@@ -1,0 +1,5 @@
+python-sqlparse is written and maintained by Andi Albrecht <albrecht.andi@gmail.com>.
+
+This module contains code (namely the lexer and filter mechanism) from
+the pygments project that was written by Georg Brandl.
+

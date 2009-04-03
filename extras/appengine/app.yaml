@@ -1,0 +1,27 @@
+application: sqlformat
+version: 2
+runtime: python
+api_version: 1
+
+default_expiration: 7d  # This is good for images, which never change
+
+handlers:
+
+- url: /(robots.txt|favicon.ico)
+  static_files: static/\1
+  upload: static/(robots.txt|favicon.ico)
+
+- url: /google7a062e78b56854c0.html
+  static_files: static/robots.txt
+  upload: static/robots.txt
+
+- url: /static/(script.js|styles.css|upload.py)
+  static_files: static/\1
+  upload: static/(script.js|styles.css|upload.py)
+  expiration: 1h  # Shorter expiration, these change often
+
+- url: /static
+  static_dir: static
+
+- url: .*
+  script: main.py

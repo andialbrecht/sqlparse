@@ -1,0 +1,45 @@
+python-sqlparse - Parse SQL statements
+======================================
+
+sqlparse currently support only one feature: You can split a series
+of SQL statements into single statements.
+
+Parts of the code are based on pygments written by Georg Brandl and others.
+pygments-Homepage: http://pygments.org/
+
+Run Tests
+---------
+
+  python test/run_tests.py
+
+
+Create Documentation
+--------------------
+
+You need `Sphinx`_ installed on your system to build the documentation.
+
+  cd docs/
+  make html
+
+
+Install
+-------
+
+Run
+
+  python setup.py install
+
+with root privileges to install python-sqlparse on your system.
+
+
+Links
+-----
+
+Source code: http://github.com/andialbrecht/python-sqlparse
+
+
+python-sqlparse is licensed under the BSD license:
+http://github.com/andialbrecht/python-sqlparse
+
+
+.. _Sphinx: http://sphinx.pocoo.org/

@@ -1,0 +1,114 @@
+<html>
+
+<head>
+<style type="text/css">
+ /*
+  These styles are customizable.  
+  Provide  .canvas-gadget (the div that holds the canvas mode gadget) 
+  at least 500px width so that  the gadget has sufficient screen real estate
+*/
+body {
+  margin: 0;
+  font-family:arial, sans-serif;
+  text-align:center;
+}
+.container {
+  width:652px;
+  margin:0 auto;
+  text-align:left;
+}
+.fc-sign-in-header {
+  text-align:left;
+  font-size: 13px;
+  padding:3px 10px;
+  border-bottom:1px solid #000000;
+}
+.signin {
+  text-align:left;
+  float:right;
+  font-size: 13px;
+  height: 32px;
+}
+.go-back {
+  text-align:left;
+  margin:5px auto 15px auto;
+}
+.go-back a, .go-back a:visited {
+  font-weight:bold;
+}
+.canvas-gadget {
+  text-align:left;
+  width:650px; /* ALLOW AT LEAST 500px WIDTH*/
+  margin:10px auto 10px auto;
+  border:1px solid #cccccc;
+}
+.site-header {
+  margin-top: 10px;
+}
+.section-title {
+  font-size: 2em;
+}
+.clear {
+  clear:both;
+  font-size:1px;
+  height:1px;
+  line-height:0;
+  margin:0;
+  padding:0;
+}
+</style>
+<script type="text/javascript" src="http://www.google.com/friendconnect/script/friendconnect.js"></script>
+</head>
+<body>
+<div class="container">
+  <div class="fc-sign-in-header">
+    <!--REQUIRED SO VISITORS CAN SIGN IN-->
+    <div class="signin" id="gadget-signin"></div>
+    <script type="text/javascript">
+    var skin = {};
+    skin['BORDER_COLOR'] = '#cccccc';
+    skin['ENDCAP_BG_COLOR'] = '#e0ecff';
+    skin['ENDCAP_TEXT_COLOR'] = '#333333';
+    skin['ENDCAP_LINK_COLOR'] = '#0000cc';
+    skin['ALTERNATE_BG_COLOR'] = '#ffffff';
+    skin['CONTENT_BG_COLOR'] = '#ffffff';
+    skin['CONTENT_LINK_COLOR'] = '#0000cc';
+    skin['CONTENT_TEXT_COLOR'] = '#333333';
+    skin['CONTENT_SECONDARY_LINK_COLOR'] = '#7777cc';
+    skin['CONTENT_SECONDARY_TEXT_COLOR'] = '#666666';
+    skin['CONTENT_HEADLINE_COLOR'] = '#333333';
+    skin['ALIGNMENT'] = 'right';
+    google.friendconnect.container.renderCanvasSignInGadget({'id': 'gadget-signin'}, skin);
+    </script>
+    <!--END REQUIRED-->
+    <div class="clear"></div>
+  </div>
+
+  <div class="site-header"><span class="section-title">Site Name</span></div>
+  <div class="go-back">
+    <!--REQUIRED SO VISITORS CAN RETURN TO REFERRING PAGE-->
+    <a href="javascript:google.friendconnect.container.goBackToSite();">
+    &lsaquo;&lsaquo; Return home</a>
+    <!--END REQUIRED-->
+  </div>
+  <!-- REQUIRED - THIS IS WHERE THE GADGET IS PRESENTED. ALLOW AT LEAST 500px WIDTH -->
+  <div id="gadget-canvas" class="canvas-gadget"></div>
+  <script type="text/javascript">
+  var skin = {};
+  skin['BORDER_COLOR'] = '#cccccc';
+  skin['ENDCAP_BG_COLOR'] = '#e0ecff';
+  skin['ENDCAP_TEXT_COLOR'] = '#333333';
+  skin['ENDCAP_LINK_COLOR'] = '#0000cc';
+  skin['ALTERNATE_BG_COLOR'] = '#ffffff';
+  skin['CONTENT_BG_COLOR'] = '#ffffff';
+  skin['CONTENT_LINK_COLOR'] = '#0000cc';
+  skin['CONTENT_TEXT_COLOR'] = '#333333';
+  skin['CONTENT_SECONDARY_LINK_COLOR'] = '#7777cc';
+  skin['CONTENT_SECONDARY_TEXT_COLOR'] = '#666666';
+  skin['CONTENT_HEADLINE_COLOR'] = '#333333';
+  google.friendconnect.container.renderUrlCanvasGadget({'id': 'gadget-canvas'}, skin);
+  </script>
+  <!--END REQUIRED-->
+</div>
+</body>
+</html>

@@ -1,0 +1,8 @@
+# Directions for web crawlers.
+# See http://www.robotstxt.org/wc/norobots.html.
+
+User-agent: HTTrack
+User-agent: puf
+User-agent: MSIECrawler
+User-agent: Nutch
+Disallow: /

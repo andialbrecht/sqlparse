@@ -1,0 +1,3 @@
+include COPYING
+include test.py
+recursive-include docs *.rst

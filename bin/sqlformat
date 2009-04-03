@@ -1,0 +1,103 @@
+#!/usr/bin/env python
+
+# Copyright (C) 2008 Andi Albrecht, albrecht.andi@gmail.com
+#
+# This module is part of python-sqlparse and is released under
+# the BSD License: http://www.opensource.org/licenses/bsd-license.php.
+
+import optparse
+import os
+import sys
+
+import sqlparse
+
+
+_CASE_CHOICES = ['upper', 'lower', 'capitalize']
+
+
+parser = optparse.OptionParser(usage='%prog [OPTIONS] FILE, ...',
+                               version='%%prog %s' % sqlparse.__version__)
+parser.set_description(('Format FILE according to OPTIONS. Use "-" as FILE '
+                        'to read from stdin.'))
+parser.add_option('-v', '--verbose', dest='verbose', action='store_true')
+parser.add_option('-o', '--outfile', dest='outfile', metavar='FILE',
+                  help='write output to FILE (defaults to stdout)')
+group = parser.add_option_group('Formatting Options')
+group.add_option('-k', '--keywords', metavar='CHOICE',
+                 dest='keyword_case', choices=_CASE_CHOICES,
+                 help=('change case of keywords, CHOICE is one of %s'
+                       % ', '.join('"%s"' % x for x in _CASE_CHOICES)))
+group.add_option('-i', '--identifiers', metavar='CHOICE',
+                 dest='identifier_case', choices=_CASE_CHOICES,
+                 help=('change case of identifiers, CHOICE is one of %s'
+                       % ', '.join('"%s"' % x for x in _CASE_CHOICES)))
+group.add_option('-l', '--language', metavar='LANG',
+                 dest='output_format', choices=['python', 'php'],
+                 help=('output a snippet in programming language LANG, '
+                       'choices are "python", "php"'))
+group.add_option('--strip-comments', dest='strip_comments',
+                 action='store_true', default=False,
+                 help='remove comments')
+group.add_option('-r', '--reindent', dest='reindent',
+                 action='store_true', default=False,
+                 help='reindent statements')
+group.add_option('--indent_width', dest='indent_width', default=2,
+                 help='indentation width (defaults to 2 spaces)')
+
+_FORMATTING_GROUP = group
+
+
+def _error(msg, exit_=None):
+    """Print msg and optionally exit with return code exit_."""
+    print >>sys.stderr, '[ERROR] %s' % msg
+    if exit_ is not None:
+        sys.exit(exit_)
+
+
+def _build_formatter_opts(options):
+    """Convert command line options to dictionary."""
+    d = {}
+    for option in _FORMATTING_GROUP.option_list:
+        d[option.dest] = getattr(options, option.dest)
+    return d
+
+
+def main():
+    options, args = parser.parse_args()
+    if options.verbose:
+        print >>sys.stderr, 'Verbose mode'
+
+    if len(args) != 1:
+        _error('No input data.')
+        parser.print_usage()
+        sys.exit(1)
+
+    if '-' in args:  # read from stdin
+        data = sys.stdin.read()
+    else:
+        try:
+            data = '\n'.join(open(args[0]).readlines())
+        except OSError, err:
+            _error('Failed to read %s: %s' % (args[0], err), exit_=1)
+
+    if options.outfile:
+        try:
+            stream = open(options.outfile, 'w')
+        except OSError, err:
+            _error('Failed to open %s: %s' % (options.outfile, err), exit_=1)
+    else:
+        stream = sys.stdout
+
+    formatter_opts = _build_formatter_opts(options)
+    try:
+        formatter_opts = sqlparse.formatter.validate_options(formatter_opts)
+    except sqlparse.SQLParseError, err:
+        _error('Invalid options: %s' % err, exit_=1)
+
+    stream.write(sqlparse.format(data, **formatter_opts).encode('utf-8',
+                                                                'replace'))
+    stream.flush()
+
+
+if __name__ == '__main__':
+    main()

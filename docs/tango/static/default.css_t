@@ -1,0 +1,90 @@
+/**
+ * Sphinx stylesheet -- default theme
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ */
+
+@import url("basic.css");
+
+body {
+  color: #000000;
+  font-family: "Free Sans", Arial, Verdana, sans;
+  font-size: 11pt;
+  width: 70em;
+  margin: 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+div.related {
+  background: #eeeeec; /* #d3d7cf; */
+  color: white;
+  padding-bottom: .6em;
+  padding-top: .6em;
+}
+
+div.related a {
+  color: #2e3436;
+  text-decoration: none;
+}
+
+div.document {
+  background: #eeeeec;
+}
+
+div.body {
+  background: white;
+  padding: .5em;
+  -moz-border-radius: 0px 10px 10px 10px;
+  border-right: 1px solid #eeeeec;
+}
+
+div.document h1, h2, h3, h4 {
+  color: #204a87;
+  font-weight: normal;
+  letter-spacing: .05em;
+}
+
+div.document p, dl, div.highlight {
+  margin-left: 25px;
+}
+
+div.document dd p, dd {
+  margin-left: .5em;
+}
+
+div.document a {
+  color: #f57900;
+}
+
+div.sphinxsidebarwrapper {
+  background: url(bgfooter.png) top left repeat-x #eeeeec;
+  padding-right: .5em;
+}
+
+div.sphinxsidebar ul {
+  margin: 0;
+  padding: 0;
+}
+
+div.sphinxsidebar a {
+  color: #888a85;
+  text-decoration: none;
+}
+
+div.footer {
+  font-size: .8em;
+  color: #888a85;
+  text-align: right;
+  padding: 10px;
+}
+
+div.footer a {
+  color: #888a85;
+}
+
+div.highlight pre {
+  background-color: #eeeeec;
+  border: 1px solid #babdb6;
+  padding: 7px;
+}
