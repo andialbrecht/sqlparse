@@ -6,20 +6,6 @@ sqlparse is a non-validating SQL parser module for Python.
 Parts of the code are based on pygments written by Georg Brandl and others.
 pygments-Homepage: http://pygments.org/
 
-Run Tests
----------
-
-  python test/run_tests.py
-
-
-Create Documentation
---------------------
-
-You need `Sphinx`_ installed on your system to build the documentation.
-
-  cd docs/
-  make html
-
 
 Install
 -------
@@ -31,14 +17,18 @@ Run
 with root privileges to install python-sqlparse on your system.
 
 
+Run Tests
+---------
+
+  python test/run_tests.py
+
+
 Links
 -----
 
-Source code: http://github.com/andialbrecht/python-sqlparse
+Project page: http://python-sqlparse.googlecode.com
+Source code: http://bitbucket.org/andialbrecht/python-sqlparse
 
 
-python-sqlparse is licensed under the BSD license:
-http://github.com/andialbrecht/python-sqlparse
+python-sqlparse is licensed under the BSD license.
 
-
-.. _Sphinx: http://sphinx.pocoo.org/
