@@ -216,6 +216,18 @@ div.footer-wrapper {
   min-height: 80px;
 }
 
+div.footer, div.footer a {
+  color: #888a85;
+}
+
+div.footer .right {
+  text-align: right;
+}
+
+div.footer .left {
+  text-transform: uppercase;
+}
+
 
 /* Styles copied form basic theme */
 

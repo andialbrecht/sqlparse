@@ -208,10 +208,25 @@
              {{ accesskey(rellink[2]) }}>{{ rellink[3] }}</a>
           {%- if not loop.last %}{{ reldelim2 }}{% endif %}
 	  {%- endfor %}
+	  {%- if show_source and has_source and sourcename %}
+            <br/>
+            <a href="{{ pathto('_sources/' + sourcename, true)|e }}"
+               rel="nofollow">{{ _('Show Source') }}</a>
+          {%- endif %}
 	</div>
 
 	<div class="right">
-
+	  {%- if hasdoc('copyright') %}
+	  {% trans path=pathto('copyright'), copyright=copyright|e %}&copy; <a href="{{ path }}">Copyright</a> {{ copyright }}.{% endtrans %}
+	  {%- else %}
+	  {% trans copyright=copyright|e %}&copy; Copyright {{ copyright }}.{% endtrans %}
+	  {%- endif %}
+	  {%- if last_updated %}
+	  {% trans last_updated=last_updated|e %}Last updated on {{ last_updated }}.{% endtrans %}
+	  {%- endif %}
+	  {%- if show_sphinx %}<br/>
+	  {% trans sphinx_version=sphinx_version|e %}Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> {{ sphinx_version }}.{% endtrans %}
+	  {%- endif %}
 	</div>
 	<div class="clearer"></div>
       </div>
