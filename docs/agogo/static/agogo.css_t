@@ -130,7 +130,9 @@ div.document ul {
 }
 
 div.document dd {
-  margin-left: .7em;
+  margin-left: 1.2em;
+  margin-top: .4em;
+  margin-bottom: 1em;
 }
 
 div.document .section {
@@ -145,8 +147,8 @@ div.document div.highlight {
   background-color: #eeeeec;
   border-top: 2px solid #dddddd;
   border-bottom: 2px solid #dddddd;
-  margin-top: .5em;
-  margin-bottom: .5em;
+  margin-top: .8em;
+  margin-bottom: .8em;
 }
 
 div.document h2 {
@@ -155,6 +157,10 @@ div.document h2 {
 
 div.document p {
   margin-bottom: .5em;
+}
+
+div.document .descname {
+  font-weight: bold;
 }
 
 
