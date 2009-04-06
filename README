@@ -1,8 +1,7 @@
 python-sqlparse - Parse SQL statements
 ======================================
 
-sqlparse currently support only one feature: You can split a series
-of SQL statements into single statements.
+sqlparse is a non-validating SQL parser module for Python.
 
 Parts of the code are based on pygments written by Georg Brandl and others.
 pygments-Homepage: http://pygments.org/
