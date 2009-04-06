@@ -9,7 +9,7 @@ setup(
     name='sqlparse',
     version='0.1.0',
     py_modules=['sqlparse'],
-    description='Provides simple SQL parsing',
+    description='Non-validating SQL parser',
     author='Andi Albrecht',
     author_email='albrecht.andi@gmail.com',
     #long_description=release.long_description,
