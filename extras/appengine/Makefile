@@ -39,10 +39,7 @@ update_indexes:
 vacuum_indexes:
 	$(APPCFG) vacuum_indexes .
 
-all: django pygments sqlparse api
-
-api:
-	ln -s ../../docs/build/html api
+all: django pygments sqlparse
 
 django:
 	svn co http://code.djangoproject.com/svn/django/trunk/django

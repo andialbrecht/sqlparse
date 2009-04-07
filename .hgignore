@@ -2,6 +2,5 @@ syntax: glob
 docs/build
 dist
 MANIFEST
-extras/appengine/api
 extras/appengine/sqlparse
 extras/appengine/pygments
