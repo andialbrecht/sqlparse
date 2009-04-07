@@ -18,29 +18,6 @@ def find_packages(base):
     return ret
 
 
-setup(
-    name='sqlparse',
-    version='0.1.0',
-    packages=find_packages('sqlparse'),
-    description='Non-validating SQL parser',
-    author='Andi Albrecht',
-    author_email='albrecht.andi@gmail.com',
-    long_description=LONG_DESCRIPTION,
-    license='BSD',
-    url='http://python-sqlparse.googlecode.com/',
-    classifiers = [
-        'Development Status :: 3 - Alpha',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Topic :: Database',
-        'Topic :: Software Development'
-    ],
-    scripts=['bin/sqlformat'],
-)
-
-
 LONG_DESCRIPTION = """
 ``sqlparse`` is a non-validating SQL parser module.
 It provides support for parsing, splitting and formatting SQL statements.
@@ -91,3 +68,26 @@ Parsing::
     <Where 'where ...' at 0x9b5caac>)
 
 """
+
+
+setup(
+    name='sqlparse',
+    version='0.1.0',
+    packages=find_packages('sqlparse'),
+    description='Non-validating SQL parser',
+    author='Andi Albrecht',
+    author_email='albrecht.andi@gmail.com',
+    long_description=LONG_DESCRIPTION,
+    license='BSD',
+    url='http://python-sqlparse.googlecode.com/',
+    classifiers = [
+        'Development Status :: 3 - Alpha',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: BSD License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Topic :: Database',
+        'Topic :: Software Development'
+    ],
+    scripts=['bin/sqlformat'],
+)
