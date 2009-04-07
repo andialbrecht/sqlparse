@@ -1,2 +1,4 @@
 syntax: glob
 docs/build
+dist
+MANIFEST
