@@ -11,7 +11,8 @@ python-sqlparse's documentation contents
 
    intro
    api
-   cmdline
+   analyzing
+   ui
    changes
 
 

@@ -9,6 +9,12 @@ from sqlparse import tokens as T
 
 
 class Token(object):
+    """Base class for all other classes in this module.
+
+    It represents a single token and has two instance attributes:
+    ``value`` is the unchange value of the token and ``ttype`` is
+    the type of the token.
+    """
 
     __slots__ = ('value', 'ttype')
 
@@ -28,6 +34,7 @@ class Token(object):
         return self.value
 
     def to_unicode(self):
+        """Returns a unicode representation of this object."""
         return unicode(self)
 
     def _get_repr_name(self):
@@ -42,6 +49,17 @@ class Token(object):
         return re.sub('\s+', ' ', short)
 
     def match(self, ttype, values, regex=False):
+        """Checks whether the token matches the given arguments.
+
+        *ttype* is a token type. If this token doesn't match the given token
+        type.
+        *values* is a list of possible values for this token. The values
+        are OR'ed together so if only one of the values matches ``True``
+        is returned. Except for keyword tokens the comparsion is
+        case-sensitive. For convenience it's ok to pass in a single string.
+        If *regex* is ``True`` (default is ``False``) the given values are
+        treated as regular expressions.
+        """
         if self.ttype is not ttype:
             return False
         if values is None:
@@ -64,13 +82,20 @@ class Token(object):
                 return self.value in values
 
     def is_group(self):
+        """Returns ``True`` if this object has children."""
         return False
 
     def is_whitespace(self):
+        """Return ``True`` if this token is a whitespace token."""
         return self.ttype and self.ttype in T.Whitespace
 
 
 class TokenList(Token):
+    """A group of tokens.
+
+    It has an additional instance attribute ``tokens`` which holds a
+    list of child-tokens.
+    """
 
     __slots__ = ('value', 'ttype', 'tokens')
 
@@ -104,6 +129,10 @@ class TokenList(Token):
                 token._pprint_tree(max_depth, depth+1)
 
     def flatten(self):
+        """Generator yielding ungrouped tokens.
+
+        This method is recursively called for all child tokens.
+        """
         for token in self.tokens:
             if isinstance(token, TokenList):
                 for item in token.flatten():
@@ -118,6 +147,11 @@ class TokenList(Token):
         return [x for x in self.tokens if isinstance(x, TokenList)]
 
     def token_first(self, ignore_whitespace=True):
+        """Returns the first child token.
+
+        If *ignore_whitespace* is ``True`` (the default), whitespace
+        tokens are ignored.
+        """
         for token in self.tokens:
             if ignore_whitespace and token.is_whitespace():
                 continue
@@ -125,6 +159,13 @@ class TokenList(Token):
         return None
 
     def token_next_by_instance(self, idx, clss):
+        """Returns the next token matching a class.
+
+        *idx* is where to start searching in the list of child tokens.
+        *clss* is a list of classes the token should be an instance of.
+
+        If no matching token can be found ``None`` is returned.
+        """
         if type(clss) not in (types.ListType, types.TupleType):
             clss = (clss,)
         if type(clss) is not types.TupleType:
@@ -135,6 +176,7 @@ class TokenList(Token):
         return None
 
     def token_next_by_type(self, idx, ttypes):
+        """Returns next matching token by it's token type."""
         if not isinstance(ttypes, (types.TupleType, types.ListType)):
             ttypes = [ttypes]
         for token in self.tokens[idx:]:
@@ -143,6 +185,7 @@ class TokenList(Token):
         return None
 
     def token_next_match(self, idx, ttype, value, regex=False):
+        """Returns next token where it's ``match`` method returns ``True``."""
         if type(idx) != types.IntType:
             idx = self.token_index(idx)
         for token in self.tokens[idx:]:
@@ -162,6 +205,11 @@ class TokenList(Token):
         return None
 
     def token_prev(self, idx, skip_ws=True):
+        """Returns the previous token relative to *idx*.
+
+        If *skip_ws* is ``True`` (the default) whitespace tokens are ignored.
+        ``None`` is returned if there's no previous token.
+        """
         while idx != 0:
             idx -= 1
             if self.tokens[idx].is_whitespace() and skip_ws:
@@ -169,6 +217,11 @@ class TokenList(Token):
             return self.tokens[idx]
 
     def token_next(self, idx, skip_ws=True):
+        """Returns the next token relative to *idx*.
+
+        If *skip_ws* is ``True`` (the default) whitespace tokens are ignored.
+        ``None`` is returned if there's no next token.
+        """
         while idx < len(self.tokens)-1:
             idx += 1
             if self.tokens[idx].is_whitespace() and skip_ws:
@@ -180,7 +233,11 @@ class TokenList(Token):
         return self.tokens.index(token)
 
     def tokens_between(self, start, end, exclude_end=False):
-        """Return all tokens between (and including) start and end."""
+        """Return all tokens between (and including) start and end.
+
+        If *exclude_end* is ``True`` (default is ``False``) the end token
+        is included too.
+        """
         if exclude_end:
             offset = 0
         else:
@@ -188,7 +245,7 @@ class TokenList(Token):
         return self.tokens[self.token_index(start):self.token_index(end)+offset]
 
     def group_tokens(self, grp_cls, tokens):
-        """Replace tokens by instance of grp_cls."""
+        """Replace tokens by an instance of *grp_cls*."""
         idx = self.token_index(tokens[0])
         for t in tokens:
             self.tokens.remove(t)
@@ -197,14 +254,22 @@ class TokenList(Token):
         return grp
 
     def insert_before(self, where, token):
+        """Inserts *token* before *where*."""
         self.tokens.insert(self.token_index(where), token)
 
 
 class Statement(TokenList):
+    """Represents a SQL statement."""
 
     __slots__ = ('value', 'ttype', 'tokens')
 
     def get_type(self):
+        """Returns the type of a statement.
+
+        The returned value is a string holding an upper-cased reprint of
+        the first DML or DDL keyword. If the first token in this group
+        isn't a DML or DDL keyword "UNKNOWN" is returned.
+        """
         first_token = self.token_first()
         if first_token.ttype in (T.Keyword.DML, T.Keyword.DDL):
             return first_token.value.upper()
@@ -213,13 +278,19 @@ class Statement(TokenList):
 
 
 class Identifier(TokenList):
+    """Represents an identifier.
+
+    Identifiers may have aliases or typecasts.
+    """
 
     __slots__ = ('value', 'ttype', 'tokens')
 
     def has_alias(self):
+        """Returns ``True`` if an alias is present."""
         return self.get_alias() is not None
 
     def get_alias(self):
+        """Returns the alias for this identifier or ``None``."""
         kw = self.token_next_match(0, T.Keyword, 'AS')
         if kw is not None:
             alias = self.token_next(self.token_index(kw))
@@ -236,15 +307,23 @@ class Identifier(TokenList):
             return alias.to_unicode()
 
     def get_name(self):
+        """Returns the name of this identifier.
+
+        This is either it's alias or it's real name. The returned valued can
+        be considered as the name under which the object corresponding to
+        this identifier is known within the current statement.
+        """
         alias = self.get_alias()
         if alias is not None:
             return alias
         return self.get_real_name()
 
     def get_real_name(self):
+        """Returns the real name (object name) of this identifier."""
         return self.token_next_by_type(0, T.Name).value
 
     def get_typecast(self):
+        """Returns the typecast or ``None`` of this object as a string."""
         marker = self.token_next_match(0, T.Punctuation, '::')
         if marker is None:
             return None
@@ -255,37 +334,50 @@ class Identifier(TokenList):
 
 
 class IdentifierList(TokenList):
+    """A list of :class:`~sqlparse.sql.Identifier`\'s."""
 
     __slots__ = ('value', 'ttype', 'tokens')
 
     def get_identifiers(self):
+        """Returns the identifiers.
+
+        Whitespaces and punctuations are not included in this list.
+        """
         return [x for x in self.tokens if isinstance(x, Identifier)]
 
 
 class Parenthesis(TokenList):
+    """Tokens between parenthesis."""
     __slots__ = ('value', 'ttype', 'tokens')
 
 
 class Assignment(TokenList):
+    """An assignment like 'var := val;'"""
     __slots__ = ('value', 'ttype', 'tokens')
 
 class If(TokenList):
+    """An 'if' clause with possible 'else if' or 'else' parts."""
     __slots__ = ('value', 'ttype', 'tokens')
 
 class For(TokenList):
+    """A 'FOR' loop."""
     __slots__ = ('value', 'ttype', 'tokens')
 
 class Comparsion(TokenList):
+    """A comparsion used for example in WHERE clauses."""
     __slots__ = ('value', 'ttype', 'tokens')
 
 class Comment(TokenList):
+    """A comment."""
     __slots__ = ('value', 'ttype', 'tokens')
 
 class Where(TokenList):
+    """A WHERE clause."""
     __slots__ = ('value', 'ttype', 'tokens')
 
 
 class Case(TokenList):
+    """A CASE statement with one or more WHEN and possibly an ELSE part."""
 
     __slots__ = ('value', 'ttype', 'tokens')
 

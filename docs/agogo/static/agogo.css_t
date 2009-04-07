@@ -167,6 +167,16 @@ div.document .descname {
   font-weight: bold;
 }
 
+div.document .docutils.literal {
+  background-color: #eeeeec;
+  padding: 1px;
+}
+
+div.document .docutils.xref.literal {
+  background-color: transparent;
+  padding: 0px;
+}
+
 
 /* Sidebar */
 
