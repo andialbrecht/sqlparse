@@ -22,7 +22,7 @@ rm -rf $ZIPFILE
 # - contrib/gis/ and related files because it's huge and unneeded.
 # - *.po and *.mo files because they are bulky and unneeded.
 # - *.pyc and *.pyo because they aren't used by App Engine anyway.
-zip -q $ZIPFILE `find django/ \
+zip -q $ZIPFILE `find django \
     -name .svn -prune -o \
     -name gis -prune -o \
     -name admin -prune -o \

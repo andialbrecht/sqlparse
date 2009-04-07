@@ -23,5 +23,8 @@ handlers:
 - url: /static
   static_dir: static
 
+- url: /sqlparse-api
+  static_dir: api
+
 - url: .*
   script: main.py
