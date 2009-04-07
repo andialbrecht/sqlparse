@@ -77,6 +77,7 @@ setup(
     description='Non-validating SQL parser',
     author='Andi Albrecht',
     author_email='albrecht.andi@gmail.com',
+    download_url='http://python-sqlparse.googlecode.com/files/sqlparse-0.1.0.tar.gz',
     long_description=LONG_DESCRIPTION,
     license='BSD',
     url='http://python-sqlparse.googlecode.com/',
