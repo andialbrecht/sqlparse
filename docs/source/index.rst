@@ -3,17 +3,16 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to python-sqlparse's documentation!
-===========================================
-
-Contents:
+python-sqlparse's documentation contents
+========================================
 
 .. toctree::
    :maxdepth: 2
 
    intro
    api
-   cmdline
+   analyzing
+   ui
    changes
 
 

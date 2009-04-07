@@ -30,9 +30,7 @@ def parse(sql):
 
     *sql* is a single string containting one or more SQL statements.
 
-    The returned :class:`~sqlparse.parser.Statement` are fully analyzed.
-
-    Returns a list of :class:`~sqlparse.parser.Statement` instances.
+    Returns a tuple of :class:`~sqlparse.sql.Statement` instances.
     """
     stack = engine.FilterStack()
     stack.full_analyze()
@@ -42,10 +40,9 @@ def parse(sql):
 def format(sql, **options):
     """Format *sql* according to *options*.
 
-    Returns a list of :class:`~sqlparse.parse.Statement` instances like
-    :meth:`parse`, but the statements are formatted according to *options*.
+    Available options are documented in :ref:`formatting`.
 
-    Available options are documented in the :mod:`~sqlparse.format` module.
+    Returns the formatted SQL statement as string.
     """
     stack = engine.FilterStack()
     options = formatter.validate_options(options)
@@ -55,7 +52,7 @@ def format(sql, **options):
 
 
 def split(sql):
-    """Split *sql* into separate statements.
+    """Split *sql* into single statements.
 
     Returns a list of strings.
     """
