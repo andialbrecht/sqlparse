@@ -1,3 +1,8 @@
 include COPYING
 include test.py
 recursive-include docs *.rst
+recursive-include tests *.*
+include TODO
+include AUTHORS
+include CHANGES
+include Makefile
