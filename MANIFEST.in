@@ -1,7 +1,6 @@
-include COPYING
-include test.py
 recursive-include docs *.rst
 recursive-include tests *.*
+include COPYING
 include TODO
 include AUTHORS
 include CHANGES
