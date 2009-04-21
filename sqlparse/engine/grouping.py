@@ -12,9 +12,9 @@ from sqlparse.sql import *
 def _group_left_right(tlist, ttype, value, cls,
                       check_right=lambda t: True,
                       include_semicolon=False):
-#    [_group_left_right(sgroup, ttype, value, cls, check_right,
-#                       include_semicolon) for sgroup in tlist.get_sublists()
-#     if not isinstance(sgroup, cls)]
+    [_group_left_right(sgroup, ttype, value, cls, check_right,
+                       include_semicolon) for sgroup in tlist.get_sublists()
+     if not isinstance(sgroup, cls)]
     idx = 0
     token = tlist.token_next_match(idx, ttype, value)
     while token:
@@ -127,7 +127,7 @@ def group_identifier(tlist):
 
 def group_identifier_list(tlist):
     [group_identifier_list(sgroup) for sgroup in tlist.get_sublists()
-     if not isinstance(sgroup, IdentifierList)]
+     if not isinstance(sgroup, (Identifier, IdentifierList))]
     idx = 0
     token = tlist.token_next_by_instance(idx, Identifier)
     while token:
@@ -139,17 +139,20 @@ def group_identifier_list(tlist):
                                                           ',')
                                         ])
         if end is None:
+            end = tlist.tokens[-1]
+            exclude_end = False
+        else:
+            exclude_end = True
+        grp_tokens = tlist.tokens_between(token, end,
+                                          exclude_end=exclude_end)
+        while grp_tokens and (grp_tokens[-1].is_whitespace()
+                              or grp_tokens[-1].match(T.Punctuation, ',')):
+            grp_tokens.pop()
+        if len(grp_tokens) <= 1:
             idx = tidx + 1
         else:
-            grp_tokens = tlist.tokens_between(token, end, exclude_end=True)
-            while grp_tokens and (grp_tokens[-1].is_whitespace()
-                                  or grp_tokens[-1].match(T.Punctuation, ',')):
-                grp_tokens.pop()
-            if len(grp_tokens) <= 1:
-                idx = tidx + 1
-            else:
-                group = tlist.group_tokens(IdentifierList, grp_tokens)
-                idx = tlist.token_index(group)
+            group = tlist.group_tokens(IdentifierList, grp_tokens)
+            idx = tlist.token_index(group)
         token = tlist.token_next_by_instance(idx, Identifier)
 
 

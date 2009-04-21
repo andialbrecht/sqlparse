@@ -143,4 +143,13 @@ class TestFormatReindent(TestCaseBase):
                                                '     else 5',
                                                'end']))
 
+    def test_nested_identifier_list(self):
+        # issue4
+        f = lambda sql: sqlparse.format(sql, reindent=True)
+        s = '(foo as bar, bar1, bar2 as bar3, b4 as b5)'
+        self.ndiffAssertEqual(f(s), '\n'.join(['(foo as bar,',
+                                               ' bar1,',
+                                               ' bar2 as bar3,',
+                                               ' b4 as b5)']))
+
 

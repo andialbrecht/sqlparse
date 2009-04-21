@@ -36,7 +36,8 @@ class TestGrouping(TestCaseBase):
         s = 'select * from foo where foo.id = 1'
         parsed = sqlparse.parse(s)[0]
         self.ndiffAssertEqual(s, parsed.to_unicode())
-        self.assert_(isinstance(parsed.tokens[-1].tokens[2], Identifier))
+        self.assert_(isinstance(parsed.tokens[-1].tokens[-1].tokens[0],
+                                Identifier))
         s = 'select * from (select "foo"."id" from foo)'
         parsed = sqlparse.parse(s)[0]
         self.ndiffAssertEqual(s, parsed.to_unicode())
