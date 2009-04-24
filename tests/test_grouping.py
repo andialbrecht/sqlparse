@@ -55,6 +55,18 @@ class TestGrouping(TestCaseBase):
         self.assertEqual(t.get_name(), '*')
         self.assertEqual(t.is_wildcard(), True)
 
+    def test_identifier_list(self):
+        p = sqlparse.parse('a, b, c')[0]
+        self.assert_(isinstance(p.tokens[0], IdentifierList))
+        p = sqlparse.parse('(a, b, c)')[0]
+        self.assert_(isinstance(p.tokens[0].tokens[1], IdentifierList))
+
+    def test_identifier_list_case(self):
+        p = sqlparse.parse('a, case when 1 then 2 else 3 end as b, c')[0]
+        self.assert_(isinstance(p.tokens[0], IdentifierList))
+        p = sqlparse.parse('(a, case when 1 then 2 else 3 end as b, c)')[0]
+        self.assert_(isinstance(p.tokens[0].tokens[1], IdentifierList))
+
     def test_where(self):
         s = 'select * from foo where bar = 1 order by id desc'
         p = sqlparse.parse(s)[0]

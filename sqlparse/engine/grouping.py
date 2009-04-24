@@ -96,7 +96,8 @@ def group_comparsion(tlist):
 
 
 def group_case(tlist):
-    _group_matching(tlist, T.Keyword, 'CASE', T.Keyword, 'END', Case, True)
+    _group_matching(tlist, T.Keyword, 'CASE', T.Keyword, 'END', Case,
+                    include_semicolon=True, recurse=True)
 
 
 def group_identifier(tlist):
