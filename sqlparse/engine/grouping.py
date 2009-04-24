@@ -102,7 +102,9 @@ def group_case(tlist):
 def group_identifier(tlist):
     def _consume_cycle(tl, i):
         x = itertools.cycle((lambda y: y.match(T.Punctuation, '.'),
-                             lambda y: y.ttype in (T.String.Symbol, T.Name)))
+                             lambda y: y.ttype in (T.String.Symbol,
+                                                   T.Name,
+                                                   T.Wildcard)))
         for t in tl.tokens[i:]:
             if x.next()(t):
                 yield t

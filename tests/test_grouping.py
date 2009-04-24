@@ -43,6 +43,18 @@ class TestGrouping(TestCaseBase):
         self.ndiffAssertEqual(s, parsed.to_unicode())
         self.assert_(isinstance(parsed.tokens[-1].tokens[3], Identifier))
 
+    def test_identifier_wildcard(self):
+        p = sqlparse.parse('a.*, b.id')[0]
+        self.assert_(isinstance(p.tokens[0], IdentifierList))
+        self.assert_(isinstance(p.tokens[0].tokens[0], Identifier))
+        self.assert_(isinstance(p.tokens[0].tokens[-1], Identifier))
+
+    def test_identifier_name_wildcard(self):
+        p = sqlparse.parse('a.*')[0]
+        t = p.tokens[0]
+        self.assertEqual(t.get_name(), '*')
+        self.assertEqual(t.is_wildcard(), True)
+
     def test_where(self):
         s = 'select * from foo where bar = 1 order by id desc'
         p = sqlparse.parse(s)[0]

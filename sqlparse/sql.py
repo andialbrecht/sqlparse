@@ -320,7 +320,18 @@ class Identifier(TokenList):
 
     def get_real_name(self):
         """Returns the real name (object name) of this identifier."""
-        return self.token_next_by_type(0, T.Name).value
+        # a.b
+        dot = self.token_next_match(0, T.Punctuation, '.')
+        if dot is None:
+            return self.token_next_by_type(0, T.Name).value
+        else:
+            return self.token_next_by_type(self.token_index(dot),
+                                           (T.Name, T.Wildcard)).value
+
+    def is_wildcard(self):
+        """Return ``True`` if this identifier contains a wildcard."""
+        token = self.token_next_by_type(0, T.Wildcard)
+        return token is not None
 
     def get_typecast(self):
         """Returns the typecast or ``None`` of this object as a string."""

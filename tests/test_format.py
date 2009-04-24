@@ -134,6 +134,11 @@ class TestFormatReindent(TestCaseBase):
                                                'from table1,',
                                                '     table2',
                                                'where 1 = 2']))
+        s = 'select a.*, b.id from a, b'
+        self.ndiffAssertEqual(f(s), '\n'.join(['select a.*,',
+                                               '       b.id',
+                                               'from a,',
+                                               '     b']))
 
     def test_case(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)
