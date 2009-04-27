@@ -325,8 +325,24 @@ class Identifier(TokenList):
         if dot is None:
             return self.token_next_by_type(0, T.Name).value
         else:
-            return self.token_next_by_type(self.token_index(dot),
-                                           (T.Name, T.Wildcard)).value
+            next_ = self.token_next_by_type(self.token_index(dot),
+                                            (T.Name, T.Wildcard))
+            if next_ is None:  # invalid identifier, e.g. "a."
+                return None
+            return next_.value
+
+    def get_parent_name(self):
+        """Return name of the parent object if any.
+
+        A parent object is identified by the first occuring dot.
+        """
+        dot = self.token_next_match(0, T.Punctuation, '.')
+        if dot is None:
+            return None
+        prev_ = self.token_prev(self.token_index(dot))
+        if prev_ is None:  # something must be verry wrong here..
+            return None
+        return prev_.value
 
     def is_wildcard(self):
         """Return ``True`` if this identifier contains a wildcard."""
