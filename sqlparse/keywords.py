@@ -250,7 +250,7 @@ KEYWORDS = {
     'LESS': Keyword,
     'LEVEL': Keyword,
     'LIKE': Keyword,
-    'LILMIT': Keyword,
+    'LIMIT': Keyword,
     'LISTEN': Keyword,
     'LOAD': Keyword,
     'LOCAL': Keyword,
