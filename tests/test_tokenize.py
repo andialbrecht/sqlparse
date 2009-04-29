@@ -19,3 +19,8 @@ class TestTokenize(unittest.TestCase):
         self.assertEqual(tokens[0], (Keyword.DML, u'select'))
         self.assertEqual(tokens[-1], (Punctuation, u';'))
 
+    def test_backticks(self):
+        sql = '`foo`.`bar`'
+        tokens = list(lexer.tokenize(sql))
+        self.assertEqual(len(tokens), 3)
+        self.assertEqual(tokens[0], (Name, u'`foo`'))

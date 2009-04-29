@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Copyright (C) 2008 Andi Albrecht, albrecht.andi@gmail.com
 #
 # This module is part of python-sqlparse and is released under
@@ -162,6 +164,8 @@ class Lexer:
             (r':=', Assignment),
             (r'::', Punctuation),
             (r'[*]', Wildcard),
+            (r"`(``|[^`])*`", Name),
+            (r"´(´´|[^´])*´", Name),
             (r'[+/<>=~!@#%^&|`?^-]', Operator),
             (r'[0-9]+', Number.Integer),
             # TODO: Backslash escapes?
