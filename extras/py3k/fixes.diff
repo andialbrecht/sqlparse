@@ -1,0 +1,44 @@
+--- sqlparse/engine/grouping.py.orig	2009-04-30 06:48:43.000000000 +0200
++++ sqlparse/engine/grouping.py	2009-04-30 06:48:56.000000000 +0200
+@@ -107,7 +107,7 @@
+                                                    T.Name,
+                                                    T.Wildcard)))
+         for t in tl.tokens[i:]:
+-            if x.next()(t):
++            if next(x)(t):
+                 yield t
+             else:
+                 raise StopIteration
+--- sqlparse/sql.py~	2009-04-30 08:38:16.000000000 +0200
++++ sqlparse/sql.py	2009-04-30 08:39:15.000000000 +0200
+@@ -23,16 +23,13 @@
+         self.ttype = ttype
+ 
+     def __str__(self):
+-        return str(self).encode('latin-1')
++        return self.value or ''
+ 
+     def __repr__(self):
+         short = self._get_repr_value()
+         return '<%s \'%s\' at 0x%07x>' % (self._get_repr_name(),
+                                           short, id(self))
+ 
+-    def __unicode__(self):
+-        return self.value or ''
+-
+     def to_unicode(self):
+         """Returns a unicode representation of this object."""
+         return str(self)
+@@ -105,11 +102,8 @@
+         self.tokens = tokens
+         Token.__init__(self, None, None)
+ 
+-    def __unicode__(self):
+-        return ''.join(str(x) for x in self.flatten())
+-
+     def __str__(self):
+-        return str(self).encode('latin-1')
++        return ''.join(str(x) for x in self.flatten())
+ 
+     def _get_repr_name(self):
+         return self.__class__.__name__
