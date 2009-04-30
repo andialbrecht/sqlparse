@@ -31,7 +31,7 @@ class Token(object):
                                           short, id(self))
 
     def __unicode__(self):
-        return self.value
+        return self.value or ''
 
     def to_unicode(self):
         """Returns a unicode representation of this object."""
