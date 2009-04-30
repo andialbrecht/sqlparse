@@ -2,7 +2,7 @@
 
 """Tests sqlparse function."""
 
-from utils import TestCaseBase
+from tests.utils import TestCaseBase
 
 import sqlparse
 

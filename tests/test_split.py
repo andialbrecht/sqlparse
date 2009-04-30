@@ -4,7 +4,7 @@
 
 import unittest
 
-from utils import load_file, TestCaseBase
+from tests.utils import load_file, TestCaseBase
 
 import sqlparse
 
