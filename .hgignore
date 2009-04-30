@@ -2,6 +2,9 @@ syntax: glob
 docs/build
 dist
 MANIFEST
+extras/appengine/django
+extras/appengine/django.zip
+extras/appengine/release
 extras/appengine/sqlparse
 extras/appengine/pygments
 extras/py3k/sqlparse

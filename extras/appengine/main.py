@@ -26,6 +26,8 @@ views.py, settings.py.
 import os
 import sys
 import logging
+import traceback
+
 
 # Log a message each time this module get loaded.
 logging.info('Loading %s, app version = %s',
@@ -51,6 +53,7 @@ assert django.VERSION[0] >= 1, "This Django version is too old"
 
 # AppEngine imports.
 from google.appengine.ext.webapp import util
+from google.appengine.api import mail
 
 
 # Helper to enter the debugger.  This passes in __stdin__ and
@@ -81,8 +84,21 @@ django.newforms = django.forms
 
 def log_exception(*args, **kwds):
   """Django signal handler to log an exception."""
-  cls, err = sys.exc_info()[:2]
-  logging.exception('Exception in request: %s: %s', cls.__name__, err)
+  excinfo = sys.exc_info()
+  cls, err = excinfo[:2]
+  subject = 'Exception in request: %s: %s' % (cls.__name__, err)
+  logging.exception(subject)
+  try:
+    repr_request = repr(kwds.get('request', 'Request not available.'))
+  except:
+    repr_request = 'Request repr() not available.'
+  msg = ('Application: %s\nVersion: %s\n\n%s\n\n%s'
+         % (os.getenv('APPLICATION_ID'), os.getenv('CURRENT_VERSION_ID'),
+            '\n'.join(traceback.format_exception(*excinfo)),
+            repr_request))
+  mail.send_mail_to_admins('albrecht.andi@googlemail.com',
+                           '[%s] %s' % (os.getenv('APPLICATION_ID'), subject),
+                           msg)
 
 
 # Log all exceptions detected by Django.
