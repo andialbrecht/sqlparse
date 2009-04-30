@@ -3,6 +3,7 @@
 import logging
 import md5
 import os
+import sys
 import time
 
 from django import forms
@@ -92,6 +93,12 @@ class FormOptions(forms.Form):
             raise forms.ValidationError('Whoops, I need a file OR text!')
         return self.cleaned_data
 
+    def clean_output_format(self):
+        frmt = self.cleaned_data.get('output_format')
+        if not frmt:
+            frmt = 'sql'
+        return frmt.lower()
+
     def get_data(self):
         data = self.cleaned_data.get('data')
         if self._datafile:
@@ -176,7 +183,11 @@ def format(request):
     if request.method == 'POST':
         form = FormOptions(request.POST)
         if form.is_valid():
-            response = format_sql(form, format='text')
+            try:
+                response = format_sql(form, format='text')
+            except:
+                err = sys.exc_info()[1]
+                response = 'ERROR: Parsing failed. %s' % str(err)
         else:
             response = 'ERROR: %s' % str(form.errors)
     else:
