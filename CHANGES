@@ -1,6 +1,8 @@
 In Development
 --------------
- * Recognize backticks quoting identifiers.
+ * Improved identifier parsing: backtick quotes, wildcards, T-SQL variables
+   prefixed with @.
+ * Recursive recognition of AS (issue4) and CASE.
 
 
 Release 0.1.0
