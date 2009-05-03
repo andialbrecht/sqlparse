@@ -24,3 +24,17 @@ class TestTokenize(unittest.TestCase):
         tokens = list(lexer.tokenize(sql))
         self.assertEqual(len(tokens), 3)
         self.assertEqual(tokens[0], (Name, u'`foo`'))
+
+    def test_linebreaks(self):  # issue1
+        sql = 'foo\nbar\n'
+        tokens = lexer.tokenize(sql)
+        self.assertEqual(''.join(str(x[1]) for x in tokens), sql)
+        sql = 'foo\rbar\r'
+        tokens = lexer.tokenize(sql)
+        self.assertEqual(''.join(str(x[1]) for x in tokens), sql)
+        sql = 'foo\r\nbar\r\n'
+        tokens = lexer.tokenize(sql)
+        self.assertEqual(''.join(str(x[1]) for x in tokens), sql)
+        sql = 'foo\r\nbar\n'
+        tokens = lexer.tokenize(sql)
+        self.assertEqual(''.join(str(x[1]) for x in tokens), sql)
