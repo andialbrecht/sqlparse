@@ -1,5 +1,6 @@
 In Development
 --------------
+ * Lexers preserves original line breaks (issue1).
  * Improved identifier parsing: backtick quotes, wildcards, T-SQL variables
    prefixed with @.
  * Recursive recognition of AS (issue4) and CASE.
