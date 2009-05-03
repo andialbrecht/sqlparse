@@ -171,8 +171,12 @@ class ReindentFilter(Filter):
             if prev and prev.is_whitespace():
                 tlist.tokens.pop(tlist.token_index(prev))
                 offset += 1
-            nl = self.nl()
-            tlist.insert_before(token, nl)
+            if prev and (str(prev).endswith('\n')
+                         or str(prev).endswith('\r')):
+                nl = tlist.token_next(token)
+            else:
+                nl = self.nl()
+                tlist.insert_before(token, nl)
             token = tlist.token_next_match(tlist.token_index(nl)+offset,
                                            T.Keyword, split_words, regex=True)
 
