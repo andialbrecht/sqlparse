@@ -132,31 +132,44 @@ def group_identifier_list(tlist):
     [group_identifier_list(sgroup) for sgroup in tlist.get_sublists()
      if not isinstance(sgroup, (Identifier, IdentifierList))]
     idx = 0
-    token = tlist.token_next_by_instance(idx, Identifier)
-    while token:
-        tidx = tlist.token_index(token)
-        end = tlist.token_not_matching(tidx+1,
-                                       [lambda t: isinstance(t, Identifier),
-                                        lambda t: t.is_whitespace(),
-                                        lambda t: t.match(T.Punctuation,
-                                                          ',')
-                                        ])
-        if end is None:
-            end = tlist.tokens[-1]
-            exclude_end = False
+    # Allowed list items
+    fend1_funcs = [lambda t: isinstance(t, Identifier),
+                   lambda t: t.is_whitespace(),
+                   lambda t: t.ttype == T.Wildcard,
+                   lambda t: t.match(T.Keyword, 'null'),
+                   lambda t: t.ttype == T.Number.Integer,
+                   lambda t: t.ttype == T.String.Single,
+                   ]
+    tcomma = tlist.token_next_match(idx, T.Punctuation, ',')
+    start = None
+    while tcomma is not None:
+        before = tlist.token_prev(tcomma)
+        after = tlist.token_next(tcomma)
+        # Check if the tokens around tcomma belong to a list
+        bpassed = apassed = False
+        for func in fend1_funcs:
+            if before is not None and func(before):
+                bpassed = True
+            if after is not None and func(after):
+                apassed = True
+        if not bpassed or not apassed:
+            # Something's wrong here, skip ahead to next ","
+            start = None
+            tcomma = tlist.token_next_match(tlist.token_index(tcomma)+1,
+                                            T.Punctuation, ',')
         else:
-            exclude_end = True
-        grp_tokens = tlist.tokens_between(token, end,
-                                          exclude_end=exclude_end)
-        while grp_tokens and (grp_tokens[-1].is_whitespace()
-                              or grp_tokens[-1].match(T.Punctuation, ',')):
-            grp_tokens.pop()
-        if len(grp_tokens) <= 1:
-            idx = tidx + 1
-        else:
-            group = tlist.group_tokens(IdentifierList, grp_tokens)
-            idx = tlist.token_index(group)
-        token = tlist.token_next_by_instance(idx, Identifier)
+            if start is None:
+                start = before
+            next_ = tlist.token_next(after)
+            if next_ is None or not next_.match(T.Punctuation, ','):
+                # Reached the end of the list
+                tokens = tlist.tokens_between(start, after)
+                group = tlist.group_tokens(IdentifierList, tokens)
+                start = None
+                tcomma = tlist.token_next_match(tlist.token_index(group)+1,
+                                                T.Punctuation, ',')
+            else:
+                tcomma = next_
 
 
 def group_parenthesis(tlist):

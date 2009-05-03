@@ -204,12 +204,24 @@ class TokenList(Token):
                 return token
         return None
 
+    def token_matching(self, idx, funcs):
+        for token in self.tokens[idx:]:
+            for i, func in enumerate(funcs):
+                if func(token):
+                    print 'MATCHED', i, token
+                    return token
+        return None
+
     def token_prev(self, idx, skip_ws=True):
         """Returns the previous token relative to *idx*.
 
         If *skip_ws* is ``True`` (the default) whitespace tokens are ignored.
         ``None`` is returned if there's no previous token.
         """
+        if idx is None:
+            return None
+        if not isinstance(idx, int):
+            idx = self.token_index(idx)
         while idx != 0:
             idx -= 1
             if self.tokens[idx].is_whitespace() and skip_ws:
@@ -222,6 +234,10 @@ class TokenList(Token):
         If *skip_ws* is ``True`` (the default) whitespace tokens are ignored.
         ``None`` is returned if there's no next token.
         """
+        if idx is None:
+            return None
+        if not isinstance(idx, int):
+            idx = self.token_index(idx)
         while idx < len(self.tokens)-1:
             idx += 1
             if self.tokens[idx].is_whitespace() and skip_ws:

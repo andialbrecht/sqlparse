@@ -39,7 +39,7 @@ KEYWORDS = {
     'BREADTH': Keyword,
     'BY': Keyword,
 
-    'C': Keyword,
+#    'C': Keyword,  # most likely this is an alias
     'CACHE': Keyword,
     'CALL': Keyword,
     'CALLED': Keyword,

@@ -75,6 +75,12 @@ class TestGrouping(TestCaseBase):
         p = sqlparse.parse('(a, case when 1 then 2 else 3 end as b, c)')[0]
         self.assert_(isinstance(p.tokens[0].tokens[1], IdentifierList))
 
+    def test_identifier_list_other(self):  # issue2
+        p = sqlparse.parse("select *, null, 1, 'foo', bar from mytable, x")[0]
+        self.assert_(isinstance(p.tokens[2], IdentifierList))
+        l = p.tokens[2]
+        self.assertEqual(len(l.tokens), 13)
+
     def test_where(self):
         s = 'select * from foo where bar = 1 order by id desc'
         p = sqlparse.parse(s)[0]
