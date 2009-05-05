@@ -148,13 +148,26 @@ class TestFormatReindent(TestCaseBase):
                                                '     else 5',
                                                'end']))
 
-    def test_nested_identifier_list(self):
-        # issue4
+    def test_nested_identifier_list(self):  # issue4
         f = lambda sql: sqlparse.format(sql, reindent=True)
         s = '(foo as bar, bar1, bar2 as bar3, b4 as b5)'
         self.ndiffAssertEqual(f(s), '\n'.join(['(foo as bar,',
                                                ' bar1,',
                                                ' bar2 as bar3,',
                                                ' b4 as b5)']))
+
+    def test_duplicate_linebreaks(self):  # issue3
+        f = lambda sql: sqlparse.format(sql, reindent=True)
+        s = 'select c1 -- column1\nfrom foo'
+        self.ndiffAssertEqual(f(s), '\n'.join(['select c1 -- column1',
+                                               'from foo']))
+        s = 'select c1 -- column1\nfrom foo'
+        r = sqlparse.format(s, reindent=True, strip_comments=True)
+        self.ndiffAssertEqual(r, '\n'.join(['select c1',
+                                            'from foo']))
+        s = 'select c1\nfrom foo\norder by c1'
+        self.ndiffAssertEqual(f(s), '\n'.join(['select c1',
+                                               'from foo',
+                                               'order by c1']))
 
 
