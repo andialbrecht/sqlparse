@@ -4,6 +4,7 @@ import re
 
 from sqlparse.engine import grouping
 from sqlparse import tokens as T
+from sqlparse import sql
 
 
 class Filter(object):
@@ -171,8 +172,10 @@ class ReindentFilter(Filter):
             if prev and prev.is_whitespace():
                 tlist.tokens.pop(tlist.token_index(prev))
                 offset += 1
-            if prev and (str(prev).endswith('\n')
-                         or str(prev).endswith('\r')):
+            if (prev
+                and isinstance(prev, sql.Comment)
+                and (str(prev).endswith('\n')
+                     or str(prev).endswith('\r'))):
                 nl = tlist.token_next(token)
             else:
                 nl = self.nl()

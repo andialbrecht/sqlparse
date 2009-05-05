@@ -169,5 +169,10 @@ class TestFormatReindent(TestCaseBase):
         self.ndiffAssertEqual(f(s), '\n'.join(['select c1',
                                                'from foo',
                                                'order by c1']))
+        s = 'select c1 from t1 where (c1 = 1) order by c1'
+        self.ndiffAssertEqual(f(s), '\n'.join(['select c1',
+                                               'from t1',
+                                               'where (c1 = 1)',
+                                               'order by c1']))
 
 
