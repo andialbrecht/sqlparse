@@ -26,8 +26,10 @@ Run Tests
 Links
 -----
 
-Project page: http://python-sqlparse.googlecode.com
-Source code: http://bitbucket.org/andialbrecht/python-sqlparse
+Project Page: http://python-sqlparse.googlecode.com
+Source Code:  http://bitbucket.org/andialbrecht/python-sqlparse
+Discussions:  http://groups.google.com/group/sqlparse
+Issues/Bugs:  http://code.google.com/p/python-sqlparse/issues/list
 
 
 python-sqlparse is licensed under the BSD license.
