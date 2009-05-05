@@ -565,6 +565,7 @@ KEYWORDS_COMMON = {
     'LIKE': Keyword,
     'ON': Keyword,
     'IN': Keyword,
+    'SET': Keyword,
 
     'BY': Keyword,
     'GROUP': Keyword,

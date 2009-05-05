@@ -386,7 +386,8 @@ class IdentifierList(TokenList):
 
         Whitespaces and punctuations are not included in this list.
         """
-        return [x for x in self.tokens if isinstance(x, Identifier)]
+        return [x for x in self.tokens
+                if not x.is_whitespace() and not x.match(T.Punctuation, ',')]
 
 
 class Parenthesis(TokenList):

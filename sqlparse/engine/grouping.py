@@ -139,6 +139,7 @@ def group_identifier_list(tlist):
                    lambda t: t.match(T.Keyword, 'null'),
                    lambda t: t.ttype == T.Number.Integer,
                    lambda t: t.ttype == T.String.Single,
+                   lambda t: isinstance(t, Comparsion),
                    ]
     tcomma = tlist.token_next_match(idx, T.Punctuation, ',')
     start = None

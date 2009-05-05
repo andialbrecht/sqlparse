@@ -5,6 +5,7 @@ In Development
    prefixed with @.
  * Improved parsing of identifier lists (issue2).
  * Recursive recognition of AS (issue4) and CASE.
+ * Improved support for UPDATE statements.
 
 
 Release 0.1.0

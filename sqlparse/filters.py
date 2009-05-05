@@ -162,7 +162,8 @@ class ReindentFilter(Filter):
 
     def _split_kwds(self, tlist):
         split_words = ('FROM', 'JOIN$', 'AND', 'OR',
-                       'GROUP', 'ORDER', 'UNION', 'VALUES')
+                       'GROUP', 'ORDER', 'UNION', 'VALUES',
+                       'SET')
         idx = 0
         token = tlist.token_next_match(idx, T.Keyword, split_words,
                                        regex=True)
