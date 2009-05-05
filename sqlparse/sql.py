@@ -48,6 +48,10 @@ class Token(object):
             short = raw
         return re.sub('\s+', ' ', short)
 
+    def flatten(self):
+        """Resolve subgroups."""
+        yield self
+
     def match(self, ttype, values, regex=False):
         """Checks whether the token matches the given arguments.
 
