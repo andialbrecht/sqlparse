@@ -5,7 +5,6 @@
 
 """filter"""
 
-import logging
 import re
 
 from sqlparse import lexer, SQLParseError

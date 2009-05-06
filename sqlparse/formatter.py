@@ -5,8 +5,6 @@
 
 """SQL formatter"""
 
-import logging
-
 from sqlparse import SQLParseError
 from sqlparse import filters
 
@@ -124,7 +122,6 @@ def build_filter_stack(stack, options):
 
 def format(statement, **options):
     import filters
-    logging.info('OPTIONS %r', options)
     lexer = Lexer()
 #    lexer.add_filter('whitespace')
     lexer.add_filter(filters.GroupFilter())
