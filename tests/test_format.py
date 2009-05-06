@@ -42,6 +42,8 @@ class TestFormat(TestCaseBase):
         sql = 'select-- foo\nfrom -- bar\nwhere'
         res = sqlparse.format(sql, strip_comments=True)
         self.ndiffAssertEqual(res, 'select from where')
+        self.assertRaises(sqlparse.SQLParseError, sqlparse.format, sql,
+                          strip_comments=None)
 
     def test_strip_comments_multi(self):
         sql = '/* sql starts here */\nselect'
@@ -63,9 +65,26 @@ class TestFormat(TestCaseBase):
         self.ndiffAssertEqual(f(s), 'select * from foo where (1 = 2)')
         s = 'select -- foo\nfrom    bar\n'
         self.ndiffAssertEqual(f(s), 'select -- foo\nfrom bar')
+        self.assertRaises(sqlparse.SQLParseError, sqlparse.format, s,
+                          strip_whitespace=None)
+
+    def test_outputformat(self):
+        sql = 'select * from foo;'
+        self.assertRaises(sqlparse.SQLParseError, sqlparse.format, sql,
+                          output_format='foo')
 
 
 class TestFormatReindent(TestCaseBase):
+
+    def test_option(self):
+        self.assertRaises(sqlparse.SQLParseError, sqlparse.format, 'foo',
+                          reindent=2)
+        self.assertRaises(sqlparse.SQLParseError, sqlparse.format, 'foo',
+                          indent_tabs=2)
+        self.assertRaises(sqlparse.SQLParseError, sqlparse.format, 'foo',
+                          reindent=True, indent_width='foo')
+        self.assertRaises(sqlparse.SQLParseError, sqlparse.format, 'foo',
+                          reindent=True, indent_width=-12)
 
     def test_stmts(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)
@@ -176,3 +195,29 @@ class TestFormatReindent(TestCaseBase):
                                                'order by c1']))
 
 
+
+
+class TestOutputFormat(TestCaseBase):
+
+    def test_python(self):
+        sql = 'select * from foo;'
+        f = lambda sql: sqlparse.format(sql, output_format='python')
+        self.ndiffAssertEqual(f(sql), "sql = 'select * from foo;'")
+        f = lambda sql: sqlparse.format(sql, output_format='python',
+                                        reindent=True)
+        self.ndiffAssertEqual(f(sql), ("sql = ('select * '\n"
+                                       "       'from foo;')"))
+
+    def test_php(self):
+        sql = 'select * from foo;'
+        f = lambda sql: sqlparse.format(sql, output_format='php')
+        self.ndiffAssertEqual(f(sql), '$sql = "select * from foo;";')
+        f = lambda sql: sqlparse.format(sql, output_format='php',
+                                        reindent=True)
+        self.ndiffAssertEqual(f(sql), ('$sql = "select * ";\n'
+                                       '$sql .= "from foo;";'))
+
+    def test_sql(self):  # "sql" is an allowed option but has no effect
+        sql = 'select * from foo;'
+        f = lambda sql: sqlparse.format(sql, output_format='sql')
+        self.ndiffAssertEqual(f(sql), 'select * from foo;')

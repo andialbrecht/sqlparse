@@ -66,6 +66,11 @@ class TestToken(unittest.TestCase):
 
 class TestTokenList(unittest.TestCase):
 
+    def test_repr(self):
+        p = sqlparse.parse('foo, bar, baz')[0]
+        tst = "<IdentifierList 'foo, b...' at 0x"
+        self.assertEqual(repr(p.tokens[0])[:len(tst)], tst)
+
     def test_token_first(self):
         p = sqlparse.parse(' select foo')[0]
         first = p.token_first()

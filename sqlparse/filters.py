@@ -364,7 +364,7 @@ class OutputPythonFilter(Filter):
                 if cnt == 1:
                     continue
                 after_lb = token.value.split('\n', 1)[1]
-                yield grouping.Token(T.Text, "'")
+                yield grouping.Token(T.Text, " '")
                 yield grouping.Token(T.Whitespace, '\n')
                 for i in range(len(varname)+4):
                     yield grouping.Token(T.Whitespace, ' ')
@@ -407,11 +407,11 @@ class OutputPHPFilter(Filter):
         cnt = 0
         for token in stream:
             if token.is_whitespace() and '\n' in token.value:
-                cnt += 1
-                if cnt == 1:
-                    continue
+#                cnt += 1
+#                if cnt == 1:
+#                    continue
                 after_lb = token.value.split('\n', 1)[1]
-                yield grouping.Token(T.Text, '"')
+                yield grouping.Token(T.Text, ' "')
                 yield grouping.Token(T.Operator, ';')
                 yield grouping.Token(T.Whitespace, '\n')
                 yield grouping.Token(T.Name, varname)

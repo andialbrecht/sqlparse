@@ -170,9 +170,9 @@ class TokenList(Token):
 
         If no matching token can be found ``None`` is returned.
         """
-        if type(clss) not in (types.ListType, types.TupleType):
+        if isinstance(clss, (list, tuple)):
             clss = (clss,)
-        if type(clss) is not types.TupleType:
+        if isinstance(clss, tuple):
             clss = tuple(clss)
         for token in self.tokens[idx:]:
             if isinstance(token, clss):
@@ -181,7 +181,7 @@ class TokenList(Token):
 
     def token_next_by_type(self, idx, ttypes):
         """Returns next matching token by it's token type."""
-        if not isinstance(ttypes, (types.TupleType, types.ListType)):
+        if not isinstance(ttypes, (list, tuple)):
             ttypes = [ttypes]
         for token in self.tokens[idx:]:
             if token.ttype in ttypes:
