@@ -6,6 +6,7 @@ In Development
  * Improved parsing of identifier lists (issue2).
  * Recursive recognition of AS (issue4) and CASE.
  * Improved support for UPDATE statements.
+ * Code cleanup and better test coverage.
 
 
 Release 0.1.0

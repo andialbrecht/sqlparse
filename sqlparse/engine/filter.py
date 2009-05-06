@@ -17,6 +17,7 @@ class TokenFilter(object):
 class StatementFilter(TokenFilter):
 
     def __init__(self):
+        TokenFilter.__init__(self)
         self._in_declare = False
         self._in_dbldollar = False
         self._is_create = False

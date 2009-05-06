@@ -123,3 +123,15 @@ class TestGrouping(TestCaseBase):
         p = sqlparse.parse(s)[0]
         self.ndiffAssertEqual(s, p.to_unicode())
         self.assertEqual(p.tokens[4].get_alias(), 'view')
+
+
+
+class TestStatement(TestCaseBase):
+
+    def test_get_type(self):
+        f = lambda sql: sqlparse.parse(sql)[0]
+        self.assertEqual(f('select * from foo').get_type(), 'SELECT')
+        self.assertEqual(f('update foo').get_type(), 'UPDATE')
+        self.assertEqual(f(' update foo').get_type(), 'UPDATE')
+        self.assertEqual(f('\nupdate foo').get_type(), 'UPDATE')
+        self.assertEqual(f('foo').get_type(), 'UNKNOWN')

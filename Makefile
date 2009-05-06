@@ -12,6 +12,9 @@ help:
 test:
 	$(PYTHON) tests/run_tests.py
 
+coverage:
+	nosetests --with-coverage --cover-inclusive --cover-package=sqlparse
+
 clean:
 	$(PYTHON) setup.py clean
 	find . -name '*.pyc' -delete

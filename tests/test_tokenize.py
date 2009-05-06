@@ -3,7 +3,9 @@
 import unittest
 import types
 
+import sqlparse
 from sqlparse import lexer
+from sqlparse import sql
 from sqlparse.tokens import *
 
 
@@ -38,3 +40,47 @@ class TestTokenize(unittest.TestCase):
         sql = 'foo\r\nbar\n'
         tokens = lexer.tokenize(sql)
         self.assertEqual(''.join(str(x[1]) for x in tokens), sql)
+
+
+class TestToken(unittest.TestCase):
+
+    def test_str(self):
+        token = sql.Token(None, 'FoO')
+        self.assertEqual(str(token), 'FoO')
+
+    def test_repr(self):
+        token = sql.Token(Keyword, 'foo')
+        tst = "<Keyword 'foo' at 0x"
+        self.assertEqual(repr(token)[:len(tst)], tst)
+        token = sql.Token(Keyword, '1234567890')
+        tst = "<Keyword '123456...' at 0x"
+        self.assertEqual(repr(token)[:len(tst)], tst)
+
+    def test_flatten(self):
+        token = sql.Token(Keyword, 'foo')
+        gen = token.flatten()
+        self.assertEqual(type(gen), types.GeneratorType)
+        lgen = list(gen)
+        self.assertEqual(lgen, [token])
+
+
+class TestTokenList(unittest.TestCase):
+
+    def test_token_first(self):
+        p = sqlparse.parse(' select foo')[0]
+        first = p.token_first()
+        self.assertEqual(first.value, 'select')
+        self.assertEqual(p.token_first(ignore_whitespace=False).value, ' ')
+        self.assertEqual(sql.TokenList([]).token_first(), None)
+
+    def test_token_matching(self):
+        t1 = sql.Token(Keyword, 'foo')
+        t2 = sql.Token(Punctuation, ',')
+        x = sql.TokenList([t1, t2])
+        self.assertEqual(x.token_matching(0, [lambda t: t.ttype is Keyword]),
+                         t1)
+        self.assertEqual(x.token_matching(0,
+                                          [lambda t: t.ttype is Punctuation]),
+                         t2)
+        self.assertEqual(x.token_matching(1, [lambda t: t.ttype is Keyword]),
+                         None)

@@ -2,6 +2,7 @@ syntax: glob
 docs/build
 dist
 MANIFEST
+.coverage
 extras/appengine/django
 extras/appengine/django.zip
 extras/appengine/release
