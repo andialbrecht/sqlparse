@@ -6,6 +6,8 @@
 import os
 from distutils.core import setup
 
+import sqlparse
+
 
 def find_packages(base):
     ret = [base]
@@ -48,13 +50,13 @@ Formatting statemtents::
 
 Parsing::
 
-   >>> sql = 'select * from "someschema"."mytable" where id = 1'
+   >>> sql = 'select * from someschema.mytable where id = 1'
    >>> res = sqlparse.parse(sql)
    >>> res
    (<Statement 'select...' at 0x9ad08ec>,)
    >>> stmt = res[0]
    >>> stmt.to_unicode()  # converting it back to unicode
-   u'select * from "someschema"."mytable" where id = 1'
+   u'select * from someschema.mytable where id = 1'
    >>> # This is how the internal representation looks like:
    >>> stmt.tokens
    (<DML 'select' at 0x9b63c34>,
@@ -63,21 +65,25 @@ Parsing::
     <Whitespace ' ' at 0x9b63c5c>,
     <Keyword 'from' at 0x9b63c84>,
     <Whitespace ' ' at 0x9b63cd4>,
-    <Identifier '"somes...' at 0x9b5c62c>,
+    <Identifier 'somes...' at 0x9b5c62c>,
     <Whitespace ' ' at 0x9b63f04>,
     <Where 'where ...' at 0x9b5caac>)
 
 """
 
 
+DOWNLOAD_URL = ('http://python-sqlparse.googlecode.com/files/'
+                'sqlparse-%s.tar.gz' % sqlparse.__version__)
+
+
 setup(
     name='sqlparse',
-    version='0.1.0',
+    version=sqlparse.__version__,
     packages=find_packages('sqlparse'),
     description='Non-validating SQL parser',
     author='Andi Albrecht',
     author_email='albrecht.andi@gmail.com',
-    download_url='http://python-sqlparse.googlecode.com/files/sqlparse-0.1.0.tar.gz',
+    download_url=DOWNLOAD_URL,
     long_description=LONG_DESCRIPTION,
     license='BSD',
     url='http://python-sqlparse.googlecode.com/',
@@ -87,6 +93,10 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.4',
+        'Programming Language :: Python :: 2.5',
+        'Programming Language :: Python :: 2.6',
         'Topic :: Database',
         'Topic :: Software Development'
     ],

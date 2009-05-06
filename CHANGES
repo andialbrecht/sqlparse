@@ -1,14 +1,18 @@
-In Development
---------------
+Release 0.1.1 (May 6, 2009)
+---------------------------
+
+Bug Fixes
  * Lexers preserves original line breaks (issue1).
  * Improved identifier parsing: backtick quotes, wildcards, T-SQL variables
    prefixed with @.
  * Improved parsing of identifier lists (issue2).
  * Recursive recognition of AS (issue4) and CASE.
  * Improved support for UPDATE statements.
+
+Other
  * Code cleanup and better test coverage.
 
 
-Release 0.1.0
--------------
+Release 0.1.0 (Apr 8, 2009)
+---------------------------
  * Initial release.
