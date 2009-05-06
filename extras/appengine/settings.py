@@ -18,6 +18,7 @@ import os
 
 APPEND_SLASH = False
 DEBUG = os.environ['SERVER_SOFTWARE'].startswith('Dev')
+DEBUG=False
 INSTALLED_APPS = (
     'sqlformat',
 )
