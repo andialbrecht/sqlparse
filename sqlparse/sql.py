@@ -16,7 +16,7 @@ class Token(object):
     the type of the token.
     """
 
-    __slots__ = ('value', 'ttype')
+    __slots__ = ('value', 'ttype',)
 
     def __init__(self, ttype, value):
         self.value = value
@@ -69,19 +69,20 @@ class Token(object):
         if values is None:
             return self.ttype is ttype
         if isinstance(values, basestring):
-            values = [values]
+            values = set([values])
         if regex:
             if self.ttype is T.Keyword:
-                values = [re.compile(v, re.IGNORECASE) for v in values]
+                values = set([re.compile(v, re.IGNORECASE) for v in values])
             else:
-                values = [re.compile(v) for v in values]
+                values = set([re.compile(v) for v in values])
             for pattern in values:
                 if pattern.search(self.value):
                     return True
             return False
         else:
             if self.ttype is T.Keyword:
-                return self.value.upper() in [v.upper() for v in values]
+                values = set([v.upper() for v in values])
+                return self.value.upper() in values
             else:
                 return self.value in values
 
@@ -212,7 +213,6 @@ class TokenList(Token):
         for token in self.tokens[idx:]:
             for i, func in enumerate(funcs):
                 if func(token):
-                    print 'MATCHED', i, token
                     return token
         return None
 
