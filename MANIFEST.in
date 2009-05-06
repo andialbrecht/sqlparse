@@ -1,5 +1,5 @@
 recursive-include docs *.rst
-recursive-include tests *.*
+recursive-include tests *.py *.sql
 include COPYING
 include TODO
 include AUTHORS
