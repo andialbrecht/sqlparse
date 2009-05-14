@@ -26,13 +26,15 @@ class TestGrouping(TestCaseBase):
         self.ndiffAssertEqual(s, unicode(parsed))
         self.assertEqual(len(parsed.tokens), 2)
 
-    #def test_xassignment(self):
-    #    s = 'foo := 1;'
-    #    parsed = sqlparse.parse(s)[0]
-    #    self.assertEqual(len(parsed.tokens), 1)
-        #s = 'foo := 1'
-        #parsed = sqlparse.parse(s)[0]
-        #self.assertEqual(len(parsed.tokens), 1)
+    def test_assignment(self):
+        s = 'foo := 1;'
+        parsed = sqlparse.parse(s)[0]
+        self.assertEqual(len(parsed.tokens), 1)
+        self.assert_(isinstance(parsed.tokens[0], Assignment))
+        s = 'foo := 1'
+        parsed = sqlparse.parse(s)[0]
+        self.assertEqual(len(parsed.tokens), 1)
+        self.assert_(isinstance(parsed.tokens[0], Assignment))
 
     def test_identifiers(self):
         s = 'select foo.bar from "myscheme"."table" where fail. order'

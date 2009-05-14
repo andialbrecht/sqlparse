@@ -29,8 +29,12 @@ def _group_left_right(tlist, ttype, value, cls,
                                            ttype, value)
         else:
             if include_semicolon:
-                right = tlist.token_next_match(tlist.token_index(right),
-                                               T.Punctuation, ';')
+                sright = tlist.token_next_match(tlist.token_index(right),
+                                                T.Punctuation, ';')
+                if sright is not None:
+                    # only overwrite "right" if a semicolon is actually
+                    # present.
+                    right = sright
             tokens = tlist.tokens_between(left, right)[1:]
             if not isinstance(left, cls):
                 new = cls([left])
