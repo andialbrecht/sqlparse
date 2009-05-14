@@ -132,6 +132,13 @@ class TestGrouping(TestCaseBase):
         self.ndiffAssertEqual(s, p.to_unicode())
         self.assertEqual(p.tokens[4].get_alias(), 'view')
 
+    def test_comparsion_exclude(self):
+        # make sure operators are not handled too lazy
+        p = sqlparse.parse('(+)')[0]
+        self.assert_(isinstance(p.tokens[0], Parenthesis))
+        self.assert_(not isinstance(p.tokens[0].tokens[1], Comparsion))
+        p = sqlparse.parse('(a+1)')[0]
+        self.assert_(isinstance(p.tokens[0].tokens[1], Comparsion))
 
 
 class TestStatement(TestCaseBase):

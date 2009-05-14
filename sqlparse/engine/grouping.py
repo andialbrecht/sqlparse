@@ -11,6 +11,7 @@ from sqlparse.sql import *
 
 def _group_left_right(tlist, ttype, value, cls,
                       check_right=lambda t: True,
+                      check_left = lambda t: True,
                       include_semicolon=False):
     [_group_left_right(sgroup, ttype, value, cls, check_right,
                        include_semicolon) for sgroup in tlist.get_sublists()
@@ -20,8 +21,10 @@ def _group_left_right(tlist, ttype, value, cls,
     while token:
         right = tlist.token_next(tlist.token_index(token))
         left = tlist.token_prev(tlist.token_index(token))
-        if (right is None or not check_right(right)
-            or left is None):
+        if right is None or not check_right(right):
+            token = tlist.token_next_match(tlist.token_index(token)+1,
+                                           ttype, value)
+        elif left is None or not check_right(left):
             token = tlist.token_next_match(tlist.token_index(token)+1,
                                            ttype, value)
         else:
@@ -92,7 +95,12 @@ def group_assignment(tlist):
                       include_semicolon=True)
 
 def group_comparsion(tlist):
-    _group_left_right(tlist, T.Operator, None, Comparsion)
+    def _parts_valid(token):
+        return (token.ttype in (T.String.Symbol, T.Name, T.Number,
+                                T.Number.Integer, T.Literal)
+                or isinstance(token, (Identifier,)))
+    _group_left_right(tlist, T.Operator, None, Comparsion,
+                      check_left=_parts_valid, check_right=_parts_valid)
 
 
 def group_case(tlist):
