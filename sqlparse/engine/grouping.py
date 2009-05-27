@@ -245,8 +245,25 @@ def group_typecasts(tlist):
     _group_left_right(tlist, T.Punctuation, '::', Identifier)
 
 
+def group_functions(tlist):
+    [group_functions(sgroup) for sgroup in tlist.get_sublists()
+     if not isinstance(sgroup, Function)]
+    idx = 0
+    token = tlist.token_next_by_type(idx, T.Name)
+    while token:
+        next_ = tlist.token_next(token)
+        if not isinstance(next_, Parenthesis):
+            idx = tlist.token_index(token)+1
+        else:
+            func = tlist.group_tokens(Function,
+                                      tlist.tokens_between(token, next_))
+            idx = tlist.token_index(func)+1
+        token = tlist.token_next_by_type(idx, T.Name)
+
+
 def group(tlist):
     for func in [group_parenthesis,
+                 group_functions,
                  group_comments,
                  group_where,
                  group_case,

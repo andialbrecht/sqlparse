@@ -455,3 +455,17 @@ class Case(TokenList):
             elif in_value:
                 ret[-1][1].append(token)
         return ret
+
+
+class Function(TokenList):
+    """A function or procedure call."""
+
+    __slots__ = ('value', 'ttype', 'tokens')
+
+    def get_parameters(self):
+        """Return a list of parameters."""
+        parenthesis = self.tokens[-1]
+        for t in parenthesis.tokens:
+            if isinstance(t, IdentifierList):
+                return t.get_identifiers()
+        return []

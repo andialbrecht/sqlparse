@@ -10,7 +10,7 @@ from tests.utils import TestCaseBase
 class TestGrouping(TestCaseBase):
 
     def test_parenthesis(self):
-        s ='x1 (x2 (x3) x2) foo (y2) bar'
+        s ='select (select (x3) x2) and (y2) bar'
         parsed = sqlparse.parse(s)[0]
         self.ndiffAssertEqual(s, str(parsed))
         self.assertEqual(len(parsed.tokens), 9)
@@ -141,6 +141,13 @@ class TestGrouping(TestCaseBase):
         self.assert_(not isinstance(p.tokens[0].tokens[1], Comparsion))
         p = sqlparse.parse('(a+1)')[0]
         self.assert_(isinstance(p.tokens[0].tokens[1], Comparsion))
+
+    def test_function(self):
+        p = sqlparse.parse('foo()')[0]
+        self.assert_(isinstance(p.tokens[0], Function))
+        p = sqlparse.parse('foo(null, bar)')[0]
+        self.assert_(isinstance(p.tokens[0], Function))
+        self.assertEqual(len(p.tokens[0].get_parameters()), 2)
 
 
 class TestStatement(TestCaseBase):
