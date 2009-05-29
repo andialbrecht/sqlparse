@@ -119,14 +119,12 @@ Details of the returned objects are described in :ref:`analyze`.
 Development & Contributing
 --------------------------
 
-The source code of this module is hosted on
-`bitbucket.org <http://bitbucket.org/andialbrecht/python-sqlparse/>`_.
-
-Run
+To check out the latest sources of this module run
 
 .. code-block:: bash
 
-   $ hg clone http://bitbucket.org/andialbrecht/python-sqlparse/
+   $ hg clone http://python-sqlparse.googlecode.com/hg/ python-sqlparse
+
 
 to check out the latest sources from the Mercurial repository.
 
