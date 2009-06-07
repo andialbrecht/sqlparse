@@ -11,7 +11,7 @@ Run
 
   python setup.py install
 
-with root privileges to install python-sqlparse on your system.
+to install python-sqlparse on your system.
 
 
 Run Tests
