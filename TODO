@@ -1,2 +1,3 @@
 * Fix bugs on issue tracker.
 * See KnownIssues http://code.google.com/p/python-sqlparse/wiki/KnownIssues
+* Python 3 version
