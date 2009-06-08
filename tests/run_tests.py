@@ -3,7 +3,6 @@
 
 """Test runner for sqlparse."""
 
-import hotshot
 import optparse
 import os
 import sys
@@ -38,6 +37,7 @@ def main(args):
 if __name__ == '__main__':
     opts, args = parser.parse_args()
     if opts.profile:
+        import hotshot
         prof = hotshot.Profile("sqlparse.prof")
         prof.runcall(main, args)
         prof.close()
