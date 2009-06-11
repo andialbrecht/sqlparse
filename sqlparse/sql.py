@@ -201,8 +201,8 @@ class TokenList(Token):
             passed = False
             for func in funcs:
                 if func(token):
-                   passed = True
-                   break
+                    passed = True
+                    break
             if not passed:
                 return token
         return None

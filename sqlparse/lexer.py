@@ -43,9 +43,11 @@ def apply_filters(stream, filters, lexer=None):
     a stream. If lexer is given it's forwarded to the
     filter, otherwise the filter receives `None`.
     """
+
     def _apply(filter_, stream):
         for token in filter_.filter(lexer, stream):
             yield token
+
     for filter_ in filters:
         stream = _apply(filter_, stream)
     return stream
@@ -68,7 +70,8 @@ class LexerMeta(type):
             if isinstance(tdef, include):
                 # it's a state reference
                 assert tdef != state, "circular state reference %r" % state
-                tokens.extend(cls._process_state(unprocessed, processed, str(tdef)))
+                tokens.extend(cls._process_state(
+                    unprocessed, processed, str(tdef)))
                 continue
 
             assert type(tdef) is tuple, "wrong rule def %r" % tdef
@@ -76,8 +79,9 @@ class LexerMeta(type):
             try:
                 rex = re.compile(tdef[0], rflags).match
             except Exception, err:
-                raise ValueError("uncompilable regex %r in state %r of %r: %s" %
-                                 (tdef[0], state, cls, err))
+                raise ValueError(("uncompilable regex %r in state"
+                                  " %r of %r: %s"
+                                  % (tdef[0], state, cls, err)))
 
             assert type(tdef[1]) is _TokenType or callable(tdef[1]), \
                    'token type must be simple type or callable, not %r' % (tdef[1],)

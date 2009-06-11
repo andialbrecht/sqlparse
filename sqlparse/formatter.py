@@ -119,4 +119,3 @@ def build_filter_stack(stack, options):
 
     return stack
 
-
