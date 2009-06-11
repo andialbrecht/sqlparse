@@ -3,7 +3,6 @@
 """This module contains classes representing syntactical elements of SQL."""
 
 import re
-import types
 
 from sqlparse import tokens as T
 
@@ -190,7 +189,7 @@ class TokenList(Token):
 
     def token_next_match(self, idx, ttype, value, regex=False):
         """Returns next token where it's ``match`` method returns ``True``."""
-        if type(idx) != types.IntType:
+        if not isinstance(idx, int):
             idx = self.token_index(idx)
         for token in self.tokens[idx:]:
             if token.match(ttype, value, regex):
