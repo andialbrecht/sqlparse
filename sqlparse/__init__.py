@@ -9,9 +9,6 @@
 __version__ = '0.1.1'
 
 
-import os
-
-
 class SQLParseError(Exception):
     """Base class for exceptions in this module."""
 

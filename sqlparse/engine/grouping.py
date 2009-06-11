@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import itertools
-import re
-import types
 
 from sqlparse import tokens as T
 from sqlparse.sql import *
-
 
 
 def _group_left_right(tlist, ttype, value, cls,

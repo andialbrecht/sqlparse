@@ -9,11 +9,6 @@
 
 """Tokens"""
 
-try:
-    set
-except NameError:
-    from sets import Set as set
-
 
 class _TokenType(tuple):
     parent = None

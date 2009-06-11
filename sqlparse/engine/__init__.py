@@ -5,9 +5,7 @@
 
 """filter"""
 
-import re
-
-from sqlparse import lexer, SQLParseError
+from sqlparse import lexer
 from sqlparse.engine import grouping
 from sqlparse.engine.filter import StatementFilter
 
@@ -58,23 +56,23 @@ class FilterStack(object):
             stream = _group(stream)
 
         if self.stmtprocess:
-            def _run(stream):
+            def _run1(stream):
                 ret = []
                 for stmt in stream:
                     for filter_ in self.stmtprocess:
                         filter_.process(self, stmt)
                     ret.append(stmt)
                 return ret
-            stream = _run(stream)
+            stream = _run1(stream)
 
         if self.postprocess:
-            def _run(stream):
+            def _run2(stream):
                 for stmt in stream:
                     stmt.tokens = list(self._flatten(stmt.tokens))
                     for filter_ in self.postprocess:
                         stmt = filter_.process(self, stmt)
                     yield stmt
-            stream = _run(stream)
+            stream = _run2(stream)
 
         return stream
 
