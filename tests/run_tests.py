@@ -8,7 +8,9 @@ import os
 import sys
 import unittest
 
-sys.path.insert(1, os.path.join(os.path.dirname(__file__), '../'))
+test_mod = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
+if test_mod not in sys.path:
+    sys.path.insert(1, test_mod)
 
 
 parser = optparse.OptionParser()
