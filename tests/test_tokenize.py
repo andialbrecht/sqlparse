@@ -41,6 +41,27 @@ class TestTokenize(unittest.TestCase):
         tokens = lexer.tokenize(sql)
         self.assertEqual(''.join(str(x[1]) for x in tokens), sql)
 
+    def test_inline_keywords(self):  # issue 7
+        sql = "create created_foo"
+        tokens = list(lexer.tokenize(sql))
+        self.assertEqual(len(tokens), 3)
+        self.assertEqual(tokens[0][0], Keyword.DDL)
+        self.assertEqual(tokens[2][0], Name)
+        self.assertEqual(tokens[2][1], u'created_foo')
+        sql = "enddate"
+        tokens = list(lexer.tokenize(sql))
+        self.assertEqual(len(tokens), 1)
+        self.assertEqual(tokens[0][0], Name)
+        sql = "join_col"
+        tokens = list(lexer.tokenize(sql))
+        self.assertEqual(len(tokens), 1)
+        self.assertEqual(tokens[0][0], Name)
+        sql = "left join_col"
+        tokens = list(lexer.tokenize(sql))
+        self.assertEqual(len(tokens), 3)
+        self.assertEqual(tokens[2][0], Name)
+        self.assertEqual(tokens[2][1], 'join_col')
+
 
 class TestToken(unittest.TestCase):
 

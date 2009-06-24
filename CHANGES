@@ -1,3 +1,11 @@
+In Development
+--------------
+
+Bug Fixes
+ * Fixed incorrect detection of keyword fragments embed in names (issue7,
+   reported and initial patch by andyboyko).
+
+
 Release 0.1.1 (May 6, 2009)
 ---------------------------
 

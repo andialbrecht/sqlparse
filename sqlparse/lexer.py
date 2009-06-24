@@ -176,9 +176,9 @@ class Lexer:
             # TODO: Backslash escapes?
             (r"'(''|[^'])*'", String.Single),
             (r'"(""|[^"])*"', String.Symbol), # not a real string literal in ANSI SQL
-            (r'(LEFT |RIGHT )?(INNER |OUTER )?JOIN', Keyword),
-            (r'END( IF| LOOP)?', Keyword),
-            (r'CREATE( OR REPLACE)?', Keyword.DDL),
+            (r'(LEFT |RIGHT )?(INNER |OUTER )?JOIN\b', Keyword),
+            (r'END( IF| LOOP)?\b', Keyword),
+            (r'CREATE( OR REPLACE)?\b', Keyword.DDL),
             (r'[a-zA-Z_][a-zA-Z0-9_]*', is_keyword),
             (r'\$([a-zA-Z_][a-zA-Z0-9_]*)?\$', Name.Builtin),
             (r'[;:()\[\],\.]', Punctuation),
