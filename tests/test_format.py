@@ -159,6 +159,16 @@ class TestFormatReindent(TestCaseBase):
                                                'from a,',
                                                '     b']))
 
+    def test_identifier_list_with_functions(self):
+        f = lambda sql: sqlparse.format(sql, reindent=True)
+        s = ("select 'abc' as foo, coalesce(col1, col2)||col3 as bar,"
+             "col3 from my_table")
+        self.ndiffAssertEqual(f(s), '\n'.join(
+            ["select 'abc' as foo,",
+             "       coalesce(col1, col2)||col3 as bar,",
+             "       col3",
+             "from my_table"]))
+
     def test_case(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)
         s = 'case when foo = 1 then 2 when foo = 3 then 4 else 5 end'
