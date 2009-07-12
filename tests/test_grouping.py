@@ -65,13 +65,21 @@ class TestGrouping(TestCaseBase):
         self.assertEqual(t.get_name(), '*')
         self.assertEqual(t.is_wildcard(), True)
 
-    def test_indentifier_invalid(self):
+    def test_identifier_invalid(self):
         p = sqlparse.parse('a.')[0]
         self.assert_(isinstance(p.tokens[0], Identifier))
         self.assertEqual(p.tokens[0].has_alias(), False)
         self.assertEqual(p.tokens[0].get_name(), None)
         self.assertEqual(p.tokens[0].get_real_name(), None)
         self.assertEqual(p.tokens[0].get_parent_name(), 'a')
+
+    def test_identifier_function(self):
+        p = sqlparse.parse('foo() as bar')[0]
+        self.assert_(isinstance(p.tokens[0], Identifier))
+        self.assert_(isinstance(p.tokens[0].tokens[0], Function))
+        p = sqlparse.parse('foo()||col2 bar')[0]
+        self.assert_(isinstance(p.tokens[0], Identifier))
+        self.assert_(isinstance(p.tokens[0].tokens[0], Function))
 
     def test_identifier_list(self):
         p = sqlparse.parse('a, b, c')[0]

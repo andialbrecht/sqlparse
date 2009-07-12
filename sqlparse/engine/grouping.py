@@ -111,11 +111,13 @@ def group_case(tlist):
 
 def group_identifier(tlist):
     def _consume_cycle(tl, i):
-        x = itertools.cycle((lambda y: (y.match(T.Punctuation, '.')
-                                        or y.ttype is T.Operator),
-                             lambda y: y.ttype in (T.String.Symbol,
-                                                   T.Name,
-                                                   T.Wildcard)))
+        x = itertools.cycle((
+            lambda y: (y.match(T.Punctuation, '.')
+                       or y.ttype is T.Operator),
+            lambda y: (y.ttype in (T.String.Symbol,
+                                   T.Name,
+                                   T.Wildcard))
+            ))
         for t in tl.tokens[i:]:
             if x.next()(t):
                 yield t
@@ -128,14 +130,22 @@ def group_identifier(tlist):
 
     # real processing
     idx = 0
-    token = tlist.token_next_by_type(idx, (T.String.Symbol, T.Name))
+    token = tlist.token_next_by_instance(idx, Function)
+    if token is None:
+        token = tlist.token_next_by_type(idx, (T.String.Symbol, T.Name))
     while token:
         identifier_tokens = [token]+list(
             _consume_cycle(tlist,
                            tlist.token_index(token)+1))
-        group = tlist.group_tokens(Identifier, identifier_tokens)
-        idx = tlist.token_index(group)+1
-        token = tlist.token_next_by_type(idx, (T.String.Symbol, T.Name))
+        if not (len(identifier_tokens) == 1
+                and isinstance(identifier_tokens[0], Function)):
+            group = tlist.group_tokens(Identifier, identifier_tokens)
+            idx = tlist.token_index(group)+1
+        else:
+            idx += 1
+        token = tlist.token_next_by_instance(idx, Function)
+        if token is None:
+            token = tlist.token_next_by_type(idx, (T.String.Symbol, T.Name))
 
 
 def group_identifier_list(tlist):
