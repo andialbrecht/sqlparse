@@ -15,11 +15,12 @@ class Token(object):
     the type of the token.
     """
 
-    __slots__ = ('value', 'ttype',)
+    __slots__ = ('value', 'ttype', 'parent')
 
     def __init__(self, ttype, value):
         self.value = value
         self.ttype = ttype
+        self.parent = None
 
     def __str__(self):
         return unicode(self).encode('latin-1')
@@ -268,6 +269,9 @@ class TokenList(Token):
         for t in tokens:
             self.tokens.remove(t)
         grp = grp_cls(tokens)
+        for token in tokens:
+            token.parent = grp
+        grp.parent = self
         self.tokens.insert(idx, grp)
         return grp
 
