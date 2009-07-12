@@ -93,6 +93,32 @@ class Token(object):
         """Return ``True`` if this token is a whitespace token."""
         return self.ttype and self.ttype in T.Whitespace
 
+    def within(self, group_cls):
+        """Returns ``True`` if this token is within *group_cls*.
+
+        Use this method for example to check if an identifier is within
+        a function: ``t.within(sql.Function)``.
+        """
+        parent = self.parent
+        while parent:
+            if isinstance(parent, group_cls):
+                return True
+            parent = parent.parent
+        return False
+
+    def is_child_of(self, other):
+        """Returns ``True`` if this token is a direct child of *other*."""
+        return self.parent == other
+
+    def has_ancestor(self, other):
+        """Returns ``True`` if *other* is in this tokens ancestry."""
+        parent = self.parent
+        while parent:
+            if parent == other:
+                return True
+            parent = parent.parent
+        return False
+
 
 class TokenList(Token):
     """A group of tokens.
