@@ -171,7 +171,8 @@ class Lexer:
             (r"`(``|[^`])*`", Name),
             (r"´(´´|[^´])*´", Name),
             (r'@[a-zA-Z_][a-zA-Z0-9_]+', Name),
-            (r'[+/<>=~!@#%^&|`?^-]', Operator),
+            (r'[<>=~!]+', Operator.Comparsion),
+            (r'[+/@#%^&|`?^-]+', Operator),
             (r'[0-9]+', Number.Integer),
             # TODO: Backslash escapes?
             (r"'(''|[^'])*'", String.Single),

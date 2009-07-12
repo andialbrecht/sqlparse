@@ -58,6 +58,7 @@ String      = Literal.String
 Number      = Literal.Number
 Punctuation = Token.Punctuation
 Operator    = Token.Operator
+Comparsion  = Operator.Comparsion
 Wildcard    = Token.Wildcard
 Comment     = Token.Comment
 Assignment  = Token.Assignement

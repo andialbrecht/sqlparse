@@ -136,10 +136,12 @@ class TestGrouping(TestCaseBase):
 
     def test_comparsion_exclude(self):
         # make sure operators are not handled too lazy
-        p = sqlparse.parse('(+)')[0]
+        p = sqlparse.parse('(=)')[0]
         self.assert_(isinstance(p.tokens[0], Parenthesis))
         self.assert_(not isinstance(p.tokens[0].tokens[1], Comparsion))
-        p = sqlparse.parse('(a+1)')[0]
+        p = sqlparse.parse('(a=1)')[0]
+        self.assert_(isinstance(p.tokens[0].tokens[1], Comparsion))
+        p = sqlparse.parse('(a>=1)')[0]
         self.assert_(isinstance(p.tokens[0].tokens[1], Comparsion))
 
     def test_function(self):

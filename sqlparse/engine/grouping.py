@@ -100,7 +100,7 @@ def group_comparsion(tlist):
         return (token.ttype in (T.String.Symbol, T.Name, T.Number,
                                 T.Number.Integer, T.Literal)
                 or isinstance(token, (Identifier,)))
-    _group_left_right(tlist, T.Operator, None, Comparsion,
+    _group_left_right(tlist, T.Operator.Comparsion, None, Comparsion,
                       check_left=_parts_valid, check_right=_parts_valid)
 
 
@@ -111,7 +111,8 @@ def group_case(tlist):
 
 def group_identifier(tlist):
     def _consume_cycle(tl, i):
-        x = itertools.cycle((lambda y: y.match(T.Punctuation, '.'),
+        x = itertools.cycle((lambda y: (y.match(T.Punctuation, '.')
+                                        or y.ttype is T.Operator),
                              lambda y: y.ttype in (T.String.Symbol,
                                                    T.Name,
                                                    T.Wildcard)))
