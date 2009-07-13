@@ -73,6 +73,13 @@ class TestGrouping(TestCaseBase):
         self.assertEqual(p.tokens[0].get_real_name(), None)
         self.assertEqual(p.tokens[0].get_parent_name(), 'a')
 
+    def test_identifier_as_invalid(self):  # issue8
+        p = sqlparse.parse('foo as select *')[0]
+        self.assert_(len(p.tokens), 5)
+        self.assert_(isinstance(p.tokens[0], Identifier))
+        self.assertEqual(len(p.tokens[0].tokens), 1)
+        self.assertEqual(p.tokens[2].ttype, T.Keyword)
+
     def test_identifier_function(self):
         p = sqlparse.parse('foo() as bar')[0]
         self.assert_(isinstance(p.tokens[0], Identifier))

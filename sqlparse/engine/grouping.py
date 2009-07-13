@@ -89,7 +89,12 @@ def group_for(tlist):
     _group_matching(tlist, T.Keyword, 'FOR', T.Keyword, 'END LOOP', For, True)
 
 def group_as(tlist):
-    _group_left_right(tlist, T.Keyword, 'AS', Identifier)
+    def _right_valid(token):
+        # Currently limited to DML/DDL. Maybe additional more non SQL reserved
+        # keywords should appear here (see issue8).
+        return not token.ttype in (T.DML, T.DDL)
+    _group_left_right(tlist, T.Keyword, 'AS', Identifier,
+                      check_right=_right_valid)
 
 def group_assignment(tlist):
     _group_left_right(tlist, T.Assignment, ':=', Assignment,
