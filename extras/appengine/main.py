@@ -33,17 +33,10 @@ import traceback
 logging.info('Loading %s, app version = %s',
              __name__, os.getenv('CURRENT_VERSION_ID'))
 
-# Delete the preloaded copy of Django.
-for key in [key for key in sys.modules if key.startswith('django')]:
-  del sys.modules[key]
-
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
-# Force sys.path to have our own directory first, so we can import from it.
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-
-# Import Django from a zipfile.
-sys.path.insert(0, os.path.abspath('django.zip'))
+from google.appengine.dist import use_library
+use_library('django', '1.0')
 
 # Fail early if we can't import Django.  Log identifying information.
 import django
@@ -105,8 +98,8 @@ def log_exception(*args, **kwds):
 django.core.signals.got_request_exception.connect(log_exception)
 
 # Unregister Django's default rollback event handler.
-django.core.signals.got_request_exception.disconnect(
-    django.db._rollback_on_exception)
+#django.core.signals.got_request_exception.disconnect(
+#    django.db._rollback_on_exception)
 
 
 def real_main():
