@@ -15,7 +15,7 @@
          self.ttype = ttype
  
      def __str__(self):
--        return str(self).encode('latin-1')
+-        return str(self).encode('utf-8')
 +        return self.value or ''
  
      def __repr__(self):
@@ -37,7 +37,7 @@
 -        return ''.join(str(x) for x in self.flatten())
 -
      def __str__(self):
--        return str(self).encode('latin-1')
+-        return str(self).encode('utf-8')
 +        return ''.join(str(x) for x in self.flatten())
  
      def _get_repr_name(self):
