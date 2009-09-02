@@ -23,7 +23,7 @@ class Token(object):
         self.parent = None
 
     def __str__(self):
-        return unicode(self).encode('latin-1')
+        return unicode(self).encode('utf-8')
 
     def __repr__(self):
         short = self._get_repr_value()
@@ -139,7 +139,7 @@ class TokenList(Token):
         return ''.join(unicode(x) for x in self.flatten())
 
     def __str__(self):
-        return unicode(self).encode('latin-1')
+        return unicode(self).encode('utf-8')
 
     def _get_repr_name(self):
         return self.__class__.__name__
