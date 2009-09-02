@@ -25,7 +25,7 @@ serve_email:
 serve_remote_email:
 	$(DEV_APPSERVER) --port=$(PORT) --enable_sendmail --address 0.0.0.0 .
 
-update: release
+update:
 	$(APPCFG) update .
 
 upload: update
@@ -36,10 +36,7 @@ update_indexes:
 vacuum_indexes:
 	$(APPCFG) vacuum_indexes .
 
-all: django pygments sqlparse
-
-django:
-	svn co http://code.djangoproject.com/svn/django/trunk/django
+all: pygments sqlparse
 
 pygments:
 	ln -s `python -c "import pygments,os; print os.path.dirname(pygments.__file__)"` .
