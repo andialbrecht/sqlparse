@@ -62,7 +62,7 @@ class FormOptions(forms.Form):
                                      ('upper', 'Upper case'),
                                      ('capitalize', 'Capitalize'))),
         required=False, initial='', label='Identifiers')
-    n_indents = forms.IntegerField(min_value=0, max_value=30,
+    n_indents = forms.IntegerField(min_value=1, max_value=30,
                                    initial=2, required=False,
                                    label='spaces',
                                    widget=forms.TextInput({'size': 2,
