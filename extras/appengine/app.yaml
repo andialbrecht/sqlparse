@@ -7,9 +7,9 @@ default_expiration: 7d  # This is good for images, which never change
 
 handlers:
 
-- url: /(robots.txt|favicon.ico)
+- url: /(robots.txt|favicon.ico|sitemap.xml)
   static_files: static/\1
-  upload: static/(robots.txt|favicon.ico)
+  upload: static/(robots.txt|favicon.ico|sitemap.xml)
 
 - url: /google7a062e78b56854c0.html
   static_files: static/robots.txt
