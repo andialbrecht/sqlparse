@@ -231,7 +231,7 @@ def group_where(tlist):
         tidx = tlist.token_index(token)
         end = tlist.token_next_match(tidx+1, T.Keyword, stopwords)
         if end is None:
-            end = tlist.tokens[-1]
+            end = tlist._groupable_tokens[-1]
         else:
             end = tlist.tokens[tlist.token_index(end)-1]
         group = tlist.group_tokens(Where, tlist.tokens_between(token, end))

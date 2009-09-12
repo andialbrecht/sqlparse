@@ -176,6 +176,10 @@ class TokenList(Token):
     def get_sublists(self):
         return [x for x in self.tokens if isinstance(x, TokenList)]
 
+    @property
+    def _groupable_tokens(self):
+        return self.tokens
+
     def token_first(self, ignore_whitespace=True):
         """Returns the first child token.
 
@@ -425,6 +429,10 @@ class IdentifierList(TokenList):
 class Parenthesis(TokenList):
     """Tokens between parenthesis."""
     __slots__ = ('value', 'ttype', 'tokens')
+
+    @property
+    def _groupable_tokens(self):
+        return self.tokens[1:-1]
 
 
 class Assignment(TokenList):
