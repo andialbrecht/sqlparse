@@ -471,9 +471,12 @@ class Case(TokenList):
         If an ELSE exists condition is None.
         """
         ret = []
-        in_condition = in_value = False
+        in_value = False
+        in_condition = True
         for token in self.tokens:
-            if token.match(T.Keyword, 'WHEN'):
+            if token.match(T.Keyword, 'CASE'):
+                continue
+            elif token.match(T.Keyword, 'WHEN'):
                 ret.append(([], []))
                 in_condition = True
                 in_value = False
@@ -487,6 +490,9 @@ class Case(TokenList):
             elif token.match(T.Keyword, 'END'):
                 in_condition = False
                 in_value = False
+            if (in_condition or in_value) and not ret:
+                # First condition withou preceding WHEN
+                ret.append(([], []))
             if in_condition:
                 ret[-1][0].append(token)
             elif in_value:
