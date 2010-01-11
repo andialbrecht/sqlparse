@@ -31,7 +31,7 @@ def main(args):
         modname = os.path.splitext(fname)[0]
         mod = __import__(os.path.splitext(fname)[0])
         suite.addTests(loader.loadTestsFromModule(mod))
-    unittest.TextTestRunner(verbosity=2).run(suite)
+    return unittest.TextTestRunner(verbosity=2).run(suite)
 
 
 
@@ -44,4 +44,9 @@ if __name__ == '__main__':
         prof.runcall(main, args)
         prof.close()
     else:
-        main(args)
+        result = main(args)
+    if not result.wasSuccessful():
+        return_code = 1
+    else:
+        return_code = 0
+    sys.exit(return_code)
