@@ -1,3 +1,4 @@
 * Fix bugs on issue tracker.
 * Document filter stack and processing phases.
+* Rewrite App Engine application using webapp.
 * See KnownIssues http://code.google.com/p/python-sqlparse/wiki/KnownIssues
