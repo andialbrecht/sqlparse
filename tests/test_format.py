@@ -172,9 +172,10 @@ class TestFormatReindent(TestCaseBase):
     def test_case(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)
         s = 'case when foo = 1 then 2 when foo = 3 then 4 else 5 end'
-        self.ndiffAssertEqual(f(s), '\n'.join(['case when foo = 1 then 2',
-                                               '     when foo = 3 then 4',
-                                               '     else 5',
+        self.ndiffAssertEqual(f(s), '\n'.join(['case',
+                                               '    when foo = 1 then 2',
+                                               '    when foo = 3 then 4',
+                                               '    else 5',
                                                'end']))
 
     def test_nested_identifier_list(self):  # issue4
