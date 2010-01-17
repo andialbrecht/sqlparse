@@ -8,7 +8,7 @@ import time
 
 from django import forms
 from django.http import HttpResponse
-from django.shortcuts import render_to_response
+from django.template import loader
 from django.utils import simplejson as json
 
 from google.appengine.api import users
@@ -22,6 +22,16 @@ import sqlparse
 
 INITIAL_SQL = "select * from foo join bar on val1 = val2 where id = 123;"
 EXAMPLES_DIR = os.path.join(os.path.dirname(__file__), '../examples')
+
+
+# Custom render_to_response() function to avoid loading django.shortcuts
+# since django.shortcuts depends on a lot of Django modules we don't need
+# here, e.g. lots of modules from django.db.
+def render_to_response(template, params=None):
+    if params is None:
+        params = {}
+    return HttpResponse(loader.render_to_string(template, params))
+
 
 def _get_user_image(user):
     if user is None:
