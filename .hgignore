@@ -1,4 +1,5 @@
 syntax: glob
+*.pyc
 docs/build
 dist
 MANIFEST
