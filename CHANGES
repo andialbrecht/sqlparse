@@ -6,6 +6,7 @@ Bug Fixes
    reported and initial patch by andyboyko).
  * Stricter detection of identfier aliases (issue8, reported by estama).
  * WHERE grouping consumed closing parenthesis (issue9, reported by estama).
+ * Fixed an issue with trailing whitespaces (reported by Kris).
 
 
 Release 0.1.1 (May 6, 2009)

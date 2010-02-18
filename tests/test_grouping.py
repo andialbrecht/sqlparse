@@ -176,3 +176,7 @@ class TestStatement(TestCaseBase):
         self.assertEqual(f(' update foo').get_type(), 'UPDATE')
         self.assertEqual(f('\nupdate foo').get_type(), 'UPDATE')
         self.assertEqual(f('foo').get_type(), 'UNKNOWN')
+        # Statements that have a whitespace after the closing semicolon
+        # are parsed as two statements where later only consists of the
+        # trailing whitespace.
+        self.assertEqual(f('\n').get_type(), 'UNKNOWN')

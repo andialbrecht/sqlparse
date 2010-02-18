@@ -323,7 +323,11 @@ class Statement(TokenList):
         isn't a DML or DDL keyword "UNKNOWN" is returned.
         """
         first_token = self.token_first()
-        if first_token.ttype in (T.Keyword.DML, T.Keyword.DDL):
+        if first_token is None:
+            # An "empty" statement that either has not tokens at all
+            # or only whitespace tokens.
+            return 'UNKNOWN'
+        elif first_token.ttype in (T.Keyword.DML, T.Keyword.DDL):
             return first_token.value.upper()
         else:
             return 'UNKNOWN'
