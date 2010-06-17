@@ -1,15 +1,13 @@
-# -*- coding: utf-8 -*-
+import unittest
 
 import sqlparse
 from sqlparse import tokens as T
-from sqlparse.engine.grouping import *
-
-from tests.utils import TestCaseBase
+from sqlparse.engine.grouping import Statement, Parenthesis
 
 
-class TestRegression(TestCaseBase):
+class TestIssue9(unittest.TestCase):
 
-    def test_where_doesnt_consume_parenthesis(self):  # issue9
+    def test_where_doesnt_consume_parenthesis(self):
         p = sqlparse.parse('(where 1)')[0]
         self.assert_(isinstance(p, Statement))
         self.assertEqual(len(p.tokens), 1)

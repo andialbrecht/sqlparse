@@ -3,6 +3,7 @@
 
 """Test runner for sqlparse."""
 
+import fnmatch
 import optparse
 import os
 import sys
@@ -19,17 +20,34 @@ parser.add_option('-P', '--profile',
                   action='store_true', default=False)
 
 
+def _path_matches(path, *patterns):
+    if not patterns:
+        return True
+    for pattern in patterns:
+        if fnmatch.fnmatch(path, pattern):
+            return True
+    return False
+
+
+def _collect_test_modules(base=None, *patterns):
+    for root, dirnames, filenames in os.walk(os.path.dirname(__file__)):
+        print root, filenames
+        for fname in filenames:
+            if not fname.endswith('.py'):
+                continue
+            elif not _path_matches(os.path.join(root, fname), *patterns):
+                continue
+            if not root in sys.path:
+                sys.path.append(root)
+            modname = os.path.splitext(fname)[0]
+            yield __import__(modname)
+
+
 def main(args):
     """Create a TestSuite and run it."""
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
-    fnames = [os.path.split(f)[-1] for f in args]
-    for fname in os.listdir(os.path.dirname(__file__)):
-        if (not fname.startswith('test_') or not fname.endswith('.py')
-            or (fnames and fname not in fnames)):
-            continue
-        modname = os.path.splitext(fname)[0]
-        mod = __import__(os.path.splitext(fname)[0])
+    for mod in _collect_test_modules(*args):
         suite.addTests(loader.loadTestsFromModule(mod))
     return unittest.TextTestRunner(verbosity=2).run(suite)
 
