@@ -175,8 +175,8 @@ class Lexer:
             (r'[+/@#%^&|`?^-]+', Operator),
             (r'[0-9]+', Number.Integer),
             # TODO: Backslash escapes?
-            (r"'(''|[^'])*'", String.Single),
-            (r'"(""|[^"])*"', String.Symbol), # not a real string literal in ANSI SQL
+            (r"(''|'.*?[^\\]')", String.Single),
+            (r'(""|".*?[^\\]")', String.Symbol), # not a real string literal in ANSI SQL
             (r'(LEFT |RIGHT )?(INNER |OUTER )?JOIN\b', Keyword),
             (r'END( IF| LOOP)?\b', Keyword),
             (r'CREATE( OR REPLACE)?\b', Keyword.DDL),
