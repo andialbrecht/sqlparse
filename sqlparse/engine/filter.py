@@ -41,17 +41,17 @@ class StatementFilter(TokenFilter):
             return 0
 
         # ANSI
-        if ttype is not T.Keyword:
+        if ttype not in T.Keyword:
             return 0
 
         unified = value.upper()
 
-        if unified == 'DECLARE':
+        if unified == 'DECLARE' and self._is_create:
             self._in_declare = True
             return 1
 
         if unified == 'BEGIN':
-            if self._in_declare:
+            if self._in_declare:  # FIXME(andi): This makes no sense.
                 return 0
             return 0
 

@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 # Tests splitting functions.
@@ -84,5 +85,11 @@ class SQLSplitTest(TestCaseBase):
     def test_casewhen(self):
         sql = ('SELECT case when val = 1 then 2 else null end as foo;\n'
                'comment on table actor is \'The actor table.\';')
+        stmts = sqlparse.split(sql)
+        self.assertEqual(len(stmts), 2)
+
+    def test_cursor_declare(self):
+        sql = ('DECLARE CURSOR "foo" AS SELECT 1;\n'
+               'SELECT 2;')
         stmts = sqlparse.split(sql)
         self.assertEqual(len(stmts), 2)
