@@ -32,6 +32,7 @@ class combined(tuple):
         # tuple.__init__ doesn't do anything
         pass
 
+
 def is_keyword(value):
     test = value.upper()
     return KEYWORDS_COMMON.get(test, KEYWORDS.get(test, tokens.Name)), value
@@ -84,7 +85,8 @@ class LexerMeta(type):
                                   % (tdef[0], state, cls, err)))
 
             assert type(tdef[1]) is tokens._TokenType or callable(tdef[1]), \
-                   'token type must be simple type or callable, not %r' % (tdef[1],)
+                   ('token type must be simple type or callable, not %r'
+                    % (tdef[1],))
 
             if len(tdef) == 2:
                 new_state = None
@@ -108,7 +110,8 @@ class LexerMeta(type):
                     cls._tmpname += 1
                     itokens = []
                     for istate in tdef2:
-                        assert istate != state, 'circular state ref %r' % istate
+                        assert istate != state, \
+                               'circular state ref %r' % istate
                         itokens.extend(cls._process_state(unprocessed,
                                                           processed, istate))
                     processed[new_state] = itokens
@@ -147,8 +150,6 @@ class LexerMeta(type):
         return type.__call__(cls, *args, **kwds)
 
 
-
-
 class Lexer:
 
     __metaclass__ = LexerMeta
@@ -176,7 +177,8 @@ class Lexer:
             (r'[0-9]+', tokens.Number.Integer),
             # TODO: Backslash escapes?
             (r"(''|'.*?[^\\]')", tokens.String.Single),
-            (r'(""|".*?[^\\]")', tokens.String.Symbol), # not a real string literal in ANSI SQL
+            # not a real string literal in ANSI SQL:
+            (r'(""|".*?[^\\]")', tokens.String.Symbol),
             (r'(LEFT |RIGHT )?(INNER |OUTER )?JOIN\b', tokens.Keyword),
             (r'END( IF| LOOP)?\b', tokens.Keyword),
             (r'CREATE( OR REPLACE)?\b', tokens.Keyword.DDL),
@@ -189,8 +191,7 @@ class Lexer:
             (r'\*/', tokens.Comment.Multiline, '#pop'),
             (r'[^/\*]+', tokens.Comment.Multiline),
             (r'[/*]', tokens.Comment.Multiline)
-        ]
-    }
+        ]}
 
     def __init__(self):
         self.filters = []
@@ -245,7 +246,6 @@ class Lexer:
         if not unfiltered:
             stream = apply_filters(stream, self.filters, self)
         return stream
-
 
     def get_tokens_unprocessed(self, text, stack=('root',)):
         """

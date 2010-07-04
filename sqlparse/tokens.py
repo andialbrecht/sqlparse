@@ -40,31 +40,31 @@ class _TokenType(tuple):
         return 'Token' + (self and '.' or '') + '.'.join(self)
 
 
-Token       = _TokenType()
+Token = _TokenType()
 
 # Special token types
-Text        = Token.Text
-Whitespace  = Text.Whitespace
-Newline     = Whitespace.Newline
-Error       = Token.Error
+Text = Token.Text
+Whitespace = Text.Whitespace
+Newline = Whitespace.Newline
+Error = Token.Error
 # Text that doesn't belong to this lexer (e.g. HTML in PHP)
-Other       = Token.Other
+Other = Token.Other
 
 # Common token types for source code
-Keyword     = Token.Keyword
-Name        = Token.Name
-Literal     = Token.Literal
-String      = Literal.String
-Number      = Literal.Number
+Keyword = Token.Keyword
+Name = Token.Name
+Literal = Token.Literal
+String = Literal.String
+Number = Literal.Number
 Punctuation = Token.Punctuation
-Operator    = Token.Operator
-Comparsion  = Operator.Comparsion
-Wildcard    = Token.Wildcard
-Comment     = Token.Comment
-Assignment  = Token.Assignement
+Operator = Token.Operator
+Comparsion = Operator.Comparsion
+Wildcard = Token.Wildcard
+Comment = Token.Comment
+Assignment = Token.Assignement
 
 # Generic types for non-source code
-Generic     = Token.Generic
+Generic = Token.Generic
 
 # String and some others are not direct childs of Token.
 # alias them:
@@ -81,4 +81,3 @@ Group = Token.Group
 Group.Parenthesis = Token.Group.Parenthesis
 Group.Comment = Token.Group.Comment
 Group.Where = Token.Group.Where
-

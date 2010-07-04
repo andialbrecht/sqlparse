@@ -119,15 +119,15 @@ class ReindentFilter(Filter):
     def _get_offset(self, token):
         all_ = list(self._curr_stmt.flatten())
         idx = all_.index(token)
-        raw = ''.join(unicode(x) for x in all_[:idx+1])
+        raw = ''.join(unicode(x) for x in all_[:idx + 1])
         line = raw.splitlines()[-1]
         # Now take current offset into account and return relative offset.
-        full_offset = len(line)-(len(self.char*(self.width*self.indent)))
+        full_offset = len(line) - len(self.char * (self.width * self.indent))
         return full_offset - self.offset
 
     def nl(self):
         # TODO: newline character should be configurable
-        ws = '\n'+(self.char*((self.indent*self.width)+self.offset))
+        ws = '\n' + (self.char * ((self.indent * self.width) + self.offset))
         return sql.Token(T.Whitespace, ws)
 
     def _split_kwds(self, tlist):
@@ -151,7 +151,7 @@ class ReindentFilter(Filter):
             else:
                 nl = self.nl()
                 tlist.insert_before(token, nl)
-            token = tlist.token_next_match(tlist.token_index(nl)+offset,
+            token = tlist.token_next_match(tlist.token_index(nl) + offset,
                                            T.Keyword, split_words, regex=True)
 
     def _split_statements(self, tlist):
@@ -165,7 +165,7 @@ class ReindentFilter(Filter):
             if prev:
                 nl = self.nl()
                 tlist.insert_before(token, nl)
-            token = tlist.token_next_by_type(tlist.token_index(token)+1,
+            token = tlist.token_next_by_type(tlist.token_index(token) + 1,
                                              (T.Keyword.DDL, T.Keyword.DML))
 
     def _process(self, tlist):
@@ -199,7 +199,7 @@ class ReindentFilter(Filter):
         identifiers = tlist.get_identifiers()
         if len(identifiers) > 1 and not tlist.within(sql.Function):
             first = list(identifiers[0].flatten())[0]
-            num_offset = self._get_offset(first)-len(first.value)
+            num_offset = self._get_offset(first) - len(first.value)
             self.offset += num_offset
             for token in identifiers[1:]:
                 tlist.insert_before(token, self.nl())
@@ -210,12 +210,12 @@ class ReindentFilter(Filter):
         is_first = True
         num_offset = None
         case = tlist.tokens[0]
-        outer_offset = self._get_offset(case)-len(case.value)
+        outer_offset = self._get_offset(case) - len(case.value)
         self.offset += outer_offset
         for cond, value in tlist.get_cases():
             if is_first:
                 is_first = False
-                num_offset = self._get_offset(cond[0])-len(cond[0].value)
+                num_offset = self._get_offset(cond[0]) - len(cond[0].value)
                 self.offset += num_offset
                 continue
             if cond is None:
@@ -335,7 +335,7 @@ class OutputPythonFilter(Filter):
                 after_lb = token.value.split('\n', 1)[1]
                 yield sql.Token(T.Text, " '")
                 yield sql.Token(T.Whitespace, '\n')
-                for i in range(len(varname)+4):
+                for i in range(len(varname) + 4):
                     yield sql.Token(T.Whitespace, ' ')
                 yield sql.Token(T.Text, "'")
                 if after_lb:  # it's the indendation

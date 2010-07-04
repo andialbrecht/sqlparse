@@ -8,7 +8,7 @@ from sqlparse import tokens as T
 
 def _group_left_right(tlist, ttype, value, cls,
                       check_right=lambda t: True,
-                      check_left = lambda t: True,
+                      check_left=lambda t: True,
                       include_semicolon=False):
     [_group_left_right(sgroup, ttype, value, cls, check_right,
                        include_semicolon) for sgroup in tlist.get_sublists()
@@ -19,10 +19,10 @@ def _group_left_right(tlist, ttype, value, cls,
         right = tlist.token_next(tlist.token_index(token))
         left = tlist.token_prev(tlist.token_index(token))
         if right is None or not check_right(right):
-            token = tlist.token_next_match(tlist.token_index(token)+1,
+            token = tlist.token_next_match(tlist.token_index(token) + 1,
                                            ttype, value)
         elif left is None or not check_right(left):
-            token = tlist.token_next_match(tlist.token_index(token)+1,
+            token = tlist.token_next_match(tlist.token_index(token) + 1,
                                            ttype, value)
         else:
             if include_semicolon:
@@ -42,8 +42,9 @@ def _group_left_right(tlist, ttype, value, cls,
             left.tokens.extend(tokens)
             for t in tokens:
                 tlist.tokens.remove(t)
-            token = tlist.token_next_match(tlist.token_index(left)+1,
+            token = tlist.token_next_match(tlist.token_index(left) + 1,
                                            ttype, value)
+
 
 def _group_matching(tlist, start_ttype, start_value, end_ttype, end_value,
                     cls, include_semicolon=False, recurse=False):
@@ -70,7 +71,7 @@ def _group_matching(tlist, start_ttype, start_value, end_ttype, end_value,
         end = _find_matching(tidx, tlist, start_ttype, start_value,
                              end_ttype, end_value)
         if end is None:
-            idx = tidx+1
+            idx = tidx + 1
         else:
             if include_semicolon:
                 next_ = tlist.token_next(tlist.token_index(end))
@@ -79,17 +80,21 @@ def _group_matching(tlist, start_ttype, start_value, end_ttype, end_value,
             group = tlist.group_tokens(cls, tlist.tokens_between(token, end))
             _group_matching(group, start_ttype, start_value,
                             end_ttype, end_value, cls, include_semicolon)
-            idx = tlist.token_index(group)+1
+            idx = tlist.token_index(group) + 1
         token = tlist.token_next_match(idx, start_ttype, start_value)
+
 
 def group_if(tlist):
     _group_matching(tlist, T.Keyword, 'IF', T.Keyword, 'END IF', sql.If, True)
+
 
 def group_for(tlist):
     _group_matching(tlist, T.Keyword, 'FOR', T.Keyword, 'END LOOP',
                     sql.For, True)
 
+
 def group_as(tlist):
+
     def _right_valid(token):
         # Currently limited to DML/DDL. Maybe additional more non SQL reserved
         # keywords should appear here (see issue8).
@@ -97,11 +102,14 @@ def group_as(tlist):
     _group_left_right(tlist, T.Keyword, 'AS', sql.Identifier,
                       check_right=_right_valid)
 
+
 def group_assignment(tlist):
     _group_left_right(tlist, T.Assignment, ':=', sql.Assignment,
                       include_semicolon=True)
 
+
 def group_comparsion(tlist):
+
     def _parts_valid(token):
         return (token.ttype in (T.String.Symbol, T.Name, T.Number,
                                 T.Number.Integer, T.Literal)
@@ -122,8 +130,7 @@ def group_identifier(tlist):
                        or y.ttype is T.Operator),
             lambda y: (y.ttype in (T.String.Symbol,
                                    T.Name,
-                                   T.Wildcard))
-            ))
+                                   T.Wildcard))))
         for t in tl.tokens[i:]:
             if x.next()(t):
                 yield t
@@ -140,13 +147,13 @@ def group_identifier(tlist):
     if token is None:
         token = tlist.token_next_by_type(idx, (T.String.Symbol, T.Name))
     while token:
-        identifier_tokens = [token]+list(
+        identifier_tokens = [token] + list(
             _consume_cycle(tlist,
-                           tlist.token_index(token)+1))
+                           tlist.token_index(token) + 1))
         if not (len(identifier_tokens) == 1
                 and isinstance(identifier_tokens[0], sql.Function)):
             group = tlist.group_tokens(sql.Identifier, identifier_tokens)
-            idx = tlist.token_index(group)+1
+            idx = tlist.token_index(group) + 1
         else:
             idx += 1
         token = tlist.token_next_by_instance(idx, sql.Function)
@@ -182,7 +189,7 @@ def group_identifier_list(tlist):
         if not bpassed or not apassed:
             # Something's wrong here, skip ahead to next ","
             start = None
-            tcomma = tlist.token_next_match(tlist.token_index(tcomma)+1,
+            tcomma = tlist.token_next_match(tlist.token_index(tcomma) + 1,
                                             T.Punctuation, ',')
         else:
             if start is None:
@@ -193,7 +200,7 @@ def group_identifier_list(tlist):
                 tokens = tlist.tokens_between(start, after)
                 group = tlist.group_tokens(sql.IdentifierList, tokens)
                 start = None
-                tcomma = tlist.token_next_match(tlist.token_index(group)+1,
+                tcomma = tlist.token_next_match(tlist.token_index(group) + 1,
                                                 T.Punctuation, ',')
             else:
                 tcomma = next_
@@ -203,6 +210,7 @@ def group_parenthesis(tlist):
     _group_matching(tlist, T.Punctuation, '(', T.Punctuation, ')',
                     sql.Parenthesis)
 
+
 def group_comments(tlist):
     [group_comments(sgroup) for sgroup in tlist.get_sublists()
      if not isinstance(sgroup, sql.Comment)]
@@ -210,7 +218,7 @@ def group_comments(tlist):
     token = tlist.token_next_by_type(idx, T.Comment)
     while token:
         tidx = tlist.token_index(token)
-        end = tlist.token_not_matching(tidx+1,
+        end = tlist.token_not_matching(tidx + 1,
                                        [lambda t: t.ttype in T.Comment,
                                         lambda t: t.is_whitespace()])
         if end is None:
@@ -223,6 +231,7 @@ def group_comments(tlist):
             idx = tlist.token_index(group)
         token = tlist.token_next_by_type(idx, T.Comment)
 
+
 def group_where(tlist):
     [group_where(sgroup) for sgroup in tlist.get_sublists()
      if not isinstance(sgroup, sql.Where)]
@@ -231,15 +240,16 @@ def group_where(tlist):
     stopwords = ('ORDER', 'GROUP', 'LIMIT', 'UNION')
     while token:
         tidx = tlist.token_index(token)
-        end = tlist.token_next_match(tidx+1, T.Keyword, stopwords)
+        end = tlist.token_next_match(tidx + 1, T.Keyword, stopwords)
         if end is None:
             end = tlist._groupable_tokens[-1]
         else:
-            end = tlist.tokens[tlist.token_index(end)-1]
+            end = tlist.tokens[tlist.token_index(end) - 1]
         group = tlist.group_tokens(sql.Where,
                                    tlist.tokens_between(token, end))
         idx = tlist.token_index(group)
         token = tlist.token_next_match(idx, T.Keyword, 'WHERE')
+
 
 def group_aliased(tlist):
     [group_aliased(sgroup) for sgroup in tlist.get_sublists()
@@ -253,7 +263,7 @@ def group_aliased(tlist):
             token.tokens.extend(grp)
             for t in grp:
                 tlist.tokens.remove(t)
-        idx = tlist.token_index(token)+1
+        idx = tlist.token_index(token) + 1
         token = tlist.token_next_by_instance(idx, sql.Identifier)
 
 
@@ -269,11 +279,11 @@ def group_functions(tlist):
     while token:
         next_ = tlist.token_next(token)
         if not isinstance(next_, sql.Parenthesis):
-            idx = tlist.token_index(token)+1
+            idx = tlist.token_index(token) + 1
         else:
             func = tlist.group_tokens(sql.Function,
                                       tlist.tokens_between(token, next_))
-            idx = tlist.token_index(func)+1
+            idx = tlist.token_index(func) + 1
         token = tlist.token_next_by_type(idx, T.Name)
 
 
@@ -291,5 +301,5 @@ def group(tlist):
                  group_comparsion,
                  group_identifier_list,
                  group_if,
-                 group_for,]:
+                 group_for]:
         func(tlist)

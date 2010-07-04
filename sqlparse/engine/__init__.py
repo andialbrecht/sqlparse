@@ -49,6 +49,7 @@ class FilterStack(object):
             stream = splitter.process(self, stream)
 
         if self._grouping:
+
             def _group(stream):
                 for stmt in stream:
                     grouping.group(stmt)
@@ -56,6 +57,7 @@ class FilterStack(object):
             stream = _group(stream)
 
         if self.stmtprocess:
+
             def _run1(stream):
                 ret = []
                 for stmt in stream:
@@ -66,6 +68,7 @@ class FilterStack(object):
             stream = _run1(stream)
 
         if self.postprocess:
+
             def _run2(stream):
                 for stmt in stream:
                     stmt.tokens = list(self._flatten(stmt.tokens))
@@ -75,4 +78,3 @@ class FilterStack(object):
             stream = _run2(stream)
 
         return stream
-

@@ -43,7 +43,7 @@ class Token(object):
     def _get_repr_value(self):
         raw = unicode(self)
         if len(raw) > 7:
-            short = raw[:6]+u'...'
+            short = raw[:6] + u'...'
         else:
             short = raw
         return re.sub('\s+', ' ', short)
@@ -271,7 +271,7 @@ class TokenList(Token):
             return None
         if not isinstance(idx, int):
             idx = self.token_index(idx)
-        while idx < len(self.tokens)-1:
+        while idx < len(self.tokens) - 1:
             idx += 1
             if self.tokens[idx].is_whitespace() and skip_ws:
                 continue
@@ -291,7 +291,8 @@ class TokenList(Token):
             offset = 0
         else:
             offset = 1
-        return self.tokens[self.token_index(start):self.token_index(end)+offset]
+        return self.tokens[
+            self.token_index(start):self.token_index(end) + offset]
 
     def group_tokens(self, grp_cls, tokens):
         """Replace tokens by an instance of *grp_cls*."""
@@ -443,21 +444,26 @@ class Assignment(TokenList):
     """An assignment like 'var := val;'"""
     __slots__ = ('value', 'ttype', 'tokens')
 
+
 class If(TokenList):
     """An 'if' clause with possible 'else if' or 'else' parts."""
     __slots__ = ('value', 'ttype', 'tokens')
+
 
 class For(TokenList):
     """A 'FOR' loop."""
     __slots__ = ('value', 'ttype', 'tokens')
 
+
 class Comparsion(TokenList):
     """A comparsion used for example in WHERE clauses."""
     __slots__ = ('value', 'ttype', 'tokens')
 
+
 class Comment(TokenList):
     """A comment."""
     __slots__ = ('value', 'ttype', 'tokens')
+
 
 class Where(TokenList):
     """A WHERE clause."""
