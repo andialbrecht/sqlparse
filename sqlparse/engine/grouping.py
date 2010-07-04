@@ -108,13 +108,13 @@ def group_assignment(tlist):
                       include_semicolon=True)
 
 
-def group_comparsion(tlist):
+def group_comparison(tlist):
 
     def _parts_valid(token):
         return (token.ttype in (T.String.Symbol, T.Name, T.Number,
                                 T.Number.Integer, T.Literal)
                 or isinstance(token, (sql.Identifier,)))
-    _group_left_right(tlist, T.Operator.Comparsion, None, sql.Comparsion,
+    _group_left_right(tlist, T.Operator.Comparison, None, sql.Comparison,
                       check_left=_parts_valid, check_right=_parts_valid)
 
 
@@ -172,7 +172,7 @@ def group_identifier_list(tlist):
                    lambda t: t.match(T.Keyword, 'null'),
                    lambda t: t.ttype == T.Number.Integer,
                    lambda t: t.ttype == T.String.Single,
-                   lambda t: isinstance(t, sql.Comparsion),
+                   lambda t: isinstance(t, sql.Comparison),
                    ]
     tcomma = tlist.token_next_match(idx, T.Punctuation, ',')
     start = None
@@ -298,7 +298,7 @@ def group(tlist):
                  group_as,
                  group_aliased,
                  group_assignment,
-                 group_comparsion,
+                 group_comparison,
                  group_identifier_list,
                  group_if,
                  group_for]:

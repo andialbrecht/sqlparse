@@ -59,6 +59,6 @@ The following classes represent distinct parts of a SQL statement.
 .. autoclass:: sqlparse.sql.Assignment
    :members:
 
-.. autoclass:: sqlparse.sql.Comparsion
+.. autoclass:: sqlparse.sql.Comparison
    :members:
 

@@ -172,7 +172,7 @@ class Lexer:
             (r"`(``|[^`])*`", tokens.Name),
             (r"´(´´|[^´])*´", tokens.Name),
             (r'@[a-zA-Z_][a-zA-Z0-9_]+', tokens.Name),
-            (r'[<>=~!]+', tokens.Operator.Comparsion),
+            (r'[<>=~!]+', tokens.Operator.Comparison),
             (r'[+/@#%^&|`?^-]+', tokens.Operator),
             (r'[0-9]+', tokens.Number.Integer),
             # TODO: Backslash escapes?

@@ -149,15 +149,15 @@ class TestGrouping(TestCaseBase):
         self.ndiffAssertEqual(s, p.to_unicode())
         self.assertEqual(p.tokens[4].get_alias(), 'view')
 
-    def test_comparsion_exclude(self):
+    def test_comparison_exclude(self):
         # make sure operators are not handled too lazy
         p = sqlparse.parse('(=)')[0]
         self.assert_(isinstance(p.tokens[0], sql.Parenthesis))
-        self.assert_(not isinstance(p.tokens[0].tokens[1], sql.Comparsion))
+        self.assert_(not isinstance(p.tokens[0].tokens[1], sql.Comparison))
         p = sqlparse.parse('(a=1)')[0]
-        self.assert_(isinstance(p.tokens[0].tokens[1], sql.Comparsion))
+        self.assert_(isinstance(p.tokens[0].tokens[1], sql.Comparison))
         p = sqlparse.parse('(a>=1)')[0]
-        self.assert_(isinstance(p.tokens[0].tokens[1], sql.Comparsion))
+        self.assert_(isinstance(p.tokens[0].tokens[1], sql.Comparison))
 
     def test_function(self):
         p = sqlparse.parse('foo()')[0]

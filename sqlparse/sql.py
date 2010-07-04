@@ -59,7 +59,7 @@ class Token(object):
         type.
         *values* is a list of possible values for this token. The values
         are OR'ed together so if only one of the values matches ``True``
-        is returned. Except for keyword tokens the comparsion is
+        is returned. Except for keyword tokens the comparison is
         case-sensitive. For convenience it's ok to pass in a single string.
         If *regex* is ``True`` (default is ``False``) the given values are
         treated as regular expressions.
@@ -455,8 +455,8 @@ class For(TokenList):
     __slots__ = ('value', 'ttype', 'tokens')
 
 
-class Comparsion(TokenList):
-    """A comparsion used for example in WHERE clauses."""
+class Comparison(TokenList):
+    """A comparison used for example in WHERE clauses."""
     __slots__ = ('value', 'ttype', 'tokens')
 
 
