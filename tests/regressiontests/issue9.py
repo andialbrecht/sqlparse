@@ -1,8 +1,8 @@
 import unittest
 
 import sqlparse
+from sqlparse.sql import Statement, Parenthesis
 from sqlparse import tokens as T
-from sqlparse.engine.grouping import Statement, Parenthesis
 
 
 class TestIssue9(unittest.TestCase):

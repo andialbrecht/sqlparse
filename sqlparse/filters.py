@@ -2,7 +2,6 @@
 
 import re
 
-from sqlparse.engine import grouping
 from sqlparse import tokens as T
 from sqlparse import sql
 
@@ -53,10 +52,9 @@ class IdentifierCaseFilter(_CaseFilter):
 class StripCommentsFilter(Filter):
 
     def _process(self, tlist):
-        idx = 0
         clss = set([x.__class__ for x in tlist.tokens])
-        while grouping.Comment in clss:
-            token = tlist.token_next_by_instance(0, grouping.Comment)
+        while sql.Comment in clss:
+            token = tlist.token_next_by_instance(0, sql.Comment)
             tidx = tlist.token_index(token)
             prev = tlist.token_prev(tidx, False)
             next_ = tlist.token_next(tidx, False)
@@ -66,7 +64,7 @@ class StripCommentsFilter(Filter):
                 and not prev.is_whitespace() and not next_.is_whitespace()
                 and not (prev.match(T.Punctuation, '(')
                          or next_.match(T.Punctuation, ')'))):
-                tlist.tokens[tidx] = grouping.Token(T.Whitespace, ' ')
+                tlist.tokens[tidx] = sql.Token(T.Whitespace, ' ')
             else:
                 tlist.tokens.pop(tidx)
             clss = set([x.__class__ for x in tlist.tokens])
@@ -130,7 +128,7 @@ class ReindentFilter(Filter):
     def nl(self):
         # TODO: newline character should be configurable
         ws = '\n'+(self.char*((self.indent*self.width)+self.offset))
-        return grouping.Token(T.Whitespace, ws)
+        return sql.Token(T.Whitespace, ws)
 
     def _split_kwds(self, tlist):
         split_words = ('FROM', 'JOIN$', 'AND', 'OR',
@@ -209,7 +207,6 @@ class ReindentFilter(Filter):
         self._process_default(tlist)
 
     def _process_case(self, tlist):
-        cases = tlist.get_cases()
         is_first = True
         num_offset = None
         case = tlist.tokens[0]
@@ -245,17 +242,17 @@ class ReindentFilter(Filter):
         [self._process(sgroup) for sgroup in tlist.get_sublists()]
 
     def process(self, stack, stmt):
-        if isinstance(stmt, grouping.Statement):
+        if isinstance(stmt, sql.Statement):
             self._curr_stmt = stmt
         self._process(stmt)
-        if isinstance(stmt, grouping.Statement):
+        if isinstance(stmt, sql.Statement):
             if self._last_stmt is not None:
                 if self._last_stmt.to_unicode().endswith('\n'):
                     nl = '\n'
                 else:
                     nl = '\n\n'
                 stmt.tokens.insert(0,
-                    grouping.Token(T.Whitespace, nl))
+                    sql.Token(T.Whitespace, nl))
             if self._last_stmt != stmt:
                 self._last_stmt = stmt
 
@@ -264,7 +261,7 @@ class ReindentFilter(Filter):
 class RightMarginFilter(Filter):
 
     keep_together = (
-#        grouping.TypeCast, grouping.Identifier, grouping.Alias,
+#        sql.TypeCast, sql.Identifier, sql.Alias,
     )
 
     def __init__(self, width=79):
@@ -289,7 +286,7 @@ class RightMarginFilter(Filter):
                         indent = match.group()
                     else:
                         indent = ''
-                    yield grouping.Token(T.Whitespace, '\n%s' % indent)
+                    yield sql.Token(T.Whitespace, '\n%s' % indent)
                     self.line = indent
                 self.line += val
             yield token
@@ -321,14 +318,14 @@ class OutputPythonFilter(Filter):
 
     def _process(self, stream, varname, count, has_nl):
         if count > 1:
-            yield grouping.Token(T.Whitespace, '\n')
-        yield grouping.Token(T.Name, varname)
-        yield grouping.Token(T.Whitespace, ' ')
-        yield grouping.Token(T.Operator, '=')
-        yield grouping.Token(T.Whitespace, ' ')
+            yield sql.Token(T.Whitespace, '\n')
+        yield sql.Token(T.Name, varname)
+        yield sql.Token(T.Whitespace, ' ')
+        yield sql.Token(T.Operator, '=')
+        yield sql.Token(T.Whitespace, ' ')
         if has_nl:
-            yield grouping.Token(T.Operator, '(')
-        yield grouping.Token(T.Text, "'")
+            yield sql.Token(T.Operator, '(')
+        yield sql.Token(T.Text, "'")
         cnt = 0
         for token in stream:
             cnt += 1
@@ -336,20 +333,20 @@ class OutputPythonFilter(Filter):
                 if cnt == 1:
                     continue
                 after_lb = token.value.split('\n', 1)[1]
-                yield grouping.Token(T.Text, " '")
-                yield grouping.Token(T.Whitespace, '\n')
+                yield sql.Token(T.Text, " '")
+                yield sql.Token(T.Whitespace, '\n')
                 for i in range(len(varname)+4):
-                    yield grouping.Token(T.Whitespace, ' ')
-                yield grouping.Token(T.Text, "'")
+                    yield sql.Token(T.Whitespace, ' ')
+                yield sql.Token(T.Text, "'")
                 if after_lb:  # it's the indendation
-                    yield grouping.Token(T.Whitespace, after_lb)
+                    yield sql.Token(T.Whitespace, after_lb)
                 continue
             elif token.value and "'" in token.value:
                 token.value = token.value.replace("'", "\\'")
-            yield grouping.Token(T.Text, token.value or '')
-        yield grouping.Token(T.Text, "'")
+            yield sql.Token(T.Text, token.value or '')
+        yield sql.Token(T.Text, "'")
         if has_nl:
-            yield grouping.Token(T.Operator, ')')
+            yield sql.Token(T.Operator, ')')
 
     def process(self, stack, stmt):
         self.cnt += 1
@@ -370,36 +367,32 @@ class OutputPHPFilter(Filter):
 
     def _process(self, stream, varname):
         if self.count > 1:
-            yield grouping.Token(T.Whitespace, '\n')
-        yield grouping.Token(T.Name, varname)
-        yield grouping.Token(T.Whitespace, ' ')
-        yield grouping.Token(T.Operator, '=')
-        yield grouping.Token(T.Whitespace, ' ')
-        yield grouping.Token(T.Text, '"')
-        cnt = 0
+            yield sql.Token(T.Whitespace, '\n')
+        yield sql.Token(T.Name, varname)
+        yield sql.Token(T.Whitespace, ' ')
+        yield sql.Token(T.Operator, '=')
+        yield sql.Token(T.Whitespace, ' ')
+        yield sql.Token(T.Text, '"')
         for token in stream:
             if token.is_whitespace() and '\n' in token.value:
-#                cnt += 1
-#                if cnt == 1:
-#                    continue
                 after_lb = token.value.split('\n', 1)[1]
-                yield grouping.Token(T.Text, ' "')
-                yield grouping.Token(T.Operator, ';')
-                yield grouping.Token(T.Whitespace, '\n')
-                yield grouping.Token(T.Name, varname)
-                yield grouping.Token(T.Whitespace, ' ')
-                yield grouping.Token(T.Punctuation, '.')
-                yield grouping.Token(T.Operator, '=')
-                yield grouping.Token(T.Whitespace, ' ')
-                yield grouping.Token(T.Text, '"')
+                yield sql.Token(T.Text, ' "')
+                yield sql.Token(T.Operator, ';')
+                yield sql.Token(T.Whitespace, '\n')
+                yield sql.Token(T.Name, varname)
+                yield sql.Token(T.Whitespace, ' ')
+                yield sql.Token(T.Punctuation, '.')
+                yield sql.Token(T.Operator, '=')
+                yield sql.Token(T.Whitespace, ' ')
+                yield sql.Token(T.Text, '"')
                 if after_lb:
-                    yield grouping.Token(T.Text, after_lb)
+                    yield sql.Token(T.Text, after_lb)
                 continue
             elif '"' in token.value:
                 token.value = token.value.replace('"', '\\"')
-            yield grouping.Token(T.Text, token.value)
-        yield grouping.Token(T.Text, '"')
-        yield grouping.Token(T.Punctuation, ';')
+            yield sql.Token(T.Text, token.value)
+        yield sql.Token(T.Text, '"')
+        yield sql.Token(T.Punctuation, ';')
 
     def process(self, stack, stmt):
         self.count += 1

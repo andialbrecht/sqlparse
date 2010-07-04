@@ -14,13 +14,13 @@
 
 import re
 
+from sqlparse import tokens
 from sqlparse.keywords import KEYWORDS, KEYWORDS_COMMON
-from sqlparse.tokens import *
-from sqlparse.tokens import _TokenType
 
 
 class include(str):
     pass
+
 
 class combined(tuple):
     """Indicates a state combined from multiple states."""
@@ -34,7 +34,7 @@ class combined(tuple):
 
 def is_keyword(value):
     test = value.upper()
-    return KEYWORDS_COMMON.get(test, KEYWORDS.get(test, Name)), value
+    return KEYWORDS_COMMON.get(test, KEYWORDS.get(test, tokens.Name)), value
 
 
 def apply_filters(stream, filters, lexer=None):
@@ -64,13 +64,13 @@ class LexerMeta(type):
         assert state[0] != '#', "invalid state name %r" % state
         if state in processed:
             return processed[state]
-        tokens = processed[state] = []
+        tokenlist = processed[state] = []
         rflags = cls.flags
         for tdef in unprocessed[state]:
             if isinstance(tdef, include):
                 # it's a state reference
                 assert tdef != state, "circular state reference %r" % state
-                tokens.extend(cls._process_state(
+                tokenlist.extend(cls._process_state(
                     unprocessed, processed, str(tdef)))
                 continue
 
@@ -83,7 +83,7 @@ class LexerMeta(type):
                                   " %r of %r: %s"
                                   % (tdef[0], state, cls, err)))
 
-            assert type(tdef[1]) is _TokenType or callable(tdef[1]), \
+            assert type(tdef[1]) is tokens._TokenType or callable(tdef[1]), \
                    'token type must be simple type or callable, not %r' % (tdef[1],)
 
             if len(tdef) == 2:
@@ -122,8 +122,8 @@ class LexerMeta(type):
                     new_state = tdef2
                 else:
                     assert False, 'unknown new state def %r' % tdef2
-            tokens.append((rex, tdef[1], new_state))
-        return tokens
+            tokenlist.append((rex, tdef[1], new_state))
+        return tokenlist
 
     def process_tokendef(cls):
         cls._all_tokens = {}
@@ -161,34 +161,34 @@ class Lexer:
 
     tokens = {
         'root': [
-            (r'--.*?(\r|\n|\r\n)', Comment.Single),
-            (r'(\r|\n|\r\n)', Newline),
-            (r'\s+', Whitespace),
-            (r'/\*', Comment.Multiline, 'multiline-comments'),
-            (r':=', Assignment),
-            (r'::', Punctuation),
-            (r'[*]', Wildcard),
-            (r"`(``|[^`])*`", Name),
-            (r"´(´´|[^´])*´", Name),
-            (r'@[a-zA-Z_][a-zA-Z0-9_]+', Name),
-            (r'[<>=~!]+', Operator.Comparsion),
-            (r'[+/@#%^&|`?^-]+', Operator),
-            (r'[0-9]+', Number.Integer),
+            (r'--.*?(\r|\n|\r\n)', tokens.Comment.Single),
+            (r'(\r|\n|\r\n)', tokens.Newline),
+            (r'\s+', tokens.Whitespace),
+            (r'/\*', tokens.Comment.Multiline, 'multiline-comments'),
+            (r':=', tokens.Assignment),
+            (r'::', tokens.Punctuation),
+            (r'[*]', tokens.Wildcard),
+            (r"`(``|[^`])*`", tokens.Name),
+            (r"´(´´|[^´])*´", tokens.Name),
+            (r'@[a-zA-Z_][a-zA-Z0-9_]+', tokens.Name),
+            (r'[<>=~!]+', tokens.Operator.Comparsion),
+            (r'[+/@#%^&|`?^-]+', tokens.Operator),
+            (r'[0-9]+', tokens.Number.Integer),
             # TODO: Backslash escapes?
-            (r"(''|'.*?[^\\]')", String.Single),
-            (r'(""|".*?[^\\]")', String.Symbol), # not a real string literal in ANSI SQL
-            (r'(LEFT |RIGHT )?(INNER |OUTER )?JOIN\b', Keyword),
-            (r'END( IF| LOOP)?\b', Keyword),
-            (r'CREATE( OR REPLACE)?\b', Keyword.DDL),
+            (r"(''|'.*?[^\\]')", tokens.String.Single),
+            (r'(""|".*?[^\\]")', tokens.String.Symbol), # not a real string literal in ANSI SQL
+            (r'(LEFT |RIGHT )?(INNER |OUTER )?JOIN\b', tokens.Keyword),
+            (r'END( IF| LOOP)?\b', tokens.Keyword),
+            (r'CREATE( OR REPLACE)?\b', tokens.Keyword.DDL),
             (r'[a-zA-Z_][a-zA-Z0-9_]*', is_keyword),
-            (r'\$([a-zA-Z_][a-zA-Z0-9_]*)?\$', Name.Builtin),
-            (r'[;:()\[\],\.]', Punctuation),
+            (r'\$([a-zA-Z_][a-zA-Z0-9_]*)?\$', tokens.Name.Builtin),
+            (r'[;:()\[\],\.]', tokens.Punctuation),
         ],
         'multiline-comments': [
-            (r'/\*', Comment.Multiline, 'multiline-comments'),
-            (r'\*/', Comment.Multiline, '#pop'),
-            (r'[^/\*]+', Comment.Multiline),
-            (r'[/*]', Comment.Multiline)
+            (r'/\*', tokens.Comment.Multiline, 'multiline-comments'),
+            (r'\*/', tokens.Comment.Multiline, '#pop'),
+            (r'[^/\*]+', tokens.Comment.Multiline),
+            (r'[/*]', tokens.Comment.Multiline)
         ]
     }
 
@@ -266,7 +266,7 @@ class Lexer:
                     value = m.group()
                     if value in known_names:
                         yield pos, known_names[value], value
-                    elif type(action) is _TokenType:
+                    elif type(action) is tokens._TokenType:
                         yield pos, action, value
                     elif hasattr(action, '__call__'):
                         ttype, value = action(value)
@@ -302,9 +302,9 @@ class Lexer:
                         pos += 1
                         statestack = ['root']
                         statetokens = tokendefs['root']
-                        yield pos, Text, u'\n'
+                        yield pos, tokens.Text, u'\n'
                         continue
-                    yield pos, Error, text[pos]
+                    yield pos, tokens.Error, text[pos]
                     pos += 1
                 except IndexError:
                     break
