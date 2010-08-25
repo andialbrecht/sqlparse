@@ -170,7 +170,7 @@ def index(request):
         data['errors'] = str(form.errors)
         data['output'] = output
         logging.info('%r', proc_time)
-        data['proc_time'] = '%.3f' % proc_time or 0.0
+        data['proc_time'] = '%.3f' % (proc_time or 0.0)
         data = json.dumps(data)
         return HttpResponse(data, content_type='text/x-json')
     elif request.POST.get('format', None) == 'text':
