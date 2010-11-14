@@ -53,6 +53,16 @@ class SQLSplitTest(TestCaseBase):
         self.assertEqual(len(stmts), 3)
         self.ndiffAssertEqual(''.join(unicode(q) for q in stmts), sql)
 
+    def test_dashcomments_eol(self):
+        stmts = sqlparse.parse('select foo; -- comment\n')
+        self.assertEqual(len(stmts), 1)
+        stmts = sqlparse.parse('select foo; -- comment\r')
+        self.assertEqual(len(stmts), 1)
+        stmts = sqlparse.parse('select foo; -- comment\r\n')
+        self.assertEqual(len(stmts), 1)
+        stmts = sqlparse.parse('select foo; -- comment')
+        self.assertEqual(len(stmts), 1)
+
     def test_begintag(self):
         sql = load_file('begintag.sql')
         stmts = sqlparse.parse(sql)
