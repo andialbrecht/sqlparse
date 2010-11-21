@@ -88,6 +88,14 @@ class TestGrouping(TestCaseBase):
         self.assert_(isinstance(p.tokens[0], sql.Identifier))
         self.assert_(isinstance(p.tokens[0].tokens[0], sql.Function))
 
+    def test_identifier_extended(self):  # issue 15
+        p = sqlparse.parse('foo+100')[0]
+        self.assert_(isinstance(p.tokens[0], sql.Identifier))
+        p = sqlparse.parse('foo + 100')[0]
+        self.assert_(isinstance(p.tokens[0], sql.Identifier))
+        p = sqlparse.parse('foo*100')[0]
+        self.assert_(isinstance(p.tokens[0], sql.Identifier))
+
     def test_identifier_list(self):
         p = sqlparse.parse('a, b, c')[0]
         self.assert_(isinstance(p.tokens[0], sql.IdentifierList))

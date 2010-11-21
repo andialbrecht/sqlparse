@@ -117,7 +117,8 @@ def group_comparison(tlist):
 
     def _parts_valid(token):
         return (token.ttype in (T.String.Symbol, T.Name, T.Number,
-                                T.Number.Integer, T.Literal)
+                                T.Number.Integer, T.Literal,
+                                T.Literal.Number.Integer)
                 or isinstance(token, (sql.Identifier,)))
     _group_left_right(tlist, T.Operator.Comparison, None, sql.Comparison,
                       check_left=_parts_valid, check_right=_parts_valid)
@@ -135,7 +136,8 @@ def group_identifier(tlist):
                        or y.ttype is T.Operator),
             lambda y: (y.ttype in (T.String.Symbol,
                                    T.Name,
-                                   T.Wildcard))))
+                                   T.Wildcard,
+                                   T.Literal.Number.Integer))))
         for t in tl.tokens[i:]:
             if next(x)(t):
                 yield t
