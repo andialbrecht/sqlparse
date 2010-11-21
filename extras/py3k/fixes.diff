@@ -1,14 +1,3 @@
---- sqlparse/engine/grouping.py.orig	2009-04-30 06:48:43.000000000 +0200
-+++ sqlparse/engine/grouping.py	2009-04-30 06:48:56.000000000 +0200
-@@ -107,7 +107,7 @@
-                                                    T.Name,
-                                                    T.Wildcard)))
-         for t in tl.tokens[i:]:
--            if x.next()(t):
-+            if next(x)(t):
-                 yield t
-             else:
-                 raise StopIteration
 --- sqlparse/sql.py~	2009-04-30 08:38:16.000000000 +0200
 +++ sqlparse/sql.py	2009-04-30 08:39:15.000000000 +0200
 @@ -23,16 +23,13 @@
