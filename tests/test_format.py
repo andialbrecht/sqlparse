@@ -30,7 +30,7 @@ class TestFormat(TestCaseBase):
                           identifier_case='foo')
         sql = 'select * from "foo"."bar"'
         res = sqlparse.format(sql, identifier_case="upper")
-        self.ndiffAssertEqual(res, 'select * from "FOO"."BAR"')
+        self.ndiffAssertEqual(res, 'select * from "foo"."bar"')
 
     def test_strip_comments_single(self):
         sql = 'select *-- statement starts here\nfrom foo'

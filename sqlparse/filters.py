@@ -45,6 +45,12 @@ class KeywordCaseFilter(_CaseFilter):
 class IdentifierCaseFilter(_CaseFilter):
     ttype = (T.Name, T.String.Symbol)
 
+    def process(self, stack, stream):
+        for ttype, value in stream:
+            if ttype in self.ttype and not value.strip()[0] == '"':
+                value = self.convert(value)
+            yield ttype, value
+
 
 # ----------------------
 # statement process
