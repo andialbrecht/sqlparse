@@ -104,6 +104,14 @@ class TestFormatReindent(TestCaseBase):
                                                'select *',
                                                'from bar;']))
 
+    def test_keywords_between(self):  # issue 14
+        # don't break AND after BETWEEN
+        f = lambda sql: sqlparse.format(sql, reindent=True)
+        s = 'and foo between 1 and 2 and bar = 3'
+        self.ndiffAssertEqual(f(s), '\n'.join(['',
+                                               'and foo between 1 and 2',
+                                               'and bar = 3']))
+
     def test_parenthesis(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)
         s = 'select count(*) from (select * from foo);'

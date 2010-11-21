@@ -133,10 +133,18 @@ class ReindentFilter(Filter):
     def _split_kwds(self, tlist):
         split_words = ('FROM', 'JOIN$', 'AND', 'OR',
                        'GROUP', 'ORDER', 'UNION', 'VALUES',
-                       'SET')
-        idx = 0
-        token = tlist.token_next_match(idx, T.Keyword, split_words,
+                       'SET', 'BETWEEN')
+        def _next_token(i):
+            t = tlist.token_next_match(i, T.Keyword, split_words,
                                        regex=True)
+            if t and t.value.upper() == 'BETWEEN':
+                t = _next_token(tlist.token_index(t)+1)
+                if t and t.value.upper() == 'AND':
+                    t = _next_token(tlist.token_index(t)+1)
+            return t
+
+        idx = 0
+        token = _next_token(idx)
         while token:
             prev = tlist.token_prev(tlist.token_index(token), False)
             offset = 1
@@ -151,8 +159,7 @@ class ReindentFilter(Filter):
             else:
                 nl = self.nl()
                 tlist.insert_before(token, nl)
-            token = tlist.token_next_match(tlist.token_index(nl) + offset,
-                                           T.Keyword, split_words, regex=True)
+            token = _next_token(tlist.token_index(nl) + offset)
 
     def _split_statements(self, tlist):
         idx = 0
