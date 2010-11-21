@@ -23,15 +23,12 @@ class Token(object):
         self.parent = None
 
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return self.value or ''
 
     def __repr__(self):
         short = self._get_repr_value()
         return '<%s \'%s\' at 0x%07x>' % (self._get_repr_name(),
                                           short, id(self))
-
-    def __unicode__(self):
-        return self.value or ''
 
     def to_unicode(self):
         """Returns a unicode representation of this object."""
@@ -135,11 +132,8 @@ class TokenList(Token):
         self.tokens = tokens
         Token.__init__(self, None, None)
 
-    def __unicode__(self):
-        return ''.join(unicode(x) for x in self.flatten())
-
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return ''.join('%s' % x for x in self.flatten())
 
     def _get_repr_name(self):
         return self.__class__.__name__
