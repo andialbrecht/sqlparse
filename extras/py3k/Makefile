@@ -6,6 +6,7 @@ sqlparse:
 	cp -r ../../sqlparse .
 	$(2TO3) sqlparse > sqlparse.diff
 	patch -p0 < sqlparse.diff
+	patch -p0 < fixes.diff
 
 tests:
 	cp -r ../../tests .
