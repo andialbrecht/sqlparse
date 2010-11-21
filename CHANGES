@@ -10,7 +10,7 @@ Bug Fixes
  * Better detection of escaped single quotes (issue13, reported by
    Martin Brochhaus, patch by bluemaro with test case by Dan Carley).
  * Lots of minor fixes targeting encoding, indentation, statement
-   parsing and more (issues 12, 14, 15).
+   parsing and more (issues 12, 14, 15, 16, 19).
  * Code cleanup with a pinch of refactoring.
 
 Release 0.1.1 (May 6, 2009)
