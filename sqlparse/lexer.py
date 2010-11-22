@@ -184,6 +184,7 @@ class Lexer:
             (r'(""|".*?[^\\]")', tokens.String.Symbol),
             (r'(LEFT |RIGHT )?(INNER |OUTER )?JOIN\b', tokens.Keyword),
             (r'END( IF| LOOP)?\b', tokens.Keyword),
+            (r'NOT NULL\b', tokens.Keyword),
             (r'CREATE( OR REPLACE)?\b', tokens.Keyword.DDL),
             (r'[a-zA-Z_][a-zA-Z0-9_]*', is_keyword),
             (r'\$([a-zA-Z_][a-zA-Z0-9_]*)?\$', tokens.Name.Builtin),
