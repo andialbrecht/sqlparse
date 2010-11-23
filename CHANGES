@@ -1,5 +1,5 @@
-In Development
---------------
+Release 0.1.2 (Nov 23, 2010)
+---------------------------------
 
 Bug Fixes
  * Fixed incorrect detection of keyword fragments embed in names (issue7,
@@ -13,6 +13,7 @@ Bug Fixes
  * Lots of minor fixes targeting encoding, indentation, statement
    parsing and more (issues 12, 14, 15, 16, 18, 19).
  * Code cleanup with a pinch of refactoring.
+
 
 Release 0.1.1 (May 6, 2009)
 ---------------------------
