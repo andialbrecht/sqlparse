@@ -1,0 +1,63 @@
+.\" Based on template /usr/share/man-db/examples/manpage.example provided by 
+.\" Tom Christiansen <tchrist@jhereg.perl.com>.
+.TH SQLFORMAT "1" "December 2010" "python-sqlparse version: 0.1.2" "User Commands"
+.SH NAME
+sqlformat \- reformat SQL file
+.SH SYNOPSIS
+.PP
+.B sqlformat
+[
+.I "OPTION"
+] ... [
+.I "FILE"
+] ...
+.SH DESCRIPTION
+.\" Putting a newline after each sentence can generate better output.
+The `sqlformat' command-line tool can be used to reformat SQL file according to
+specified options or prepare a snippet in in some programming language (only
+Puthon and PHP currently supported).
+Use "-" as
+.I FILE
+to read from stdin.
+.SH OPTIONS
+.TP
+\fB\-i\fR \fICHOICE\fR|\fB\-\-identifiers\fR=\fIFORMAT\fR
+Change case of identifiers.
+.I FORMAT
+is one of "upper", "lower", "capitalize".
+.TP
+\fB\-k\fR \fICHOICE\fR|\fB\-\-keywords\fR=\fIFORMAT\fR
+Change case of keywords.
+.I FORMAT
+is one of "upper", "lower", "capitalize".
+.TP
+\fB\-l\fR \fICHOICE\fR|\fB\-\-language\fR=\fILANG\fR
+Output a snippet in programming language LANG.
+.I LANG
+can be "python", "php".
+.TP
+\fB\-o\fR \fIFILE\fR|\fB\-\-outfile\fR=\fIFILE\fR
+Write output to
+.I FILE
+(defaults to stdout).
+.TP
+.BR \-r | \-\-reindent
+Reindent statements.
+.TP
+\fB\-\-indent_width\fR=\fIINDENT_WIDTH\fR
+Set indent width to
+.IR INDENT_WIDTH .
+Default is 2 spaces.
+.TP
+\fB\-\-strip\-comments
+Remove comments.
+.TP
+.BR \-h | \-\-help
+Print a short help message and exit.
+All subsequent options are ignored.
+.TP
+.BR --verbose
+Verbose output.
+.TP
+.BR \-\-version
+Print program's version number and exit.

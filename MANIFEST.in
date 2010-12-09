@@ -5,3 +5,4 @@ include TODO
 include AUTHORS
 include CHANGES
 include Makefile
+include docs/sqlformat.1
