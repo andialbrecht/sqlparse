@@ -1,4 +1,4 @@
-2TO3=2to3
+2TO3=2to3-3.1
 
 all: sqlparse tests
 

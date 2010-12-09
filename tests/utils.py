@@ -28,7 +28,7 @@ class TestCaseBase(unittest.TestCase):
     # Adopted from Python's tests.
     def ndiffAssertEqual(self, first, second):
         """Like failUnlessEqual except use ndiff for readable output."""
-        if first <> second:
+        if first != second:
             sfirst = unicode(first)
             ssecond = unicode(second)
             diff = difflib.ndiff(sfirst.splitlines(), ssecond.splitlines())
