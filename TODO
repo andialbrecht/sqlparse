@@ -1,3 +1,4 @@
+* Provide a function to replace tokens. See this thread: https://groups.google.com/d/msg/sqlparse/5xmBL2UKqX4/ZX9z_peve-AJ
 * Fix bugs on issue tracker.
 * Document filter stack and processing phases.
 * Rewrite App Engine application using webapp.
