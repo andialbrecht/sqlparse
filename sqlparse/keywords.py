@@ -400,7 +400,7 @@ KEYWORDS = {
     'SQLERROR': tokens.Keyword,
     'SQLEXCEPTION': tokens.Keyword,
     'SQLSTATE': tokens.Keyword,
-    'SQLWARNINIG': tokens.Keyword,
+    'SQLWARNING': tokens.Keyword,
     'STABLE': tokens.Keyword,
     'START': tokens.Keyword,
     'STATE': tokens.Keyword,
