@@ -61,3 +61,17 @@ class SQLParseTest(TestCaseBase):
         self.assert_(baz.has_ancestor(p.tokens[-1].tokens[1]))
         self.assert_(baz.has_ancestor(p.tokens[-1]))
         self.assert_(baz.has_ancestor(p))
+
+    def test_float(self):
+        t = sqlparse.parse('.5')[0].tokens
+        self.assertEqual(len(t), 1)
+        self.assert_(t[0].ttype is sqlparse.tokens.Number.Float)
+        t = sqlparse.parse('.51')[0].tokens
+        self.assertEqual(len(t), 1)
+        self.assert_(t[0].ttype is sqlparse.tokens.Number.Float)
+        t = sqlparse.parse('1.5')[0].tokens
+        self.assertEqual(len(t), 1)
+        self.assert_(t[0].ttype is sqlparse.tokens.Number.Float)
+        t = sqlparse.parse('12.5')[0].tokens
+        self.assertEqual(len(t), 1)
+        self.assert_(t[0].ttype is sqlparse.tokens.Number.Float)
