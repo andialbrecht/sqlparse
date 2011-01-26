@@ -1,5 +1,12 @@
+In Development
+--------------
+
+Bug Fixes
+ * Improve parsing of floats (thanks to Kris).
+
+
 Release 0.1.2 (Nov 23, 2010)
----------------------------------
+----------------------------
 
 Bug Fixes
  * Fixed incorrect detection of keyword fragments embed in names (issue7,
