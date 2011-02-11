@@ -62,6 +62,7 @@ class StatementFilter(TokenFilter):
 
         if ttype is T.Keyword.DDL and unified.startswith('CREATE'):
             self._is_create = True
+            return 0
 
         if unified in ('IF', 'FOR') and self._is_create:
             return 1
