@@ -186,6 +186,14 @@ class TestFormatReindent(TestCaseBase):
                                                '    else 5',
                                                'end']))
 
+    def test_case2(self):
+        f = lambda sql: sqlparse.format(sql, reindent=True)
+        s = 'case(foo) when bar = 1 then 2 else 3 end'
+        self.ndiffAssertEqual(f(s), '\n'.join(['case(foo)',
+                                               '    when bar = 1 then 2',
+                                               '    else 3',
+                                               'end']))
+
     def test_nested_identifier_list(self):  # issue4
         f = lambda sql: sqlparse.format(sql, reindent=True)
         s = '(foo as bar, bar1, bar2 as bar3, b4 as b5)'

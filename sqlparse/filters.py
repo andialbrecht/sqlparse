@@ -227,8 +227,9 @@ class ReindentFilter(Filter):
         self.offset += outer_offset
         for cond, value in tlist.get_cases():
             if is_first:
+                tcond = list(cond[0].flatten())[0]
                 is_first = False
-                num_offset = self._get_offset(cond[0]) - len(cond[0].value)
+                num_offset = self._get_offset(tcond) - len(tcond.value)
                 self.offset += num_offset
                 continue
             if cond is None:
