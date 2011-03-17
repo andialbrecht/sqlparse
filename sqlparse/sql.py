@@ -79,7 +79,7 @@ class Token(object):
                     return True
             return False
         else:
-            if self.ttype is T.Keyword:
+            if self.ttype in T.Keyword:
                 values = set([v.upper() for v in values])
                 return self.value.upper() in values
             else:
