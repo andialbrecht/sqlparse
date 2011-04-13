@@ -287,16 +287,21 @@ class TokenList(Token):
         If *exclude_end* is ``True`` (default is ``False``) the end token
         is included too.
         """
+        # FIXME(andi): rename exclude_end to inlcude_end
         if exclude_end:
             offset = 0
         else:
             offset = 1
-        return self.tokens[
-            self.token_index(start):self.token_index(end) + offset]
+        end_idx = self.token_index(end) + offset
+        start_idx = self.token_index(start)
+        return self.tokens[start_idx:end_idx]
 
-    def group_tokens(self, grp_cls, tokens):
+    def group_tokens(self, grp_cls, tokens, ignore_ws=False):
         """Replace tokens by an instance of *grp_cls*."""
         idx = self.token_index(tokens[0])
+        if ignore_ws:
+            while tokens and tokens[-1].is_whitespace():
+                tokens = tokens[:-1]
         for t in tokens:
             self.tokens.remove(t)
         grp = grp_cls(tokens)

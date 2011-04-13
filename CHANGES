@@ -3,6 +3,7 @@ In Development
 
 Bug Fixes
  * Improve parsing of floats (thanks to Kris).
+ * When formatting a statement a space before LIMIT was removed (issue35).
 
 
 Release 0.1.2 (Nov 23, 2010)

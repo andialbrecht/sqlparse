@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import unittest
+from tests.utils import TestCaseBase
 
 import sqlparse
 from sqlparse import sql
 from sqlparse import tokens as T
 
 
-class RegressionTests(unittest.TestCase):
+class RegressionTests(TestCaseBase):
 
     def test_issue9(self):
         # make sure where doesn't consume parenthesis
@@ -31,3 +31,11 @@ class RegressionTests(unittest.TestCase):
         t = sqlparse.parse("create")[0].token_first()
         self.assertEqual(t.match(T.Keyword.DDL, "create"), True)
         self.assertEqual(t.match(T.Keyword.DDL, "CREATE"), True)
+
+    def test_issue35(self):
+        # missing space before LIMIT
+        sql = sqlparse.format("select * from foo where bar = 1 limit 1",
+                              reindent=True)
+        self.ndiffAssertEqual(sql, "\n".join(["select *",
+                                              "from foo",
+                                              "where bar = 1 limit 1"]))

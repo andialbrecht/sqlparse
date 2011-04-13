@@ -253,7 +253,8 @@ def group_where(tlist):
         else:
             end = tlist.tokens[tlist.token_index(end) - 1]
         group = tlist.group_tokens(sql.Where,
-                                   tlist.tokens_between(token, end))
+                                   tlist.tokens_between(token, end),
+                                   ignore_ws=True)
         idx = tlist.token_index(group)
         token = tlist.token_next_match(idx, T.Keyword, 'WHERE')
 
