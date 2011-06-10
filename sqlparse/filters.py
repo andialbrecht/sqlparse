@@ -57,10 +57,16 @@ class IdentifierCaseFilter(_CaseFilter):
 
 class StripCommentsFilter(Filter):
 
+    def _get_next_comment(self, tlist):
+        # TODO(andi) Comment types should be unified, see related issue38
+        token = tlist.token_next_by_instance(0, sql.Comment)
+        if token is None:
+            token = tlist.token_next_by_type(0, T.Comment)
+        return token
+
     def _process(self, tlist):
-        clss = set([x.__class__ for x in tlist.tokens])
-        while sql.Comment in clss:
-            token = tlist.token_next_by_instance(0, sql.Comment)
+        token = self._get_next_comment(tlist)
+        while token:
             tidx = tlist.token_index(token)
             prev = tlist.token_prev(tidx, False)
             next_ = tlist.token_next(tidx, False)
@@ -73,7 +79,7 @@ class StripCommentsFilter(Filter):
                 tlist.tokens[tidx] = sql.Token(T.Whitespace, ' ')
             else:
                 tlist.tokens.pop(tidx)
-            clss = set([x.__class__ for x in tlist.tokens])
+            token = self._get_next_comment(tlist)
 
     def process(self, stack, stmt):
         [self.process(stack, sgroup) for sgroup in stmt.get_sublists()]

@@ -39,3 +39,10 @@ class RegressionTests(TestCaseBase):
         self.ndiffAssertEqual(sql, "\n".join(["select *",
                                               "from foo",
                                               "where bar = 1 limit 1"]))
+
+    def test_issue38(self):
+        sql = sqlparse.format("SELECT foo; -- comment",
+                              strip_comments=True)
+        self.ndiffAssertEqual(sql, "SELECT foo;")
+        sql = sqlparse.format("/* foo */", strip_comments=True)
+        self.ndiffAssertEqual(sql, "")
