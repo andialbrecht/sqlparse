@@ -46,3 +46,13 @@ class RegressionTests(TestCaseBase):
         self.ndiffAssertEqual(sql, "SELECT foo;")
         sql = sqlparse.format("/* foo */", strip_comments=True)
         self.ndiffAssertEqual(sql, "")
+
+    def test_issue39(self):
+        p = sqlparse.parse('select user.id from user')[0]
+        self.assertEqual(len(p.tokens), 7)
+        idt = p.tokens[2]
+        self.assertEqual(idt.__class__, sql.Identifier)
+        self.assertEqual(len(idt.tokens), 3)
+        self.assertEqual(idt.tokens[0].match(T.Name, 'user'), True)
+        self.assertEqual(idt.tokens[1].match(T.Punctuation, '.'), True)
+        self.assertEqual(idt.tokens[2].match(T.Name, 'id'), True)

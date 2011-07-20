@@ -5,6 +5,7 @@ Bug Fixes
  * Improve parsing of floats (thanks to Kris).
  * When formatting a statement a space before LIMIT was removed (issue35).
  * Fix strip_comments flag (issue38, reported by ooberm...@gmail.com).
+ * Avoid parsing names as keywords (issue39, reported by  djo...@taket.org).
 
 
 Release 0.1.2 (Nov 23, 2010)
