@@ -170,7 +170,7 @@ def group_identifier(tlist):
 
 def group_identifier_list(tlist):
     [group_identifier_list(sgroup) for sgroup in tlist.get_sublists()
-     if not isinstance(sgroup, (sql.Identifier, sql.IdentifierList))]
+     if not isinstance(sgroup, sql.IdentifierList)]
     idx = 0
     # Allowed list items
     fend1_funcs = [lambda t: isinstance(t, sql.Identifier),

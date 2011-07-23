@@ -56,3 +56,35 @@ class RegressionTests(TestCaseBase):
         self.assertEqual(idt.tokens[0].match(T.Name, 'user'), True)
         self.assertEqual(idt.tokens[1].match(T.Punctuation, '.'), True)
         self.assertEqual(idt.tokens[2].match(T.Name, 'id'), True)
+
+    def test_issue40(self):
+        # make sure identifier lists in subselects are grouped
+        p = sqlparse.parse(('SELECT id, name FROM '
+                            '(SELECT id, name FROM bar) as foo'))[0]
+        self.assertEqual(len(p.tokens), 7)
+        self.assertEqual(p.tokens[2].__class__, sql.IdentifierList)
+        self.assertEqual(p.tokens[-1].__class__, sql.Identifier)
+        self.assertEqual(p.tokens[-1].get_name(), u'foo')
+        sp = p.tokens[-1].tokens[0]
+        self.assertEqual(sp.tokens[3].__class__, sql.IdentifierList)
+        # make sure that formatting works as expected
+        self.ndiffAssertEqual(
+            sqlparse.format(('SELECT id, name FROM '
+                             '(SELECT id, name FROM bar)'),
+                            reindent=True),
+            ('SELECT id,\n'
+             '       name\n'
+             'FROM\n'
+             '  (SELECT id,\n'
+             '          name\n'
+             '   FROM bar)'))
+        self.ndiffAssertEqual(
+            sqlparse.format(('SELECT id, name FROM '
+                             '(SELECT id, name FROM bar) as foo'),
+                            reindent=True),
+            ('SELECT id,\n'
+             '       name\n'
+             'FROM\n'
+             '  (SELECT id,\n'
+             '          name\n'
+             '   FROM bar) as foo'))
