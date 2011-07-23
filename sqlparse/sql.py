@@ -147,13 +147,14 @@ class TokenList(Token):
     def _pprint_tree(self, max_depth=None, depth=0):
         """Pretty-print the object tree."""
         indent = ' '*(depth*2)
-        for token in self.tokens:
+        for idx, token in enumerate(self.tokens):
             if token.is_group():
                 pre = ' +-'
             else:
                 pre = ' | '
-            print '%s%s%s \'%s\'' % (indent, pre, token._get_repr_name(),
-                                     token._get_repr_value())
+            print '%s%s%d %s \'%s\'' % (indent, pre, idx,
+                                        token._get_repr_name(),
+                                        token._get_repr_value())
             if (token.is_group() and (max_depth is None or depth < max_depth)):
                 token._pprint_tree(max_depth, depth+1)
 
