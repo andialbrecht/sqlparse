@@ -172,10 +172,11 @@ class Lexer:
             (r':=', tokens.Assignment),
             (r'::', tokens.Punctuation),
             (r'[*]', tokens.Wildcard),
+            (r'CASE\b', tokens.Keyword),  # extended CASE(foo)
             (r"`(``|[^`])*`", tokens.Name),
             (r"´(´´|[^´])*´", tokens.Name),
             (r'@[a-zA-Z_][a-zA-Z0-9_]+', tokens.Name),
-            (r'[a-zA-Z_][a-zA-Z0-9_]*(?=\.)', tokens.Name),  # see issue39
+            (r'[a-zA-Z_][a-zA-Z0-9_]*(?=[.(])', tokens.Name),  # see issue39
             (r'[<>=~!]+', tokens.Operator.Comparison),
             (r'[+/@#%^&|`?^-]+', tokens.Operator),
             (r'0x[0-9a-fA-F]+', tokens.Number.Hexadecimal),

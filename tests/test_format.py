@@ -221,6 +221,13 @@ class TestFormatReindent(TestCaseBase):
                                                'where (c1 = 1)',
                                                'order by c1']))
 
+    def test_keywordfunctions(self):  # issue36
+        f = lambda sql: sqlparse.format(sql, reindent=True)
+        s = 'select max(a) b, foo, bar'
+        self.ndiffAssertEqual(f(s), '\n'.join(['select max(a) b,',
+                                               '       foo,',
+                                               '       bar']))
+
 
 
 
