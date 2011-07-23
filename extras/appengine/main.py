@@ -36,7 +36,7 @@ logging.info('Loading %s, app version = %s',
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 
 from google.appengine.dist import use_library
-use_library('django', '1.0')
+use_library('django', '1.2')
 
 # Fail early if we can't import Django.  Log identifying information.
 import django
