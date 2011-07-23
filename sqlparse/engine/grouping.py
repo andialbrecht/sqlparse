@@ -173,7 +173,7 @@ def group_identifier_list(tlist):
      if not isinstance(sgroup, sql.IdentifierList)]
     idx = 0
     # Allowed list items
-    fend1_funcs = [lambda t: isinstance(t, sql.Identifier),
+    fend1_funcs = [lambda t: isinstance(t, (sql.Identifier, sql.Function)),
                    lambda t: t.is_whitespace(),
                    lambda t: t.ttype == T.Wildcard,
                    lambda t: t.match(T.Keyword, 'null'),
