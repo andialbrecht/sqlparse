@@ -8,6 +8,8 @@ Bug Fixes
  * Avoid parsing names as keywords (issue39, reported by djo...@taket.org).
  * Make sure identifier lists in subselects are grouped (issue40,
    reported by djo...@taket.org).
+ * Split statements with IF as functions correctly (issue33, reported
+   by charles....@unige.ch).
 
 
 Release 0.1.2 (Nov 23, 2010)

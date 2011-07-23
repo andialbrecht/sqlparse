@@ -21,11 +21,13 @@ class StatementFilter(TokenFilter):
         self._in_declare = False
         self._in_dbldollar = False
         self._is_create = False
+        self._begin_depth = 0
 
     def _reset(self):
         self._in_declare = False
         self._in_dbldollar = False
         self._is_create = False
+        self._begin_depth = 0
 
     def _change_splitlevel(self, ttype, value):
         # PostgreSQL
@@ -51,6 +53,7 @@ class StatementFilter(TokenFilter):
             return 1
 
         if unified == 'BEGIN':
+            self._begin_depth += 1
             if self._in_declare:  # FIXME(andi): This makes no sense.
                 return 0
             return 0
@@ -58,13 +61,14 @@ class StatementFilter(TokenFilter):
         if unified == 'END':
             # Should this respect a preceeding BEGIN?
             # In CASE ... WHEN ... END this results in a split level -1.
+            self._begin_depth = max(0, self._begin_depth-1)
             return -1
 
         if ttype is T.Keyword.DDL and unified.startswith('CREATE'):
             self._is_create = True
             return 0
 
-        if unified in ('IF', 'FOR') and self._is_create:
+        if unified in ('IF', 'FOR') and self._is_create and self._begin_depth > 0:
             return 1
 
         # Default
