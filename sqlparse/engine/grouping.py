@@ -175,6 +175,7 @@ def group_identifier_list(tlist):
     # Allowed list items
     fend1_funcs = [lambda t: isinstance(t, (sql.Identifier, sql.Function)),
                    lambda t: t.is_whitespace(),
+                   lambda t: t.ttype == T.Name,
                    lambda t: t.ttype == T.Wildcard,
                    lambda t: t.match(T.Keyword, 'null'),
                    lambda t: t.ttype == T.Number.Integer,
@@ -261,18 +262,18 @@ def group_where(tlist):
 
 def group_aliased(tlist):
     [group_aliased(sgroup) for sgroup in tlist.get_sublists()
-     if not isinstance(sgroup, sql.Identifier)]
+     if not isinstance(sgroup, (sql.Identifier, sql.Function))]
     idx = 0
-    token = tlist.token_next_by_instance(idx, sql.Identifier)
+    token = tlist.token_next_by_instance(idx, (sql.Identifier, sql.Function))
     while token:
         next_ = tlist.token_next(tlist.token_index(token))
-        if next_ is not None and isinstance(next_, sql.Identifier):
+        if next_ is not None and isinstance(next_, (sql.Identifier, sql.Function)):
             grp = tlist.tokens_between(token, next_)[1:]
             token.tokens.extend(grp)
             for t in grp:
                 tlist.tokens.remove(t)
         idx = tlist.token_index(token) + 1
-        token = tlist.token_next_by_instance(idx, sql.Identifier)
+        token = tlist.token_next_by_instance(idx, (sql.Identifier, sql.Function))
 
 
 def group_typecasts(tlist):
