@@ -75,3 +75,23 @@ class SQLParseTest(TestCaseBase):
         t = sqlparse.parse('12.5')[0].tokens
         self.assertEqual(len(t), 1)
         self.assert_(t[0].ttype is sqlparse.tokens.Number.Float)
+
+    def test_placeholder(self):
+        def _get_tokens(sql):
+            return sqlparse.parse(sql)[0].tokens[-1].tokens
+        t = _get_tokens('select * from foo where user = ?')
+        self.assert_(t[-1].ttype is sqlparse.tokens.Name.Placeholder)
+        self.assertEqual(t[-1].value, '?')
+        t = _get_tokens('select * from foo where user = :1')
+        self.assert_(t[-1].ttype is sqlparse.tokens.Name.Placeholder)
+        self.assertEqual(t[-1].value, ':1')
+        t = _get_tokens('select * from foo where user = :name')
+        self.assert_(t[-1].ttype is sqlparse.tokens.Name.Placeholder)
+        self.assertEqual(t[-1].value, ':name')
+        t = _get_tokens('select * from foo where user = %s')
+        self.assert_(t[-1].ttype is sqlparse.tokens.Name.Placeholder)
+        self.assertEqual(t[-1].value, '%s')
+        t = _get_tokens('select * from foo where user = $a')
+        self.assert_(t[-1].ttype is sqlparse.tokens.Name.Placeholder)
+        self.assertEqual(t[-1].value, '$a')
+

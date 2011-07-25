@@ -14,6 +14,8 @@ Bug Fixes
    (issue36, nyuhu...@gmail.com).
  * Don't treat single characters as keywords (issue32).
  * Improve parsing of stand-alone comments (issue26).
+ * Detection of placeholders in paramterized queries (issue22,
+   reported by Glyph Lefkowitz).
 
 
 Release 0.1.2 (Nov 23, 2010)

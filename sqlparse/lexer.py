@@ -175,6 +175,9 @@ class Lexer:
             (r'CASE\b', tokens.Keyword),  # extended CASE(foo)
             (r"`(``|[^`])*`", tokens.Name),
             (r"´(´´|[^´])*´", tokens.Name),
+            (r'\$([a-zA-Z_][a-zA-Z0-9_]*)?\$', tokens.Name.Builtin),
+            (r'\?{1}', tokens.Name.Placeholder),
+            (r'[$:?%][a-zA-Z0-9_]+[^$:?%]?', tokens.Name.Placeholder),
             (r'@[a-zA-Z_][a-zA-Z0-9_]+', tokens.Name),
             (r'[a-zA-Z_][a-zA-Z0-9_]*(?=[.(])', tokens.Name),  # see issue39
             (r'[<>=~!]+', tokens.Operator.Comparison),
@@ -191,7 +194,6 @@ class Lexer:
             (r'NOT NULL\b', tokens.Keyword),
             (r'CREATE( OR REPLACE)?\b', tokens.Keyword.DDL),
             (r'[a-zA-Z_][a-zA-Z0-9_]*', is_keyword),
-            (r'\$([a-zA-Z_][a-zA-Z0-9_]*)?\$', tokens.Name.Builtin),
             (r'[;:()\[\],\.]', tokens.Punctuation),
         ],
         'multiline-comments': [
