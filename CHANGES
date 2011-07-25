@@ -12,6 +12,7 @@ Bug Fixes
    by charles....@unige.ch).
  * Relax detection of keywords, esp. when used as function names
    (issue36, nyuhu...@gmail.com).
+ * Don't treat single characters as keywords (issue32).
 
 
 Release 0.1.2 (Nov 23, 2010)

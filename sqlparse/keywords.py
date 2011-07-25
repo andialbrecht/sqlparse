@@ -172,7 +172,7 @@ KEYWORDS = {
     'FULL': tokens.Keyword,
     'FUNCTION': tokens.Keyword,
 
-    'G': tokens.Keyword,
+#    'G': tokens.Keyword,
     'GENERAL': tokens.Keyword,
     'GENERATED': tokens.Keyword,
     'GET': tokens.Keyword,
@@ -219,7 +219,7 @@ KEYWORDS = {
     'ISOLATION': tokens.Keyword,
     'ITERATE': tokens.Keyword,
 
-    'K': tokens.Keyword,
+#    'K': tokens.Keyword,
     'KEY': tokens.Keyword,
     'KEY_MEMBER': tokens.Keyword,
     'KEY_TYPE': tokens.Keyword,
@@ -244,7 +244,7 @@ KEYWORDS = {
     'LOCK': tokens.Keyword,
     'LOWER': tokens.Keyword,
 
-    'M': tokens.Keyword,
+#    'M': tokens.Keyword,
     'MAP': tokens.Keyword,
     'MATCH': tokens.Keyword,
     'MAXVALUE': tokens.Keyword,
