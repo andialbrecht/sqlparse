@@ -8,8 +8,8 @@ Bug Fixes
  * Avoid parsing names as keywords (issue39, reported by djo...@taket.org).
  * Make sure identifier lists in subselects are grouped (issue40,
    reported by djo...@taket.org).
- * Split statements with IF as functions correctly (issue33, reported
-   by charles....@unige.ch).
+ * Split statements with IF as functions correctly (issue33 and
+   issue29, reported by charles....@unige.ch).
  * Relax detection of keywords, esp. when used as function names
    (issue36, nyuhu...@gmail.com).
  * Don't treat single characters as keywords (issue32).
