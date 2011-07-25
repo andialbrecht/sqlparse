@@ -27,6 +27,24 @@ class RegressionTests(TestCaseBase):
         self.assertEqual(len(parsed), 3)
         self.assertEqual(str(parsed[1]).strip(), "select 'two\\'';")
 
+    def test_issue26(self):
+        # parse stand-alone comments
+        p = sqlparse.parse('--hello')[0]
+        self.assertEqual(len(p.tokens), 1)
+        self.assert_(p.tokens[0].ttype is T.Comment.Single)
+        p = sqlparse.parse('-- hello')[0]
+        self.assertEqual(len(p.tokens), 1)
+        self.assert_(p.tokens[0].ttype is T.Comment.Single)
+        p = sqlparse.parse('--hello\n')[0]
+        self.assertEqual(len(p.tokens), 1)
+        self.assert_(p.tokens[0].ttype is T.Comment.Single)
+        p = sqlparse.parse('--')[0]
+        self.assertEqual(len(p.tokens), 1)
+        self.assert_(p.tokens[0].ttype is T.Comment.Single)
+        p = sqlparse.parse('--\n')[0]
+        self.assertEqual(len(p.tokens), 1)
+        self.assert_(p.tokens[0].ttype is T.Comment.Single)
+
     def test_issue34(self):
         t = sqlparse.parse("create")[0].token_first()
         self.assertEqual(t.match(T.Keyword.DDL, "create"), True)
