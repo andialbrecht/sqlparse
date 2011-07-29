@@ -1,1 +1,0 @@
-insert into customer (id, name) values (1, 'John');insert into customer (id, name) values (2, 'Jack');insert into customer (id, name) values (3, 'Jane');insert into customer (id, name) values (4, 'Jim');insert into customer (id, name) values (5, 'Jerry');insert into customer (id, name) values (1, 'Joe');
