@@ -150,7 +150,7 @@ class LexerMeta(type):
         return type.__call__(cls, *args, **kwds)
 
 
-class Lexer:
+class Lexer(object):
 
     __metaclass__ = LexerMeta
 

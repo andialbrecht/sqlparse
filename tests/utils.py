@@ -33,6 +33,7 @@ class TestCaseBase(unittest.TestCase):
             ssecond = unicode(second)
             diff = difflib.ndiff(sfirst.splitlines(), ssecond.splitlines())
             fp = StringIO()
-            print >> fp, NL, NL.join(diff)
+            fp.write(NL)
+            fp.write(NL.join(diff))
             print fp.getvalue()
             raise self.failureException, fp.getvalue()
