@@ -19,6 +19,9 @@ Bug Fixes
  * Add parsing of MS Access column names with braces (issue27,
    reported by frankz...@gmail.com).
 
+Other
+ * Replace Django by Flask in App Engine frontend (issue11).
+
 
 Release 0.1.2 (Nov 23, 2010)
 ----------------------------

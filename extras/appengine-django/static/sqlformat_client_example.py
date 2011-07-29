@@ -13,7 +13,6 @@ payload = (
     ('n_indents', 2),
     )
 
-
 response = urllib2.urlopen(REMOTE_API,
                            urllib.urlencode(payload))
 print response.read()

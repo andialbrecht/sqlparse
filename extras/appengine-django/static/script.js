@@ -11,6 +11,7 @@ function update_output() {
     data.keyword_case = $('#id_keyword_case').val();
     data.identifier_case = $('#id_identifier_case').val();
     data.n_indents = $('#id_n_indents').val();
+    data.right_margin = $('#id_right_margin').val();
     data.output_format = $('#id_output_format').val();
     form = document.getElementById('form_options');
     $(form.elements).attr('disabled', 'disabled');
@@ -71,7 +72,7 @@ function load_example() {
     fname = $('#sel_example').val();
     data = {fname: fname};
     $.post('/load_example', data,
-	       function(data) {
+	   function(data) {
 	       $('#id_data').val(data.answer);
 	   }, 'json');
 }
@@ -95,4 +96,8 @@ function init() {
     $(document).bind('keydown', {combi: 't', disableInInput: true},
 		     textarea_grab_focus);
     initialized = true;
+    /* jQuery textarea resizer plugin usage */
+    $(document).ready(function() {
+	    $('textarea.resizable:not(.processed)').TextAreaResizer();
+	});
 }

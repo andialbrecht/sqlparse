@@ -1,0 +1,1 @@
+select sum(a1.Sales) from Store_Information a1 where a1.Store_name in (select store_name from Geography a2 where a2.store_name = a1.store_name);

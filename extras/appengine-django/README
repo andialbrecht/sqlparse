@@ -1,0 +1,22 @@
+gae-sqlformat - An SQL formatting tool runnging on App Engine
+=============================================================
+
+
+To set up this application run
+
+  make all
+
+This command fetches Django from Subversion and symlinks Pygments
+and sqlparse. Note: You'll need Pygments installed somewhere in your
+PYTHONPATH.
+
+For a manual setup have a look at the Makefile ;-)
+
+
+To run the development server run
+
+  make serve
+
+
+Homepage: http://sqlformat.appspot.com
+
