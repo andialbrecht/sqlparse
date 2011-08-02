@@ -105,7 +105,7 @@ def _get_examples():
 def _get_sql(data, files=None):
     sql = None
     if files is not None and 'datafile' in files:
-        sql = files['datafile'].read()
+        sql = files['datafile'].read().decode('utf-8')
     if not sql:
         sql = data.get('data')
     return sql or ''
