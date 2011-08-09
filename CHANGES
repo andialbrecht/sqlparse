@@ -1,5 +1,5 @@
-In Development
---------------
+Release 0.1.3 (Jul 29, 2011)
+----------------------------
 
 Bug Fixes
  * Improve parsing of floats (thanks to Kris).
@@ -16,6 +16,11 @@ Bug Fixes
  * Improve parsing of stand-alone comments (issue26).
  * Detection of placeholders in paramterized queries (issue22,
    reported by Glyph Lefkowitz).
+ * Add parsing of MS Access column names with braces (issue27,
+   reported by frankz...@gmail.com).
+
+Other
+ * Replace Django by Flask in App Engine frontend (issue11).
 
 
 Release 0.1.2 (Nov 23, 2010)

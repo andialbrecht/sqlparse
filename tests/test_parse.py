@@ -95,3 +95,10 @@ class SQLParseTest(TestCaseBase):
         self.assert_(t[-1].ttype is sqlparse.tokens.Name.Placeholder)
         self.assertEqual(t[-1].value, '$a')
 
+    def test_access_symbol(self):  # see issue27
+        t = sqlparse.parse('select a.[foo bar] as foo')[0].tokens
+        self.assert_(isinstance(t[-1], sqlparse.sql.Identifier))
+        self.assertEqual(t[-1].get_name(), 'foo')
+        self.assertEqual(t[-1].get_real_name(), '[foo bar]')
+        self.assertEqual(t[-1].get_parent_name(), 'a')
+

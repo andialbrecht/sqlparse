@@ -1,17 +1,16 @@
-2TO3=2to3-3.1
+2TO3=2to3
+2TO3OPTS=--no-diffs -w -n
 
 all: sqlparse tests
 
 sqlparse:
 	cp -r ../../sqlparse .
-	$(2TO3) sqlparse > sqlparse.diff
-	patch -p0 < sqlparse.diff
+	$(2TO3) $(2TO3OPTS) sqlparse
 	patch -p0 < fixes.diff
 
 tests:
 	cp -r ../../tests .
-	$(2TO3) tests > tests.diff
-	patch -p0 < tests.diff
+	$(2TO3) $(2TO3OPTS) tests
 
 clean:
 	rm -rf sqlparse

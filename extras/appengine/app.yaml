@@ -1,5 +1,5 @@
 application: sqlformat
-version: 2
+version: dev
 runtime: python
 api_version: 1
 
@@ -23,8 +23,15 @@ handlers:
 - url: /static
   static_dir: static
 
+- url: /_ereporter.*
+  script: $PYTHON_LIB/google/appengine/ext/ereporter/report_generator.py
+  login: admin
+
 - url: .*
   script: main.py
 
-derived_file_type:
-- python_precompiled
+builtins:
+- appstats: on
+
+inbound_services:
+- warmup

@@ -5,7 +5,7 @@ dist
 MANIFEST
 .coverage
 extras/appengine/sqlparse
-extras/appengine/pygments
+extras/appengine/lib/
 extras/py3k/sqlparse
 extras/py3k/tests
 extras/py3k/sqlparse.diff

@@ -8,15 +8,13 @@
 
 <form method="post" action="" id="form_options" enctype="multipart/form-data">
   <div id="input">
-    {% if form.non_field_errors %}{{form.non_field_errors}}{% endif %}
     <div>
       <strong>Type your SQL here:</strong><br />
-      {{form.data}}
-      {% if form.data.errors %}{{form.data.errors}}{% endif %}
+	  <textarea id="id_data" rows="10" cols="40" name="data" class="resizable">{{ sql_orig }}</textarea>
     </div>
     <div style="margin-top: .5em;">
       <strong>...or upload a file:</strong>
-      {{form.datafile}}
+      <input type="file" name="datafile" id="id_datafile" />
     </div>
     <div id="examples" style="margin-top: .5em;"></div>
     <div id="actions" style="margin-top: .5em;">
@@ -50,51 +48,60 @@
     <h1 class="skip">Options</h1>
     <fieldset><legend id="general"><strong>General Options</strong></legend>
       <div id="general_content" class="content">
-      {{form.remove_comments}}
-      <label for="id_remove_comments">{{form.remove_comments.label}}</label>
+      <input type="checkbox" id="id_remove_comments" name="remove_comments" value="1" {% if extra.comments %}checked="checked"{% endif %}/>
+      <label for="id_remove_comments">Remove comments</label>
       <br />
-      {{form.highlight}}
-      <label for="id_highlight">{{form.highlight.label}}</label>
-      {% if form.highlight.errors %}
-        <ul class="errors">{{form.highlight.errors</ul>
-      {% endif %}
+      <input type="checkbox" id="id_highlight" name="highlight" value="1" {% if extra.highlight %}checked="checked"{% endif %} />
+      <label for="id_highlight">Enable syntax highlighting</label>
       </div>
     </fieldset>
     <fieldset><legend id="kwcase">
 	<strong>Keywords &amp; Identifiers</strong></legend>
-        <div>
-	  {{form.keyword_case.label}}: {{form.keyword_case}}
+      <div>
+	  Keywords: <select id="id_keyword_case" name="keyword_case">
+			<option value="">Unchanged</option>
+			<option value="lower" {% if extra.keywords == 'lower' %}selected="selected"{% endif %}>Lower case</option>
+			<option value="upper"  {% if extra.keywords == 'upper' %}selected="selected"{% endif %}>Upper case</option>
+			<option value="capitalize"  {% if extra.keywords == 'capitalize' %}selected="selected"{% endif %}>Capitalize</option>
+	  </select>
 	</div>
 	<div>
-	  {{form.identifier_case.label}}: {{form.identifier_case}}
+	  Identifiers: <select name="identifier_case" id="id_identifier_case">
+		<option value="">Unchanged</option>
+		<option value="lower" {% if extra.idcase == 'lower' %}selected="selected"{% endif %}>Lower case</option>
+		<option value="upper" {% if extra.idcase == 'upper' %}selected="selected"{% endif %}>Upper case</option>
+		<option value="capitalize" {% if extra.idcase == 'capitalize' %}selected="selected"{% endif %}>Capitalize</option>
+	  </select>
 	</div>
     </fieldset>
     <fieldset><legend id="indent"><strong>Indentation &amp; Margins</strong>
 	</legend>
 	  <div id="indent_content" class="content">
 	    <label for="id_n_indents">Indentation: </label>
-	    {{form.n_indents}} {{form.n_indents.label}}
+	    <input name="n_indents" value="{{extra.n_indents}}" maxlength="2" type="text" id="id_n_indents" size="2" /> spaces
 	    <div class="help">Empty field means leave indentation unchanged.</div>
-<!--
-	    <label for="id_right_margin">Right margin: </label>
-	    {{form.right_margin}} {{form.right_margin.label}}
-	    <div class="help">Empty field means don't mind right margin.</div>
--->
 	  </div>
     </fieldset>
     <fieldset><legend id="output"><strong>Output Format</strong></legend>
       <label for="id_output_format">Language: </label>
-      {{form.output_format}}
+	  <select name="output_format" id="id_output_format">
+		<option value="sql" {% if extra.lang == 'sql' %}selected="selected"{% endif %}>SQL</option>
+		<option value="python" {% if extra.lang == 'python' %}selected="selected"{% endif %}>Python</option>
+		<option value="php" {% if extra.lang == 'php' %}selected="selected"{% endif %}>PHP</option>
+	  </select>
     </fieldset>
 
     <div class="dev">This software is in development.</div>
 
 	<div>
+	  <g:plusone size="medium"></g:plusone>
 	  <a href="http://flattr.com/thing/350724/SQLFormat-Online-SQL-formatting-service" target="_blank">
 		<img src="http://api.flattr.com/button/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" />
 	  </a>
 	</div>
-
+	<div style="padding-top: 15px;">
+	  <a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="andialbrecht">Tweet</a><script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+	</div>
   </div>
   <div class="clearfix"></div>
 </form>
