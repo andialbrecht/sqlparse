@@ -108,9 +108,9 @@ class IncludeStatement(Filter):
                 # Include file if path was found
                 if path:
                     try:
-                        with open(path) as f:
-                            raw_sql = f.read()
-
+                        f = open(path)
+                        raw_sql = f.read()
+                        f.close()
                     except IOError, err:
                         yield Comment, u'-- IOError: %s\n' % err
 
