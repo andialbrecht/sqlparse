@@ -7,7 +7,10 @@ from os.path import abspath, join
 from sqlparse import sql
 from sqlparse import tokens as T
 from sqlparse.engine import FilterStack
-from sqlparse.tokens import Comment, Keyword, Name, Punctuation, String, Whitespace
+from sqlparse.tokens import (
+    Comment, Keyword, Name,
+    Punctuation, String, Whitespace,
+)
 
 
 class Filter(object):
@@ -56,7 +59,7 @@ class IdentifierCaseFilter(_CaseFilter):
             yield ttype, value
 
 
-class Get_Comments(Filter):
+class GetComments(Filter):
     """Get the comments from a stack"""
     def process(self, stack, stream):
         for token_type, value in stream:
@@ -80,7 +83,6 @@ class IncludeStatement(Filter):
         self.maxRecursive = maxRecursive
 
         self.detected = False
-
 
     def process(self, stack, stream):
         # Run over all tokens in the stream
@@ -107,10 +109,9 @@ class IncludeStatement(Filter):
                 if path:
                     try:
                         with open(path) as f:
-                            sql = f.read()
+                            raw_sql = f.read()
 
                     except IOError, err:
-                        logging.error(err)
                         yield Comment, u'-- IOError: %s\n' % err
 
                     else:
@@ -120,7 +121,7 @@ class IncludeStatement(Filter):
                         stack = FilterStack()
                         stack.preprocess.append(IncludeStatement(self.dirpath))
 
-                        for tv in stack.run(sql):
+                        for tv in stack.run(raw_sql):
                             yield tv
 
                     # Set normal mode
@@ -227,6 +228,7 @@ class ReindentFilter(Filter):
         split_words = ('FROM', 'JOIN$', 'AND', 'OR',
                        'GROUP', 'ORDER', 'UNION', 'VALUES',
                        'SET', 'BETWEEN')
+
         def _next_token(i):
             t = tlist.token_next_match(i, T.Keyword, split_words,
                                        regex=True)
@@ -426,7 +428,8 @@ class ColumnsSelect(Filter):
                     oldValue = ""
                     mode = 2
 
-                elif token_type == Punctuation and value == ',' and not parenthesis:
+                elif (token_type == Punctuation
+                      and value == ',' and not parenthesis):
                     if oldValue:
                         yield Name, oldValue
                     oldValue = ""
