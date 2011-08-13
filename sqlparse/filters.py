@@ -420,7 +420,7 @@ class ColumnsSelect(Filter):
             elif mode == 1:
                 if value == 'FROM':
                     if oldValue:
-                        yield Name, oldValue
+                        yield oldValue
 
                     mode = 3    # Columns have been checked
 
@@ -431,7 +431,7 @@ class ColumnsSelect(Filter):
                 elif (token_type == Punctuation
                       and value == ',' and not parenthesis):
                     if oldValue:
-                        yield Name, oldValue
+                        yield oldValue
                     oldValue = ""
 
                 elif token_type not in Whitespace:
@@ -446,7 +446,7 @@ class ColumnsSelect(Filter):
             elif mode == 2:
                 # We check also for Keywords because a bug in SQLParse
                 if token_type == Name or token_type == Keyword:
-                    yield Name, value
+                    yield value
                     mode = 1
 
 
