@@ -53,3 +53,9 @@ def split(sql):
     stack = engine.FilterStack()
     stack.split_statements = True
     return [unicode(stmt) for stmt in stack.run(sql)]
+
+
+from sqlparse.engine.filter import StatementFilter
+def split2(stream):
+    splitter = StatementFilter()
+    return list(splitter.process(None, stream))

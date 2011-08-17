@@ -463,6 +463,14 @@ class SerializerUnicode(Filter):
             res += '\n'
         return res
 
+def Tokens2Unicode(stream):
+    result = ""
+
+    for _, value in stream:
+        result += unicode(value)
+
+    return result
+
 
 class OutputPythonFilter(Filter):
 
