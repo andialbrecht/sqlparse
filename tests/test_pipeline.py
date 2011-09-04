@@ -21,7 +21,7 @@ class Test(unittest.TestCase):
         INSERT INTO directories(inode)
         VALUES(:inode)
         LIMIT 1"""
-        self.assertListEqual([], self.pipe(sql))
+        self.assertEqual([], self.pipe(sql))
 
     def test_2(self):
         sql = """
@@ -29,8 +29,8 @@ class Test(unittest.TestCase):
         FROM links
         WHERE parent_dir == :parent_dir AND name == :name
         LIMIT 1"""
-        self.assertListEqual([u'child_entry', u'inode', u'creation'],
-                             self.pipe(sql))
+        self.assertEqual([u'child_entry', u'inode', u'creation'],
+                         self.pipe(sql))
 
     def test_3(self):
         sql = """
@@ -63,7 +63,7 @@ class Test(unittest.TestCase):
 
         GROUP BY dir_entries.inode
         LIMIT 1"""
-        self.assertListEqual([u'st_dev', u'st_uid', u'st_gid', u'st_mode',
-                              u'st_ino', u'st_nlink', u'st_ctime',
-                              u'st_atime', u'st_mtime', u'st_size', u'size'],
-                             self.pipe(sql))
+        self.assertEqual([u'st_dev', u'st_uid', u'st_gid', u'st_mode',
+                          u'st_ino', u'st_nlink', u'st_ctime',
+                          u'st_atime', u'st_mtime', u'st_size', u'size'],
+                         self.pipe(sql))
