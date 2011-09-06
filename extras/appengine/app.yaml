@@ -18,7 +18,6 @@ handlers:
 - url: /static/(script.js|styles.css)
   static_files: static/\1
   upload: static/(script.js|styles.css)
-  expiration: 1h  # Shorter expiration, these change often
 
 - url: /static
   static_dir: static
