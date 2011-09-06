@@ -1,5 +1,8 @@
 """Legacy URLs."""
 
+# This module reflects the URLs and behavior of the former Django
+# application.
+
 import logging
 import os
 import time
