@@ -14,11 +14,6 @@ def ping():
 def warmup():
     return make_response('polishing chrome')
 
-@app.route('/fail')
-def fail():
-    # test URL for failure handling
-    raise AssertionError('You shouldn\'t be here!')
-
 
 # Register legacy URLs last so that newer URLs replace them.
 app.register_blueprint(legacy)
