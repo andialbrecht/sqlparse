@@ -15,10 +15,9 @@ handlers:
   static_files: static/robots.txt
   upload: static/robots.txt
 
-- url: /static/(script.js|styles.css|upload.py)
+- url: /static/(script.js|styles.css)
   static_files: static/\1
-  upload: static/(script.js|styles.css|upload.py)
-  expiration: 1h  # Shorter expiration, these change often
+  upload: static/(script.js|styles.css)
 
 - url: /static
   static_dir: static

@@ -280,13 +280,15 @@ def group_aliased(tlist):
     token = tlist.token_next_by_instance(idx, (sql.Identifier, sql.Function))
     while token:
         next_ = tlist.token_next(tlist.token_index(token))
-        if next_ is not None and isinstance(next_, (sql.Identifier, sql.Function)):
+        if next_ is not None and isinstance(next_,
+                                            (sql.Identifier, sql.Function)):
             grp = tlist.tokens_between(token, next_)[1:]
             token.tokens.extend(grp)
             for t in grp:
                 tlist.tokens.remove(t)
         idx = tlist.token_index(token) + 1
-        token = tlist.token_next_by_instance(idx, (sql.Identifier, sql.Function))
+        token = tlist.token_next_by_instance(idx,
+                                             (sql.Identifier, sql.Function))
 
 
 def group_typecasts(tlist):
