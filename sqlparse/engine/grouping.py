@@ -144,15 +144,30 @@ def group_identifier(tlist):
             else:
                 raise StopIteration
 
+    def _next_token(tl, i):
+        # chooses the next token. if two tokens are found then the
+        # first is returned.
+        t1 = tl.token_next_by_type(i, (T.String.Symbol, T.Name))
+        t2 = tl.token_next_by_instance(i, sql.Function)
+        if t1 and t2:
+            i1 = tl.token_index(t1)
+            i2 = tl.token_index(t2)
+            if i1 > i2:
+                return t2
+            else:
+                return t1
+        elif t1:
+            return t1
+        else:
+            return t2
+
     # bottom up approach: group subgroups first
     [group_identifier(sgroup) for sgroup in tlist.get_sublists()
      if not isinstance(sgroup, sql.Identifier)]
 
     # real processing
     idx = 0
-    token = tlist.token_next_by_instance(idx, sql.Function)
-    if token is None:
-        token = tlist.token_next_by_type(idx, (T.String.Symbol, T.Name))
+    token = _next_token(tlist, idx)
     while token:
         identifier_tokens = [token] + list(
             _consume_cycle(tlist,
@@ -163,9 +178,7 @@ def group_identifier(tlist):
             idx = tlist.token_index(group) + 1
         else:
             idx += 1
-        token = tlist.token_next_by_instance(idx, sql.Function)
-        if token is None:
-            token = tlist.token_next_by_type(idx, (T.String.Symbol, T.Name))
+        token = _next_token(tlist, idx)
 
 
 def group_identifier_list(tlist):

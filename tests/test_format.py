@@ -228,7 +228,12 @@ class TestFormatReindent(TestCaseBase):
                                                '       foo,',
                                                '       bar']))
 
-
+    def test_identifier_and_functions(self):  # issue45
+        f = lambda sql: sqlparse.format(sql, reindent=True)
+        s = 'select foo.bar, nvl(1) from dual'
+        self.ndiffAssertEqual(f(s), '\n'.join(['select foo.bar,',
+                                               '       nvl(1)',
+                                               'from dual']))
 
 
 class TestOutputFormat(TestCaseBase):
