@@ -231,15 +231,6 @@ class Lexer(object):
                         text = text[len(u'\ufeff'):]
                 except UnicodeDecodeError:
                     text = text.decode('latin1')
-            elif self.encoding == 'chardet':
-                try:
-                    import chardet
-                except ImportError:
-                    raise ImportError('To enable chardet encoding guessing, '
-                                      'please install the chardet library '
-                                      'from http://chardet.feedparser.org/')
-                enc = chardet.detect(text)
-                text = text.decode(enc['encoding'])
             else:
                 text = text.decode(self.encoding)
         if self.stripall:
@@ -266,7 +257,7 @@ class Lexer(object):
         ``stack`` is the inital stack (default: ``['root']``)
         """
         pos = 0
-        tokendefs = self._tokens
+        tokendefs = self._tokens  # see __call__, pylint:disable=E1101
         statestack = list(stack)
         statetokens = tokendefs[statestack[-1]]
         known_names = {}
