@@ -157,6 +157,11 @@ class TestGrouping(TestCaseBase):
         self.ndiffAssertEqual(s, p.to_unicode())
         self.assertEqual(p.tokens[4].get_alias(), 'view')
 
+    def test_alias_case(self):  # see issue46
+        p = sqlparse.parse('CASE WHEN 1 THEN 2 ELSE 3 END foo')[0]
+        self.assertEqual(len(p.tokens), 1)
+        self.assertEqual(p.tokens[0].get_alias(), 'foo')
+
     def test_idlist_function(self):  # see issue10 too
         p = sqlparse.parse('foo(1) x, bar')[0]
         self.assert_(isinstance(p.tokens[0], sql.IdentifierList))

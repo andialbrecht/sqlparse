@@ -315,38 +315,6 @@ class TokenList(Token):
         """Inserts *token* before *where*."""
         self.tokens.insert(self.token_index(where), token)
 
-
-class Statement(TokenList):
-    """Represents a SQL statement."""
-
-    __slots__ = ('value', 'ttype', 'tokens')
-
-    def get_type(self):
-        """Returns the type of a statement.
-
-        The returned value is a string holding an upper-cased reprint of
-        the first DML or DDL keyword. If the first token in this group
-        isn't a DML or DDL keyword "UNKNOWN" is returned.
-        """
-        first_token = self.token_first()
-        if first_token is None:
-            # An "empty" statement that either has not tokens at all
-            # or only whitespace tokens.
-            return 'UNKNOWN'
-        elif first_token.ttype in (T.Keyword.DML, T.Keyword.DDL):
-            return first_token.value.upper()
-        else:
-            return 'UNKNOWN'
-
-
-class Identifier(TokenList):
-    """Represents an identifier.
-
-    Identifiers may have aliases or typecasts.
-    """
-
-    __slots__ = ('value', 'ttype', 'tokens')
-
     def has_alias(self):
         """Returns ``True`` if an alias is present."""
         return self.get_alias() is not None
@@ -359,8 +327,8 @@ class Identifier(TokenList):
             if alias is None:
                 return None
         else:
-            next_ = self.token_next(0)
-            if next_ is None or not isinstance(next_, Identifier):
+            next_ = self.token_next_by_instance(0, Identifier)
+            if next_ is None:
                 return None
             alias = next_
         if isinstance(alias, Identifier):
@@ -392,6 +360,39 @@ class Identifier(TokenList):
             if next_ is None:  # invalid identifier, e.g. "a."
                 return None
             return next_.value
+
+
+
+class Statement(TokenList):
+    """Represents a SQL statement."""
+
+    __slots__ = ('value', 'ttype', 'tokens')
+
+    def get_type(self):
+        """Returns the type of a statement.
+
+        The returned value is a string holding an upper-cased reprint of
+        the first DML or DDL keyword. If the first token in this group
+        isn't a DML or DDL keyword "UNKNOWN" is returned.
+        """
+        first_token = self.token_first()
+        if first_token is None:
+            # An "empty" statement that either has not tokens at all
+            # or only whitespace tokens.
+            return 'UNKNOWN'
+        elif first_token.ttype in (T.Keyword.DML, T.Keyword.DDL):
+            return first_token.value.upper()
+        else:
+            return 'UNKNOWN'
+
+
+class Identifier(TokenList):
+    """Represents an identifier.
+
+    Identifiers may have aliases or typecasts.
+    """
+
+    __slots__ = ('value', 'ttype', 'tokens')
 
     def get_parent_name(self):
         """Return name of the parent object if any.

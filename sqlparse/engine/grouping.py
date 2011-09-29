@@ -274,21 +274,20 @@ def group_where(tlist):
 
 
 def group_aliased(tlist):
+    clss = (sql.Identifier, sql.Function, sql.Case)
     [group_aliased(sgroup) for sgroup in tlist.get_sublists()
-     if not isinstance(sgroup, (sql.Identifier, sql.Function))]
+     if not isinstance(sgroup, clss)]
     idx = 0
-    token = tlist.token_next_by_instance(idx, (sql.Identifier, sql.Function))
+    token = tlist.token_next_by_instance(idx, clss)
     while token:
         next_ = tlist.token_next(tlist.token_index(token))
-        if next_ is not None and isinstance(next_,
-                                            (sql.Identifier, sql.Function)):
+        if next_ is not None and isinstance(next_, clss):
             grp = tlist.tokens_between(token, next_)[1:]
             token.tokens.extend(grp)
             for t in grp:
                 tlist.tokens.remove(t)
         idx = tlist.token_index(token) + 1
-        token = tlist.token_next_by_instance(idx,
-                                             (sql.Identifier, sql.Function))
+        token = tlist.token_next_by_instance(idx, clss)
 
 
 def group_typecasts(tlist):
