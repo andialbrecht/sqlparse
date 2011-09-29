@@ -102,3 +102,7 @@ class SQLParseTest(TestCaseBase):
         self.assertEqual(t[-1].get_real_name(), '[foo bar]')
         self.assertEqual(t[-1].get_parent_name(), 'a')
 
+    def test_keyword_like_identifier(self):  # see issue47
+        t = sqlparse.parse('foo.key')[0].tokens
+        self.assertEqual(len(t), 1)
+        self.assert_(isinstance(t[0], sqlparse.sql.Identifier))
