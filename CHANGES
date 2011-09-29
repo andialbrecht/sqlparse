@@ -5,6 +5,7 @@ Bug Fixes
  * Avoid "stair case" effects when identifiers and functions are mixed
    in identifier lists (issue45).
  * Make keyword detection more restrict (issue47).
+ * Improve handling of CASE statements (issue46).
 
 
 Release 0.1.3 (Jul 29, 2011)
