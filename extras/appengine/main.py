@@ -3,8 +3,6 @@
 import os
 import sys
 
-from google.appengine.ext.webapp.util import run_wsgi_app
-
 LIB_DIR = os.path.join(os.path.dirname(__file__), 'lib')
 
 if LIB_DIR not in sys.path:
@@ -37,5 +35,3 @@ class EreporterMiddleware(object):
 app.config.from_object(config)
 
 app = EreporterMiddleware(app)
-
-run_wsgi_app(app)

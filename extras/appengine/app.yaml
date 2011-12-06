@@ -1,7 +1,8 @@
-application: sqlformat
-version: dev
-runtime: python
+application: sqlformat-hrd
+version: dev27
+runtime: python27
 api_version: 1
+threadsafe: true
 
 default_expiration: 7d  # This is good for images, which never change
 
@@ -22,15 +23,32 @@ handlers:
 - url: /static
   static_dir: static
 
-- url: /_ereporter.*
-  script: $PYTHON_LIB/google/appengine/ext/ereporter/report_generator.py
-  login: admin
-
 - url: .*
-  script: main.py
+  script: main.app
 
 builtins:
 - appstats: on
 
+skip_files:
+- ^(.*/)?app\.yaml
+- ^(.*/)?app\.yml
+- ^(.*/)?index\.yaml
+- ^(.*/)?index\.yml
+- ^(.*/)?#.*#
+- ^(.*/)?.*~
+- ^(.*/)?.*\.py[co]
+- ^(.*/)?.*/RCS/.*
+- ^(.*/)?\..*
+- ^(.*/)?jinja2*
+
 inbound_services:
 - warmup
+
+libraries:
+- name: jinja2
+  version: latest
+- name: markupsafe
+  version: latest
+- name: setuptools
+  version: latest
+
