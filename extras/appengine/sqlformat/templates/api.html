@@ -7,7 +7,7 @@
 
 <p>
   Using the API for this application is pretty simple. Just send a
-  <code>POST</code> request to
+  request to
 </p>
 <p>
   <code>http://sqlformat.appspot.com/format/</code>
@@ -15,9 +15,10 @@
 
 <h2>Options</h2>
 <p>
-  The <code>POST</code> request accepts various options to control
-  formatting. Only the <em>data</em> option is required. All others
-  are optional.
+  The server accepts various options to control formatting. Only
+  the <em>data</em> option is required. All others are optional.<br />
+  Either use <code>GET</code> and pack the options in the query string
+  or <code>POST</code> and submit your parameters as form data.
 </p>
 
 <dl>
@@ -48,5 +49,16 @@
 <p>
   <a href="/static/sqlformat_client_example.py">Download sqlformat_example_client.py</a>
 </p>
+
+<p>
+  And another example using curl and a <code>GET</code> request:
+</p>
+<div class="highlight example"><pre>
+$ curl "http://localhost:8080/format<b>?</b>keyword_case=upper<b>&</b>reindent=true<b>&</b>data=select%20*%20from%20foo;"
+SELECT *
+FROM foo;
+$
+</pre></div>
+
 
 {% endblock %}

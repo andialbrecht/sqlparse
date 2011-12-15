@@ -73,6 +73,7 @@ def api():
 
 
 @legacy.route('/format/', methods=['GET', 'POST'])
+@legacy.route('/format', methods=['GET', 'POST'])
 def format_():
     if request.method == 'POST':
         sql = _get_sql(request.form, request.files)
@@ -140,6 +141,10 @@ def _format_sql(sql, data, format='html'):
             popts['reindent'] = True
         except (ValueError, TypeError):
             pass
+    if (not 'indent_width' in popts and
+        data.get('reindent', '').lower() in ('1', 'true', 't')):
+        popts['indent_width'] = 2
+        popts['reindent'] = True
     if data.get('output_format', None) is not None:
         popts['output_format'] = data.get('output_format')
     logging.debug('Format: %s, POPTS: %r', format, popts)
