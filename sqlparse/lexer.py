@@ -180,11 +180,9 @@ class Lexer(object):
             (r'[$:?%][a-zA-Z0-9_]+[^$:?%]?', tokens.Name.Placeholder),
             (r'@[a-zA-Z_][a-zA-Z0-9_]+', tokens.Name),
             (r'[a-zA-Z_][a-zA-Z0-9_]*(?=[.(])', tokens.Name),  # see issue39
-            (r'[<>=~!]+', tokens.Operator.Comparison),
-            (r'[+/@#%^&|`?^-]+', tokens.Operator),
-            (r'0x[0-9a-fA-F]+', tokens.Number.Hexadecimal),
-            (r'[0-9]*\.[0-9]+', tokens.Number.Float),
-            (r'[0-9]+', tokens.Number.Integer),
+            (r'[-]?0x[0-9a-fA-F]+', tokens.Number.Hexadecimal),
+            (r'[-]?[0-9]*\.[0-9]+', tokens.Number.Float),
+            (r'[-]?[0-9]+', tokens.Number.Integer),
             # TODO: Backslash escapes?
             (r"(''|'.*?[^\\]')", tokens.String.Single),
             # not a real string literal in ANSI SQL:
@@ -197,6 +195,8 @@ class Lexer(object):
             (r'(?<=\.)[a-zA-Z_][a-zA-Z0-9_]*', tokens.Name),
             (r'[a-zA-Z_][a-zA-Z0-9_]*', is_keyword),
             (r'[;:()\[\],\.]', tokens.Punctuation),
+            (r'[<>=~!]+', tokens.Operator.Comparison),
+            (r'[+/@#%^&|`?^-]+', tokens.Operator),
         ],
         'multiline-comments': [
             (r'/\*', tokens.Comment.Multiline, 'multiline-comments'),

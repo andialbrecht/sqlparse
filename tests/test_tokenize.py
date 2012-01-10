@@ -62,6 +62,12 @@ class TestTokenize(unittest.TestCase):
         self.assertEqual(tokens[2][0], Name)
         self.assertEqual(tokens[2][1], 'join_col')
 
+    def test_negative_numbers(self):
+        sql = "values(-1)"
+        tokens = list(lexer.tokenize(sql))
+        self.assertEqual(len(tokens), 4)
+        self.assertEqual(tokens[2][0], Number.Integer)
+        self.assertEqual(tokens[2][1], '-1')
 
 class TestToken(unittest.TestCase):
 
