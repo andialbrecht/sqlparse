@@ -32,7 +32,7 @@ class StatementFilter(TokenFilter):
         self._begin_depth = 0
 
     def _change_splitlevel(self, ttype, value):
-        "Change the current split level"
+        "Get the new split level (increase, decrease or remain equal)"
         # PostgreSQL
         if (ttype == T.Name.Builtin
             and value.startswith('$') and value.endswith('$')):
@@ -80,34 +80,40 @@ class StatementFilter(TokenFilter):
 
     def process(self, stack, stream):
         "Process the stream"
+        consume_ws = False
         splitlevel = 0
         stmt = None
-        consume_ws = False
         stmt_tokens = []
+
+        # Run over all stream tokens
         for ttype, value in stream:
-            # Before appending the token
-            if (consume_ws and ttype not in (T.Whitespace, T.Comment.Single)):
-                consume_ws = False
+            # Yield token if we finished a statement and there's no whitespaces
+            if consume_ws and ttype not in (T.Whitespace, T.Comment.Single):
                 stmt.tokens = stmt_tokens
                 yield stmt
 
+                # Reset filter and prepare to process next statement
                 self._reset()
-                stmt = None
+                consume_ws = False
                 splitlevel = 0
+                stmt = None
 
+            # Create a new statement if we are not currently in one of them
             if stmt is None:
                 stmt = Statement()
                 stmt_tokens = []
 
+            # Change current split level (increase, decrease or remain equal)
             splitlevel += self._change_splitlevel(ttype, value)
 
-            # Append the token
+            # Append the token to the current statement
             stmt_tokens.append(Token(ttype, value))
-            # After appending the token
-            if (splitlevel <= 0 and ttype is T.Punctuation
-                and value == ';'):
+
+            # Check if we get the end of a statement
+            if splitlevel <= 0 and ttype is T.Punctuation and value == ';':
                 consume_ws = True
 
+        # Yield pending statement (if any)
         if stmt is not None:
             stmt.tokens = stmt_tokens
             yield stmt
