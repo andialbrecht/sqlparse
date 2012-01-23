@@ -69,6 +69,12 @@ class SQLSplitTest(TestCaseBase):
         self.assertEqual(len(stmts), 3)
         self.ndiffAssertEqual(''.join(unicode(q) for q in stmts), sql)
 
+    def test_begintag_2(self):
+        sql = load_file('begintag_2.sql')
+        stmts = sqlparse.parse(sql)
+        self.assertEqual(len(stmts), 1)
+        self.ndiffAssertEqual(''.join(unicode(q) for q in stmts), sql)
+
     def test_dropif(self):
         sql = 'DROP TABLE IF EXISTS FOO;\n\nSELECT * FROM BAR;'
         stmts = sqlparse.parse(sql)
