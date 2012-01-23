@@ -15,6 +15,7 @@ class TokenFilter(object):
 
 
 class StatementFilter(TokenFilter):
+    "Filter that split stream at individual statements"
 
     def __init__(self):
         TokenFilter.__init__(self)
@@ -24,12 +25,14 @@ class StatementFilter(TokenFilter):
         self._begin_depth = 0
 
     def _reset(self):
+        "Set the filter attributes to its default values"
         self._in_declare = False
         self._in_dbldollar = False
         self._is_create = False
         self._begin_depth = 0
 
     def _change_splitlevel(self, ttype, value):
+        "Change the current split level"
         # PostgreSQL
         if (ttype == T.Name.Builtin
             and value.startswith('$') and value.endswith('$')):
@@ -76,30 +79,35 @@ class StatementFilter(TokenFilter):
         return 0
 
     def process(self, stack, stream):
+        "Process the stream"
         splitlevel = 0
         stmt = None
         consume_ws = False
         stmt_tokens = []
         for ttype, value in stream:
             # Before appending the token
-            if (consume_ws and ttype is not T.Whitespace
-                and ttype is not T.Comment.Single):
+            if (consume_ws and ttype not in (T.Whitespace, T.Comment.Single)):
                 consume_ws = False
                 stmt.tokens = stmt_tokens
                 yield stmt
+
                 self._reset()
                 stmt = None
                 splitlevel = 0
+
             if stmt is None:
                 stmt = Statement()
                 stmt_tokens = []
+
             splitlevel += self._change_splitlevel(ttype, value)
+
             # Append the token
             stmt_tokens.append(Token(ttype, value))
             # After appending the token
             if (splitlevel <= 0 and ttype is T.Punctuation
                 and value == ';'):
                 consume_ws = True
+
         if stmt is not None:
             stmt.tokens = stmt_tokens
             yield stmt
