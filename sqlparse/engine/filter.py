@@ -57,8 +57,9 @@ class StatementFilter(TokenFilter):
 
         if unified == 'BEGIN':
             self._begin_depth += 1
-            if self._in_declare:  # FIXME(andi): This makes no sense.
-                return 0
+            if self._in_declare or self._is_create:
+                # FIXME(andi): This makes no sense.
+                return 1
             return 0
 
         if unified == 'END':
