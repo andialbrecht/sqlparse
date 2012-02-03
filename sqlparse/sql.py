@@ -175,7 +175,10 @@ class TokenList(Token):
         return True
 
     def get_sublists(self):
-        return [x for x in self.tokens if isinstance(x, TokenList)]
+#        return [x for x in self.tokens if isinstance(x, TokenList)]
+        for x in self.tokens:
+            if isinstance(x, TokenList):
+                yield x
 
     @property
     def _groupable_tokens(self):
