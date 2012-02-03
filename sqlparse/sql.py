@@ -194,7 +194,6 @@ class TokenList(Token):
             if ignore_whitespace and token.is_whitespace():
                 continue
             return token
-        return None
 
     def token_next_by_instance(self, idx, clss):
         """Returns the next token matching a class.
@@ -206,30 +205,31 @@ class TokenList(Token):
         """
         if isinstance(clss, (list, tuple)):
             clss = (clss,)
+
         if isinstance(clss, tuple):
             clss = tuple(clss)
+
         for token in self.tokens[idx:]:
             if isinstance(token, clss):
                 return token
-        return None
 
     def token_next_by_type(self, idx, ttypes):
         """Returns next matching token by it's token type."""
         if not isinstance(ttypes, (list, tuple)):
             ttypes = [ttypes]
+
         for token in self.tokens[idx:]:
             if token.ttype in ttypes:
                 return token
-        return None
 
     def token_next_match(self, idx, ttype, value, regex=False):
         """Returns next token where it's ``match`` method returns ``True``."""
         if not isinstance(idx, int):
             idx = self.token_index(idx)
+
         for token in self.tokens[idx:]:
             if token.match(ttype, value, regex):
                 return token
-        return None
 
     def token_not_matching(self, idx, funcs):
         for token in self.tokens[idx:]:
@@ -238,16 +238,15 @@ class TokenList(Token):
                 if func(token):
                     passed = True
                     break
+
             if not passed:
                 return token
-        return None
 
     def token_matching(self, idx, funcs):
         for token in self.tokens[idx:]:
             for i, func in enumerate(funcs):
                 if func(token):
                     return token
-        return None
 
     def token_prev(self, idx, skip_ws=True):
         """Returns the previous token relative to *idx*.
@@ -257,8 +256,10 @@ class TokenList(Token):
         """
         if idx is None:
             return None
+
         if not isinstance(idx, int):
             idx = self.token_index(idx)
+
         while idx != 0:
             idx -= 1
             if self.tokens[idx].is_whitespace() and skip_ws:
@@ -273,8 +274,10 @@ class TokenList(Token):
         """
         if idx is None:
             return None
+
         if not isinstance(idx, int):
             idx = self.token_index(idx)
+
         while idx < len(self.tokens) - 1:
             idx += 1
             if self.tokens[idx].is_whitespace() and skip_ws:
@@ -365,7 +368,6 @@ class TokenList(Token):
             return next_.value
 
 
-
 class Statement(TokenList):
     """Represents a SQL statement."""
 
@@ -383,10 +385,11 @@ class Statement(TokenList):
             # An "empty" statement that either has not tokens at all
             # or only whitespace tokens.
             return 'UNKNOWN'
+
         elif first_token.ttype in (T.Keyword.DML, T.Keyword.DDL):
             return first_token.value.upper()
-        else:
-            return 'UNKNOWN'
+
+        return 'UNKNOWN'
 
 
 class Identifier(TokenList):
