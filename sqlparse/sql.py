@@ -493,33 +493,43 @@ class Case(TokenList):
 
         If an ELSE exists condition is None.
         """
+        CONDITION = 1
+        VALUE = 2
+
         ret = []
-        in_value = False
-        in_condition = True
+        mode = CONDITION
+
         for token in self.tokens:
+            # Set mode from the current statement
             if token.match(T.Keyword, 'CASE'):
                 continue
+
             elif token.match(T.Keyword, 'WHEN'):
                 ret.append(([], []))
-                in_condition = True
-                in_value = False
+                mode = CONDITION
+
+            elif token.match(T.Keyword, 'THEN'):
+                mode = VALUE
+
             elif token.match(T.Keyword, 'ELSE'):
                 ret.append((None, []))
-                in_condition = False
-                in_value = True
-            elif token.match(T.Keyword, 'THEN'):
-                in_condition = False
-                in_value = True
+                mode = VALUE
+
             elif token.match(T.Keyword, 'END'):
-                in_condition = False
-                in_value = False
-            if (in_condition or in_value) and not ret:
-                # First condition withou preceding WHEN
+                mode = None
+
+            # First condition without preceding WHEN
+            if mode and not ret:
                 ret.append(([], []))
-            if in_condition:
+
+            # Append token depending of the current mode
+            if mode == CONDITION:
                 ret[-1][0].append(token)
-            elif in_value:
+
+            elif mode == VALUE:
                 ret[-1][1].append(token)
+
+        # Return cases list
         return ret
 
 
