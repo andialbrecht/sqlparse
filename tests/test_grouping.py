@@ -181,7 +181,7 @@ class TestGrouping(TestCaseBase):
         self.assert_(isinstance(p.tokens[0], sql.Function))
         p = sqlparse.parse('foo(null, bar)')[0]
         self.assert_(isinstance(p.tokens[0], sql.Function))
-        self.assertEqual(len(p.tokens[0].get_parameters()), 2)
+        self.assertEqual(len(list(p.tokens[0].get_parameters())), 2)
 
 
 class TestStatement(TestCaseBase):

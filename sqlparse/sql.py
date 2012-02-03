@@ -437,10 +437,11 @@ class IdentifierList(TokenList):
     def get_identifiers(self):
         """Returns the identifiers.
 
-        Whitespaces and punctuations are not included in this list.
+        Whitespaces and punctuations are not included in this generator.
         """
-        return [x for x in self.tokens
-                if not x.is_whitespace() and not x.match(T.Punctuation, ',')]
+        for x in self.tokens:
+            if not x.is_whitespace() and not x.match(T.Punctuation, ','):
+                yield x
 
 
 class Parenthesis(TokenList):

@@ -298,7 +298,7 @@ class ReindentFilter(Filter):
         self.offset -= num_offset
 
     def _process_identifierlist(self, tlist):
-        identifiers = tlist.get_identifiers()
+        identifiers = list(tlist.get_identifiers())
         if len(identifiers) > 1 and not tlist.within(sql.Function):
             first = list(identifiers[0].flatten())[0]
             num_offset = self._get_offset(first) - len(first.value)
