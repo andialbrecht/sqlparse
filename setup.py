@@ -55,7 +55,7 @@ Parsing::
    >>> res
    (<Statement 'select...' at 0x9ad08ec>,)
    >>> stmt = res[0]
-   >>> stmt.to_unicode()  # converting it back to unicode
+   >>> unicode(stmt)  # converting it back to unicode
    u'select * from someschema.mytable where id = 1'
    >>> # This is how the internal representation looks like:
    >>> stmt.tokens
@@ -87,7 +87,7 @@ setup(
     long_description=LONG_DESCRIPTION,
     license='BSD',
     url='http://python-sqlparse.googlecode.com/',
-    classifiers = [
+    classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',

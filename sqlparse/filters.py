@@ -350,7 +350,7 @@ class ReindentFilter(Filter):
         self._process(stmt)
         if isinstance(stmt, sql.Statement):
             if self._last_stmt is not None:
-                if self._last_stmt.to_unicode().endswith('\n'):
+                if unicode(self._last_stmt).endswith('\n'):
                     nl = '\n'
                 else:
                     nl = '\n\n'
@@ -382,7 +382,7 @@ class RightMarginFilter(Filter):
                   and not token.__class__ in self.keep_together):
                 token.tokens = self._process(stack, token, token.tokens)
             else:
-                val = token.to_unicode()
+                val = unicode(token)
                 if len(self.line) + len(val) > self.width:
                     match = re.search('^ +', self.line)
                     if match is not None:
@@ -456,7 +456,7 @@ class ColumnsSelect(Filter):
 class SerializerUnicode(Filter):
 
     def process(self, stack, stmt):
-        raw = stmt.to_unicode()
+        raw = unicode(stmt)
         add_nl = raw.endswith('\n')
         res = '\n'.join(line.rstrip() for line in raw.splitlines())
         if add_nl:
@@ -516,7 +516,7 @@ class OutputPythonFilter(Filter):
             varname = '%s%d' % (self.varname, self.cnt)
         else:
             varname = self.varname
-        has_nl = len(stmt.to_unicode().strip().splitlines()) > 1
+        has_nl = len(unicode(stmt).strip().splitlines()) > 1
         stmt.tokens = self._process(stmt.tokens, varname, self.cnt, has_nl)
         return stmt
 

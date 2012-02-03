@@ -31,10 +31,14 @@ class Token(object):
                                           short, id(self))
 
     def __unicode__(self):
+        """Returns a unicode representation of this object."""
         return self.value or ''
 
     def to_unicode(self):
-        """Returns a unicode representation of this object."""
+        """Returns a unicode representation of this object.
+        
+        @deprecated: please use __unicode__()
+        """
         return unicode(self)
 
     def _get_repr_name(self):
@@ -333,8 +337,7 @@ class TokenList(Token):
             alias = next_
         if isinstance(alias, Identifier):
             return alias.get_name()
-        else:
-            return alias.to_unicode()
+        return unicode(alias)
 
     def get_name(self):
         """Returns the name of this identifier.
@@ -420,7 +423,7 @@ class Identifier(TokenList):
         next_ = self.token_next(self.token_index(marker), False)
         if next_ is None:
             return None
-        return next_.to_unicode()
+        return unicode(next_)
 
 
 class IdentifierList(TokenList):
