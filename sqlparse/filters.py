@@ -75,6 +75,26 @@ class StripComments(Filter):
                 yield token_type, value
 
 
+def StripWhitespace(stream):
+    """Strip the whitespaces from a stream"""
+    last_type = None
+
+    for token_type, value in stream:
+        if last_type == None:
+            if token_type not in Whitespace + Punctuation:
+                yield token_type, value
+                last_type = token_type
+
+        else:
+            if token_type in Whitespace:
+                if last_type not in Whitespace:
+                    yield token_type, ' '
+            else:
+                yield token_type, value
+
+            last_type = token_type
+
+
 class IncludeStatement(Filter):
     """Filter that enable a INCLUDE statement"""
 
