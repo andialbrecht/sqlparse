@@ -131,9 +131,11 @@ def group_case(tlist):
 
 def group_identifier(tlist):
     def _consume_cycle(tl, i):
+        # TODO: Usage of Wildcard token is ambivalent here.
         x = itertools.cycle((
             lambda y: (y.match(T.Punctuation, '.')
-                       or y.ttype is T.Operator),
+                       or y.ttype is T.Operator
+                       or y.ttype is T.Wildcard),
             lambda y: (y.ttype in (T.String.Symbol,
                                    T.Name,
                                    T.Wildcard,
