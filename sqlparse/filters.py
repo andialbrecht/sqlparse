@@ -76,23 +76,30 @@ class StripComments(Filter):
 
 
 def StripWhitespace(stream):
-    """Strip the whitespaces from a stream"""
+    """Strip the whitespaces from a stream leaving only one between tokens"""
     last_type = None
 
     for token_type, value in stream:
-        if last_type == None:
-            if token_type not in Whitespace + Punctuation:
-                yield token_type, value
-                last_type = token_type
+        print repr(token_type), repr(value)
+        # We got a previous token
+        if last_type:
+            print '\t 1', repr(token_type), repr(value)
 
-        else:
             if token_type in Whitespace:
-                if last_type not in Whitespace:
-                    yield token_type, ' '
-            else:
-                yield token_type, value
+                if last_type in Whitespace:
+                    continue
+                value = ' '
 
-            last_type = token_type
+        # Ignore first empty spaces and dot-commas
+        elif token_type in Whitespace + Punctuation:
+            continue
+
+        # There's no previous token
+        else:
+            print '\t 2', repr(token_type), repr(value)
+
+        yield token_type, value
+        last_type = token_type
 
 
 class IncludeStatement(Filter):
