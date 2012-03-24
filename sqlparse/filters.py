@@ -80,23 +80,16 @@ def StripWhitespace(stream):
     last_type = None
 
     for token_type, value in stream:
-        print repr(token_type), repr(value)
         # We got a previous token
         if last_type:
-            print '\t 1', repr(token_type), repr(value)
-
             if token_type in Whitespace:
-                if last_type in Whitespace:
+                if last_type in (Whitespace, Whitespace.Newline, Punctuation):
                     continue
                 value = ' '
 
         # Ignore first empty spaces and dot-commas
-        elif token_type in Whitespace + Punctuation:
+        elif token_type in (Whitespace, Whitespace.Newline, Punctuation):
             continue
-
-        # There's no previous token
-        else:
-            print '\t 2', repr(token_type), repr(value)
 
         yield token_type, value
         last_type = token_type
