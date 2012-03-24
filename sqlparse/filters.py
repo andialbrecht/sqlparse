@@ -76,19 +76,22 @@ class StripComments(Filter):
 def StripWhitespace(stream):
     "Strip the useless whitespaces from a stream leaving only the minimal ones"
     last_type = None
+    ignore_group = Whitespace, Whitespace.Newline, Comparison, Punctuation
 
     for token_type, value in stream:
         # We got a previous token
         if last_type:
             print repr(token_type), repr(value)
+
             if token_type in Whitespace:
                 print '\t', repr(token_type), repr(value)
-                if last_type in (Whitespace, Whitespace.Newline, Comparison, Punctuation):
+
+                if last_type in ignore_group:
                     continue
                 value = ' '
 
         # Ignore first empty spaces and dot-commas
-        elif token_type in (Whitespace, Whitespace.Newline, Punctuation):
+        elif token_type in ignore_group:
             continue
 
         yield token_type, value
