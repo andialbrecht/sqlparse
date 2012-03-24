@@ -7,10 +7,8 @@ from os.path import abspath, join
 from sqlparse import sql
 from sqlparse import tokens as T
 from sqlparse.engine import FilterStack
-from sqlparse.tokens import (
-    Comment, Keyword, Name,
-    Punctuation, String, Whitespace,
-)
+from sqlparse.tokens import (Comment, Comparison, Keyword, Name, Punctuation,
+                             String, Whitespace)
 
 
 class Filter(object):
@@ -76,14 +74,16 @@ class StripComments(Filter):
 
 
 def StripWhitespace(stream):
-    """Strip the whitespaces from a stream leaving only one between tokens"""
+    "Strip the useless whitespaces from a stream leaving only the minimal ones"
     last_type = None
 
     for token_type, value in stream:
         # We got a previous token
         if last_type:
+            print repr(token_type), repr(value)
             if token_type in Whitespace:
-                if last_type in (Whitespace, Whitespace.Newline, Punctuation):
+                print '\t', repr(token_type), repr(value)
+                if last_type in (Whitespace, Whitespace.Newline, Comparison, Punctuation):
                     continue
                 value = ' '
 
