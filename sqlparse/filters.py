@@ -80,13 +80,9 @@ def StripWhitespace(stream):
     ignore_group = frozenset((Comparison, Punctuation))
 
     for token_type, value in stream:
-        # We got a previous token
+        # We got a previous token (not empty first ones)
         if last_type:
-            print repr(token_type), repr(value)
-
             if token_type in Whitespace:
-                print '\t', repr(token_type), repr(value)
-
                 has_space = True
                 continue
 

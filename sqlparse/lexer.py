@@ -177,7 +177,7 @@ class Lexer(object):
             (r"´(´´|[^´])*´", tokens.Name),
             (r'\$([a-zA-Z_][a-zA-Z0-9_]*)?\$', tokens.Name.Builtin),
             (r'\?{1}', tokens.Name.Placeholder),
-            (r'[$:?%][a-zA-Z0-9_]+[^$:?%]?', tokens.Name.Placeholder),
+            (r'[$:?%][a-zA-Z0-9_]+', tokens.Name.Placeholder),
             (r'@[a-zA-Z_][a-zA-Z0-9_]+', tokens.Name),
             (r'[a-zA-Z_][a-zA-Z0-9_]*(?=[.(])', tokens.Name),  # see issue39
             (r'[-]?0x[0-9a-fA-F]+', tokens.Number.Hexadecimal),
