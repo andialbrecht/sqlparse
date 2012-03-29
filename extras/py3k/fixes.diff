@@ -1,7 +1,7 @@
---- sqlparse/sql.py~	2009-04-30 08:38:16.000000000 +0200
-+++ sqlparse/sql.py	2009-04-30 08:39:15.000000000 +0200
-@@ -23,16 +23,13 @@
-         self.ttype = ttype
+--- sqlparse/sql.py.orig	2012-03-29 12:09:46.660311410 +0200
++++ sqlparse/sql.py	2012-03-29 12:11:04.924699486 +0200
+@@ -23,17 +23,13 @@
+         self.parent = None
  
      def __str__(self):
 -        return str(self).encode('utf-8')
@@ -13,21 +13,18 @@
                                            short, id(self))
  
 -    def __unicode__(self):
+-        """Returns a unicode representation of this object."""
 -        return self.value or ''
 -
      def to_unicode(self):
-         """Returns a unicode representation of this object."""
-         return str(self)
-@@ -105,11 +102,8 @@
+         """Returns a unicode representation of this object.
+         
+@@ -139,7 +135,7 @@
          self.tokens = tokens
          Token.__init__(self, None, None)
  
 -    def __unicode__(self):
--        return ''.join(str(x) for x in self.flatten())
--
-     def __str__(self):
--        return str(self).encode('utf-8')
-+        return ''.join(str(x) for x in self.flatten())
++    def __str__(self):
+         return ''.join(str(x) for x in self.flatten())
  
      def _get_repr_name(self):
-         return self.__class__.__name__
