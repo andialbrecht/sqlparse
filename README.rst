@@ -29,7 +29,7 @@ Project Page
   https://github.com/andialbrecht/sqlparse
 
 Documentation
-  http://python-sqlparse.googlecode.com/svn/docs/api/index.html
+  http://readthedocs.org/docs/sqlparse/en/latest/
 
 Discussions
   http://groups.google.com/group/sqlparse
