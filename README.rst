@@ -7,7 +7,7 @@ sqlparse is a non-validating SQL parser module for Python.
 Install
 -------
 
-Run
+Run::
 
   python setup.py install
 
@@ -17,17 +17,28 @@ to install python-sqlparse on your system.
 Run Tests
 ---------
 
+To run the test suite::
+
   python test/run_tests.py
 
 
 Links
 -----
 
-Project Page:  http://python-sqlparse.googlecode.com
-Documentation: http://python-sqlparse.googlecode.com/svn/docs/api/index.html
-Discussions:   http://groups.google.com/group/sqlparse
-Issues/Bugs:   http://code.google.com/p/python-sqlparse/issues/list
-Online Demo:   http://sqlformat.appspot.com
+Project Page
+  https://github.com/andialbrecht/sqlparse
+
+Documentation
+  http://python-sqlparse.googlecode.com/svn/docs/api/index.html
+
+Discussions
+  http://groups.google.com/group/sqlparse
+
+Issues/Bugs
+  https://github.com/andialbrecht/sqlparse/issues
+
+Online Demo
+  http://sqlformat.appspot.com
 
 
 python-sqlparse is licensed under the BSD license.
