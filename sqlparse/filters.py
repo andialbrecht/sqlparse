@@ -332,6 +332,9 @@ class ReindentFilter(Filter):
             self.offset += num_offset
             for token in identifiers[1:]:
                 tlist.insert_before(token, self.nl())
+            for token in tlist.tokens:
+                if isinstance(token, sql.Comment):
+                    tlist.insert_after(token, self.nl())
             self.offset -= num_offset
         self._process_default(tlist)
 

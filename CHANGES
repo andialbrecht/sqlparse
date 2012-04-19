@@ -10,6 +10,7 @@ Bug Fixes
  * Fix statement splitting when parsing recursive statements (issue57,
    thanks to piranna).
  * Fix for negative numbers (issue56, thanks to kevinjqiu).
+ * Pretty format comments in identifier lists (issue59).
  * Several minor bug fixes and improvements.
 
 

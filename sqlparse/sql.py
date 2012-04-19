@@ -322,6 +322,14 @@ class TokenList(Token):
         """Inserts *token* before *where*."""
         self.tokens.insert(self.token_index(where), token)
 
+    def insert_after(self, where, token):
+        """Inserts *token* after *where*."""
+        next_token = self.token_next(where)
+        if next_token is None:
+            self.tokens.append(token)
+        else:
+            self.tokens.insert(self.token_index(next_token), token)
+
     def has_alias(self):
         """Returns ``True`` if an alias is present."""
         return self.get_alias() is not None

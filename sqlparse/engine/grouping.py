@@ -197,6 +197,7 @@ def group_identifier_list(tlist):
                    lambda t: t.ttype == T.Number.Integer,
                    lambda t: t.ttype == T.String.Single,
                    lambda t: isinstance(t, sql.Comparison),
+                   lambda t: isinstance(t, sql.Comment),
                    ]
     tcomma = tlist.token_next_match(idx, T.Punctuation, ',')
     start = None
@@ -314,18 +315,19 @@ def group_functions(tlist):
 
 
 def group(tlist):
-    for func in [group_parenthesis,
-                 group_functions,
-                 group_comments,
-                 group_where,
-                 group_case,
-                 group_identifier,
-                 group_typecasts,
-                 group_as,
-                 group_aliased,
-                 group_assignment,
-                 group_comparison,
-                 group_identifier_list,
-                 group_if,
-                 group_for]:
+    for func in [
+            group_comments,
+            group_parenthesis,
+            group_functions,
+            group_where,
+            group_case,
+            group_identifier,
+            group_typecasts,
+            group_as,
+            group_aliased,
+            group_assignment,
+            group_comparison,
+            group_identifier_list,
+            group_if,
+            group_for]:
         func(tlist)
