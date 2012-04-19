@@ -218,10 +218,11 @@ class StripWhitespaceFilter(Filter):
             tlist.tokens.pop(-2)
         self._stripws_default(tlist)
 
-    def process(self, stack, stmt):
-        [self.process(stack, sgroup) for sgroup in stmt.get_sublists()]
+    def process(self, stack, stmt, depth=0):
+        [self.process(stack, sgroup, depth+1)
+         for sgroup in stmt.get_sublists()]
         self._stripws(stmt)
-        if stmt.tokens[-1].is_whitespace():
+        if depth == 0 and stmt.tokens[-1].is_whitespace():
             stmt.tokens.pop(-1)
 
 
