@@ -7,6 +7,10 @@ Bug Fixes
    operators (issue58).
  * Make keyword detection more restrict (issue47).
  * Improve handling of CASE statements (issue46).
+ * Fix statement splitting when parsing recursive statements (issue57,
+   thanks to piranna).
+ * Fix for negative numbers (issue56, thanks to kevinjqiu).
+ * Several minor bug fixes and improvements.
 
 
 Release 0.1.3 (Jul 29, 2011)
