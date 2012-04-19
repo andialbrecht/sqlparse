@@ -3,6 +3,8 @@ python-sqlparse - Parse SQL statements
 
 sqlparse is a non-validating SQL parser module for Python.
 
+.. image:: https://secure.travis-ci.org/andialbrecht/sqlparse.png?branch=master
+
 
 Install
 -------
