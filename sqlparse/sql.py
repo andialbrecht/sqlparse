@@ -137,7 +137,7 @@ class TokenList(Token):
         if tokens is None:
             tokens = []
         self.tokens = tokens
-        Token.__init__(self, None, None)
+        Token.__init__(self, None, unicode(self))
 
     def __unicode__(self):
         return ''.join(unicode(x) for x in self.flatten())
