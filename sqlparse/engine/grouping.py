@@ -194,6 +194,7 @@ def group_identifier_list(tlist):
                    lambda t: t.ttype == T.Name,
                    lambda t: t.ttype == T.Wildcard,
                    lambda t: t.match(T.Keyword, 'null'),
+                   lambda t: t.match(T.Keyword, 'role'),
                    lambda t: t.ttype == T.Number.Integer,
                    lambda t: t.ttype == T.String.Single,
                    lambda t: isinstance(t, sql.Comparison),

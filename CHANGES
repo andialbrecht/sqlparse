@@ -2,9 +2,9 @@ Development
 -----------
 
 Bug Fixes
- * Avoid "stair case" effects when identifiers and functions are mixed
-   in identifier lists (issue45) and when asterisks are used as
-   operators (issue58).
+ * Avoid "stair case" effects when identifiers, functions or keywords
+   are mixed in identifier lists (issue45, issue49) and when asterisks
+   are used as operators (issue58).
  * Make keyword detection more restrict (issue47).
  * Improve handling of CASE statements (issue46).
  * Fix statement splitting when parsing recursive statements (issue57,
