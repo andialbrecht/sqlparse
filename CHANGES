@@ -1,5 +1,5 @@
-Development
------------
+Release 0.1.4 (Apr 20, 2012)
+----------------------------
 
 Bug Fixes
  * Avoid "stair case" effects when identifiers, functions,

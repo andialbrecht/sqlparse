@@ -6,7 +6,7 @@
 """Parse SQL statements."""
 
 
-__version__ = '0.1.3'
+__version__ = '0.1.4'
 
 
 class SQLParseError(Exception):
