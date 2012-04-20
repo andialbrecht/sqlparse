@@ -68,6 +68,12 @@ class TestFormat(TestCaseBase):
         self.assertRaises(sqlparse.SQLParseError, sqlparse.format, s,
                           strip_whitespace=None)
 
+    def test_preserve_ws(self):
+        # preserve at least one whitespace after subgroups
+        f = lambda sql: sqlparse.format(sql, strip_whitespace=True)
+        s = 'select\n* /* foo */  from bar '
+        self.ndiffAssertEqual(f(s), 'select * /* foo */ from bar')
+
     def test_outputformat(self):
         sql = 'select * from foo;'
         self.assertRaises(sqlparse.SQLParseError, sqlparse.format, sql,

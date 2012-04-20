@@ -137,7 +137,7 @@ class TokenList(Token):
         if tokens is None:
             tokens = []
         self.tokens = tokens
-        Token.__init__(self, None, None)
+        Token.__init__(self, None, unicode(self))
 
     def __unicode__(self):
         return ''.join(unicode(x) for x in self.flatten())
@@ -321,6 +321,14 @@ class TokenList(Token):
     def insert_before(self, where, token):
         """Inserts *token* before *where*."""
         self.tokens.insert(self.token_index(where), token)
+
+    def insert_after(self, where, token):
+        """Inserts *token* after *where*."""
+        next_token = self.token_next(where)
+        if next_token is None:
+            self.tokens.append(token)
+        else:
+            self.tokens.insert(self.token_index(next_token), token)
 
     def has_alias(self):
         """Returns ``True`` if an alias is present."""
