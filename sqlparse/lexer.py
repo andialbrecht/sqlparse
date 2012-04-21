@@ -271,8 +271,9 @@ class Lexer(object):
         statetokens = tokendefs[statestack[-1]]
         known_names = {}
 
-        text = self._decode(stream.read(self.bufsize))
+        text = stream.read(self.bufsize)
         hasmore = len(text) == self.bufsize
+        text = self._decode(text)
 
         while 1:
             for rexmatch, action, new_state in statetokens:
@@ -317,9 +318,9 @@ class Lexer(object):
                     break
             else:
                 if hasmore:
-                    buf = self._decode(stream.read(self.bufsize))
+                    buf = stream.read(self.bufsize)
                     hasmore = len(buf) == self.bufsize
-                    text = text[pos:] + buf
+                    text = text[pos:] + self._decode(buf)
                     pos = 0
                     continue
 
