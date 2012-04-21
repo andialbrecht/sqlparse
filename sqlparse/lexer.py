@@ -16,7 +16,7 @@ import re
 
 from sqlparse import tokens
 from sqlparse.keywords import KEYWORDS, KEYWORDS_COMMON
-
+from cStringIO import StringIO
 
 class include(str):
     pass
@@ -239,14 +239,17 @@ class Lexer(object):
         Also preprocess the text, i.e. expand tabs and strip it if
         wanted and applies registered filters.
         """
-        if isinstance(text, str):
-            text = self._decode(text)
-
         if isinstance(text, basestring):
             if self.stripall:
                 text = text.strip()
             elif self.stripnl:
                 text = text.strip('\n')
+
+            if isinstance(text, unicode):
+                text = StringIO(text.encode('utf-8'))
+                self.encoding = 'utf-8'
+            else:
+                text = StringIO(text)
 
         def streamer():
             for i, t, v in self.get_tokens_unprocessed(text):
@@ -256,7 +259,7 @@ class Lexer(object):
             stream = apply_filters(stream, self.filters, self)
         return stream
 
-    def get_tokens_unprocessed(self, text, stack=('root',)):
+    def get_tokens_unprocessed(self, stream, stack=('root',)):
         """
         Split ``text`` into (tokentype, text) pairs.
 
@@ -268,10 +271,8 @@ class Lexer(object):
         statetokens = tokendefs[statestack[-1]]
         known_names = {}
 
-        hasmore = False
-        if hasattr(text, 'read'):
-            o, text = text, self._decode(text.read(self.bufsize))
-            hasmore = len(text) == self.bufsize
+        text = self._decode(stream.read(self.bufsize))
+        hasmore = len(text) == self.bufsize
 
         while 1:
             for rexmatch, action, new_state in statetokens:
@@ -315,18 +316,18 @@ class Lexer(object):
                     break
             else:
                 try:
+                    if hasmore:
+                        buf = self._decode(stream.read(self.bufsize))
+                        hasmore = len(buf) == self.bufsize
+                        text = text[pos:] + buf
+                        pos = 0
+                        continue
                     if text[pos] == '\n':
                         # at EOL, reset state to "root"
                         pos += 1
                         statestack = ['root']
                         statetokens = tokendefs['root']
                         yield pos, tokens.Text, u'\n'
-                        continue
-                    if hasmore:
-                        buf = self._decode(o.read(self.bufsize))
-                        hasmore = len(buf) == self.bufsize
-                        text = text[pos:] + buf
-                        pos = 0
                         continue
                     yield pos, tokens.Error, text[pos]
                     pos += 1
