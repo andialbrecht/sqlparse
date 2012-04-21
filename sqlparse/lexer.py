@@ -279,6 +279,7 @@ class Lexer(object):
                 m = rexmatch(text, pos)
                 if m:
                     if hasmore and m.end() == len(text):
+                        # Since this is end, token may be truncated
                         continue
 
                     # print rex.pattern
@@ -315,13 +316,14 @@ class Lexer(object):
                         statetokens = tokendefs[statestack[-1]]
                     break
             else:
+                if hasmore:
+                    buf = self._decode(stream.read(self.bufsize))
+                    hasmore = len(buf) == self.bufsize
+                    text = text[pos:] + buf
+                    pos = 0
+                    continue
+
                 try:
-                    if hasmore:
-                        buf = self._decode(stream.read(self.bufsize))
-                        hasmore = len(buf) == self.bufsize
-                        text = text[pos:] + buf
-                        pos = 0
-                        continue
                     if text[pos] == '\n':
                         # at EOL, reset state to "root"
                         pos += 1
