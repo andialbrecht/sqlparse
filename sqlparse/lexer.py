@@ -159,6 +159,7 @@ class Lexer(object):
     stripnl = False
     tabsize = 0
     flags = re.IGNORECASE
+    bufsize = 4096
 
     tokens = {
         'root': [
@@ -214,6 +215,21 @@ class Lexer(object):
             filter_ = filter_(**options)
         self.filters.append(filter_)
 
+    def _decode(self, text):
+        if self.encoding == 'guess':
+            try:
+                text = text.decode('utf-8')
+                if text.startswith(u'\ufeff'):
+                    text = text[len(u'\ufeff'):]
+            except UnicodeDecodeError:
+                text = text.decode('latin1')
+        else:
+            text = text.decode(self.encoding)
+
+        if self.tabsize > 0:
+            text = text.expandtabs(self.tabsize)
+        return text
+
     def get_tokens(self, text, unfiltered=False):
         """
         Return an iterable of (tokentype, value) pairs generated from
@@ -223,24 +239,14 @@ class Lexer(object):
         Also preprocess the text, i.e. expand tabs and strip it if
         wanted and applies registered filters.
         """
-        if not isinstance(text, unicode):
-            if self.encoding == 'guess':
-                try:
-                    text = text.decode('utf-8')
-                    if text.startswith(u'\ufeff'):
-                        text = text[len(u'\ufeff'):]
-                except UnicodeDecodeError:
-                    text = text.decode('latin1')
-            else:
-                text = text.decode(self.encoding)
-        if self.stripall:
-            text = text.strip()
-        elif self.stripnl:
-            text = text.strip('\n')
-        if self.tabsize > 0:
-            text = text.expandtabs(self.tabsize)
-#        if not text.endswith('\n'):
-#            text += '\n'
+        if isinstance(text, str):
+            text = self._decode(text)
+
+        if isinstance(text, basestring):
+            if self.stripall:
+                text = text.strip()
+            elif self.stripnl:
+                text = text.strip('\n')
 
         def streamer():
             for i, t, v in self.get_tokens_unprocessed(text):
@@ -261,10 +267,19 @@ class Lexer(object):
         statestack = list(stack)
         statetokens = tokendefs[statestack[-1]]
         known_names = {}
+
+        hasmore = False
+        if hasattr(text, 'read'):
+            o, text = text, self._decode(text.read(self.bufsize))
+            hasmore = len(text) == self.bufsize
+
         while 1:
             for rexmatch, action, new_state in statetokens:
                 m = rexmatch(text, pos)
                 if m:
+                    if hasmore and m.end() == len(text):
+                        continue
+
                     # print rex.pattern
                     value = m.group()
                     if value in known_names:
@@ -306,6 +321,12 @@ class Lexer(object):
                         statestack = ['root']
                         statetokens = tokendefs['root']
                         yield pos, tokens.Text, u'\n'
+                        continue
+                    if hasmore:
+                        buf = self._decode(o.read(self.bufsize))
+                        hasmore = len(buf) == self.bufsize
+                        text = text[pos:] + buf
+                        pos = 0
                         continue
                     yield pos, tokens.Error, text[pos]
                     pos += 1
