@@ -16,7 +16,7 @@ import re
 
 from sqlparse import tokens
 from sqlparse.keywords import KEYWORDS, KEYWORDS_COMMON
-
+from cStringIO import StringIO
 
 class include(str):
     pass
@@ -159,6 +159,7 @@ class Lexer(object):
     stripnl = False
     tabsize = 0
     flags = re.IGNORECASE
+    bufsize = 4096
 
     tokens = {
         'root': [
@@ -214,6 +215,21 @@ class Lexer(object):
             filter_ = filter_(**options)
         self.filters.append(filter_)
 
+    def _decode(self, text):
+        if self.encoding == 'guess':
+            try:
+                text = text.decode('utf-8')
+                if text.startswith(u'\ufeff'):
+                    text = text[len(u'\ufeff'):]
+            except UnicodeDecodeError:
+                text = text.decode('latin1')
+        else:
+            text = text.decode(self.encoding)
+
+        if self.tabsize > 0:
+            text = text.expandtabs(self.tabsize)
+        return text
+
     def get_tokens(self, text, unfiltered=False):
         """
         Return an iterable of (tokentype, value) pairs generated from
@@ -223,24 +239,17 @@ class Lexer(object):
         Also preprocess the text, i.e. expand tabs and strip it if
         wanted and applies registered filters.
         """
-        if not isinstance(text, unicode):
-            if self.encoding == 'guess':
-                try:
-                    text = text.decode('utf-8')
-                    if text.startswith(u'\ufeff'):
-                        text = text[len(u'\ufeff'):]
-                except UnicodeDecodeError:
-                    text = text.decode('latin1')
+        if isinstance(text, basestring):
+            if self.stripall:
+                text = text.strip()
+            elif self.stripnl:
+                text = text.strip('\n')
+
+            if isinstance(text, unicode):
+                text = StringIO(text.encode('utf-8'))
+                self.encoding = 'utf-8'
             else:
-                text = text.decode(self.encoding)
-        if self.stripall:
-            text = text.strip()
-        elif self.stripnl:
-            text = text.strip('\n')
-        if self.tabsize > 0:
-            text = text.expandtabs(self.tabsize)
-#        if not text.endswith('\n'):
-#            text += '\n'
+                text = StringIO(text)
 
         def streamer():
             for i, t, v in self.get_tokens_unprocessed(text):
@@ -250,7 +259,7 @@ class Lexer(object):
             stream = apply_filters(stream, self.filters, self)
         return stream
 
-    def get_tokens_unprocessed(self, text, stack=('root',)):
+    def get_tokens_unprocessed(self, stream, stack=('root',)):
         """
         Split ``text`` into (tokentype, text) pairs.
 
@@ -261,10 +270,19 @@ class Lexer(object):
         statestack = list(stack)
         statetokens = tokendefs[statestack[-1]]
         known_names = {}
+
+        text = stream.read(self.bufsize)
+        hasmore = len(text) == self.bufsize
+        text = self._decode(text)
+
         while 1:
             for rexmatch, action, new_state in statetokens:
                 m = rexmatch(text, pos)
                 if m:
+                    if hasmore and m.end() == len(text):
+                        # Since this is end, token may be truncated
+                        continue
+
                     # print rex.pattern
                     value = m.group()
                     if value in known_names:
@@ -299,6 +317,13 @@ class Lexer(object):
                         statetokens = tokendefs[statestack[-1]]
                     break
             else:
+                if hasmore:
+                    buf = stream.read(self.bufsize)
+                    hasmore = len(buf) == self.bufsize
+                    text = text[pos:] + self._decode(buf)
+                    pos = 0
+                    continue
+
                 try:
                     if text[pos] == '\n':
                         # at EOL, reset state to "root"

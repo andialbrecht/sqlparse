@@ -69,6 +69,13 @@ class TestTokenize(unittest.TestCase):
         self.assertEqual(tokens[2][0], Number.Integer)
         self.assertEqual(tokens[2][1], '-1')
 
+    def test_tab_expansion(self):
+        sql = "\t"
+        lex = lexer.Lexer()
+        lex.tabsize = 5
+        tokens = list(lex.get_tokens(sql))
+        self.assertEqual(tokens[0][1], " " * 5)
+
 class TestToken(unittest.TestCase):
 
     def test_str(self):
@@ -116,3 +123,35 @@ class TestTokenList(unittest.TestCase):
                          t2)
         self.assertEqual(x.token_matching(1, [lambda t: t.ttype is Keyword]),
                          None)
+
+class TestStream(unittest.TestCase):
+    def test_simple(self):
+        import types
+        from cStringIO import StringIO
+
+        stream = StringIO("SELECT 1; SELECT 2;")
+        lex = lexer.Lexer()
+
+        tokens = lex.get_tokens(stream)
+        self.assertEqual(len(list(tokens)), 9)
+
+        stream.seek(0)
+        lex.bufsize = 4
+        tokens = list(lex.get_tokens(stream))
+        self.assertEqual(len(tokens), 9)
+
+        stream.seek(0)
+        lex.bufsize = len(stream.getvalue())
+        tokens = list(lex.get_tokens(stream))
+        self.assertEqual(len(tokens), 9)
+
+    def test_error(self):
+        from cStringIO import StringIO
+
+        stream = StringIO("FOOBAR{")
+
+        lex = lexer.Lexer()
+        lex.bufsize = 4
+        tokens = list(lex.get_tokens(stream))
+        self.assertEqual(len(tokens), 2)
+        self.assertEqual(tokens[1][0], Error)
