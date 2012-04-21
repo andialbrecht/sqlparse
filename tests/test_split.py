@@ -121,12 +121,12 @@ class SQLSplitTest(TestCaseBase):
         from cStringIO import StringIO
 
         stream = StringIO("SELECT 1; SELECT 2;")
-        stmts = sqlparse.splitstream(stream)
+        stmts = sqlparse.parsestream(stream)
         self.assertEqual(type(stmts), types.GeneratorType)
         self.assertEqual(len(list(stmts)), 2)
 
-    def test_encoding_splitstream(self):
+    def test_encoding_parsestream(self):
         from cStringIO import StringIO
         stream = StringIO("SELECT 1; SELECT 2;")
-        stmts = list(sqlparse.splitstream(stream))
+        stmts = list(sqlparse.parsestream(stream))
         self.assertEqual(type(stmts[0].tokens[0].value), unicode)
