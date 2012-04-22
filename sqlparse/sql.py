@@ -15,11 +15,13 @@ class Token(object):
     the type of the token.
     """
 
-    __slots__ = ('value', 'ttype', 'parent')
+    __slots__ = ('value', 'ttype', 'parent', 'normalized', 'is_keyword')
 
     def __init__(self, ttype, value):
         self.value = value
+        self.normalized = value.upper() if ttype in T.Keyword else value
         self.ttype = ttype
+        self.is_keyword = ttype in T.Keyword
         self.parent = None
 
     def __str__(self):
@@ -71,9 +73,9 @@ class Token(object):
         type_matched = self.ttype is ttype
         if not type_matched or values is None:
             return type_matched
-        if isinstance(values, basestring):
-            values = set([values])
         if regex:
+            if isinstance(values, basestring):
+                values = set([values])
             if self.ttype is T.Keyword:
                 values = set([re.compile(v, re.IGNORECASE) for v in values])
             else:
@@ -83,10 +85,18 @@ class Token(object):
                     return True
             return False
         else:
-            if self.ttype in T.Keyword:
-                values = set([v.upper() for v in values])
-                return self.value.upper() in values
+            if isinstance(values, basestring):
+                if self.is_keyword:
+                    return values.upper() == self.normalized
+                else:
+                    return values == self.value
+            if self.is_keyword:
+                for v in values:
+                    if v.upper() == self.normalized:
+                        return True
+                return False
             else:
+                print len(values)
                 return self.value in values
 
     def is_group(self):
@@ -227,7 +237,8 @@ class TokenList(Token):
         if not isinstance(idx, int):
             idx = self.token_index(idx)
 
-        for token in self.tokens[idx:]:
+        for n in xrange(idx, len(self.tokens)):
+            token = self.tokens[n]
             if token.match(ttype, value, regex):
                 return token
 
@@ -395,7 +406,7 @@ class Statement(TokenList):
             return 'UNKNOWN'
 
         elif first_token.ttype in (T.Keyword.DML, T.Keyword.DDL):
-            return first_token.value.upper()
+            return first_token.normalized
 
         return 'UNKNOWN'
 

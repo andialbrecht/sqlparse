@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 
 # Tests splitting functions.
@@ -116,3 +115,18 @@ class SQLSplitTest(TestCaseBase):
                'SELECT t FROM two')
         stmts = sqlparse.split(sql)
         self.assertEqual(len(stmts), 2)
+
+    def test_split_stream(self):
+        import types
+        from cStringIO import StringIO
+
+        stream = StringIO("SELECT 1; SELECT 2;")
+        stmts = sqlparse.parsestream(stream)
+        self.assertEqual(type(stmts), types.GeneratorType)
+        self.assertEqual(len(list(stmts)), 2)
+
+    def test_encoding_parsestream(self):
+        from cStringIO import StringIO
+        stream = StringIO("SELECT 1; SELECT 2;")
+        stmts = list(sqlparse.parsestream(stream))
+        self.assertEqual(type(stmts[0].tokens[0].value), unicode)
