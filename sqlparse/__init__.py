@@ -31,6 +31,16 @@ def parse(sql):
     return tuple(stack.run(sql))
 
 
+def parsestream(stream):
+    """Pares sql statements from file-like object.
+
+    Returns a generator of Statement instances.
+    """
+    stack = engine.FilterStack()
+    stack.full_analyze()
+    return stack.run(stream)
+
+
 def format(sql, **options):
     """Format *sql* according to *options*.
 
@@ -53,7 +63,6 @@ def split(sql):
     stack = engine.FilterStack()
     stack.split_statements = True
     return [unicode(stmt) for stmt in stack.run(sql)]
-
 
 from sqlparse.engine.filter import StatementFilter
 def split2(stream):
