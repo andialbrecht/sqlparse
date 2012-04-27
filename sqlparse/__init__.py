@@ -26,13 +26,11 @@ def parse(sql):
 
     Returns a tuple of :class:`~sqlparse.sql.Statement` instances.
     """
-    stack = engine.FilterStack()
-    stack.full_analyze()
-    return tuple(stack.run(sql))
+    return tuple(parsestream(sql))
 
 
 def parsestream(stream):
-    """Pares sql statements from file-like object.
+    """Parse sql statements from file-like object.
 
     Returns a generator of Statement instances.
     """
