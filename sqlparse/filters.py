@@ -11,13 +11,7 @@ from sqlparse.tokens import (Comment, Comparison, Keyword, Name, Punctuation,
                              String, Whitespace)
 
 
-class Filter(object):
-
-    def process(self, *args):
-        raise NotImplementedError
-
-
-class TokenFilter(Filter):
+class TokenFilter:
 
     def process(self, stack, stream):
         raise NotImplementedError
@@ -57,7 +51,7 @@ class IdentifierCaseFilter(_CaseFilter):
             yield ttype, value
 
 
-class GetComments(Filter):
+class GetComments(TokenFilter):
     """Get the comments from a stack"""
     def process(self, stack, stream):
         for token_type, value in stream:
@@ -65,7 +59,7 @@ class GetComments(Filter):
                 yield token_type, value
 
 
-class StripComments(Filter):
+class StripComments(TokenFilter):
     """Strip the comments from a stack"""
     def process(self, stack, stream):
         for token_type, value in stream:
@@ -101,7 +95,7 @@ def StripWhitespace(stream):
         last_type = token_type
 
 
-class IncludeStatement(Filter):
+class IncludeStatement(TokenFilter):
     """Filter that enable a INCLUDE statement"""
 
     def __init__(self, dirpath=".", maxRecursive=10):
@@ -163,7 +157,7 @@ class IncludeStatement(Filter):
 # ----------------------
 # statement process
 
-class StripCommentsFilter(Filter):
+class StripCommentsFilter(TokenFilter):
 
     def _get_next_comment(self, tlist):
         # TODO(andi) Comment types should be unified, see related issue38
@@ -194,7 +188,7 @@ class StripCommentsFilter(Filter):
         self._process(stmt)
 
 
-class StripWhitespaceFilter(Filter):
+class StripWhitespaceFilter(TokenFilter):
 
     def _stripws(self, tlist):
         func_name = '_stripws_%s' % tlist.__class__.__name__.lower()
@@ -226,7 +220,7 @@ class StripWhitespaceFilter(Filter):
             stmt.tokens.pop(-1)
 
 
-class ReindentFilter(Filter):
+class ReindentFilter(TokenFilter):
 
     def __init__(self, width=2, char=' ', line_width=None):
         self.width = width
@@ -391,7 +385,7 @@ class ReindentFilter(Filter):
 
 
 # FIXME: Doesn't work ;)
-class RightMarginFilter(Filter):
+class RightMarginFilter(TokenFilter):
 
     keep_together = (
 #        sql.TypeCast, sql.Identifier, sql.Alias,
@@ -429,7 +423,7 @@ class RightMarginFilter(Filter):
         group.tokens = self._process(stack, group, group.tokens)
 
 
-class ColumnsSelect(Filter):
+class ColumnsSelect(TokenFilter):
     """Get the columns names of a SELECT query"""
     def process(self, stack, stream):
         mode = 0
@@ -483,7 +477,7 @@ class ColumnsSelect(Filter):
 # ---------------------------
 # postprocess
 
-class SerializerUnicode(Filter):
+class SerializerUnicode(TokenFilter):
 
     def process(self, stack, stmt):
         raw = unicode(stmt)
@@ -617,7 +611,7 @@ class OutputPHPFilter(OutputFilter):
         yield sql.Token(T.Punctuation, ';')
 
 
-class Limit(Filter):
+class Limit(TokenFilter):
     """Get the LIMIT of a query.
 
     If not defined, return -1 (SQL specification for no LIMIT query)
