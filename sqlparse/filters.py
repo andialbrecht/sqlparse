@@ -503,10 +503,15 @@ def Tokens2Unicode(stream):
     return result
 
 
-class OutputFilter(Filter):
+class OutputFilter(TokenFilter):
+    varname_prefix = ''
+
     def __init__(self, varname='sql'):
         self.varname = self.varname_prefix + varname
         self.count = 0
+
+    def _process(self, stream, varname, has_nl):
+        raise NotImplementedError
 
     def process(self, stack, stmt):
         self.count += 1
@@ -521,8 +526,6 @@ class OutputFilter(Filter):
 
 
 class OutputPythonFilter(OutputFilter):
-    varname_prefix = ''
-
     def _process(self, stream, varname, has_nl):
         if self.count > 1:
             yield sql.Token(T.Whitespace, '\n')
