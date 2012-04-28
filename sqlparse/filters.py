@@ -538,8 +538,11 @@ class OutputPythonFilter(OutputFilter):
             yield sql.Token(T.Operator, '(')
         yield sql.Token(T.Text, "'")
 
+        # Print the tokens on the quote
         for token in stream:
+            # Token is a new line separator
             if token.is_whitespace() and '\n' in token.value:
+                # Close quote and add a new line
                 yield sql.Token(T.Text, " '")
                 yield sql.Token(T.Whitespace, '\n')
 
@@ -547,14 +550,18 @@ class OutputPythonFilter(OutputFilter):
                 yield sql.Token(T.Whitespace, ' ' * (len(varname) + 4))
                 yield sql.Token(T.Text, "'")
 
+                # Indentation
                 after_lb = token.value.split('\n', 1)[1]
-                if after_lb:  # it's the indendation
+                if after_lb:
                     yield sql.Token(T.Whitespace, after_lb)
                 continue
 
-            elif token.value and "'" in token.value:
+            # Token has escape chars
+            elif "'" in token.value:
                 token.value = token.value.replace("'", "\\'")
-            yield sql.Token(T.Text, token.value or '')
+
+            # Put the token
+            yield sql.Token(T.Text, token.value)
 
         # Close quote
         yield sql.Token(T.Text, "'")
@@ -577,10 +584,12 @@ class OutputPHPFilter(OutputFilter):
         yield sql.Token(T.Whitespace, ' ')
         yield sql.Token(T.Text, '"')
 
+        # Print the tokens on the quote
         for token in stream:
+            # Token is a new line separator
             if token.is_whitespace() and '\n' in token.value:
-                yield sql.Token(T.Text, ' "')
-                yield sql.Token(T.Operator, ';')
+                # Close quote and add a new line
+                yield sql.Token(T.Text, ' ";')
                 yield sql.Token(T.Whitespace, '\n')
 
                 # Quote header on secondary lines
@@ -590,13 +599,17 @@ class OutputPHPFilter(OutputFilter):
                 yield sql.Token(T.Whitespace, ' ')
                 yield sql.Token(T.Text, '"')
 
+                # Indentation
                 after_lb = token.value.split('\n', 1)[1]
                 if after_lb:
-                    yield sql.Token(T.Text, after_lb)
+                    yield sql.Token(T.Whitespace, after_lb)
                 continue
 
+            # Token has escape chars
             elif '"' in token.value:
                 token.value = token.value.replace('"', '\\"')
+
+            # Put the token
             yield sql.Token(T.Text, token.value)
 
         # Close quote
