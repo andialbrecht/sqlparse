@@ -219,7 +219,7 @@ class StripWhitespaceFilter(Filter):
         self._stripws_default(tlist)
 
     def process(self, stack, stmt, depth=0):
-        [self.process(stack, sgroup, depth+1)
+        [self.process(stack, sgroup, depth + 1)
          for sgroup in stmt.get_sublists()]
         self._stripws(stmt)
         if depth == 0 and stmt.tokens[-1].is_whitespace():
@@ -492,6 +492,7 @@ class SerializerUnicode(Filter):
         if add_nl:
             res += '\n'
         return res
+
 
 def Tokens2Unicode(stream):
     result = ""
