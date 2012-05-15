@@ -16,11 +16,12 @@ from sqlparse.tokens import (Comment, Comparison, Keyword, Name, Punctuation,
 # token process
 
 class _CaseFilter:
+    """
+    Base filter for case sensitive filters
+    """
     ttype = None
 
-    def __init__(self, case=None):
-        if case is None:
-            case = 'upper'
+    def __init__(self, case='upper'):
         assert case in ['lower', 'upper', 'capitalize']
         self.convert = getattr(unicode, case)
 
@@ -39,9 +40,6 @@ class IdentifierCaseFilter(_CaseFilter):
     ttype = (T.Name, T.String.Symbol)
 
     def __call__(self, stream):
-        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
-             DeprecationWarning)
-
         for ttype, value in stream:
             if ttype in self.ttype and not value.strip()[0] == '"':
                 value = self.convert(value)
