@@ -2,7 +2,8 @@
 
 import re
 
-from os.path import abspath, join
+from os.path  import abspath, join
+from warnings import warn
 
 from sqlparse import sql
 from sqlparse import tokens as T
@@ -25,6 +26,9 @@ class _CaseFilter:
         self.convert = getattr(unicode, case)
 
     def process(self, stack, stream):
+        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
+             DeprecationWarning)
+
         for ttype, value in stream:
             if ttype in self.ttype:
                 value = self.convert(value)
@@ -39,6 +43,9 @@ class IdentifierCaseFilter(_CaseFilter):
     ttype = (T.Name, T.String.Symbol)
 
     def process(self, stack, stream):
+        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
+             DeprecationWarning)
+
         for ttype, value in stream:
             if ttype in self.ttype and not value.strip()[0] == '"':
                 value = self.convert(value)
@@ -48,6 +55,9 @@ class IdentifierCaseFilter(_CaseFilter):
 class GetComments:
     """Get the comments from a stack"""
     def process(self, stack, stream):
+        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
+             DeprecationWarning)
+
         for token_type, value in stream:
             if token_type in Comment:
                 yield token_type, value
@@ -56,6 +66,9 @@ class GetComments:
 class StripComments:
     """Strip the comments from a stack"""
     def process(self, stack, stream):
+        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
+             DeprecationWarning)
+
         for token_type, value in stream:
             if token_type not in Comment:
                 yield token_type, value
@@ -99,6 +112,9 @@ class IncludeStatement:
         self.detected = False
 
     def process(self, stack, stream):
+        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
+             DeprecationWarning)
+
         # Run over all tokens in the stream
         for token_type, value in stream:
             # INCLUDE statement found, set detected mode
@@ -178,6 +194,9 @@ class StripCommentsFilter:
             token = self._get_next_comment(tlist)
 
     def process(self, stack, stmt):
+        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
+             DeprecationWarning)
+
         [self.process(stack, sgroup) for sgroup in stmt.get_sublists()]
         self._process(stmt)
 
@@ -207,6 +226,9 @@ class StripWhitespaceFilter:
         self._stripws_default(tlist)
 
     def process(self, stack, stmt, depth=0):
+        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
+             DeprecationWarning)
+
         [self.process(stack, sgroup, depth + 1)
          for sgroup in stmt.get_sublists()]
         self._stripws(stmt)
@@ -363,6 +385,9 @@ class ReindentFilter:
         [self._process(sgroup) for sgroup in tlist.get_sublists()]
 
     def process(self, stack, stmt):
+        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
+             DeprecationWarning)
+
         if isinstance(stmt, sql.Statement):
             self._curr_stmt = stmt
         self._process(stmt)
@@ -413,6 +438,9 @@ class RightMarginFilter:
             yield token
 
     def process(self, stack, group):
+        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
+             DeprecationWarning)
+
         return
         group.tokens = self._process(stack, group, group.tokens)
 
@@ -420,6 +448,9 @@ class RightMarginFilter:
 class ColumnsSelect:
     """Get the columns names of a SELECT query"""
     def process(self, stack, stream):
+        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
+             DeprecationWarning)
+
         mode = 0
         oldValue = ""
         parenthesis = 0
@@ -474,6 +505,9 @@ class ColumnsSelect:
 class SerializerUnicode:
 
     def process(self, stack, stmt):
+        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
+             DeprecationWarning)
+
         raw = unicode(stmt)
         add_nl = raw.endswith('\n')
         res = '\n'.join(line.rstrip() for line in raw.splitlines())
@@ -502,6 +536,9 @@ class OutputFilter:
         raise NotImplementedError
 
     def process(self, stack, stmt):
+        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
+             DeprecationWarning)
+
         self.count += 1
         if self.count > 1:
             varname = '%s%d' % (self.varname, self.count)
@@ -611,6 +648,9 @@ class Limit:
     If not defined, return -1 (SQL specification for no LIMIT query)
     """
     def process(self, stack, stream):
+        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
+             DeprecationWarning)
+
         index = 7
         stream = list(stream)
         stream.reverse()

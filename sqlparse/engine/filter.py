@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from warnings import warn
+
 from sqlparse.sql import Statement, Token
 from sqlparse import tokens as T
 
@@ -70,6 +72,9 @@ class StatementFilter:
 
     def process(self, stack, stream):
         "Process the stream"
+        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
+             DeprecationWarning)
+
         consume_ws = False
         splitlevel = 0
         stmt = None
