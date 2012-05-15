@@ -6,16 +6,16 @@
 """Parse SQL statements."""
 
 
-__version__ = '0.1.4'
-
-
-class SQLParseError(Exception):
-    """Base class for exceptions in this module."""
+__version__ = '0.2.0'
 
 
 # Setup namespace
 from sqlparse         import engine, filters, formatter
 from sqlparse.filters import serializerUnicode
+
+
+class SQLParseError(Exception):
+    """Base class for exceptions in this module."""
 
 
 def parse(sql):
