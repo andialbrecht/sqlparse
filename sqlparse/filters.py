@@ -472,11 +472,7 @@ def columnsSelect(stream):
 # postprocess
 
 class SerializerUnicode:
-
-    def process(self, stack, stmt):
-        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
-             DeprecationWarning)
-
+    def __call__(self, stmt):
         raw = unicode(stmt)
         add_nl = raw.endswith('\n')
         res = '\n'.join(line.rstrip() for line in raw.splitlines())
@@ -504,7 +500,7 @@ class OutputFilter:
     def _process(self, stream, varname, has_nl):
         raise NotImplementedError
 
-    def process(self, stack, stmt):
+    def __call__(self, stmt):
         warn("Deprecated, use callable objects. This will be removed at 0.2.0",
              DeprecationWarning)
 

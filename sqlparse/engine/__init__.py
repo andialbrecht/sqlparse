@@ -73,7 +73,7 @@ class FilterStack(object):
                 for stmt in stream:
                     stmt.tokens = list(self._flatten(stmt.tokens))
                     for filter_ in self.postprocess:
-                        stmt = filter_.process(self, stmt)
+                        stmt = filter_(stmt)
                     yield stmt
             stream = _run2(stream)
 
