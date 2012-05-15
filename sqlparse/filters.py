@@ -99,10 +99,7 @@ class IncludeStatement:
 
         self.detected = False
 
-    def process(self, stack, stream):
-        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
-             DeprecationWarning)
-
+    def __call__(self, stream):
         # Run over all tokens in the stream
         for token_type, value in stream:
             # INCLUDE statement found, set detected mode
