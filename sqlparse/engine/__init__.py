@@ -46,7 +46,7 @@ class FilterStack(object):
         if (self.stmtprocess or self.postprocess or self.split_statements
             or self._grouping):
             splitter = StatementFilter()
-            stream = splitter.process(self, stream)
+            stream = splitter(stream)
 
         if self._grouping:
 

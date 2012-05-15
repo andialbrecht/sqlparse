@@ -70,11 +70,8 @@ class StatementFilter:
         # Default
         return 0
 
-    def process(self, stack, stream):
+    def __call__(self, stream):
         "Process the stream"
-        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
-             DeprecationWarning)
-
         consume_ws = False
         splitlevel = 0
         stmt = None
