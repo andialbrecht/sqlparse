@@ -48,15 +48,11 @@ class IdentifierCaseFilter(_CaseFilter):
             yield ttype, value
 
 
-class GetComments:
+def GetComments(stream):
     """Get the comments from a stack"""
-    def process(self, stack, stream):
-        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
-             DeprecationWarning)
-
-        for token_type, value in stream:
-            if token_type in Comment:
-                yield token_type, value
+    for token_type, value in stream:
+        if token_type == Comment:
+            yield token_type, value
 
 
 class StripComments:
