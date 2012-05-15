@@ -62,7 +62,7 @@ class FilterStack(object):
                 ret = []
                 for stmt in stream:
                     for filter_ in self.stmtprocess:
-                        filter_.process(self, stmt)
+                        filter_(stmt)
                     ret.append(stmt)
                 return ret
             stream = _run1(stream)

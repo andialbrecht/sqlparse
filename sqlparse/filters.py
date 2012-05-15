@@ -153,7 +153,6 @@ class IncludeStatement:
 # statement process
 
 class StripCommentsFilter:
-
     def _get_next_comment(self, tlist):
         # TODO(andi) Comment types should be unified, see related issue38
         token = tlist.token_next_by_instance(0, sql.Comment)
@@ -178,16 +177,13 @@ class StripCommentsFilter:
                 tlist.tokens.pop(tidx)
             token = self._get_next_comment(tlist)
 
-    def process(self, stack, stmt):
-        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
-             DeprecationWarning)
-
-        [self.process(stack, sgroup) for sgroup in stmt.get_sublists()]
+    def __call__(self, stmt):
+        for sgroup in stmt.get_sublists():
+            self(sgroup)
         self._process(stmt)
 
 
 class StripWhitespaceFilter:
-
     def _stripws(self, tlist):
         func_name = '_stripws_%s' % tlist.__class__.__name__.lower()
         func = getattr(self, func_name, self._stripws_default)
@@ -210,19 +206,15 @@ class StripWhitespaceFilter:
             tlist.tokens.pop(-2)
         self._stripws_default(tlist)
 
-    def process(self, stack, stmt, depth=0):
-        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
-             DeprecationWarning)
-
-        [self.process(stack, sgroup, depth + 1)
-         for sgroup in stmt.get_sublists()]
+    def __call__(self, stmt, depth=0):
+        for sgroup in stmt.get_sublists():
+            self(sgroup, depth + 1)
         self._stripws(stmt)
         if depth == 0 and stmt.tokens[-1].is_whitespace():
             stmt.tokens.pop(-1)
 
 
 class ReindentFilter:
-
     def __init__(self, width=2, char=' ', line_width=None):
         self.width = width
         self.char = char
@@ -369,10 +361,7 @@ class ReindentFilter:
             self._split_kwds(tlist)
         [self._process(sgroup) for sgroup in tlist.get_sublists()]
 
-    def process(self, stack, stmt):
-        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
-             DeprecationWarning)
-
+    def __call__(self, stmt):
         if isinstance(stmt, sql.Statement):
             self._curr_stmt = stmt
         self._process(stmt)
