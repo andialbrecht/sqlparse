@@ -55,15 +55,11 @@ def GetComments(stream):
             yield token_type, value
 
 
-class StripComments:
+def StripComments(stream):
     """Strip the comments from a stack"""
-    def process(self, stack, stream):
-        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
-             DeprecationWarning)
-
-        for token_type, value in stream:
-            if token_type not in Comment:
-                yield token_type, value
+    for token_type, value in stream:
+        if token_type != Comment:
+            yield token_type, value
 
 
 def StripWhitespace(stream):
