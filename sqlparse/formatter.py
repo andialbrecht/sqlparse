@@ -5,8 +5,12 @@
 
 """SQL formatter"""
 
-from sqlparse import SQLParseError
-from sqlparse import filters
+from sqlparse         import filters
+from sqlparse.filters import stripCommentsFilter
+
+
+class SQLParseError(Exception):
+    """Base class for exceptions in this module."""
 
 
 def validate_options(options):
@@ -87,7 +91,7 @@ def build_filter_stack(stack, options):
     # After grouping
     if options.get('strip_comments', False):
         stack.enable_grouping()
-        stack.stmtprocess.append(filters.StripCommentsFilter())
+        stack.stmtprocess.append(stripCommentsFilter)
 
     if (options.get('strip_whitespace', False)
         or options.get('reindent', False)):

@@ -14,10 +14,6 @@ from sqlparse         import engine, filters, formatter
 from sqlparse.filters import serializerUnicode
 
 
-class SQLParseError(Exception):
-    """Base class for exceptions in this module."""
-
-
 def parse(sql):
     """Parse sql and return a list of statements.
 

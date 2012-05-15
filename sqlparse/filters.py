@@ -150,16 +150,16 @@ class IncludeStatement:
 # ----------------------
 # statement process
 
-class StripCommentsFilter:
-    def _get_next_comment(self, tlist):
+def stripCommentsFilter(stmt):
+    def _get_next_comment(tlist):
         # TODO(andi) Comment types should be unified, see related issue38
         token = tlist.token_next_by_instance(0, sql.Comment)
         if token is None:
             token = tlist.token_next_by_type(0, T.Comment)
         return token
 
-    def _process(self, tlist):
-        token = self._get_next_comment(tlist)
+    def _process(tlist):
+        token = _get_next_comment(tlist)
         while token:
             tidx = tlist.token_index(token)
             prev = tlist.token_prev(tidx, False)
@@ -173,12 +173,11 @@ class StripCommentsFilter:
                 tlist.tokens[tidx] = sql.Token(T.Whitespace, ' ')
             else:
                 tlist.tokens.pop(tidx)
-            token = self._get_next_comment(tlist)
+            token = _get_next_comment(tlist)
 
-    def __call__(self, stmt):
-        for sgroup in stmt.get_sublists():
-            self(sgroup)
-        self._process(stmt)
+    for sgroup in stmt.get_sublists():
+        stripCommentsFilter(sgroup)
+    _process(stmt)
 
 
 class StripWhitespaceFilter:
