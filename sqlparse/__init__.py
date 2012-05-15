@@ -14,9 +14,8 @@ class SQLParseError(Exception):
 
 
 # Setup namespace
-from sqlparse import engine
-from sqlparse import filters
-from sqlparse import formatter
+from sqlparse         import engine, filters, formatter
+from sqlparse.filters import serializerUnicode
 
 
 def parse(sql):
@@ -49,7 +48,7 @@ def format(sql, **options):
     stack = engine.FilterStack()
     options = formatter.validate_options(options)
     stack = formatter.build_filter_stack(stack, options)
-    stack.postprocess.append(filters.SerializerUnicode())
+    stack.postprocess.append(serializerUnicode)
     return ''.join(stack.run(sql))
 
 

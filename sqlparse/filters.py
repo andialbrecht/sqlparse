@@ -471,14 +471,13 @@ def columnsSelect(stream):
 # ---------------------------
 # postprocess
 
-class SerializerUnicode:
-    def __call__(self, stmt):
-        raw = unicode(stmt)
-        add_nl = raw.endswith('\n')
-        res = '\n'.join(line.rstrip() for line in raw.splitlines())
-        if add_nl:
-            res += '\n'
-        return res
+def serializerUnicode(stream):
+    raw = unicode(stream)
+    add_nl = raw.endswith('\n')
+    res = '\n'.join(line.rstrip() for line in raw.splitlines())
+    if add_nl:
+        res += '\n'
+    return res
 
 
 def Tokens2Unicode(stream):
