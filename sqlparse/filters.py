@@ -16,7 +16,6 @@ from sqlparse.tokens import (Comment, Comparison, Keyword, Name, Punctuation,
 # token process
 
 class _CaseFilter:
-
     ttype = None
 
     def __init__(self, case=None):
@@ -25,10 +24,7 @@ class _CaseFilter:
         assert case in ['lower', 'upper', 'capitalize']
         self.convert = getattr(unicode, case)
 
-    def process(self, stack, stream):
-        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
-             DeprecationWarning)
-
+    def __call__(self, stream):
         for ttype, value in stream:
             if ttype in self.ttype:
                 value = self.convert(value)
@@ -42,7 +38,7 @@ class KeywordCaseFilter(_CaseFilter):
 class IdentifierCaseFilter(_CaseFilter):
     ttype = (T.Name, T.String.Symbol)
 
-    def process(self, stack, stream):
+    def __call__(self, stream):
         warn("Deprecated, use callable objects. This will be removed at 0.2.0",
              DeprecationWarning)
 

@@ -41,7 +41,7 @@ class FilterStack(object):
         # Process token stream
         if self.preprocess:
             for filter_ in self.preprocess:
-                stream = filter_.process(self, stream)
+                stream = filter_(stream)
 
         if (self.stmtprocess or self.postprocess or self.split_statements
             or self._grouping):
