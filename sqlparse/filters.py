@@ -3,7 +3,6 @@
 import re
 
 from os.path  import abspath, join
-from warnings import warn
 
 from sqlparse import sql
 from sqlparse import tokens as T
@@ -500,9 +499,6 @@ class OutputFilter:
         raise NotImplementedError
 
     def __call__(self, stmt):
-        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
-             DeprecationWarning)
-
         self.count += 1
         if self.count > 1:
             varname = '%s%d' % (self.varname, self.count)

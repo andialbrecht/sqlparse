@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from warnings import warn
-
 from sqlparse.sql import Statement, Token
 from sqlparse import tokens as T
 
