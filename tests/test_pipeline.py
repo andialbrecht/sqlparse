@@ -1,15 +1,15 @@
 import unittest
 
-from sqlparse.filters import ColumnsSelect
-from sqlparse.lexer import tokenize
+from sqlparse.filters  import columnsSelect
+from sqlparse.lexer    import tokenize
 from sqlparse.pipeline import Pipeline
 
-class Test(unittest.TestCase):
 
+class Test(unittest.TestCase):
     def setUp(self):
         self.pipe = Pipeline()
         self.pipe.append(tokenize)
-        self.pipe.append(ColumnsSelect())
+        self.pipe.append(columnsSelect)
 
     def test_1(self):
         sql = """

@@ -418,58 +418,54 @@ class RightMarginFilter:
         group.tokens = self._process(group, group.tokens)
 
 
-class ColumnsSelect:
+def columnsSelect(stream):
     """Get the columns names of a SELECT query"""
-    def process(self, stack, stream):
-        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
-             DeprecationWarning)
+    mode = 0
+    oldValue = ""
+    parenthesis = 0
 
-        mode = 0
-        oldValue = ""
-        parenthesis = 0
+    for token_type, value in stream:
+        # Ignore comments
+        if token_type in Comment:
+            continue
 
-        for token_type, value in stream:
-            # Ignore comments
-            if token_type in Comment:
-                continue
+        # We have not detected a SELECT statement
+        if mode == 0:
+            if token_type in Keyword and value == 'SELECT':
+                mode = 1
 
-            # We have not detected a SELECT statement
-            if mode == 0:
-                if token_type in Keyword and value == 'SELECT':
-                    mode = 1
+        # We have detected a SELECT statement
+        elif mode == 1:
+            if value == 'FROM':
+                if oldValue:
+                    yield oldValue
 
-            # We have detected a SELECT statement
-            elif mode == 1:
-                if value == 'FROM':
-                    if oldValue:
-                        yield oldValue
+                mode = 3    # Columns have been checked
 
-                    mode = 3    # Columns have been checked
+            elif value == 'AS':
+                oldValue = ""
+                mode = 2
 
-                elif value == 'AS':
-                    oldValue = ""
-                    mode = 2
+            elif (token_type == Punctuation
+                  and value == ',' and not parenthesis):
+                if oldValue:
+                    yield oldValue
+                oldValue = ""
 
-                elif (token_type == Punctuation
-                      and value == ',' and not parenthesis):
-                    if oldValue:
-                        yield oldValue
-                    oldValue = ""
+            elif token_type not in Whitespace:
+                if value == '(':
+                    parenthesis += 1
+                elif value == ')':
+                    parenthesis -= 1
 
-                elif token_type not in Whitespace:
-                    if value == '(':
-                        parenthesis += 1
-                    elif value == ')':
-                        parenthesis -= 1
+                oldValue += value
 
-                    oldValue += value
-
-            # We are processing an AS keyword
-            elif mode == 2:
-                # We check also for Keywords because a bug in SQLParse
-                if token_type == Name or token_type == Keyword:
-                    yield value
-                    mode = 1
+        # We are processing an AS keyword
+        elif mode == 2:
+            # We check also for Keywords because a bug in SQLParse
+            if token_type == Name or token_type == Keyword:
+                yield value
+                mode = 1
 
 
 # ---------------------------
