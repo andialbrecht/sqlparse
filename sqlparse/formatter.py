@@ -6,7 +6,7 @@
 """SQL formatter"""
 
 from sqlparse         import filters
-from sqlparse.filters import stripCommentsFilter
+from sqlparse.filters import stripCommentsFilter, stripWhitespaceFilter
 
 
 class SQLParseError(Exception):
@@ -96,7 +96,7 @@ def build_filter_stack(stack, options):
     if (options.get('strip_whitespace', False)
         or options.get('reindent', False)):
         stack.enable_grouping()
-        stack.stmtprocess.append(filters.StripWhitespaceFilter())
+        stack.stmtprocess.append(stripWhitespaceFilter)
 
     if options.get('reindent', False):
         stack.enable_grouping()

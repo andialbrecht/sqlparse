@@ -180,13 +180,8 @@ def stripCommentsFilter(stmt):
     _process(stmt)
 
 
-class StripWhitespaceFilter:
-    def _stripws(self, tlist):
-        func_name = '_stripws_%s' % tlist.__class__.__name__.lower()
-        func = getattr(self, func_name, self._stripws_default)
-        func(tlist)
-
-    def _stripws_default(self, tlist):
+def stripWhitespaceFilter(stmt, depth=0):
+    def _stripws_default(tlist):
         last_was_ws = False
         for token in tlist.tokens:
             if token.is_whitespace():
@@ -196,19 +191,27 @@ class StripWhitespaceFilter:
                     token.value = ' '
             last_was_ws = token.is_whitespace()
 
-    def _stripws_parenthesis(self, tlist):
+    def _stripws_parenthesis(tlist):
         if tlist.tokens[1].is_whitespace():
             tlist.tokens.pop(1)
         if tlist.tokens[-2].is_whitespace():
             tlist.tokens.pop(-2)
-        self._stripws_default(tlist)
+        _stripws_default(tlist)
 
-    def __call__(self, stmt, depth=0):
-        for sgroup in stmt.get_sublists():
-            self(sgroup, depth + 1)
-        self._stripws(stmt)
-        if depth == 0 and stmt.tokens[-1].is_whitespace():
-            stmt.tokens.pop(-1)
+    def _stripws(tlist):
+        func_name = '_stripws_%s' % tlist.__class__.__name__.lower()
+
+        if func_name == '_stripws_parenthesis':
+            _stripws_parenthesis(tlist)
+        else:
+            _stripws_default(tlist)
+
+    for sgroup in stmt.get_sublists():
+        stripWhitespaceFilter(sgroup, depth + 1)
+
+    _stripws(stmt)
+    if depth == 0 and stmt.tokens[-1].is_whitespace():
+        stmt.tokens.pop(-1)
 
 
 class ReindentFilter:
