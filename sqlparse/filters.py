@@ -388,16 +388,18 @@ class RightMarginFilter:
         self.width = width
         self.line = ''
 
-    def _process(self, stack, group, stream):
+    def _process(self, group, stream):
         for token in stream:
             if token.is_whitespace() and '\n' in token.value:
                 if token.value.endswith('\n'):
                     self.line = ''
                 else:
                     self.line = token.value.splitlines()[-1]
+
             elif (token.is_group()
                   and not token.__class__ in self.keep_together):
-                token.tokens = self._process(stack, token, token.tokens)
+                token.tokens = self._process(token, token.tokens)
+
             else:
                 val = unicode(token)
                 if len(self.line) + len(val) > self.width:
@@ -411,12 +413,9 @@ class RightMarginFilter:
                 self.line += val
             yield token
 
-    def process(self, stack, group):
-        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
-             DeprecationWarning)
-
+    def __call__(self, group):
         return
-        group.tokens = self._process(stack, group, group.tokens)
+        group.tokens = self._process(group, group.tokens)
 
 
 class ColumnsSelect:
