@@ -606,25 +606,21 @@ class OutputPHPFilter(OutputFilter):
         yield sql.Token(T.Punctuation, ';')
 
 
-class Limit:
+def limit(stream):
     """Get the LIMIT of a query.
 
     If not defined, return -1 (SQL specification for no LIMIT query)
     """
-    def process(self, stack, stream):
-        warn("Deprecated, use callable objects. This will be removed at 0.2.0",
-             DeprecationWarning)
+    index = 7
+    stream = list(stream)
+    stream.reverse()
 
-        index = 7
-        stream = list(stream)
-        stream.reverse()
-
-        # Run over all tokens in the stream from the end
-        for token_type, value in stream:
-            index -= 1
+    # Run over all tokens in the stream from the end
+    for token_type, value in stream:
+        index -= 1
 
 #            if index and token_type in Keyword:
-            if index and token_type in Keyword and value == 'LIMIT':
-                return stream[4 - index][1]
+        if index and token_type in Keyword and value == 'LIMIT':
+            return stream[4 - index][1]
 
-        return -1
+    return -1
