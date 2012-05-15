@@ -38,7 +38,7 @@ class Token(object):
 
     def to_unicode(self):
         """Returns a unicode representation of this object.
-        
+
         @deprecated: please use __unicode__()
         """
         return unicode(self)
@@ -49,10 +49,8 @@ class Token(object):
     def _get_repr_value(self):
         raw = unicode(self)
         if len(raw) > 7:
-            short = raw[:6] + u'...'
-        else:
-            short = raw
-        return re.sub('\s+', ' ', short)
+            raw = raw[:6] + u'...'
+        return re.sub('\s+', ' ', raw)
 
     def flatten(self):
         """Resolve subgroups."""
@@ -73,31 +71,33 @@ class Token(object):
         type_matched = self.ttype is ttype
         if not type_matched or values is None:
             return type_matched
+
         if regex:
             if isinstance(values, basestring):
                 values = set([values])
+
             if self.ttype is T.Keyword:
-                values = set([re.compile(v, re.IGNORECASE) for v in values])
+                values = set(re.compile(v, re.IGNORECASE) for v in values)
             else:
-                values = set([re.compile(v) for v in values])
+                values = set(re.compile(v) for v in values)
+
             for pattern in values:
                 if pattern.search(self.value):
                     return True
             return False
-        else:
-            if isinstance(values, basestring):
-                if self.is_keyword:
-                    return values.upper() == self.normalized
-                else:
-                    return values == self.value
+
+        if isinstance(values, basestring):
             if self.is_keyword:
-                for v in values:
-                    if v.upper() == self.normalized:
-                        return True
-                return False
-            else:
-                print len(values)
-                return self.value in values
+                return values.upper() == self.normalized
+            return values == self.value
+
+        if self.is_keyword:
+            for v in values:
+                if v.upper() == self.normalized:
+                    return True
+            return False
+
+        return self.value in values
 
     def is_group(self):
         """Returns ``True`` if this object has children."""
@@ -271,7 +271,7 @@ class TokenList(Token):
         if not isinstance(idx, int):
             idx = self.token_index(idx)
 
-        while idx != 0:
+        while idx:
             idx -= 1
             if self.tokens[idx].is_whitespace() and skip_ws:
                 continue
@@ -379,12 +379,12 @@ class TokenList(Token):
         dot = self.token_next_match(0, T.Punctuation, '.')
         if dot is None:
             return self.token_next_by_type(0, T.Name).value
-        else:
-            next_ = self.token_next_by_type(self.token_index(dot),
-                                            (T.Name, T.Wildcard))
-            if next_ is None:  # invalid identifier, e.g. "a."
-                return None
-            return next_.value
+
+        next_ = self.token_next_by_type(self.token_index(dot),
+                                        (T.Name, T.Wildcard))
+        if next_ is None:  # invalid identifier, e.g. "a."
+            return None
+        return next_.value
 
 
 class Statement(TokenList):
