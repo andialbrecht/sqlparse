@@ -17,13 +17,7 @@ class Pipeline(list):
 
         # Run the stream over all the filters on the pipeline
         for filter in self:
-            # Functions and callable objects (objects with '__call__' method)
-            if callable(filter):
-                stream = filter(stream)
-
-            # Normal filters (objects with 'process' method)
-            else:
-                stream = filter.process(None, stream)
+            stream = filter(stream)
 
         # If last filter return a generator, staticalize it inside a list
         if isinstance(stream, GeneratorType):

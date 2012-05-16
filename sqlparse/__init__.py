@@ -60,4 +60,4 @@ def split(sql):
 from sqlparse.engine.filter import StatementFilter
 def split2(stream):
     splitter = StatementFilter()
-    return list(splitter.process(None, stream))
+    return list(splitter(stream))
