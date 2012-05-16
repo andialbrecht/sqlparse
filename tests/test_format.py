@@ -90,7 +90,7 @@ class TestFormatReindent(TestCaseBase):
         self.assertRaises(sqlparse.SQLParseError, sqlparse.format, 'foo',
                           reindent=True, indent_width='foo')
         self.assertRaises(sqlparse.SQLParseError, sqlparse.format, 'foo',
-                          reindent=True, indent_width=-12)
+                          reindent=True, indent_width= -12)
 
     def test_stmts(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)
@@ -259,7 +259,7 @@ class TestOutputFormat(TestCaseBase):
         self.ndiffAssertEqual(f(sql), '$sql = "select * from foo;";')
         f = lambda sql: sqlparse.format(sql, output_format='php',
                                         reindent=True)
-        self.ndiffAssertEqual(f(sql), ('$sql = "select * ";\n'
+        self.ndiffAssertEqual(f(sql), ('$sql  = "select * ";\n'
                                        '$sql .= "from foo;";'))
 
     def test_sql(self):  # "sql" is an allowed option but has no effect

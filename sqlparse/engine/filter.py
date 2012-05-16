@@ -4,21 +4,10 @@ from sqlparse.sql import Statement, Token
 from sqlparse import tokens as T
 
 
-class TokenFilter(object):
-
-    def __init__(self, **options):
-        self.options = options
-
-    def process(self, stack, stream):
-        """Process token stream."""
-        raise NotImplementedError
-
-
-class StatementFilter(TokenFilter):
+class StatementFilter:
     "Filter that split stream at individual statements"
 
     def __init__(self):
-        TokenFilter.__init__(self)
         self._in_declare = False
         self._in_dbldollar = False
         self._is_create = False
