@@ -92,12 +92,13 @@ def StripWhitespace(stream):
 class IncludeStatement:
     """Filter that enable a INCLUDE statement"""
 
-    def __init__(self, dirpath=".", maxRecursive=10):
+    def __init__(self, dirpath=".", maxRecursive=10, raiseonload=False):
         if maxRecursive <= 0:
             raise ValueError('Max recursion limit reached')
 
         self.dirpath = abspath(dirpath)
         self.maxRecursive = maxRecursive
+        self.raiseonload = raiseonload
 
         self.detected = False
 
@@ -127,15 +128,22 @@ class IncludeStatement:
                         raw_sql = f.read()
                         f.close()
                     except IOError, err:
+                        # Raise the exception to the interpreter
+                        if self.raiseonload:
+                            raise
+
+                        # Put the exception as a comment on the SQL code
                         yield Comment, u'-- IOError: %s\n' % err
 
                     else:
                         # Create new FilterStack to parse readed file
                         # and add all its tokens to the main stack recursively
-                        # [ToDo] Add maximum recursive iteration value
+                        filtr = IncludeStatement(self.dirpath,
+                                                 self.maxRecursive - 1,
+                                                 self.raiseonload)
+
                         stack = FilterStack()
-                        stack.preprocess.append(IncludeStatement(self.dirpath,
-                                                        self.maxRecursive - 1))
+                        stack.preprocess.append(filtr)
 
                         for tv in stack.run(raw_sql):
                             yield tv
