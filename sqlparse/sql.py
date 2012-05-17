@@ -97,7 +97,6 @@ class Token(object):
                     return True
             return False
 
-        print len(values)
         return self.value in values
 
     def is_group(self):
