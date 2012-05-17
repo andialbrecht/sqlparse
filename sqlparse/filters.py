@@ -93,6 +93,9 @@ class IncludeStatement:
     """Filter that enable a INCLUDE statement"""
 
     def __init__(self, dirpath=".", maxRecursive=10):
+        if maxRecursive <= 0:
+            raise ValueError('Max recursion limit reached')
+
         self.dirpath = abspath(dirpath)
         self.maxRecursive = maxRecursive
 
@@ -131,7 +134,8 @@ class IncludeStatement:
                         # and add all its tokens to the main stack recursively
                         # [ToDo] Add maximum recursive iteration value
                         stack = FilterStack()
-                        stack.preprocess.append(IncludeStatement(self.dirpath))
+                        stack.preprocess.append(IncludeStatement(self.dirpath,
+                                                        self.maxRecursive - 1))
 
                         for tv in stack.run(raw_sql):
                             yield tv
