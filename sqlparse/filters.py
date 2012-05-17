@@ -110,17 +110,15 @@ class IncludeStatement:
             elif self.detected:
                 # Omit whitespaces
                 if token_type in Whitespace:
-                    pass
+                    continue
 
-                # Get path of file to include
-                path = None
-
+                # Found file path to include
                 if token_type in String.Symbol:
 #                if token_type in tokens.String.Symbol:
+
+                    # Get path of file to include
                     path = join(self.dirpath, value[1:-1])
 
-                # Include file if path was found
-                if path:
                     try:
                         f = open(path)
                         raw_sql = f.read()
