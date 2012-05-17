@@ -40,5 +40,5 @@ class IsType():
 
     def __call__(self, stream):
         for token_type, value in stream:
-            if token_type in Whitespace: continue
-            return token_type in Keyword and value == self.type
+            if token_type not in Whitespace:
+                return token_type in Keyword and value == self.type
