@@ -92,13 +92,13 @@ def StripWhitespace(stream):
 class IncludeStatement:
     """Filter that enable a INCLUDE statement"""
 
-    def __init__(self, dirpath=".", maxRecursive=10, raiseonload=False):
+    def __init__(self, dirpath=".", maxRecursive=10, raiseexceptions=False):
         if maxRecursive <= 0:
             raise ValueError('Max recursion limit reached')
 
         self.dirpath = abspath(dirpath)
         self.maxRecursive = maxRecursive
-        self.raiseonload = raiseonload
+        self.raiseexceptions = raiseexceptions
 
         self.detected = False
 
@@ -127,9 +127,11 @@ class IncludeStatement:
                         f = open(path)
                         raw_sql = f.read()
                         f.close()
+
+                    # There was a problem loading the include file
                     except IOError, err:
                         # Raise the exception to the interpreter
-                        if self.raiseonload:
+                        if self.raiseexceptions:
                             raise
 
                         # Put the exception as a comment on the SQL code
@@ -138,9 +140,19 @@ class IncludeStatement:
                     else:
                         # Create new FilterStack to parse readed file
                         # and add all its tokens to the main stack recursively
-                        filtr = IncludeStatement(self.dirpath,
-                                                 self.maxRecursive - 1,
-                                                 self.raiseonload)
+                        try:
+                            filtr = IncludeStatement(self.dirpath,
+                                                     self.maxRecursive - 1,
+                                                     self.raiseexceptions)
+
+                        # Max recursion limit reached
+                        except ValueError, err:
+                            # Raise the exception to the interpreter
+                            if self.raiseexceptions:
+                                raise
+
+                            # Put the exception as a comment on the SQL code
+                            yield Comment, u'-- ValueError: %s\n' % err
 
                         stack = FilterStack()
                         stack.preprocess.append(filtr)
