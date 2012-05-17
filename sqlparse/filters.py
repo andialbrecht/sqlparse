@@ -4,11 +4,11 @@ import re
 
 from os.path import abspath, join
 
-from sqlparse import sql
-from sqlparse import tokens as T
+from sqlparse        import sql, tokens as T
 from sqlparse.engine import FilterStack
-from sqlparse.tokens import (Comment, Comparison, Keyword, Name, Punctuation,
-                             String, Whitespace)
+from sqlparse.tokens import Comment, Comparison, Keyword, Name, Punctuation
+from sqlparse.tokens import String, Whitespace
+from sqlparse.utils  import memoize_generator
 
 
 # --------------------------
@@ -102,6 +102,7 @@ class IncludeStatement:
 
         self.detected = False
 
+    @memoize_generator
     def process(self, stack, stream):
         # Run over all tokens in the stream
         for token_type, value in stream:
