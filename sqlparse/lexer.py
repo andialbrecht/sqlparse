@@ -179,6 +179,9 @@ class Lexer(object):
             (r'\$([a-zA-Z_][a-zA-Z0-9_]*)?\$', tokens.Name.Builtin),
             (r'\?{1}', tokens.Name.Placeholder),
             (r'[$:?%][a-zA-Z0-9_]+', tokens.Name.Placeholder),
+            # FIXME(andi): VALUES shouldn't be listed here
+            # see https://github.com/andialbrecht/sqlparse/pull/64
+            (r'VALUES', tokens.Keyword),
             (r'@[a-zA-Z_][a-zA-Z0-9_]+', tokens.Name),
             (r'[a-zA-Z_][a-zA-Z0-9_]*(?=[.(])', tokens.Name),  # see issue39
             (r'[-]?0x[0-9a-fA-F]+', tokens.Number.Hexadecimal),
