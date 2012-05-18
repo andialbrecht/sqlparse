@@ -278,11 +278,15 @@ class ReindentFilter:
         idx = all_.index(token)
         raw = ''.join(unicode(x) for x in all_[:idx + 1])
         line = raw.splitlines()[-1]
+
         # Now take current offset into account and return relative offset.
-        full_offset = len(line) - len(self.char * (self.width * self.indent))
+        full_offset = len(line) - len(self.char * self.width * self.indent)
         return full_offset - self.offset
 
     def nl(self):
+        """
+        Return an indented new line token
+        """
         # TODO: newline character should be configurable
         ws = '\n' + self.char * (self.indent * self.width + self.offset)
         return sql.Token(T.Whitespace, ws)
@@ -301,14 +305,14 @@ class ReindentFilter:
                     t = _next_token(tlist.token_index(t) + 1)
             return t
 
-        idx = 0
-        token = _next_token(idx)
+        token = _next_token(0)
         while token:
             prev = tlist.token_prev(tlist.token_index(token), False)
             offset = 1
             if prev and prev.is_whitespace():
                 tlist.tokens.pop(tlist.token_index(prev))
                 offset += 1
+
             if (prev
                 and isinstance(prev, sql.Comment)
                 and (str(prev).endswith('\n')
@@ -317,6 +321,7 @@ class ReindentFilter:
             else:
                 nl = self.nl()
                 tlist.insert_before(token, nl)
+
             token = _next_token(tlist.token_index(nl) + offset)
 
     def _split_statements(self, tlist):
