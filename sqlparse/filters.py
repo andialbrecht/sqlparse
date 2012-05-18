@@ -301,8 +301,7 @@ class ReindentFilter:
                        'SET', 'BETWEEN')
 
         def _next_token(i):
-            t = tlist.token_next_match(i, T.Keyword, split_words,
-                                       regex=True)
+            t = tlist.token_next_match(i, T.Keyword, split_words, regex=True)
             if t and t.value.upper() == 'BETWEEN':
                 t = _next_token(tlist.token_index(t) + 1)
                 if t and t.value.upper() == 'AND':
@@ -329,16 +328,23 @@ class ReindentFilter:
             token = _next_token(tlist.token_index(nl) + offset)
 
     def _split_statements(self, tlist):
-        idx = 0
-        token = tlist.token_next_by_type(idx, (T.Keyword.DDL, T.Keyword.DML))
+        """
+        Split tlist on statements
+        """
+        # Search for the first statement
+        token = tlist.token_next_by_type(0, (T.Keyword.DDL, T.Keyword.DML))
+
         while token:
             prev = tlist.token_prev(tlist.token_index(token), False)
-            if prev and prev.is_whitespace():
-                tlist.tokens.pop(tlist.token_index(prev))
-            # only break if it's not the first token
             if prev:
+                if prev.is_whitespace():
+                    tlist.tokens.pop(tlist.token_index(prev))
+
+                # only break if it's not the first token
                 nl = self.nl()
                 tlist.insert_before(token, nl)
+
+            # Go to the next statement
             token = tlist.token_next_by_type(tlist.token_index(token) + 1,
                                              (T.Keyword.DDL, T.Keyword.DML))
 
