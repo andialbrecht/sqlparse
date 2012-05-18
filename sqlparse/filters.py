@@ -391,12 +391,17 @@ class ReindentFilter:
             self.indent -= 1
 
     def _process_identifierlist(self, tlist):
+        """
+        Process an identifier list
+        """
+        # If there are more than an identifier, put each on a line
         identifiers = list(tlist.get_identifiers())
-
         if len(identifiers) > 1 and not tlist.within(sql.Function):
+            # Get offset size to increase
             first = list(identifiers[0].flatten())[0]
             num_offset = self._get_offset(first) - len(first.value)
 
+            # Increase offset and insert new lines
             self.offset += num_offset
             for token in identifiers[1:]:
                 tlist.insert_before(token, self.nl())
@@ -405,6 +410,7 @@ class ReindentFilter:
                     tlist.insert_after(token, self.nl())
             self.offset -= num_offset
 
+        # Process the identifier list as usual
         self._process_default(tlist)
 
     def _process_case(self, tlist):
