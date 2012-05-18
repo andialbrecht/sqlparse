@@ -274,6 +274,10 @@ class ReindentFilter:
         self._last_stmt = None
 
     def _get_offset(self, token):
+        """
+        Return the offset where the token should be indented
+        """
+        # Get last processed line (the current one) up to the next token
         all_ = list(self._curr_stmt.flatten())
         idx = all_.index(token)
         raw = ''.join(unicode(x) for x in all_[:idx + 1])
