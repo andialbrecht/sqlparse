@@ -405,25 +405,33 @@ class ReindentFilter:
             self._split_statements(tlist)
         if kwds:
             self._split_kwds(tlist)
-        [self._process(sgroup) for sgroup in tlist.get_sublists()]
+
+        for sgroup in tlist.get_sublists():
+            self._process(sgroup)
 
     def process(self, stack, stmt):
         warn("Deprecated, use callable objects. This will be removed at 0.2.0",
              DeprecationWarning)
 
+        # If we are processing a statement, set it as the current one
         if isinstance(stmt, sql.Statement):
             self._curr_stmt = stmt
+
+        # Process the statement
         self._process(stmt)
+
+        # If we are processing a statement, check if we should add a new line
         if isinstance(stmt, sql.Statement):
-            if self._last_stmt is not None:
+            if self._last_stmt != None:
                 if unicode(self._last_stmt).endswith('\n'):
                     nl = '\n'
                 else:
                     nl = '\n\n'
-                stmt.tokens.insert(0,
-                    sql.Token(T.Whitespace, nl))
-            if self._last_stmt != stmt:
-                self._last_stmt = stmt
+
+                stmt.tokens.insert(0, sql.Token(T.Whitespace, nl))
+
+            # Set the statement as the current one
+            self._last_stmt = stmt
 
 
 # FIXME: Doesn't work ;)
