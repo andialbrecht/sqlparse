@@ -260,6 +260,9 @@ class StripWhitespaceFilter:
 
 
 class ReindentFilter:
+    """
+    Filter that return a correctly indented version of the SQL string
+    """
 
     def __init__(self, width=2, char=' ', line_width=None):
         self.width = width
@@ -281,7 +284,7 @@ class ReindentFilter:
 
     def nl(self):
         # TODO: newline character should be configurable
-        ws = '\n' + (self.char * ((self.indent * self.width) + self.offset))
+        ws = '\n' + self.char * (self.indent * self.width + self.offset)
         return sql.Token(T.Whitespace, ws)
 
     def _split_kwds(self, tlist):
@@ -331,37 +334,60 @@ class ReindentFilter:
                                              (T.Keyword.DDL, T.Keyword.DML))
 
     def _process(self, tlist):
+        """
+        Proxy to other methods based on `tlist` class
+        """
         func_name = '_process_%s' % tlist.__class__.__name__.lower()
         func = getattr(self, func_name, self._process_default)
         func(tlist)
 
     def _process_where(self, tlist):
+        """
+        Process WHERE statement
+        """
+        # Look for the next WHERE keyword and add a new line
         token = tlist.token_next_match(0, T.Keyword, 'WHERE')
         tlist.insert_before(token, self.nl())
+
+        # Indent and process the (indented) WHERE statement as usual
         self.indent += 1
         self._process_default(tlist)
         self.indent -= 1
 
     def _process_parenthesis(self, tlist):
+        """
+        Process parenthesis
+        """
+        # Omit the 'open parenthesis' token
+        # and check if the next one require say us we should indent
         first = tlist.token_next(0)
-        indented = False
-        if first and first.ttype in (T.Keyword.DML, T.Keyword.DDL):
+        indented = first and first.ttype in (T.Keyword.DML, T.Keyword.DDL)
+
+        # If we should indent, increase indent and add a new line
+        if indented:
             self.indent += 1
             tlist.tokens.insert(0, self.nl())
-            indented = True
-        num_offset = self._get_offset(tlist.token_next_match(0,
-                                                        T.Punctuation, '('))
+
+        # Get indentation offset
+        token = tlist.token_next_match(0, T.Punctuation, '(')
+        num_offset = self._get_offset(token)
+
+        # Increase indentation offset and process the statement as usual
         self.offset += num_offset
         self._process_default(tlist, stmts=not indented)
+        self.offset -= num_offset
+
+        # If we indented, decrease indent to previous state
         if indented:
             self.indent -= 1
-        self.offset -= num_offset
 
     def _process_identifierlist(self, tlist):
         identifiers = list(tlist.get_identifiers())
+
         if len(identifiers) > 1 and not tlist.within(sql.Function):
             first = list(identifiers[0].flatten())[0]
             num_offset = self._get_offset(first) - len(first.value)
+
             self.offset += num_offset
             for token in identifiers[1:]:
                 tlist.insert_before(token, self.nl())
@@ -369,38 +395,56 @@ class ReindentFilter:
                 if isinstance(token, sql.Comment):
                     tlist.insert_after(token, self.nl())
             self.offset -= num_offset
+
         self._process_default(tlist)
 
     def _process_case(self, tlist):
-        is_first = True
-        num_offset = None
+        """
+        Process a CASE statement
+        """
+        # Increase the offset the size of the CASE keyword
         case = tlist.tokens[0]
         outer_offset = self._get_offset(case) - len(case.value)
         self.offset += outer_offset
-        for cond, value in tlist.get_cases():
-            if is_first:
-                tcond = list(cond[0].flatten())[0]
-                is_first = False
-                num_offset = self._get_offset(tcond) - len(tcond.value)
-                self.offset += num_offset
-                continue
+
+        # Get the case conditions
+        cases = tlist.get_cases()
+
+        # Get and increase the offset the size of the condition selector
+        cond, value = cases[0]
+        tcond = list(cond[0].flatten())[0]
+        num_offset = self._get_offset(tcond) - len(tcond.value)
+        self.offset += num_offset
+
+        # Insert a new line before each condition
+        for cond, value in cases[1:]:
             if cond is None:
                 token = value[0]
             else:
                 token = cond[0]
+
             tlist.insert_before(token, self.nl())
+
         # Line breaks on group level are done. Now let's add an offset of
         # 5 (=length of "when", "then", "else") and process subgroups.
         self.offset += 5
         self._process_default(tlist)
         self.offset -= 5
-        if num_offset is not None:
-            self.offset -= num_offset
+
+        # Decrease the offset the size of the condition selector
+        self.offset -= num_offset
+
+        # Insert a new line before the case END keyword
         end = tlist.token_next_match(0, T.Keyword, 'END')
         tlist.insert_before(end, self.nl())
+
+        # Decrease the offset the size of the CASE keyword
         self.offset -= outer_offset
 
     def _process_default(self, tlist, stmts=True, kwds=True):
+        """
+        Generic processing of `tlist` statements
+        """
         if stmts:
             self._split_statements(tlist)
         if kwds:
