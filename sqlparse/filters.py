@@ -4,11 +4,11 @@ import re
 
 from os.path  import abspath, join
 
-from sqlparse import sql
-from sqlparse import tokens as T
+from sqlparse        import sql, tokens as T
 from sqlparse.engine import FilterStack
-from sqlparse.tokens import (Comment, Comparison, Keyword, Name, Punctuation,
-                             String, Whitespace)
+from sqlparse.tokens import Comment, Comparison, Keyword, Name, Punctuation
+from sqlparse.tokens import String, Whitespace
+from sqlparse.utils  import memoize_generator
 
 
 # --------------------------
@@ -90,12 +90,17 @@ def StripWhitespace(stream):
 class IncludeStatement:
     """Filter that enable a INCLUDE statement"""
 
-    def __init__(self, dirpath=".", maxRecursive=10):
+    def __init__(self, dirpath=".", maxRecursive=10, raiseexceptions=False):
+        if maxRecursive <= 0:
+            raise ValueError('Max recursion limit reached')
+
         self.dirpath = abspath(dirpath)
         self.maxRecursive = maxRecursive
+        self.raiseexceptions = raiseexceptions
 
         self.detected = False
 
+    @memoize_generator
     def __call__(self, stream):
         # Run over all tokens in the stream
         for token_type, value in stream:
@@ -108,30 +113,48 @@ class IncludeStatement:
             elif self.detected:
                 # Omit whitespaces
                 if token_type in Whitespace:
-                    pass
+                    continue
 
-                # Get path of file to include
-                path = None
-
+                # Found file path to include
                 if token_type in String.Symbol:
 #                if token_type in tokens.String.Symbol:
+
+                    # Get path of file to include
                     path = join(self.dirpath, value[1:-1])
 
-                # Include file if path was found
-                if path:
                     try:
                         f = open(path)
                         raw_sql = f.read()
                         f.close()
+
+                    # There was a problem loading the include file
                     except IOError, err:
+                        # Raise the exception to the interpreter
+                        if self.raiseexceptions:
+                            raise
+
+                        # Put the exception as a comment on the SQL code
                         yield Comment, u'-- IOError: %s\n' % err
 
                     else:
                         # Create new FilterStack to parse readed file
                         # and add all its tokens to the main stack recursively
-                        # [ToDo] Add maximum recursive iteration value
+                        try:
+                            filtr = IncludeStatement(self.dirpath,
+                                                     self.maxRecursive - 1,
+                                                     self.raiseexceptions)
+
+                        # Max recursion limit reached
+                        except ValueError, err:
+                            # Raise the exception to the interpreter
+                            if self.raiseexceptions:
+                                raise
+
+                            # Put the exception as a comment on the SQL code
+                            yield Comment, u'-- ValueError: %s\n' % err
+
                         stack = FilterStack()
-                        stack.preprocess.append(IncludeStatement(self.dirpath))
+                        stack.preprocess.append(filtr)
 
                         for tv in stack.run(raw_sql):
                             yield tv

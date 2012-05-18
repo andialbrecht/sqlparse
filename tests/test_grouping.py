@@ -53,6 +53,12 @@ class TestGrouping(TestCaseBase):
         self.ndiffAssertEqual(s, unicode(parsed))
         self.assert_(isinstance(parsed.tokens[-1].tokens[3], sql.Identifier))
 
+        s = "INSERT INTO `test` VALUES('foo', 'bar');"
+        parsed = sqlparse.parse(s)[0]
+        types = [l.ttype for l in parsed.tokens if not l.is_whitespace()]
+        self.assertEquals(types, [T.DML, T.Keyword, None,
+                                  T.Keyword, None, T.Punctuation])
+
     def test_identifier_wildcard(self):
         p = sqlparse.parse('a.*, b.id')[0]
         self.assert_(isinstance(p.tokens[0], sql.IdentifierList))
