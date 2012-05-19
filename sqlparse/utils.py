@@ -6,8 +6,7 @@ Created on 17/05/2012
 
 
 def memoize_generator(func):
-    """
-    Memoize decorator for generators
+    """Memoize decorator for generators
 
     Store `func` results in a cache according to their arguments as 'memoize'
     does but instead this works on decorators instead of regular functions.
@@ -25,6 +24,12 @@ def memoize_generator(func):
 
         # Not cached, exec and store it
         except KeyError:
+            # Reset the cache if we have too much cached entries and start over
+            # In the future would be better to use an OrderedDict and drop the
+            # Least Recent Used entries
+            if len(cache) >= 10:
+                cache.clear()
+
             cached = []
 
             for item in func(*args, **kwargs):
