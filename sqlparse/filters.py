@@ -4,11 +4,11 @@ import re
 
 from os.path import abspath, join
 
-from sqlparse        import sql, tokens as T
+from sqlparse import sql, tokens as T
 from sqlparse.engine import FilterStack
-from sqlparse.tokens import Comment, Comparison, Keyword, Name, Punctuation
-from sqlparse.tokens import String, Whitespace
-from sqlparse.utils  import memoize_generator
+from sqlparse.tokens import (Comment, Comparison, Keyword, Name, Punctuation,
+                             String, Whitespace)
+from sqlparse.utils import memoize_generator
 
 
 # --------------------------
@@ -92,12 +92,12 @@ def StripWhitespace(stream):
 class IncludeStatement:
     """Filter that enable a INCLUDE statement"""
 
-    def __init__(self, dirpath=".", maxRecursive=10, raiseexceptions=False):
-        if maxRecursive <= 0:
+    def __init__(self, dirpath=".", maxrecursive=10, raiseexceptions=False):
+        if maxrecursive <= 0:
             raise ValueError('Max recursion limit reached')
 
         self.dirpath = abspath(dirpath)
-        self.maxRecursive = maxRecursive
+        self.maxRecursive = maxrecursive
         self.raiseexceptions = raiseexceptions
 
         self.detected = False
