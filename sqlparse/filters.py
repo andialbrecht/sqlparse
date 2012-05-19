@@ -7,6 +7,8 @@ from warnings import warn
 
 from sqlparse import sql, tokens as T
 from sqlparse.engine import FilterStack
+from sqlparse.lexer import tokenize
+from sqlparse.pipeline import Pipeline
 from sqlparse.tokens import (Comment, Comparison, Keyword, Name, Punctuation,
                              String, Whitespace)
 from sqlparse.utils import memoize_generator
@@ -687,3 +689,15 @@ class Limit:
                 return stream[4 - index][1]
 
         return -1
+
+
+def Compact(sql, includePath="sql"):
+    """Function that return a compacted version of the input SQL query"""
+    pipe = Pipeline()
+
+    pipe.append(tokenize)
+    pipe.append(IncludeStatement(includePath))
+    pipe.append(StripComments())
+    pipe.append(StripWhitespace)
+
+    return pipe(sql)
