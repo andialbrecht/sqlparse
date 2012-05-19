@@ -228,19 +228,25 @@ def group_identifier_list(tlist):
 
             # Look if the next token is another comma
             next_ = tlist.token_next(after)
-            if next_ and next_.match(T.Punctuation, ','):
-                tcomma = next_
+            if next_:
+                if next_.match(T.Punctuation, ','):
+                    tcomma = next_
+                    continue
+
+                elif(next_.ttype == T.Keyword
+                and next_.value not in ('FROM', 'WHERE', 'GROUP')):
+                    tcomma = next_
+                    continue
 
             # Reached the end of the list
-            else:
-                # Create and group the identifiers list
-                tokens = tlist.tokens_between(start, after)
-                group = tlist.group_tokens(sql.IdentifierList, tokens)
+            # Create and group the identifiers list
+            tokens = tlist.tokens_between(start, after)
+            group = tlist.group_tokens(sql.IdentifierList, tokens)
 
-                # Skip ahead to next ","
-                start = None
-                tcomma = tlist.token_next_match(tlist.token_index(group) + 1,
-                                                T.Punctuation, ',')
+            # Skip ahead to next ","
+            start = None
+            tcomma = tlist.token_next_match(tlist.token_index(group) + 1,
+                                            T.Punctuation, ',')
 
         # At least one of the tokens around tcomma don't belong to an
         # identifier list. Something's wrong here, skip ahead to next ","
@@ -248,6 +254,12 @@ def group_identifier_list(tlist):
             start = None
             tcomma = tlist.token_next_match(tlist.token_index(tcomma) + 1,
                                             T.Punctuation, ',')
+
+    # There's an open identifier list
+    if start:
+        # Create and group the identifiers list
+        tokens = tlist.tokens_between(start, after)
+        group = tlist.group_tokens(sql.IdentifierList, tokens)
 
 
 def group_parenthesis(tlist):
