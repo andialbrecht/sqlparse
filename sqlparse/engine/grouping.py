@@ -185,9 +185,10 @@ def group_identifier(tlist):
 
 
 def group_identifier_list(tlist):
-    [group_identifier_list(sgroup) for sgroup in tlist.get_sublists()
-     if not isinstance(sgroup, sql.IdentifierList)]
-    idx = 0
+    for sgroup in tlist.get_sublists():
+        if not isinstance(sgroup, sql.IdentifierList):
+            group_identifier_list(sgroup)
+
     # Allowed list items
     fend1_funcs = [lambda t: isinstance(t, (sql.Identifier, sql.Function,
                                             sql.Case)),
@@ -202,36 +203,40 @@ def group_identifier_list(tlist):
                    lambda t: isinstance(t, sql.Comparison),
                    lambda t: isinstance(t, sql.Comment),
                    ]
-    tcomma = tlist.token_next_match(idx, T.Punctuation, ',')
+
+    tcomma = tlist.token_next_match(0, T.Punctuation, ',')
     start = None
-    while tcomma is not None:
+    while tcomma:
         before = tlist.token_prev(tcomma)
         after = tlist.token_next(tcomma)
+
         # Check if the tokens around tcomma belong to a list
         bpassed = apassed = False
         for func in fend1_funcs:
-            if before is not None and func(before):
+            if before and func(before):
                 bpassed = True
-            if after is not None and func(after):
+            if after and func(after):
                 apassed = True
-        if not bpassed or not apassed:
-            # Something's wrong here, skip ahead to next ","
-            start = None
-            tcomma = tlist.token_next_match(tlist.token_index(tcomma) + 1,
-                                            T.Punctuation, ',')
-        else:
+
+        if bpassed and apassed:
             if start is None:
                 start = before
+
             next_ = tlist.token_next(after)
-            if next_ is None or not next_.match(T.Punctuation, ','):
+            if next_ and next_.match(T.Punctuation, ','):
+                tcomma = next_
+            else:
                 # Reached the end of the list
                 tokens = tlist.tokens_between(start, after)
                 group = tlist.group_tokens(sql.IdentifierList, tokens)
                 start = None
                 tcomma = tlist.token_next_match(tlist.token_index(group) + 1,
                                                 T.Punctuation, ',')
-            else:
-                tcomma = next_
+        else:
+            # Something's wrong here, skip ahead to next ","
+            start = None
+            tcomma = tlist.token_next_match(tlist.token_index(tcomma) + 1,
+                                            T.Punctuation, ',')
 
 
 def group_parenthesis(tlist):
