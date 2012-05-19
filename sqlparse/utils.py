@@ -20,8 +20,9 @@ if OrderedDict:
             self._maxsize = maxsize
 
         def __getitem__(self, key, *args, **kwargs):
-            # Remove the (key, value) pair from the cache, or raise KeyError
-            value = self.pop(key)
+            # Get the key and remove it from the cache, or raise KeyError
+            value = OrderedDict.__getitem__(self, key)
+            del self[key]
 
             # Insert the (key, value) pair on the front of the cache
             OrderedDict.__setitem__(self, key, value)
