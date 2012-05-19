@@ -12,7 +12,7 @@ import sys
 sys.path.insert(0, '..')
 
 from sqlparse.filters   import Compact
-from sqlparse.functions import GetColumns, GetLimit, IsType
+from sqlparse.functions import getcolumns, getlimit, IsType
 
 
 class Test_SQL(TestCase):
@@ -86,15 +86,15 @@ class Test_Compact(Test_SQL):
 
 class Test_GetColumns(Test_SQL):
     def test_getcolumns1(self):
-        columns = GetColumns(tokenize(self.sql))
+        columns = getcolumns(tokenize(self.sql))
         self.assertEqual(columns, [])
 
     def test_getcolumns2(self):
-        columns = GetColumns(tokenize(self.sql2))
+        columns = getcolumns(tokenize(self.sql2))
         self.assertEqual(columns, ['child_entry', 'inode', 'creation'])
 
     def test_getcolumns3(self):
-        columns = GetColumns(tokenize(self.sql3))
+        columns = getcolumns(tokenize(self.sql3))
         self.assertEqual(columns, ['st_dev', 'st_uid', 'st_gid', 'st_mode',
                                    'st_ino', 'st_nlink', 'st_ctime',
                                    'st_atime', 'st_mtime', 'st_size', 'size'])
@@ -102,15 +102,15 @@ class Test_GetColumns(Test_SQL):
 
 class Test_GetLimit(Test_SQL):
     def test_getlimit1(self):
-        limit = GetLimit(tokenize(self.sql))
+        limit = getlimit(tokenize(self.sql))
         self.assertEqual(limit, 1)
 
     def test_getlimit2(self):
-        limit = GetLimit(tokenize(self.sql2))
+        limit = getlimit(tokenize(self.sql2))
         self.assertEqual(limit, 1)
 
     def test_getlimit3(self):
-        limit = GetLimit(tokenize(self.sql3))
+        limit = getlimit(tokenize(self.sql3))
         self.assertEqual(limit, 1)
 
 

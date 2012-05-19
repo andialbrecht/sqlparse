@@ -11,7 +11,7 @@ from sqlparse.pipeline import Pipeline
 from sqlparse.tokens   import Keyword, Whitespace
 
 
-def GetLimit(stream):
+def getlimit(stream):
     """Function that return the LIMIT of a input SQL """
     pipe = Pipeline()
 
@@ -24,7 +24,7 @@ def GetLimit(stream):
         return result
 
 
-def GetColumns(stream):
+def getcolumns(stream):
     """Function that return the colums of a SELECT query"""
     pipe = Pipeline()
 
