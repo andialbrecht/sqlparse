@@ -7,7 +7,7 @@
 
 from sqlparse import lexer
 from sqlparse.engine import grouping
-from sqlparse.engine.filter import StatementFilter
+from sqlparse.engine.filter import statementFilter
 
 # XXX remove this when cleanup is complete
 Filter = object
@@ -45,8 +45,7 @@ class FilterStack(object):
 
         if (self.stmtprocess or self.postprocess or self.split_statements
             or self._grouping):
-            splitter = StatementFilter()
-            stream = splitter(stream)
+            stream = statementFilter(stream)
 
         if self._grouping:
 
