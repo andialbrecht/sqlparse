@@ -181,6 +181,13 @@ class TokenList(Token):
             else:
                 yield token
 
+#    def __iter__(self):
+#        return self
+#
+#    def next(self):
+#        for token in self.tokens:
+#            yield token
+
     def is_group(self):
         return True
 
@@ -255,7 +262,7 @@ class TokenList(Token):
 
     def token_matching(self, idx, funcs):
         for token in self.tokens[idx:]:
-            for i, func in enumerate(funcs):
+            for func in funcs:
                 if func(token):
                     return token
 
