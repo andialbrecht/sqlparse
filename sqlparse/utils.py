@@ -75,7 +75,6 @@ def memoize_generator(func):
 
         # Look if cached
         try:
-            print params
             cached = cache[params]
 
         # Not cached, exec and store it
