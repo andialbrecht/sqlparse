@@ -458,16 +458,20 @@ class ColumnsSelect:
                     mode = 1
 
             # We have detected a SELECT statement
-            elif mode == 1:
-                if value == 'FROM':
+            elif mode in (1, 3):
+                if value in ('FROM', 'WHERE', 'GROUP'):
                     if oldValue:
                         yield oldValue
+                        oldValue = ""
 
-                    mode = 3    # Columns have been checked
+                    break    # Columns have been checked
 
                 elif value == 'AS':
                     oldValue = ""
                     mode = 2
+
+                elif token_type in Whitespace:
+                    mode = 3
 
                 elif (token_type == Punctuation
                       and value == ',' and not parenthesis):
@@ -481,7 +485,11 @@ class ColumnsSelect:
                     elif value == ')':
                         parenthesis -= 1
 
-                    oldValue += value
+                    if mode == 3:
+                        oldValue = value
+                        mode = 1
+                    else:
+                        oldValue += value
 
             # We are processing an AS keyword
             elif mode == 2:
@@ -489,6 +497,9 @@ class ColumnsSelect:
                 if token_type == Name or token_type == Keyword:
                     yield value
                     mode = 1
+
+        if oldValue:
+            yield oldValue
 
 
 # ---------------------------
