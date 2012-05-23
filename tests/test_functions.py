@@ -5,7 +5,7 @@ Created on 13/02/2012
 '''
 from unittest import main, TestCase
 
-from sqlparse.filters import Tokens2Unicode
+from sqlparse.filters import IncludeStatement, Tokens2Unicode
 from sqlparse.lexer   import tokenize
 
 import sys
@@ -26,7 +26,10 @@ class Test_IncludeStatement(TestCase):
             LIMIT 1"""
 
     def test_includeStatement(self):
-        stream = compact(tokenize(self.sql), 'tests/files')
+        stream = tokenize(self.sql)
+        includeStatement = IncludeStatement('tests/files')
+        stream = includeStatement.process(None, stream)
+        stream = compact(stream)
 
         result = Tokens2Unicode(stream)
 
