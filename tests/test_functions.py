@@ -5,7 +5,7 @@ Created on 13/02/2012
 '''
 from unittest import main, TestCase
 
-from sqlparse.filters import Tokens2Unicode
+from sqlparse.filters import IncludeStatement, Tokens2Unicode
 from sqlparse.lexer   import tokenize
 
 import sys
@@ -15,11 +15,32 @@ from sqlparse.filters   import compact
 from sqlparse.functions import getcolumns, getlimit, IsType
 
 
-class Test_SQL(TestCase):
+class Test_IncludeStatement(TestCase):
     sql = """-- type: script
             -- return: integer
 
             INCLUDE "_Make_DirEntry.sql";
+
+            INSERT INTO directories(inode)
+                            VALUES(:inode)
+            LIMIT 1"""
+
+    def test_includeStatement(self):
+        stream = tokenize(self.sql)
+        includeStatement = IncludeStatement('tests/files', raiseexceptions=True)
+        stream = includeStatement.process(None, stream)
+        stream = compact(stream)
+
+        result = Tokens2Unicode(stream)
+
+        self.assertEqual(result,
+            'INSERT INTO dir_entries(type)VALUES(:type);INSERT INTO '
+            'directories(inode)VALUES(:inode)LIMIT 1')
+
+
+class Test_SQL(TestCase):
+    sql = """-- type: script
+            -- return: integer
 
             INSERT INTO directories(inode)
                             VALUES(:inode)
@@ -63,17 +84,28 @@ LIMIT 1"""
 
 class Test_Compact(Test_SQL):
     def test_compact1(self):
-        self.assertEqual(Tokens2Unicode(compact(self.sql, 'tests/files')),
-            'INSERT INTO dir_entries(type)VALUES(:type);INSERT INTO '
-            'directories(inode)VALUES(:inode)LIMIT 1')
+        stream = compact(tokenize(self.sql))
+
+        result = Tokens2Unicode(stream)
+
+        self.assertEqual(result,
+                         'INSERT INTO directories(inode)VALUES(:inode)LIMIT 1')
 
     def test_compact2(self):
-        self.assertEqual(Tokens2Unicode(compact(self.sql2)),
+        stream = tokenize(self.sql2)
+
+        result = compact(stream)
+
+        self.assertEqual(Tokens2Unicode(result),
             'SELECT child_entry,asdf AS inode,creation FROM links WHERE '
             'parent_dir==:parent_dir AND name==:name LIMIT 1')
 
     def test_compact3(self):
-        self.assertEqual(Tokens2Unicode(compact(self.sql3)),
+        stream = tokenize(self.sql3)
+
+        result = compact(stream)
+
+        self.assertEqual(Tokens2Unicode(result),
             'SELECT 0 AS st_dev,0 AS st_uid,0 AS st_gid,dir_entries.type AS '
             'st_mode,dir_entries.inode AS st_ino,COUNT(links.child_entry)AS '
             'st_nlink,:creation AS st_ctime,dir_entries.access AS st_atime,'
