@@ -651,7 +651,7 @@ class Limit:
         return -1
 
 
-def Compact(sql, includePath="sql"):
+def compact(sql, includePath="sql"):
     """Function that return a compacted version of the input SQL query"""
     pipe = Pipeline()
 
