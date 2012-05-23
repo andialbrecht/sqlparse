@@ -27,7 +27,7 @@ class Test_IncludeStatement(TestCase):
 
     def test_includeStatement(self):
         stream = tokenize(self.sql)
-        includeStatement = IncludeStatement('tests/files')
+        includeStatement = IncludeStatement('tests/files', raiseexceptions=True)
         stream = includeStatement.process(None, stream)
         stream = compact(stream)
 
