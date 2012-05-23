@@ -11,7 +11,7 @@ from sqlparse.lexer   import tokenize
 import sys
 sys.path.insert(0, '..')
 
-from sqlparse.filters   import Compact
+from sqlparse.filters   import compact
 from sqlparse.functions import getcolumns, getlimit, IsType
 
 
@@ -63,17 +63,17 @@ LIMIT 1"""
 
 class Test_Compact(Test_SQL):
     def test_compact1(self):
-        self.assertEqual(Tokens2Unicode(Compact(self.sql, 'tests/files')),
+        self.assertEqual(Tokens2Unicode(compact(self.sql, 'tests/files')),
             'INSERT INTO dir_entries(type)VALUES(:type);INSERT INTO '
             'directories(inode)VALUES(:inode)LIMIT 1')
 
     def test_compact2(self):
-        self.assertEqual(Tokens2Unicode(Compact(self.sql2)),
+        self.assertEqual(Tokens2Unicode(compact(self.sql2)),
             'SELECT child_entry,asdf AS inode,creation FROM links WHERE '
             'parent_dir==:parent_dir AND name==:name LIMIT 1')
 
     def test_compact3(self):
-        self.assertEqual(Tokens2Unicode(Compact(self.sql3)),
+        self.assertEqual(Tokens2Unicode(compact(self.sql3)),
             'SELECT 0 AS st_dev,0 AS st_uid,0 AS st_gid,dir_entries.type AS '
             'st_mode,dir_entries.inode AS st_ino,COUNT(links.child_entry)AS '
             'st_nlink,:creation AS st_ctime,dir_entries.access AS st_atime,'
