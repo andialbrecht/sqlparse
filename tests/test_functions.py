@@ -15,11 +15,29 @@ from sqlparse.filters   import compact
 from sqlparse.functions import getcolumns, getlimit, IsType
 
 
-class Test_SQL(TestCase):
+class Test_IncludeStatement(TestCase):
     sql = """-- type: script
             -- return: integer
 
             INCLUDE "_Make_DirEntry.sql";
+
+            INSERT INTO directories(inode)
+                            VALUES(:inode)
+            LIMIT 1"""
+
+    def test_includeStatement(self):
+        stream = compact(tokenize(self.sql), 'tests/files')
+
+        result = Tokens2Unicode(stream)
+
+        self.assertEqual(result,
+            'INSERT INTO dir_entries(type)VALUES(:type);INSERT INTO '
+            'directories(inode)VALUES(:inode)LIMIT 1')
+
+
+class Test_SQL(TestCase):
+    sql = """-- type: script
+            -- return: integer
 
             INSERT INTO directories(inode)
                             VALUES(:inode)
@@ -63,13 +81,12 @@ LIMIT 1"""
 
 class Test_Compact(Test_SQL):
     def test_compact1(self):
-        stream = compact(tokenize(self.sql), 'tests/files')
+        stream = compact(tokenize(self.sql))
 
         result = Tokens2Unicode(stream)
 
         self.assertEqual(result,
-            'INSERT INTO dir_entries(type)VALUES(:type);INSERT INTO '
-            'directories(inode)VALUES(:inode)LIMIT 1')
+                         'INSERT INTO directories(inode)VALUES(:inode)LIMIT 1')
 
     def test_compact2(self):
         stream = tokenize(self.sql2)
