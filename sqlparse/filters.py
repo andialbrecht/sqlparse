@@ -419,21 +419,34 @@ class ReindentFilter:
     def _process_identifierlist(self, tlist):
         """
         Process an identifier list
+
+        If there are more than an identifier, put each on a line
         """
-        # If there are more than an identifier, put each on a line
+        # Get identifiers from the tlist
         identifiers = list(tlist.get_identifiers())
+
+        # Split the identifier list if we have more than one identifier
+        # and its not from a function
         if len(identifiers) > 1 and not tlist.within(sql.Function):
-            # Get offset size to increase
+            # Get first token
             first = list(identifiers[0].flatten())[0]
+
+            # Increase offset the size of the first token
             num_offset = self._get_offset(first) - len(first.value)
 
             # Increase offset and insert new lines
             self.offset += num_offset
+
+            # Insert a new line between the tokens
             for token in identifiers[1:]:
                 tlist.insert_before(token, self.nl())
+
+            # Imsert another new line after comment tokens
             for token in tlist.tokens:
                 if isinstance(token, sql.Comment):
                     tlist.insert_after(token, self.nl())
+
+            # Decrease offset the size of the first token
             self.offset -= num_offset
 
         # Process the identifier list as usual
@@ -507,7 +520,7 @@ class ReindentFilter:
 
         # If we are processing a statement, check if we should add a new line
         if isinstance(stmt, sql.Statement):
-            if self._last_stmt != None:
+            if self._last_stmt:
                 if unicode(self._last_stmt).endswith('\n'):
                     nl = '\n'
                 else:
@@ -582,16 +595,20 @@ class ColumnsSelect:
                     mode = 1
 
             # We have detected a SELECT statement
-            elif mode == 1:
-                if value == 'FROM':
+            elif mode in (1, 3):
+                if value in ('FROM', 'WHERE', 'GROUP'):
                     if oldValue:
                         yield oldValue
+                        oldValue = ""
 
-                    mode = 3    # Columns have been checked
+                    break    # Columns have been checked
 
                 elif value == 'AS':
                     oldValue = ""
                     mode = 2
+
+                elif token_type in Whitespace:
+                    mode = 3
 
                 elif (token_type == Punctuation
                       and value == ',' and not parenthesis):
@@ -605,7 +622,11 @@ class ColumnsSelect:
                     elif value == ')':
                         parenthesis -= 1
 
-                    oldValue += value
+                    if mode == 3:
+                        oldValue = value
+                        mode = 1
+                    else:
+                        oldValue += value
 
             # We are processing an AS keyword
             elif mode == 2:
@@ -613,6 +634,9 @@ class ColumnsSelect:
                 if token_type == Name or token_type == Keyword:
                     yield value
                     mode = 1
+
+        if oldValue:
+            yield oldValue
 
 
 # ---------------------------
