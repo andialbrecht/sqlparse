@@ -205,9 +205,16 @@ def group_identifier_list(tlist):
                    lambda t: isinstance(t, sql.Comment),
                    ]
 
-    start = None
+    def group(start, after):
+        """
+        Create and group the identifiers list
+        """
+        tokens = tlist.tokens_between(start, after)
+        return tlist.group_tokens(sql.IdentifierList, tokens)
 
+    start = None
     tcomma = tlist.token_next_match(0, T.Punctuation, ',')
+
     while tcomma:
         before = tlist.token_prev(tcomma)
         after = tlist.token_next(tcomma)
@@ -240,26 +247,16 @@ def group_identifier_list(tlist):
 
             # Reached the end of the list
             # Create and group the identifiers list
-            tokens = tlist.tokens_between(start, after)
-            group = tlist.group_tokens(sql.IdentifierList, tokens)
+            tcomma = group(start, after)
 
-            # Skip ahead to next ","
-            start = None
-            tcomma = tlist.token_next_match(tlist.token_index(group) + 1,
-                                            T.Punctuation, ',')
+        # Skip ahead to next ","
+        start = None
+        tcomma = tlist.token_next_match(tlist.token_index(tcomma) + 1,
+                                        T.Punctuation, ',')
 
-        # At least one of the tokens around tcomma don't belong to an
-        # identifier list. Something's wrong here, skip ahead to next ","
-        else:
-            start = None
-            tcomma = tlist.token_next_match(tlist.token_index(tcomma) + 1,
-                                            T.Punctuation, ',')
-
-    # There's an open identifier list
+    # There's an open identifier list, create and group the identifiers list
     if start:
-        # Create and group the identifiers list
-        tokens = tlist.tokens_between(start, after)
-        group = tlist.group_tokens(sql.IdentifierList, tokens)
+        group(start, after)
 
 
 def group_parenthesis(tlist):
