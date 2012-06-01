@@ -205,7 +205,7 @@ def group_identifier_list(tlist):
                    lambda t: isinstance(t, sql.Comment),
                    ]
 
-    def group(start, after):
+    def group_identifierlist(start, after):
         """
         Create and group the identifiers list
         """
@@ -247,7 +247,7 @@ def group_identifier_list(tlist):
 
             # Reached the end of the list
             # Create and group the identifiers list
-            tcomma = group(start, after)
+            tcomma = group_identifierlist(start, after)
 
         # Skip ahead to next ","
         start = None
@@ -256,7 +256,7 @@ def group_identifier_list(tlist):
 
     # There's an open identifier list, create and group the identifiers list
     if start:
-        group(start, after)
+        group_identifierlist(start, after)
 
 
 def group_parenthesis(tlist):
