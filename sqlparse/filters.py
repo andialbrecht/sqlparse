@@ -405,17 +405,19 @@ class ReindentFilter:
     def process(self, stack, stmt):
         if isinstance(stmt, sql.Statement):
             self._curr_stmt = stmt
+
         self._process(stmt)
+
         if isinstance(stmt, sql.Statement):
-            if self._last_stmt is not None:
+            if self._last_stmt:
                 if unicode(self._last_stmt).endswith('\n'):
                     nl = '\n'
                 else:
                     nl = '\n\n'
-                stmt.tokens.insert(0,
-                    sql.Token(T.Whitespace, nl))
-            if self._last_stmt != stmt:
-                self._last_stmt = stmt
+
+                stmt.tokens.insert(0, sql.Token(T.Whitespace, nl))
+
+            self._last_stmt = stmt
 
 
 # FIXME: Doesn't work ;)
