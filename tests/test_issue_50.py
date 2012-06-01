@@ -13,11 +13,10 @@ class Issue_50(TestCase):
     def test_issue(self):
         result = format("SELECT foo, null bar, car FROM dual", reindent=True)
         print result
-        self.assertEqual(result,
-"""SELECT      foo,
-       null bar,
-            car
-FROM dual""")
+        self.assertEqual(result, "SELECT      foo,\n"
+                                 "       null bar,\n"
+                                 "            car\n"
+                                 "FROM dual")
 
 
 if __name__ == "__main__":
