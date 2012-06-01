@@ -336,17 +336,32 @@ class ReindentFilter:
         self.offset -= num_offset
 
     def _process_identifierlist(self, tlist):
+        # Get identifiers from the tlist
         identifiers = list(tlist.get_identifiers())
+
+        # Split the identifier list if we have more than one identifier
+        # and its not from a function
         if len(identifiers) > 1 and not tlist.within(sql.Function):
+            # Get first token
             first = list(identifiers[0].flatten())[0]
+
+            # Increase offset the size of the first token
             num_offset = self._get_offset(first) - len(first.value)
             self.offset += num_offset
+
+            # Insert a new line between the tokens
             for token in identifiers[1:]:
                 tlist.insert_before(token, self.nl())
+
+            # Imsert another new line after comment tokens
             for token in tlist.tokens:
                 if isinstance(token, sql.Comment):
                     tlist.insert_after(token, self.nl())
+
+            # Decrease offset the size of the first token
             self.offset -= num_offset
+
+        # Process default tokens over tlist as usual
         self._process_default(tlist)
 
     def _process_case(self, tlist):
@@ -383,7 +398,9 @@ class ReindentFilter:
             self._split_statements(tlist)
         if kwds:
             self._split_kwds(tlist)
-        [self._process(sgroup) for sgroup in tlist.get_sublists()]
+
+        for sgroup in tlist.get_sublists():
+            self._process(sgroup)
 
     def process(self, stack, stmt):
         if isinstance(stmt, sql.Statement):
