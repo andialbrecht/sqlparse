@@ -234,7 +234,7 @@ def group_identifier_list(tlist):
                     continue
 
                 elif(next_.ttype == T.Keyword
-                and next_.value not in ('FROM', 'WHERE', 'GROUP')):
+                and next_.value.upper() not in ('FROM', 'WHERE', 'GROUP')):
                     tcomma = next_
                     continue
 
