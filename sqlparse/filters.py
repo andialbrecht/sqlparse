@@ -438,15 +438,36 @@ class ReindentFilter:
 
                 # Increase offset and insert new lines
                 self.offset += num_offset
+                offset = 0
 
                 # Insert a new line between the tokens
+                ignore = False
                 for token in identifiers[1:]:
-                    tlist.insert_before(token, self.nl())
+                    if not ignore:
+                        tlist.insert_before(token, self.nl())
+                    ignore = token.ttype
+
+                    # Check identifiers offset
+                    if token.ttype:
+                        l = len(token.value)
+                        if offset < l:
+                            offset = l
 
                 # Imsert another new line after comment tokens
                 for token in tlist.tokens:
                     if isinstance(token, sql.Comment):
                         tlist.insert_after(token, self.nl())
+
+                # Update identifiers offset
+                if offset:
+                    offset += 1
+
+                    ignore = False
+                    for token in identifiers:
+                        if not ignore and not token.ttype:
+                            tlist.insert_before(token, sql.Token(T.Whitespace,
+                                                                 " " * offset))
+                        ignore = token.ttype
 
                 # Decrease offset the size of the first token
                 self.offset -= num_offset

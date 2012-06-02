@@ -209,9 +209,11 @@ def group_identifier_list(tlist):
         """
         Create and group the identifiers list
         """
+        print "group_identifierlist", start, after
         tokens = tlist.tokens_between(start, after)
         return tlist.group_tokens(sql.IdentifierList, tokens)
 
+    # Search for the first identifier list
     start = None
     tcomma = tlist.token_next_match(0, T.Punctuation, ',')
 
@@ -233,23 +235,25 @@ def group_identifier_list(tlist):
             if start == None:
                 start = before
 
-            # Look if the next token is another comma
-            next_ = tlist.token_next(after)
-            if next_:
-                if next_.match(T.Punctuation, ','):
-                    tcomma = next_
-                    continue
+            def continue_next():
+                # Check the next token
+                next_ = tlist.token_next(after)
+                while next_:
+                    # Next token is another comma or an identifier list keyword
+                    if next_.match(T.Punctuation, ','):
+                        return next_
 
-                elif(next_.ttype == T.Keyword
-                and next_.value.upper() not in ('FROM', 'WHERE', 'GROUP')):
-                    tcomma = next_
-                    continue
+                    next_ = tlist.token_next(next_)
+
+            tcomma = continue_next()
+            if tcomma:
+                continue
 
             # Reached the end of the list
             # Create and group the identifiers list
             tcomma = group_identifierlist(start, after)
 
-        # Skip ahead to next ","
+        # Skip ahead to next identifier list
         start = None
         tcomma = tlist.token_next_match(tlist.token_index(tcomma) + 1,
                                         T.Punctuation, ',')
