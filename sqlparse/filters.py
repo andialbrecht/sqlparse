@@ -830,13 +830,11 @@ class Limit:
         return -1
 
 
-def Compact(sql, includePath="sql"):
-    """Function that return a compacted version of the input SQL query"""
+def compact(stream):
+    """Function that return a compacted version of the stream"""
     pipe = Pipeline()
 
-    pipe.append(tokenize)
-    pipe.append(IncludeStatement(includePath))
     pipe.append(StripComments())
     pipe.append(StripWhitespace)
 
-    return pipe(sql)
+    return pipe(stream)
