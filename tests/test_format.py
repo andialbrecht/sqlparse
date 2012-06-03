@@ -161,7 +161,6 @@ class TestFormatReindent(TestCaseBase):
     def test_identifier_list(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)
         s = 'select foo, bar, baz from table1, table2 where 1 = 2'
-        print f(s)
         self.ndiffAssertEqual(f(s), '\n'.join(['select foo,',
                                                '       bar,',
                                                '       baz',

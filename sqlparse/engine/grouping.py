@@ -237,12 +237,6 @@ def group_identifier_list(tlist):
                 # Check the next token
                 next_ = tlist.token_next(after)
                 while next_:
-#                    # Next token is another comma or an identifier list keyword
-#                    if next_.match(T.Punctuation, ','):
-#                        return next_
-#
-#                    next_ = tlist.token_next(next_)
-
                     if next_.value != ',':
                         passed = False
                         for func in fend1_funcs:
@@ -251,7 +245,6 @@ def group_identifier_list(tlist):
                                 break
 
                         if not passed:
-                            print "not passed", repr(next_)
                             break
 
                     after = next_
