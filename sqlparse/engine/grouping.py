@@ -209,7 +209,6 @@ def group_identifier_list(tlist):
         """
         Create and group the identifiers list
         """
-        print "group_identifierlist", start, after
         tokens = tlist.tokens_between(start, after)
         return tlist.group_tokens(sql.IdentifierList, tokens)
 
@@ -235,19 +234,26 @@ def group_identifier_list(tlist):
             if start == None:
                 start = before
 
-            def continue_next():
                 # Check the next token
                 next_ = tlist.token_next(after)
                 while next_:
-                    # Next token is another comma or an identifier list keyword
-                    if next_.match(T.Punctuation, ','):
-                        return next_
+#                    # Next token is another comma or an identifier list keyword
+#                    if next_.match(T.Punctuation, ','):
+#                        return next_
+#
+#                    next_ = tlist.token_next(next_)
 
+                    passed = False
+                    for func in fend1_funcs:
+                        if func(next_):
+                            passed = True
+                            break
+
+                    if not passed:
+                        break
+
+                    after = next_
                     next_ = tlist.token_next(next_)
-
-            tcomma = continue_next()
-            if tcomma:
-                continue
 
             # Reached the end of the list
             # Create and group the identifiers list
