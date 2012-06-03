@@ -11,34 +11,43 @@ from sqlparse import filters
 
 def validate_options(options):
     """Validates options."""
+
+    # keyword_case
     kwcase = options.get('keyword_case', None)
     if kwcase not in [None, 'upper', 'lower', 'capitalize']:
         raise SQLParseError('Invalid value for keyword_case: %r' % kwcase)
 
+    # identifier_case
     idcase = options.get('identifier_case', None)
     if idcase not in [None, 'upper', 'lower', 'capitalize']:
         raise SQLParseError('Invalid value for identifier_case: %r' % idcase)
 
+    # output_format
     ofrmt = options.get('output_format', None)
     if ofrmt not in [None, 'sql', 'python', 'php']:
         raise SQLParseError('Unknown output format: %r' % ofrmt)
 
+    # strip_comments
     strip_comments = options.get('strip_comments', False)
     if strip_comments not in [True, False]:
         raise SQLParseError('Invalid value for strip_comments: %r'
                             % strip_comments)
 
+    # strip_whitespace
     strip_ws = options.get('strip_whitespace', False)
     if strip_ws not in [True, False]:
         raise SQLParseError('Invalid value for strip_whitespace: %r'
                             % strip_ws)
 
+    # reindent
     reindent = options.get('reindent', False)
     if reindent not in [True, False]:
         raise SQLParseError('Invalid value for reindent: %r'
                             % reindent)
     elif reindent:
         options['strip_whitespace'] = True
+
+    # indent_tabs
     indent_tabs = options.get('indent_tabs', False)
     if indent_tabs not in [True, False]:
         raise SQLParseError('Invalid value for indent_tabs: %r' % indent_tabs)
@@ -46,15 +55,20 @@ def validate_options(options):
         options['indent_char'] = '\t'
     else:
         options['indent_char'] = ' '
+
+    # indent_width
     indent_width = options.get('indent_width', 2)
     try:
         indent_width = int(indent_width)
     except (TypeError, ValueError):
         raise SQLParseError('indent_width requires an integer')
+
     if indent_width < 1:
         raise SQLParseError('indent_width requires an positive integer')
+
     options['indent_width'] = indent_width
 
+    # right_margin
     right_margin = options.get('right_margin', None)
     if right_margin is not None:
         try:
@@ -65,6 +79,7 @@ def validate_options(options):
             raise SQLParseError('right_margin requires an integer > 10')
     options['right_margin'] = right_margin
 
+    # return the processed options
     return options
 
 
@@ -89,8 +104,7 @@ def build_filter_stack(stack, options):
         stack.enable_grouping()
         stack.stmtprocess.append(filters.StripCommentsFilter())
 
-    if (options.get('strip_whitespace', False)
-        or options.get('reindent', False)):
+    if options.get('strip_whitespace', False):
         stack.enable_grouping()
         stack.stmtprocess.append(filters.StripWhitespaceFilter())
 
