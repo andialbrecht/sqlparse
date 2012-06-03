@@ -243,14 +243,16 @@ def group_identifier_list(tlist):
 #
 #                    next_ = tlist.token_next(next_)
 
-                    passed = False
-                    for func in fend1_funcs:
-                        if func(next_):
-                            passed = True
-                            break
+                    if next_.value != ',':
+                        passed = False
+                        for func in fend1_funcs:
+                            if func(next_):
+                                passed = True
+                                break
 
-                    if not passed:
-                        break
+                        if not passed:
+                            print "not passed", repr(next_)
+                            break
 
                     after = next_
                     next_ = tlist.token_next(next_)
