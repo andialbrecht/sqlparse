@@ -294,7 +294,12 @@ class ReindentFilter:
         Return an indented new line token
         """
         # TODO: newline character should be configurable
-        ws = '\n' + self.char * (self.indent * self.width + self.offset)
+        ws = '\n'
+        offset = self.indent * self.width + self.offset
+        if self.char == '\t':
+            tabs, offset = divmod(offset, self.width)
+            ws += self.char * tabs
+        ws += ' ' * offset
         return sql.Token(T.Whitespace, ws)
 
     def _split_kwds(self, tlist):
