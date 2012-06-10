@@ -70,7 +70,7 @@ def validate_options(options):
 
     # right_margin
     right_margin = options.get('right_margin', None)
-    if right_margin is not None:
+    if right_margin:
         try:
             right_margin = int(right_margin)
         except (TypeError, ValueError):
