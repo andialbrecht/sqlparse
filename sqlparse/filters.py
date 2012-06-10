@@ -255,9 +255,18 @@ class ReindentFilter:
         full_offset = len(line) - len(self.char * (self.width * self.indent))
         return full_offset - self.offset
 
+    def _gentabs(self, offset):
+        result = ''
+        if self.char == '\t':
+            tabs, offset = divmod(offset, self.width)
+            result += self.char * tabs
+        result += ' ' * offset
+
+        return result
+
     def nl(self):
         # TODO: newline character should be configurable
-        ws = '\n' + (self.char * ((self.indent * self.width) + self.offset))
+        ws = '\n' + self._gentabs(self.indent * self.width + self.offset)
         return sql.Token(T.Whitespace, ws)
 
     def _split_kwds(self, tlist):
@@ -334,17 +343,80 @@ class ReindentFilter:
         self.offset -= num_offset
 
     def _process_identifierlist(self, tlist):
-        identifiers = list(tlist.get_identifiers())
-        if len(identifiers) > 1 and not tlist.within(sql.Function):
-            first = list(identifiers[0].flatten())[0]
-            num_offset = self._get_offset(first) - len(first.value)
-            self.offset += num_offset
-            for token in identifiers[1:]:
-                tlist.insert_before(token, self.nl())
-            for token in tlist.tokens:
-                if isinstance(token, sql.Comment):
-                    tlist.insert_after(token, self.nl())
-            self.offset -= num_offset
+        """
+        Process an identifier list
+
+        If there are more than an identifier, put each on a line
+        """
+        # Split the identifier list if we are not in a function
+        if not tlist.within(sql.Function):
+            # Get identifiers from the tlist
+            identifiers = list(tlist.get_identifiers())
+            # Split the identifier list if we have more than one identifier
+            if len(identifiers) > 1:
+                # Get first token
+                first = list(identifiers[0].flatten())[0]
+
+                # Increase offset the size of the first token
+                num_offset = self._get_offset(first) - len(first.value)
+
+                # Increase offset and insert new lines
+                self.offset += num_offset
+                offset = 0
+
+                # Insert a new line between the tokens
+                ignore = False
+                for token in identifiers[1:]:
+                    if not ignore:
+                        tlist.insert_before(token, self.nl())
+                    ignore = token.ttype
+
+                    # Check identifiers offset
+                    if token.ttype:
+                        l = len(token.value)
+                        if offset < l:
+                            offset = l
+
+                # Imsert another new line after comment tokens
+                for token in tlist.tokens:
+                    if isinstance(token, sql.Comment):
+                        tlist.insert_after(token, self.nl())
+
+                # Update identifiers offset
+                if offset:
+                    offset += 1
+
+                    ignore = False
+                    for token in identifiers:
+                        if not ignore and not token.ttype:
+                            prev = tlist.token_prev(token, False)
+                            if prev:
+                                if prev.ttype == T.Whitespace:
+                                    value = prev.value
+
+                                    spaces = 0
+                                    while value and value[-1] == ' ':
+                                        value = value[:-1]
+                                        spaces += 1
+
+                                    value += self._gentabs(spaces + offset)
+                                    prev.value = value
+                                else:
+                                    ws = sql.Token(T.Whitespace,
+                                                   self._gentabs(offset))
+                                    tlist.insert_before(token, ws)
+
+                            # Just first identifier
+                            else:
+                                ws = sql.Token(T.Whitespace, ' ' * offset)
+                                tlist.insert_before(token, ws)
+
+                        ignore = token.ttype
+
+                # Decrease offset the size of the first token
+                self.offset -= num_offset
+
+        # Process the identifier list as usual
         self._process_default(tlist)
 
     def _process_case(self, tlist):
