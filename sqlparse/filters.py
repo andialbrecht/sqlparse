@@ -475,9 +475,21 @@ class ReindentFilter:
                     ignore = False
                     for token in identifiers:
                         if not ignore and not token.ttype:
-                            ws = self._gentabs(offset)
-                            tlist.insert_before(token, sql.Token(T.Whitespace,
-                                                                 ws))
+                            prev = tlist.token_prev(token, False)
+                            if prev and prev.ttype == T.Whitespace:
+                                value = prev.value
+
+                                spaces = 0
+                                while value and value[-1] == ' ':
+                                    value = value[:-1]
+                                    spaces += 1
+
+                                value += self._gentabs(spaces + offset)
+                                prev.value = value
+                            else:
+                                ws = sql.Token(T.Whitespace,
+                                               self._gentabs(offset))
+                                tlist.insert_before(token, ws)
                         ignore = token.ttype
 
                 # Decrease offset the size of the first token
