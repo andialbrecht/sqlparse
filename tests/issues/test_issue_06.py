@@ -13,7 +13,7 @@ class Issue_06(TestCase):
     def test_issue(self):
         result = format("SELECT foo, null bar, car FROM dual", reindent=True,
                         indent_tabs=True)
-        self.assertEqual(result, "SELECT\t\t\tfoo,\n"
+        self.assertEqual(result, "SELECT      foo,\n"
                                  "\t\t\t null bar,\n"
                                  "\t\t\t\t\t\tcar\n"
                                  "FROM dual")
