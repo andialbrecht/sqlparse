@@ -265,82 +265,132 @@ class ReindentFilter:
         return result
 
     def nl(self):
+        """
+        Return an indented new line token
+        """
         # TODO: newline character should be configurable
         ws = '\n' + self._gentabs(self.indent * self.width + self.offset)
         return sql.Token(T.Whitespace, ws)
 
     def _split_kwds(self, tlist):
+        """
+        Split `tlist` by its keywords
+        """
         split_words = ('FROM', 'JOIN$', 'AND', 'OR',
                        'GROUP', 'ORDER', 'UNION', 'VALUES',
                        'SET', 'BETWEEN')
 
         def _next_token(i):
-            t = tlist.token_next_match(i, T.Keyword, split_words,
-                                       regex=True)
+            """
+            Get next keyword where to split
+            """
+            # Search for the first keyword token
+            t = tlist.token_next_match(i, T.Keyword, split_words, regex=True)
+
+            # Use the BETWEEN ... AND ... struct as an unsplitable statement
             if t and t.value.upper() == 'BETWEEN':
                 t = _next_token(tlist.token_index(t) + 1)
                 if t and t.value.upper() == 'AND':
                     t = _next_token(tlist.token_index(t) + 1)
+
+            # Return the token
             return t
 
-        idx = 0
-        token = _next_token(idx)
+        # Get first token
+        token = _next_token(0)
         while token:
-            prev = tlist.token_prev(tlist.token_index(token), False)
             offset = 1
-            if prev and prev.is_whitespace():
-                tlist.tokens.pop(tlist.token_index(prev))
-                offset += 1
-            if (prev
-                and isinstance(prev, sql.Comment)
-                and (str(prev).endswith('\n')
-                     or str(prev).endswith('\r'))):
-                nl = tlist.token_next(token)
-            else:
+            nl = None
+
+            # Check if we have any token before
+            prev = tlist.token_prev(tlist.token_index(token), False)
+            if prev:
+                # Previous token was a whitespace, increase offset
+                if prev.is_whitespace():
+                    tlist.tokens.pop(tlist.token_index(prev))
+                    offset += 1
+
+                # Previous token was a comment, add new line if necessary
+                if isinstance(prev, sql.Comment):
+                    prev = str(prev)
+                    if prev.endswith('\n') or prev.endswith('\r'):
+                        nl = tlist.token_next(token)
+
+            # New line was not added, set it now
+            if nl == None:
                 nl = self.nl()
                 tlist.insert_before(token, nl)
+
+            # Add token now
             token = _next_token(tlist.token_index(nl) + offset)
 
     def _split_statements(self, tlist):
-        idx = 0
-        token = tlist.token_next_by_type(idx, (T.Keyword.DDL, T.Keyword.DML))
+        """
+        Split tlist on statements
+        """
+        # Search for the first statement
+        token = tlist.token_next_by_type(0, (T.Keyword.DDL, T.Keyword.DML))
         while token:
             prev = tlist.token_prev(tlist.token_index(token), False)
-            if prev and prev.is_whitespace():
-                tlist.tokens.pop(tlist.token_index(prev))
-            # only break if it's not the first token
             if prev:
+                if prev.is_whitespace():
+                    tlist.tokens.pop(tlist.token_index(prev))
+
+                # only break if it's not the first token
                 nl = self.nl()
                 tlist.insert_before(token, nl)
+
+            # Go to the next statement
             token = tlist.token_next_by_type(tlist.token_index(token) + 1,
                                              (T.Keyword.DDL, T.Keyword.DML))
 
     def _process(self, tlist):
+        """
+        Proxy to other methods based on `tlist` class
+        """
         func_name = '_process_%s' % tlist.__class__.__name__.lower()
         func = getattr(self, func_name, self._process_default)
         func(tlist)
 
     def _process_where(self, tlist):
+        """
+        Process WHERE statement
+        """
+        # Look for the next WHERE keyword and add a new line
         token = tlist.token_next_match(0, T.Keyword, 'WHERE')
         tlist.insert_before(token, self.nl())
+
+        # Indent and process the (indented) WHERE statement as usual
         self.indent += 1
         self._process_default(tlist)
         self.indent -= 1
 
     def _process_parenthesis(self, tlist):
+        """
+        Process parenthesis
+        """
+        # Omit the 'open parenthesis' token
+        # and check if the next one require say us we should indent
         first = tlist.token_next(0)
-        indented = False
-        if first and first.ttype in (T.Keyword.DML, T.Keyword.DDL):
+        indented = first and first.ttype in (T.Keyword.DML, T.Keyword.DDL)
+
+        # If we should indent, increase indent and add a new line
+        if indented:
             self.indent += 1
             tlist.tokens.insert(0, self.nl())
-            indented = True
-        num_offset = self._get_offset(tlist.token_next_match(0,
-                                                        T.Punctuation, '('))
+
+        # Get indentation offset
+        token = tlist.token_next_match(0, T.Punctuation, '(')
+        num_offset = self._get_offset(token)
+
+        # Increase indentation offset and process the statement as usual
         self.offset += num_offset
         self._process_default(tlist, stmts=not indented)
+        self.offset -= num_offset
+
+        # If we indented, decrease indent to previous state
         if indented:
             self.indent -= 1
-        self.offset -= num_offset
 
     def _process_identifierlist(self, tlist):
         """
@@ -352,6 +402,8 @@ class ReindentFilter:
         if not tlist.within(sql.Function):
             # Get identifiers from the tlist
             identifiers = list(tlist.get_identifiers())
+            print repr(identifiers)
+
             # Split the identifier list if we have more than one identifier
             if len(identifiers) > 1:
                 # Get first token
@@ -420,55 +472,79 @@ class ReindentFilter:
         self._process_default(tlist)
 
     def _process_case(self, tlist):
-        is_first = True
-        num_offset = None
+        """
+        Process a CASE statement
+        """
+        # Increase the offset the size of the CASE keyword
         case = tlist.tokens[0]
         outer_offset = self._get_offset(case) - len(case.value)
         self.offset += outer_offset
-        for cond, value in tlist.get_cases():
-            if is_first:
-                tcond = list(cond[0].flatten())[0]
-                is_first = False
-                num_offset = self._get_offset(tcond) - len(tcond.value)
-                self.offset += num_offset
-                continue
+
+        # Get the case conditions
+        cases = tlist.get_cases()
+
+        # Get and increase the offset the size of the condition selector
+        cond, value = cases[0]
+        tcond = list(cond[0].flatten())[0]
+        num_offset = self._get_offset(tcond) - len(tcond.value)
+        self.offset += num_offset
+
+        # Insert a new line before each condition
+        for cond, value in cases[1:]:
             if cond is None:
                 token = value[0]
             else:
                 token = cond[0]
+
             tlist.insert_before(token, self.nl())
+
         # Line breaks on group level are done. Now let's add an offset of
         # 5 (=length of "when", "then", "else") and process subgroups.
         self.offset += 5
         self._process_default(tlist)
         self.offset -= 5
-        if num_offset is not None:
-            self.offset -= num_offset
+
+        # Decrease the offset the size of the condition selector
+        self.offset -= num_offset
+
+        # Insert a new line before the case END keyword
         end = tlist.token_next_match(0, T.Keyword, 'END')
         tlist.insert_before(end, self.nl())
+
+        # Decrease the offset the size of the CASE keyword
         self.offset -= outer_offset
 
     def _process_default(self, tlist, stmts=True, kwds=True):
+        """
+        Generic processing of `tlist` statements
+        """
         if stmts:
             self._split_statements(tlist)
         if kwds:
             self._split_kwds(tlist)
-        [self._process(sgroup) for sgroup in tlist.get_sublists()]
+
+        for sgroup in tlist.get_sublists():
+            self._process(sgroup)
 
     def __call__(self, stmt):
         if isinstance(stmt, sql.Statement):
             self._curr_stmt = stmt
+
+        # Process the statement
         self._process(stmt)
+
+        # If we are processing a statement, check if we should add a new line
         if isinstance(stmt, sql.Statement):
-            if self._last_stmt is not None:
+            if self._last_stmt:
                 if unicode(self._last_stmt).endswith('\n'):
                     nl = '\n'
                 else:
                     nl = '\n\n'
-                stmt.tokens.insert(0,
-                    sql.Token(T.Whitespace, nl))
-            if self._last_stmt != stmt:
-                self._last_stmt = stmt
+
+                stmt.tokens.insert(0, sql.Token(T.Whitespace, nl))
+
+            # Set the statement as the current one
+            self._last_stmt = stmt
 
 
 # FIXME: Doesn't work ;)
