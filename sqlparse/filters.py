@@ -289,17 +289,21 @@ class ReindentFilter:
         full_offset = len(line) - len(self.char * self.width * self.indent)
         return full_offset - self.offset
 
+    def _gentabs(self, offset):
+        result = ''
+        if self.char == '\t':
+            tabs, offset = divmod(offset, self.width)
+            result += self.char * tabs
+        result += ' ' * offset
+
+        return result
+
     def nl(self):
         """
         Return an indented new line token
         """
         # TODO: newline character should be configurable
-        ws = '\n'
-        offset = self.indent * self.width + self.offset
-        if self.char == '\t':
-            tabs, offset = divmod(offset, self.width)
-            ws += self.char * tabs
-        ws += ' ' * offset
+        ws = '\n' + self._gentabs(self.indent * self.width + self.offset)
         return sql.Token(T.Whitespace, ws)
 
     def _split_kwds(self, tlist):
@@ -471,8 +475,9 @@ class ReindentFilter:
                     ignore = False
                     for token in identifiers:
                         if not ignore and not token.ttype:
+                            ws = self._gentabs(offset)
                             tlist.insert_before(token, sql.Token(T.Whitespace,
-                                                                 " " * offset))
+                                                                 ws))
                         ignore = token.ttype
 
                 # Decrease offset the size of the first token
