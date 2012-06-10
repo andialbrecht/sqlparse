@@ -402,7 +402,6 @@ class ReindentFilter:
         if not tlist.within(sql.Function):
             # Get identifiers from the tlist
             identifiers = list(tlist.get_identifiers())
-            print repr(identifiers)
 
             # Split the identifier list if we have more than one identifier
             if len(identifiers) > 1:

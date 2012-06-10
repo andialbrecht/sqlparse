@@ -214,6 +214,7 @@ def group_identifier_list(tlist):
     # Search for the first identifier list
     start = None
     tcomma = tlist.token_next_match(0, T.Punctuation, ',')
+
     while tcomma:
         before = tlist.token_prev(tcomma)
         after = tlist.token_next(tcomma)
@@ -227,7 +228,7 @@ def group_identifier_list(tlist):
                 apassed = True
 
         # Both tokens around tcomma belong to a list
-        if not bpassed or not apassed:
+        if bpassed and apassed:
             # Set the start of the identifier list if not defined before
             if start == None:
                 start = before
