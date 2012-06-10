@@ -289,12 +289,21 @@ class ReindentFilter:
         full_offset = len(line) - len(self.char * self.width * self.indent)
         return full_offset - self.offset
 
+    def _gentabs(self, offset):
+        result = ''
+        if self.char == '\t':
+            tabs, offset = divmod(offset, self.width)
+            result += self.char * tabs
+        result += ' ' * offset
+
+        return result
+
     def nl(self):
         """
         Return an indented new line token
         """
         # TODO: newline character should be configurable
-        ws = '\n' + self.char * (self.indent * self.width + self.offset)
+        ws = '\n' + self._gentabs(self.indent * self.width + self.offset)
         return sql.Token(T.Whitespace, ws)
 
     def _split_kwds(self, tlist):
@@ -466,8 +475,28 @@ class ReindentFilter:
                     ignore = False
                     for token in identifiers:
                         if not ignore and not token.ttype:
-                            tlist.insert_before(token, sql.Token(T.Whitespace,
-                                                                 " " * offset))
+                            prev = tlist.token_prev(token, False)
+                            if prev:
+                                if prev.ttype == T.Whitespace:
+                                    value = prev.value
+
+                                    spaces = 0
+                                    while value and value[-1] == ' ':
+                                        value = value[:-1]
+                                        spaces += 1
+
+                                    value += self._gentabs(spaces + offset)
+                                    prev.value = value
+                                else:
+                                    ws = sql.Token(T.Whitespace,
+                                                   self._gentabs(offset))
+                                    tlist.insert_before(token, ws)
+
+                            # Just first identifier
+                            else:
+                                ws = sql.Token(T.Whitespace, ' ' * offset)
+                                tlist.insert_before(token, ws)
+
                         ignore = token.ttype
 
                 # Decrease offset the size of the first token

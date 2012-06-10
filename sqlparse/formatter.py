@@ -9,6 +9,9 @@ from sqlparse import SQLParseError
 from sqlparse import filters
 
 
+INDENT_WIDTH = 2
+
+
 def validate_options(options):
     """Validates options."""
 
@@ -57,7 +60,7 @@ def validate_options(options):
         options['indent_char'] = ' '
 
     # indent_width
-    indent_width = options.get('indent_width', 2)
+    indent_width = options.get('indent_width', INDENT_WIDTH)
     try:
         indent_width = int(indent_width)
     except (TypeError, ValueError):
@@ -70,7 +73,7 @@ def validate_options(options):
 
     # right_margin
     right_margin = options.get('right_margin', None)
-    if right_margin is not None:
+    if right_margin:
         try:
             right_margin = int(right_margin)
         except (TypeError, ValueError):
@@ -112,7 +115,8 @@ def build_filter_stack(stack, options):
         stack.enable_grouping()
         stack.stmtprocess.append(
             filters.ReindentFilter(char=options['indent_char'],
-                                   width=options['indent_width']))
+                                   width=options['indent_width'],
+                                   line_width=options['right_margin']))
 
     if options.get('right_margin', False):
         stack.enable_grouping()
