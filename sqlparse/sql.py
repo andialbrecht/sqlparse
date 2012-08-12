@@ -28,7 +28,7 @@ class Token(object):
         return unicode(self).encode('utf-8')
 
     def __repr__(self):
-        short = self._get_repr_value()
+        short = self._get_repr_value().encode('utf-8')
         return '<%s \'%s\' at 0x%07x>' % (self._get_repr_name(),
                                           short, id(self))
 
