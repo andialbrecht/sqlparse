@@ -158,7 +158,7 @@ class Lexer(object):
     stripall = False
     stripnl = False
     tabsize = 0
-    flags = re.IGNORECASE
+    flags = re.IGNORECASE|re.UNICODE
     bufsize = 4096
 
     tokens = {
@@ -176,14 +176,14 @@ class Lexer(object):
             (r'CASE\b', tokens.Keyword),  # extended CASE(foo)
             (r"`(``|[^`])*`", tokens.Name),
             (r"´(´´|[^´])*´", tokens.Name),
-            (r'\$([a-zA-Z_][a-zA-Z0-9_]*)?\$', tokens.Name.Builtin),
+            (r'\$([^\W\d_]\w*)?\$', tokens.Name.Builtin),
             (r'\?{1}', tokens.Name.Placeholder),
-            (r'[$:?%][a-zA-Z0-9_]+', tokens.Name.Placeholder),
+            (r'[$:?%]\w+', tokens.Name.Placeholder),
             # FIXME(andi): VALUES shouldn't be listed here
             # see https://github.com/andialbrecht/sqlparse/pull/64
             (r'VALUES', tokens.Keyword),
-            (r'@[a-zA-Z_][a-zA-Z0-9_]+', tokens.Name),
-            (r'[a-zA-Z_][a-zA-Z0-9_]*(?=[.(])', tokens.Name),  # see issue39
+            (r'@[^\W\d_]\w+', tokens.Name),
+            (r'[^\W\d_]\w*(?=[.(])', tokens.Name),  # see issue39
             (r'[-]?0x[0-9a-fA-F]+', tokens.Number.Hexadecimal),
             (r'[-]?[0-9]*\.[0-9]+', tokens.Number.Float),
             (r'[-]?[0-9]+', tokens.Number.Integer),
@@ -196,8 +196,8 @@ class Lexer(object):
             (r'END( IF| LOOP)?\b', tokens.Keyword),
             (r'NOT NULL\b', tokens.Keyword),
             (r'CREATE( OR REPLACE)?\b', tokens.Keyword.DDL),
-            (r'(?<=\.)[a-zA-Z_][a-zA-Z0-9_]*', tokens.Name),
-            (r'[a-zA-Z_][a-zA-Z0-9_]*', is_keyword),
+            (r'(?<=\.)[^\W\d_]\w*', tokens.Name),
+            (r'[^\W\d_]\w*', is_keyword),
             (r'[;:()\[\],\.]', tokens.Punctuation),
             (r'[<>=~!]+', tokens.Operator.Comparison),
             (r'[+/@#%^&|`?^-]+', tokens.Operator),
