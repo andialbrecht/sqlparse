@@ -24,7 +24,7 @@ LONG_DESCRIPTION = """
 ``sqlparse`` is a non-validating SQL parser module.
 It provides support for parsing, splitting and formatting SQL statements.
 
-Visit the `project page <http://code.google.com/p/python-sqlparse/>`_ for
+Visit the `project page <https://github.com/andialbrecht/sqlparse>`_ for
 additional information and documentation.
 
 **Example Usage**
@@ -72,8 +72,10 @@ Parsing::
 """
 
 
-DOWNLOAD_URL = ('http://python-sqlparse.googlecode.com/files/'
-                'sqlparse-%s.tar.gz' % sqlparse.__version__)
+DOWNLOAD_URL = (
+    'https://github.com/downloads/andialbrecht/sqlparse/'
+    'sqlparse-%s.tar.gz' % sqlparse.__version__
+)
 
 
 setup(
@@ -86,7 +88,7 @@ setup(
     download_url=DOWNLOAD_URL,
     long_description=LONG_DESCRIPTION,
     license='BSD',
-    url='http://python-sqlparse.googlecode.com/',
+    url='https://github.com/andialbrecht/sqlparse',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
