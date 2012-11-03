@@ -10,6 +10,7 @@ import os
 import sys
 
 import sqlparse
+from sqlparse.exceptions import SQLParseError
 
 
 _CASE_CHOICES = ['upper', 'lower', 'capitalize']
@@ -91,7 +92,7 @@ def main():
     formatter_opts = _build_formatter_opts(options)
     try:
         formatter_opts = sqlparse.formatter.validate_options(formatter_opts)
-    except sqlparse.SQLParseError, err:
+    except SQLParseError, err:
         _error('Invalid options: %s' % err, exit_=1)
 
     stream.write(sqlparse.format(data, **formatter_opts).encode('utf-8',

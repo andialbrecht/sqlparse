@@ -5,8 +5,8 @@
 
 """SQL formatter"""
 
-from sqlparse import SQLParseError
 from sqlparse import filters
+from sqlparse.exceptions import SQLParseError
 
 
 def validate_options(options):

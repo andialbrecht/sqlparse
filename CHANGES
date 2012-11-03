@@ -14,6 +14,10 @@ Bug Fixes
  * Pretty format comments in identifier lists (issue59).
  * Several minor bug fixes and improvements.
 
+Other
+ * Deprecated sqlparse.SQLParseError. Please use
+   sqlparse.exceptions.SQLParseError instead.
+
 
 Release 0.1.3 (Jul 29, 2011)
 ----------------------------

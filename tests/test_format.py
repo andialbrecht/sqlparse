@@ -3,6 +3,7 @@
 from tests.utils import TestCaseBase
 
 import sqlparse
+from sqlparse.exceptions import SQLParseError
 
 
 class TestFormat(TestCaseBase):
@@ -15,7 +16,7 @@ class TestFormat(TestCaseBase):
         self.ndiffAssertEqual(res, 'Select * From bar; -- select foo\n')
         res = sqlparse.format(sql.upper(), keyword_case='lower')
         self.ndiffAssertEqual(res, 'select * from BAR; -- SELECT FOO\n')
-        self.assertRaises(sqlparse.SQLParseError, sqlparse.format, sql,
+        self.assertRaises(SQLParseError, sqlparse.format, sql,
                           keyword_case='foo')
 
     def test_identifiercase(self):
@@ -26,7 +27,7 @@ class TestFormat(TestCaseBase):
         self.ndiffAssertEqual(res, 'select * from Bar; -- select foo\n')
         res = sqlparse.format(sql.upper(), identifier_case='lower')
         self.ndiffAssertEqual(res, 'SELECT * FROM bar; -- SELECT FOO\n')
-        self.assertRaises(sqlparse.SQLParseError, sqlparse.format, sql,
+        self.assertRaises(SQLParseError, sqlparse.format, sql,
                           identifier_case='foo')
         sql = 'select * from "foo"."bar"'
         res = sqlparse.format(sql, identifier_case="upper")
@@ -42,7 +43,7 @@ class TestFormat(TestCaseBase):
         sql = 'select-- foo\nfrom -- bar\nwhere'
         res = sqlparse.format(sql, strip_comments=True)
         self.ndiffAssertEqual(res, 'select from where')
-        self.assertRaises(sqlparse.SQLParseError, sqlparse.format, sql,
+        self.assertRaises(SQLParseError, sqlparse.format, sql,
                           strip_comments=None)
 
     def test_strip_comments_multi(self):
@@ -65,7 +66,7 @@ class TestFormat(TestCaseBase):
         self.ndiffAssertEqual(f(s), 'select * from foo where (1 = 2)')
         s = 'select -- foo\nfrom    bar\n'
         self.ndiffAssertEqual(f(s), 'select -- foo\nfrom bar')
-        self.assertRaises(sqlparse.SQLParseError, sqlparse.format, s,
+        self.assertRaises(SQLParseError, sqlparse.format, s,
                           strip_whitespace=None)
 
     def test_preserve_ws(self):
@@ -76,20 +77,20 @@ class TestFormat(TestCaseBase):
 
     def test_outputformat(self):
         sql = 'select * from foo;'
-        self.assertRaises(sqlparse.SQLParseError, sqlparse.format, sql,
+        self.assertRaises(SQLParseError, sqlparse.format, sql,
                           output_format='foo')
 
 
 class TestFormatReindent(TestCaseBase):
 
     def test_option(self):
-        self.assertRaises(sqlparse.SQLParseError, sqlparse.format, 'foo',
+        self.assertRaises(SQLParseError, sqlparse.format, 'foo',
                           reindent=2)
-        self.assertRaises(sqlparse.SQLParseError, sqlparse.format, 'foo',
+        self.assertRaises(SQLParseError, sqlparse.format, 'foo',
                           indent_tabs=2)
-        self.assertRaises(sqlparse.SQLParseError, sqlparse.format, 'foo',
+        self.assertRaises(SQLParseError, sqlparse.format, 'foo',
                           reindent=True, indent_width='foo')
-        self.assertRaises(sqlparse.SQLParseError, sqlparse.format, 'foo',
+        self.assertRaises(SQLParseError, sqlparse.format, 'foo',
                           reindent=True, indent_width= -12)
 
     def test_stmts(self):
