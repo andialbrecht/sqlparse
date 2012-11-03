@@ -3,4 +3,6 @@ python:
   - "2.5"
   - "2.6"
   - "2.7"
-script: python tests/run_tests.py
+install:
+  - pip install pytest pytest-cov
+script: py.test -v --cov=sqlparse/

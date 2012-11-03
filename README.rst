@@ -19,9 +19,11 @@ to install python-sqlparse on your system.
 Run Tests
 ---------
 
-To run the test suite::
+To run the test suite run::
 
-  python test/run_tests.py
+  py.test
+
+Note, you'll need py.test installed.
 
 
 Links
