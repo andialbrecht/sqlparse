@@ -106,3 +106,31 @@ class RegressionTests(TestCaseBase):
              '  (SELECT id,\n'
              '          name\n'
              '   FROM bar) as foo'))
+
+
+def test_issue78():
+    # the bug author provided this nice examples, let's use them!
+    def _get_identifier(sql):
+        p = sqlparse.parse(sql)[0]
+        return p.tokens[2]
+    results = (('get_name', 'z'),
+               ('get_real_name', 'y'),
+               ('get_parent_name', 'x'),
+               ('get_alias', 'z'),
+               ('get_typecast', 'text'))
+    variants = (
+        'select x.y::text as z from foo',
+        'select x.y::text as "z" from foo',
+        'select x."y"::text as z from foo',
+        'select x."y"::text as "z" from foo',
+        'select "x".y::text as z from foo',
+        'select "x".y::text as "z" from foo',
+        'select "x"."y"::text as z from foo',
+        'select "x"."y"::text as "z" from foo',
+    )
+    for variant in variants:
+        i = _get_identifier(variant)
+        assert isinstance(i, sql.Identifier)
+        for func_name, result in results:
+            func = getattr(i, func_name)
+            assert func() == result

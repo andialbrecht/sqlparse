@@ -106,3 +106,10 @@ class SQLParseTest(TestCaseBase):
         t = sqlparse.parse('foo.key')[0].tokens
         self.assertEqual(len(t), 1)
         self.assert_(isinstance(t[0], sqlparse.sql.Identifier))
+
+
+def test_quoted_identifier():
+    t = sqlparse.parse('select x.y as "z" from foo')[0].tokens
+    assert isinstance(t[2], sqlparse.sql.Identifier)
+    assert t[2].get_name() == 'z'
+    assert t[2].get_real_name() == 'y'

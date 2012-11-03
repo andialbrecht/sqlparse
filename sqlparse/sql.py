@@ -169,6 +169,14 @@ class TokenList(Token):
             if (token.is_group() and (max_depth is None or depth < max_depth)):
                 token._pprint_tree(max_depth, depth + 1)
 
+    def _remove_quotes(self, val):
+        """Helper that removes surrounding quotes from strings."""
+        if not val:
+            return val
+        if val[0] in ('"', '\'') and val[-1] == val[0]:
+            val = val[1:-1]
+        return val
+
     def flatten(self):
         """Generator yielding ungrouped tokens.
 
@@ -362,11 +370,13 @@ class TokenList(Token):
         else:
             next_ = self.token_next_by_instance(0, Identifier)
             if next_ is None:
-                return None
+                next_ = self.token_next_by_type(0, T.String.Symbol)
+                if next_ is None:
+                    return None
             alias = next_
         if isinstance(alias, Identifier):
             return alias.get_name()
-        return unicode(alias)
+        return self._remove_quotes(unicode(alias))
 
     def get_name(self):
         """Returns the name of this identifier.
@@ -385,13 +395,16 @@ class TokenList(Token):
         # a.b
         dot = self.token_next_match(0, T.Punctuation, '.')
         if dot is None:
-            return self.token_next_by_type(0, T.Name).value
+            next_ = self.token_next_by_type(0, T.Name)
+            if next_ is not None:
+                return self._remove_quotes(next_.value)
+            return None
 
         next_ = self.token_next_by_type(self.token_index(dot),
-                                        (T.Name, T.Wildcard))
+                                        (T.Name, T.Wildcard, T.String.Symbol))
         if next_ is None:  # invalid identifier, e.g. "a."
             return None
-        return next_.value
+        return self._remove_quotes(next_.value)
 
 
 class Statement(TokenList):
@@ -437,7 +450,7 @@ class Identifier(TokenList):
         prev_ = self.token_prev(self.token_index(dot))
         if prev_ is None:  # something must be verry wrong here..
             return None
-        return prev_.value
+        return self._remove_quotes(prev_.value)
 
     def is_wildcard(self):
         """Return ``True`` if this identifier contains a wildcard."""
