@@ -189,6 +189,10 @@ class TestGrouping(TestCaseBase):
         self.assert_(isinstance(p.tokens[0], sql.Function))
         self.assertEqual(len(list(p.tokens[0].get_parameters())), 2)
 
+    def test_varchar(self):
+        p = sqlparse.parse('"text" Varchar(50) NOT NULL')[0]
+        self.assert_(isinstance(p.tokens[2], sql.Function))
+        
 
 class TestStatement(TestCaseBase):
 
