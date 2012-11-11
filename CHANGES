@@ -5,11 +5,16 @@ Bug Fixes
  * Improve handling of quoted identifiers (issue78).
  * Improve grouping and formatting of identifiers with operators (issue53).
  * Improve grouping and formatting of concatenated strings (issue53).
+ * Improve handling of varchar() (by Mike Amy).
+ * Clean up handling of various SQL elements.
+ * Misc. minor fixes and lots of cleaned up tests.
 
 Other
  * Deprecated sqlparse.SQLParseError. Please use
    sqlparse.exceptions.SQLParseError instead.
-
+ * Added caching to speed up processing.
+ * Added experimental filters for token processing.
+ * Added sqlformat.parsestream (by quest).
 
 
 Release 0.1.4 (Apr 20, 2012)
