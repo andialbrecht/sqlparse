@@ -29,7 +29,7 @@ def parse(sql):
 
 
 def parsestream(stream):
-    """Parse sql statements from file-like object.
+    """Parses sql statements from file-like object.
 
     Returns a generator of Statement instances.
     """
