@@ -192,7 +192,7 @@ class TestGrouping(TestCaseBase):
     def test_varchar(self):
         p = sqlparse.parse('"text" Varchar(50) NOT NULL')[0]
         self.assert_(isinstance(p.tokens[2], sql.Function))
-        
+
 
 class TestStatement(TestCaseBase):
 
@@ -207,3 +207,27 @@ class TestStatement(TestCaseBase):
         # are parsed as two statements where later only consists of the
         # trailing whitespace.
         self.assertEqual(f('\n').get_type(), 'UNKNOWN')
+
+
+def test_identifier_with_operators():  # issue 53
+    p = sqlparse.parse('foo||bar')[0]
+    assert len(p.tokens) == 1
+    assert isinstance(p.tokens[0], sql.Identifier)
+    # again with whitespaces
+    p = sqlparse.parse('foo || bar')[0]
+    assert len(p.tokens) == 1
+    assert isinstance(p.tokens[0], sql.Identifier)
+
+
+def test_identifier_with_op_trailing_ws():
+    # make sure trailing whitespace isn't grouped with identifier
+    p = sqlparse.parse('foo || bar ')[0]
+    assert len(p.tokens) == 2
+    assert isinstance(p.tokens[0], sql.Identifier)
+    assert p.tokens[1].ttype is T.Whitespace
+
+
+def test_identifier_string_concat():
+    p = sqlparse.parse('\'foo\' || bar')[0]
+    assert len(p.tokens) == 1
+    assert isinstance(p.tokens[0], sql.Identifier)

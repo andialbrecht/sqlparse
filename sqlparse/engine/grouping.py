@@ -138,10 +138,15 @@ def group_identifier(tlist):
                        or y.ttype is T.Operator
                        or y.ttype is T.Wildcard),
             lambda y: (y.ttype in (T.String.Symbol,
+                                   T.String.Single,
                                    T.Name,
                                    T.Wildcard,
                                    T.Literal.Number.Integer))))
         for t in tl.tokens[i:]:
+            # Don't take whitespaces into account.
+            if t.ttype is T.Whitespace:
+                yield t
+                continue
             if next(x)(t):
                 yield t
             else:
@@ -150,7 +155,7 @@ def group_identifier(tlist):
     def _next_token(tl, i):
         # chooses the next token. if two tokens are found then the
         # first is returned.
-        t1 = tl.token_next_by_type(i, (T.String.Symbol, T.Name))
+        t1 = tl.token_next_by_type(i, (T.String.Symbol, T.String.Single, T.Name))
         t2 = tl.token_next_by_instance(i, sql.Function)
         if t1 and t2:
             i1 = tl.token_index(t1)
@@ -175,6 +180,9 @@ def group_identifier(tlist):
         identifier_tokens = [token] + list(
             _consume_cycle(tlist,
                            tlist.token_index(token) + 1))
+        # remove trailing whitespace
+        if identifier_tokens and identifier_tokens[-1].ttype is T.Whitespace:
+            identifier_tokens = identifier_tokens[:-1]
         if not (len(identifier_tokens) == 1
                 and isinstance(identifier_tokens[0], sql.Function)):
             group = tlist.group_tokens(sql.Identifier, identifier_tokens)

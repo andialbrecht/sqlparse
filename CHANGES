@@ -3,6 +3,8 @@ Development Version
 
 Bug Fixes
  * Improve handling of quoted identifiers (issue78).
+ * Improve grouping and formatting of identifiers with operators (issue53).
+ * Improve grouping and formatting of concatenated strings (issue53).
 
 Other
  * Deprecated sqlparse.SQLParseError. Please use
