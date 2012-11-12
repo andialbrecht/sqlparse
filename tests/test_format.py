@@ -91,7 +91,7 @@ class TestFormatReindent(TestCaseBase):
         self.assertRaises(SQLParseError, sqlparse.format, 'foo',
                           reindent=True, indent_width='foo')
         self.assertRaises(SQLParseError, sqlparse.format, 'foo',
-                          reindent=True, indent_width= -12)
+                          reindent=True, indent_width=-12)
 
     def test_stmts(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)

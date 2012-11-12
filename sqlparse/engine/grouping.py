@@ -155,7 +155,8 @@ def group_identifier(tlist):
     def _next_token(tl, i):
         # chooses the next token. if two tokens are found then the
         # first is returned.
-        t1 = tl.token_next_by_type(i, (T.String.Symbol, T.String.Single, T.Name))
+        t1 = tl.token_next_by_type(
+            i, (T.String.Symbol, T.String.Single, T.Name))
         t2 = tl.token_next_by_instance(i, sql.Function)
         if t1 and t2:
             i1 = tl.token_index(t1)

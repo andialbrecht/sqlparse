@@ -12,9 +12,9 @@ from sqlparse.tokens import *
 class TestTokenize(unittest.TestCase):
 
     def test_simple(self):
-        sql = 'select * from foo;'
-        stream = lexer.tokenize(sql)
-        self.assert_(type(stream) is types.GeneratorType)
+        s = 'select * from foo;'
+        stream = lexer.tokenize(s)
+        self.assert_(isinstance(stream, types.GeneratorType))
         tokens = list(stream)
         self.assertEqual(len(tokens), 8)
         self.assertEqual(len(tokens[0]), 2)
@@ -22,59 +22,60 @@ class TestTokenize(unittest.TestCase):
         self.assertEqual(tokens[-1], (Punctuation, u';'))
 
     def test_backticks(self):
-        sql = '`foo`.`bar`'
-        tokens = list(lexer.tokenize(sql))
+        s = '`foo`.`bar`'
+        tokens = list(lexer.tokenize(s))
         self.assertEqual(len(tokens), 3)
         self.assertEqual(tokens[0], (Name, u'`foo`'))
 
     def test_linebreaks(self):  # issue1
-        sql = 'foo\nbar\n'
-        tokens = lexer.tokenize(sql)
-        self.assertEqual(''.join(str(x[1]) for x in tokens), sql)
-        sql = 'foo\rbar\r'
-        tokens = lexer.tokenize(sql)
-        self.assertEqual(''.join(str(x[1]) for x in tokens), sql)
-        sql = 'foo\r\nbar\r\n'
-        tokens = lexer.tokenize(sql)
-        self.assertEqual(''.join(str(x[1]) for x in tokens), sql)
-        sql = 'foo\r\nbar\n'
-        tokens = lexer.tokenize(sql)
-        self.assertEqual(''.join(str(x[1]) for x in tokens), sql)
+        s = 'foo\nbar\n'
+        tokens = lexer.tokenize(s)
+        self.assertEqual(''.join(str(x[1]) for x in tokens), s)
+        s = 'foo\rbar\r'
+        tokens = lexer.tokenize(s)
+        self.assertEqual(''.join(str(x[1]) for x in tokens), s)
+        s = 'foo\r\nbar\r\n'
+        tokens = lexer.tokenize(s)
+        self.assertEqual(''.join(str(x[1]) for x in tokens), s)
+        s = 'foo\r\nbar\n'
+        tokens = lexer.tokenize(s)
+        self.assertEqual(''.join(str(x[1]) for x in tokens), s)
 
     def test_inline_keywords(self):  # issue 7
-        sql = "create created_foo"
-        tokens = list(lexer.tokenize(sql))
+        s = "create created_foo"
+        tokens = list(lexer.tokenize(s))
         self.assertEqual(len(tokens), 3)
         self.assertEqual(tokens[0][0], Keyword.DDL)
         self.assertEqual(tokens[2][0], Name)
         self.assertEqual(tokens[2][1], u'created_foo')
-        sql = "enddate"
-        tokens = list(lexer.tokenize(sql))
+        s = "enddate"
+        tokens = list(lexer.tokenize(s))
         self.assertEqual(len(tokens), 1)
         self.assertEqual(tokens[0][0], Name)
-        sql = "join_col"
-        tokens = list(lexer.tokenize(sql))
+        s = "join_col"
+        tokens = list(lexer.tokenize(s))
         self.assertEqual(len(tokens), 1)
         self.assertEqual(tokens[0][0], Name)
-        sql = "left join_col"
-        tokens = list(lexer.tokenize(sql))
+        s = "left join_col"
+        tokens = list(lexer.tokenize(s))
         self.assertEqual(len(tokens), 3)
         self.assertEqual(tokens[2][0], Name)
         self.assertEqual(tokens[2][1], 'join_col')
 
     def test_negative_numbers(self):
-        sql = "values(-1)"
-        tokens = list(lexer.tokenize(sql))
+        s = "values(-1)"
+        tokens = list(lexer.tokenize(s))
         self.assertEqual(len(tokens), 4)
         self.assertEqual(tokens[2][0], Number.Integer)
         self.assertEqual(tokens[2][1], '-1')
 
     def test_tab_expansion(self):
-        sql = "\t"
+        s = "\t"
         lex = lexer.Lexer()
         lex.tabsize = 5
-        tokens = list(lex.get_tokens(sql))
+        tokens = list(lex.get_tokens(s))
         self.assertEqual(tokens[0][1], " " * 5)
+
 
 class TestToken(unittest.TestCase):
 
@@ -124,9 +125,9 @@ class TestTokenList(unittest.TestCase):
         self.assertEqual(x.token_matching(1, [lambda t: t.ttype is Keyword]),
                          None)
 
+
 class TestStream(unittest.TestCase):
     def test_simple(self):
-        import types
         from cStringIO import StringIO
 
         stream = StringIO("SELECT 1; SELECT 2;")

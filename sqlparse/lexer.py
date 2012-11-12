@@ -18,6 +18,7 @@ from sqlparse import tokens
 from sqlparse.keywords import KEYWORDS, KEYWORDS_COMMON
 from cStringIO import StringIO
 
+
 class include(str):
     pass
 
@@ -158,7 +159,7 @@ class Lexer(object):
     stripall = False
     stripnl = False
     tabsize = 0
-    flags = re.IGNORECASE|re.UNICODE
+    flags = re.IGNORECASE | re.UNICODE
     bufsize = 4096
 
     tokens = {

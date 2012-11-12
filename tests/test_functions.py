@@ -6,12 +6,12 @@ Created on 13/02/2012
 from unittest import main, TestCase
 
 from sqlparse.filters import IncludeStatement, Tokens2Unicode
-from sqlparse.lexer   import tokenize
+from sqlparse.lexer import tokenize
 
 import sys
 sys.path.insert(0, '..')
 
-from sqlparse.filters   import compact
+from sqlparse.filters import compact
 from sqlparse.functions import getcolumns, getlimit, IsType
 
 
@@ -27,15 +27,17 @@ class Test_IncludeStatement(TestCase):
 
     def test_includeStatement(self):
         stream = tokenize(self.sql)
-        includeStatement = IncludeStatement('tests/files', raiseexceptions=True)
+        includeStatement = IncludeStatement('tests/files',
+                                            raiseexceptions=True)
         stream = includeStatement.process(None, stream)
         stream = compact(stream)
 
         result = Tokens2Unicode(stream)
 
-        self.assertEqual(result,
-            'INSERT INTO dir_entries(type)VALUES(:type);INSERT INTO '
-            'directories(inode)VALUES(:inode)LIMIT 1')
+        self.assertEqual(
+            result, (
+                'INSERT INTO dir_entries(type)VALUES(:type);INSERT INTO '
+                'directories(inode)VALUES(:inode)LIMIT 1'))
 
 
 class Test_SQL(TestCase):
@@ -96,7 +98,8 @@ class Test_Compact(Test_SQL):
 
         result = compact(stream)
 
-        self.assertEqual(Tokens2Unicode(result),
+        self.assertEqual(
+            Tokens2Unicode(result),
             'SELECT child_entry,asdf AS inode,creation FROM links WHERE '
             'parent_dir==:parent_dir AND name==:name LIMIT 1')
 
@@ -105,7 +108,8 @@ class Test_Compact(Test_SQL):
 
         result = compact(stream)
 
-        self.assertEqual(Tokens2Unicode(result),
+        self.assertEqual(
+            Tokens2Unicode(result),
             'SELECT 0 AS st_dev,0 AS st_uid,0 AS st_gid,dir_entries.type AS '
             'st_mode,dir_entries.inode AS st_ino,COUNT(links.child_entry)AS '
             'st_nlink,:creation AS st_ctime,dir_entries.access AS st_atime,'

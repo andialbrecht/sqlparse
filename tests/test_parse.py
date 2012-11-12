@@ -20,7 +20,7 @@ class SQLParseTest(TestCaseBase):
     def test_multistatement(self):
         sql1 = 'select * from foo;'
         sql2 = 'select * from bar;'
-        stmts = sqlparse.parse(sql1+sql2)
+        stmts = sqlparse.parse(sql1 + sql2)
         self.assertEqual(len(stmts), 2)
         self.assertEqual(str(stmts[0]), sql1)
         self.assertEqual(str(stmts[1]), sql2)

@@ -111,7 +111,8 @@ class SQLSplitTest(TestCaseBase):
 
     def test_if_function(self):  # see issue 33
         # don't let IF as a function confuse the splitter
-        sql = ('CREATE TEMPORARY TABLE tmp SELECT IF(a=1, a, b) AS o FROM one; '
+        sql = ('CREATE TEMPORARY TABLE tmp '
+               'SELECT IF(a=1, a, b) AS o FROM one; '
                'SELECT t FROM two')
         stmts = sqlparse.split(sql)
         self.assertEqual(len(stmts), 2)
