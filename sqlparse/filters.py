@@ -329,8 +329,8 @@ class ReindentFilter:
             self.indent += 1
             tlist.tokens.insert(0, self.nl())
             indented = True
-        num_offset = self._get_offset(tlist.token_next_match(0,
-                                                        T.Punctuation, '('))
+        num_offset = self._get_offset(
+            tlist.token_next_match(0, T.Punctuation, '('))
         self.offset += num_offset
         self._process_default(tlist, stmts=not indented)
         if indented:
@@ -397,8 +397,8 @@ class ReindentFilter:
                     nl = '\n'
                 else:
                     nl = '\n\n'
-                stmt.tokens.insert(0,
-                    sql.Token(T.Whitespace, nl))
+                stmt.tokens.insert(
+                    0, sql.Token(T.Whitespace, nl))
             if self._last_stmt != stmt:
                 self._last_stmt = stmt
 
@@ -407,7 +407,7 @@ class ReindentFilter:
 class RightMarginFilter:
 
     keep_together = (
-#        sql.TypeCast, sql.Identifier, sql.Alias,
+        # sql.TypeCast, sql.Identifier, sql.Alias,
     )
 
     def __init__(self, width=79):

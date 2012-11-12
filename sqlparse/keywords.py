@@ -36,7 +36,7 @@ KEYWORDS = {
     'BOTH': tokens.Keyword,
     'BREADTH': tokens.Keyword,
 
-#    'C': tokens.Keyword,  # most likely this is an alias
+    # 'C': tokens.Keyword,  # most likely this is an alias
     'CACHE': tokens.Keyword,
     'CALL': tokens.Keyword,
     'CALLED': tokens.Keyword,
@@ -172,7 +172,7 @@ KEYWORDS = {
     'FULL': tokens.Keyword,
     'FUNCTION': tokens.Keyword,
 
-#    'G': tokens.Keyword,
+    # 'G': tokens.Keyword,
     'GENERAL': tokens.Keyword,
     'GENERATED': tokens.Keyword,
     'GET': tokens.Keyword,
@@ -219,7 +219,7 @@ KEYWORDS = {
     'ISOLATION': tokens.Keyword,
     'ITERATE': tokens.Keyword,
 
-#    'K': tokens.Keyword,
+    # 'K': tokens.Keyword,
     'KEY': tokens.Keyword,
     'KEY_MEMBER': tokens.Keyword,
     'KEY_TYPE': tokens.Keyword,
@@ -244,7 +244,7 @@ KEYWORDS = {
     'LOCK': tokens.Keyword,
     'LOWER': tokens.Keyword,
 
-#    'M': tokens.Keyword,
+    # 'M': tokens.Keyword,
     'MAP': tokens.Keyword,
     'MATCH': tokens.Keyword,
     'MAXVALUE': tokens.Keyword,
@@ -519,7 +519,7 @@ KEYWORDS = {
     'INT8': tokens.Name.Builtin,
     'SERIAL8': tokens.Name.Builtin,
     'TEXT': tokens.Name.Builtin,
-    }
+}
 
 
 KEYWORDS_COMMON = {
@@ -562,4 +562,4 @@ KEYWORDS_COMMON = {
     'MIN': tokens.Keyword,
     'MAX': tokens.Keyword,
     'DISTINCT': tokens.Keyword,
-    }
+}
