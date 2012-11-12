@@ -228,11 +228,8 @@ class TokenList(Token):
 
         If no matching token can be found ``None`` is returned.
         """
-        if isinstance(clss, (list, tuple)):
+        if not isinstance(clss, (list, tuple)):
             clss = (clss,)
-
-        if isinstance(clss, tuple):
-            clss = tuple(clss)
 
         for token in self.tokens[idx:]:
             if isinstance(token, clss):
