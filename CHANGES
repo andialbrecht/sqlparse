@@ -1,5 +1,5 @@
-Development Version
--------------------
+Release 0.1.5 (Nov 13, 2012)
+----------------------------
 
 Bug Fixes
  * Improve handling of quoted identifiers (issue78).
@@ -7,14 +7,15 @@ Bug Fixes
  * Improve grouping and formatting of concatenated strings (issue53).
  * Improve handling of varchar() (by Mike Amy).
  * Clean up handling of various SQL elements.
- * Misc. minor fixes and lots of cleaned up tests.
+ * Switch to py.test and clean up tests.
+ * Several minor fixes.
 
 Other
- * Deprecated sqlparse.SQLParseError. Please use
+ * Deprecate sqlparse.SQLParseError. Please use
    sqlparse.exceptions.SQLParseError instead.
- * Added caching to speed up processing.
- * Added experimental filters for token processing.
- * Added sqlformat.parsestream (by quest).
+ * Add caching to speed up processing.
+ * Add experimental filters for token processing.
+ * Add sqlformat.parsestream (by quest).
 
 
 Release 0.1.4 (Apr 20, 2012)
