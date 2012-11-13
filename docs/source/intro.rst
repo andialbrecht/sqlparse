@@ -126,7 +126,7 @@ To check out the latest sources of this module run
    $ git clone git://github.com/andialbrecht/sqlparse.git
 
 
-to check out the latest sources from the Mercurial repository.
+to check out the latest sources from the repository.
 
 Please file bug reports and feature requests on the project site at
 https://github.com/andialbrecht/sqlparse/issues/new or if you have
