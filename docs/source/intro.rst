@@ -123,13 +123,13 @@ To check out the latest sources of this module run
 
 .. code-block:: bash
 
-   $ hg clone http://python-sqlparse.googlecode.com/hg/ python-sqlparse
+   $ git clone git://github.com/andialbrecht/sqlparse.git
 
 
 to check out the latest sources from the Mercurial repository.
 
 Please file bug reports and feature requests on the project site at
-http://code.google.com/p/python-sqlparse/issues/entry or if you have
+https://github.com/andialbrecht/sqlparse/issues/new or if you have
 code to contribute upload it to http://codereview.appspot.com and
 add albrecht.andi@googlemail.com as reviewer.
 
