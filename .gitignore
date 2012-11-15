@@ -4,6 +4,7 @@ dist
 MANIFEST
 .coverage
 .cache/
+htmlcov/
 extras/appengine/sqlparse
 extras/appengine/lib/
 extras/py3k/sqlparse
