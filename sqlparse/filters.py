@@ -11,7 +11,7 @@ from sqlparse.pipeline import Pipeline
 from sqlparse.tokens import (Comment, Comparison, Keyword, Name, Punctuation,
                              String, Whitespace)
 from sqlparse.utils import memoize_generator
-
+import six
 
 # --------------------------
 # token process
@@ -24,7 +24,7 @@ class _CaseFilter:
         if case is None:
             case = 'upper'
         assert case in ['lower', 'upper', 'capitalize']
-        self.convert = getattr(unicode, case)
+        self.convert = getattr(six.text_type, case)
 
     def process(self, stack, stream):
         for ttype, value in stream:
@@ -132,7 +132,7 @@ class IncludeStatement:
                         f.close()
 
                     # There was a problem loading the include file
-                    except IOError, err:
+                    except IOError as err:
                         # Raise the exception to the interpreter
                         if self.raiseexceptions:
                             raise
@@ -149,7 +149,7 @@ class IncludeStatement:
                                                      self.raiseexceptions)
 
                         # Max recursion limit reached
-                        except ValueError, err:
+                        except ValueError as err:
                             # Raise the exception to the interpreter
                             if self.raiseexceptions:
                                 raise
@@ -253,7 +253,7 @@ class ReindentFilter:
     def _get_offset(self, token):
         all_ = list(self._curr_stmt.flatten())
         idx = all_.index(token)
-        raw = ''.join(unicode(x) for x in all_[:idx + 1])
+        raw = ''.join(six.text_type(x) for x in all_[:idx + 1])
         line = raw.splitlines()[-1]
         # Now take current offset into account and return relative offset.
         full_offset = len(line) - len(self.char * (self.width * self.indent))
@@ -393,7 +393,7 @@ class ReindentFilter:
         self._process(stmt)
         if isinstance(stmt, sql.Statement):
             if self._last_stmt is not None:
-                if unicode(self._last_stmt).endswith('\n'):
+                if six.text_type(self._last_stmt).endswith('\n'):
                     nl = '\n'
                 else:
                     nl = '\n\n'
@@ -425,7 +425,7 @@ class RightMarginFilter:
                   and not token.__class__ in self.keep_together):
                 token.tokens = self._process(stack, token, token.tokens)
             else:
-                val = unicode(token)
+                val = six.text_type(token)
                 if len(self.line) + len(val) > self.width:
                     match = re.search('^ +', self.line)
                     if match is not None:
@@ -499,7 +499,7 @@ class ColumnsSelect:
 class SerializerUnicode:
 
     def process(self, stack, stmt):
-        raw = unicode(stmt)
+        raw = six.text_type(stmt)
         add_nl = raw.endswith('\n')
         res = '\n'.join(line.rstrip() for line in raw.splitlines())
         if add_nl:
@@ -511,7 +511,7 @@ def Tokens2Unicode(stream):
     result = ""
 
     for _, value in stream:
-        result += unicode(value)
+        result += six.text_type(value)
 
     return result
 
@@ -533,7 +533,7 @@ class OutputFilter:
         else:
             varname = self.varname
 
-        has_nl = len(unicode(stmt).strip().splitlines()) > 1
+        has_nl = len(six.text_type(stmt).strip().splitlines()) > 1
         stmt.tokens = self._process(stmt.tokens, varname, has_nl)
         return stmt
 

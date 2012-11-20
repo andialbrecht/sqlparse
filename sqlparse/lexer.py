@@ -16,8 +16,11 @@ import re
 
 from sqlparse import tokens
 from sqlparse.keywords import KEYWORDS, KEYWORDS_COMMON
-from cStringIO import StringIO
-
+try:
+    from io import BytesIO as StringIO
+except ImportError:
+    from cStringIO import StringIO
+import six
 
 class include(str):
     pass
@@ -80,7 +83,7 @@ class LexerMeta(type):
 
             try:
                 rex = re.compile(tdef[0], rflags).match
-            except Exception, err:
+            except Exception as err:
                 raise ValueError(("uncompilable regex %r in state"
                                   " %r of %r: %s"
                                   % (tdef[0], state, cls, err)))
@@ -151,9 +154,7 @@ class LexerMeta(type):
         return type.__call__(cls, *args, **kwds)
 
 
-class Lexer(object):
-
-    __metaclass__ = LexerMeta
+class Lexer(six.with_metaclass(LexerMeta, object)):
 
     encoding = 'utf-8'
     stripall = False
@@ -243,13 +244,13 @@ class Lexer(object):
         Also preprocess the text, i.e. expand tabs and strip it if
         wanted and applies registered filters.
         """
-        if isinstance(text, basestring):
+        if isinstance(text, six.string_types):
             if self.stripall:
                 text = text.strip()
             elif self.stripnl:
                 text = text.strip('\n')
 
-            if isinstance(text, unicode):
+            if isinstance(text, six.text_type):
                 text = StringIO(text.encode('utf-8'))
                 self.encoding = 'utf-8'
             else:

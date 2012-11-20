@@ -4,6 +4,7 @@ import itertools
 
 from sqlparse import sql
 from sqlparse import tokens as T
+import six
 
 try:
     next
@@ -55,7 +56,7 @@ def _group_matching(tlist, start_ttype, start_value, end_ttype, end_value,
                     cls, include_semicolon=False, recurse=False):
     def _find_matching(i, tl, stt, sva, ett, eva):
         depth = 1
-        for n in xrange(i, len(tl.tokens)):
+        for n in six.moves.xrange(i, len(tl.tokens)):
             t = tl.tokens[n]
             if t.match(stt, sva):
                 depth += 1
