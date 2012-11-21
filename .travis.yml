@@ -3,6 +3,7 @@ python:
   - "2.5"
   - "2.6"
   - "2.7"
+  - "3.3"
 install:
-  - pip install pytest pytest-cov
+  - pip install pytest pytest-cov six
 script: py.test -v --cov=sqlparse/
