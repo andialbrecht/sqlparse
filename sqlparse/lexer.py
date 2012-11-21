@@ -21,6 +21,7 @@ try:
 except ImportError:
     from cStringIO import StringIO
 import six
+import sys
 
 class include(str):
     pass
@@ -83,7 +84,8 @@ class LexerMeta(type):
 
             try:
                 rex = re.compile(tdef[0], rflags).match
-            except Exception as err:
+            except Exception:
+                err = sys.exc_info()[1]
                 raise ValueError(("uncompilable regex %r in state"
                                   " %r of %r: %s"
                                   % (tdef[0], state, cls, err)))
