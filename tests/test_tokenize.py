@@ -7,6 +7,11 @@ import sqlparse
 from sqlparse import lexer
 from sqlparse import sql
 from sqlparse.tokens import *
+try:
+    from io import BytesIO as StringIO
+except ImportError:
+    from StringIO import StringIO
+import six
 
 
 class TestTokenize(unittest.TestCase):
@@ -18,14 +23,14 @@ class TestTokenize(unittest.TestCase):
         tokens = list(stream)
         self.assertEqual(len(tokens), 8)
         self.assertEqual(len(tokens[0]), 2)
-        self.assertEqual(tokens[0], (Keyword.DML, u'select'))
-        self.assertEqual(tokens[-1], (Punctuation, u';'))
+        self.assertEqual(tokens[0], (Keyword.DML, six.u('select')))
+        self.assertEqual(tokens[-1], (Punctuation, six.u(';')))
 
     def test_backticks(self):
         s = '`foo`.`bar`'
         tokens = list(lexer.tokenize(s))
         self.assertEqual(len(tokens), 3)
-        self.assertEqual(tokens[0], (Name, u'`foo`'))
+        self.assertEqual(tokens[0], (Name, six.u('`foo`')))
 
     def test_linebreaks(self):  # issue1
         s = 'foo\nbar\n'
@@ -47,7 +52,7 @@ class TestTokenize(unittest.TestCase):
         self.assertEqual(len(tokens), 3)
         self.assertEqual(tokens[0][0], Keyword.DDL)
         self.assertEqual(tokens[2][0], Name)
-        self.assertEqual(tokens[2][1], u'created_foo')
+        self.assertEqual(tokens[2][1], six.u('created_foo'))
         s = "enddate"
         tokens = list(lexer.tokenize(s))
         self.assertEqual(len(tokens), 1)
@@ -128,9 +133,8 @@ class TestTokenList(unittest.TestCase):
 
 class TestStream(unittest.TestCase):
     def test_simple(self):
-        from cStringIO import StringIO
 
-        stream = StringIO("SELECT 1; SELECT 2;")
+        stream = StringIO(six.b("SELECT 1; SELECT 2;"))
         lex = lexer.Lexer()
 
         tokens = lex.get_tokens(stream)
@@ -147,9 +151,8 @@ class TestStream(unittest.TestCase):
         self.assertEqual(len(tokens), 9)
 
     def test_error(self):
-        from cStringIO import StringIO
 
-        stream = StringIO("FOOBAR{")
+        stream = StringIO(six.b("FOOBAR{"))
 
         lex = lexer.Lexer()
         lex.bufsize = 4

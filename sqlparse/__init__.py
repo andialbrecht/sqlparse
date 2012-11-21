@@ -16,7 +16,7 @@ from sqlparse import formatter
 
 # Deprecated in 0.1.5. Will be removed in 0.2.0
 from sqlparse.exceptions import SQLParseError
-
+import six
 
 def parse(sql):
     """Parse sql and return a list of statements.
@@ -59,7 +59,7 @@ def split(sql):
     """
     stack = engine.FilterStack()
     stack.split_statements = True
-    return [unicode(stmt) for stmt in stack.run(sql)]
+    return [six.text_type(stmt) for stmt in stack.run(sql)]
 
 
 from sqlparse.engine.filter import StatementFilter

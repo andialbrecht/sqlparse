@@ -6,7 +6,7 @@ from tests.utils import TestCaseBase
 
 import sqlparse
 import sqlparse.sql
-
+import six
 
 class SQLParseTest(TestCaseBase):
     """Tests sqlparse.parse()."""
@@ -26,18 +26,18 @@ class SQLParseTest(TestCaseBase):
         self.assertEqual(str(stmts[1]), sql2)
 
     def test_newlines(self):
-        sql = u'select\n*from foo;'
+        sql = six.u('select\n*from foo;')
         p = sqlparse.parse(sql)[0]
-        self.assertEqual(unicode(p), sql)
-        sql = u'select\r\n*from foo'
+        self.assertEqual(six.text_type(p), sql)
+        sql = six.u('select\r\n*from foo')
         p = sqlparse.parse(sql)[0]
-        self.assertEqual(unicode(p), sql)
-        sql = u'select\r*from foo'
+        self.assertEqual(six.text_type(p), sql)
+        sql = six.u('select\r*from foo')
         p = sqlparse.parse(sql)[0]
-        self.assertEqual(unicode(p), sql)
-        sql = u'select\r\n*from foo\n'
+        self.assertEqual(six.text_type(p), sql)
+        sql = six.u('select\r\n*from foo\n')
         p = sqlparse.parse(sql)[0]
-        self.assertEqual(unicode(p), sql)
+        self.assertEqual(six.text_type(p), sql)
 
     def test_within(self):
         sql = 'foo(col1, col2)'

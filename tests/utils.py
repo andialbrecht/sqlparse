@@ -6,7 +6,10 @@ import codecs
 import difflib
 import os
 import unittest
-from StringIO import StringIO
+try:
+    from StringIO import StringIO
+except ImportError: # python 3
+    from io import StringIO
 
 NL = '\n'
 DIR_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -35,5 +38,5 @@ class TestCaseBase(unittest.TestCase):
             fp = StringIO()
             fp.write(NL)
             fp.write(NL.join(diff))
-            print fp.getvalue()
-            raise self.failureException, fp.getvalue()
+            print (fp.getvalue())
+            raise self.failureException(fp.getvalue())

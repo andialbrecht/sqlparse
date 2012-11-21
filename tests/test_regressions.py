@@ -5,6 +5,7 @@ from tests.utils import TestCaseBase
 import sqlparse
 from sqlparse import sql
 from sqlparse import tokens as T
+import six
 
 
 class RegressionTests(TestCaseBase):
@@ -82,7 +83,7 @@ class RegressionTests(TestCaseBase):
         self.assertEqual(len(p.tokens), 7)
         self.assertEqual(p.tokens[2].__class__, sql.IdentifierList)
         self.assertEqual(p.tokens[-1].__class__, sql.Identifier)
-        self.assertEqual(p.tokens[-1].get_name(), u'foo')
+        self.assertEqual(p.tokens[-1].get_name(), six.u('foo'))
         sp = p.tokens[-1].tokens[0]
         self.assertEqual(sp.tokens[3].__class__, sql.IdentifierList)
         # make sure that formatting works as expected
