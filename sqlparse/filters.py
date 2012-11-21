@@ -157,7 +157,7 @@ class IncludeStatement:
                                 raise
 
                             # Put the exception as a comment on the SQL code
-                            yield Comment, u'-- ValueError: %s\n' % err
+                            yield Comment, six.u('-- ValueError: %s\n') % err
 
                         stack = FilterStack()
                         stack.preprocess.append(filtr)
