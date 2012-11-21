@@ -3,6 +3,7 @@ import unittest
 from sqlparse.filters import ColumnsSelect
 from sqlparse.lexer import tokenize
 from sqlparse.pipeline import Pipeline
+import six
 
 
 class Test(unittest.TestCase):
@@ -30,7 +31,9 @@ class Test(unittest.TestCase):
         FROM links
         WHERE parent_dir == :parent_dir AND name == :name
         LIMIT 1"""
-        self.assertEqual([u'child_entry', u'inode', u'creation'],
+        self.assertEqual([six.u('child_entry'),
+                          six.u('inode'),
+                          six.u('creation')],
                          self.pipe(sql))
 
     def test_3(self):
@@ -64,7 +67,8 @@ WHERE dir_entries.inode == :inode
 
 GROUP BY dir_entries.inode
 LIMIT 1"""
-        self.assertEqual([u'st_dev', u'st_uid', u'st_gid', u'st_mode',
-                          u'st_ino', u'st_nlink', u'st_ctime',
-                          u'st_atime', u'st_mtime', u'st_size', u'size'],
+        self.assertEqual([six.u('st_dev'), six.u('st_uid'), six.u('st_gid'), 
+                          six.u('st_mode'), six.u('st_ino'), six.u('st_nlink'),
+                          six.u('st_ctime'), six.u('st_atime'),
+                          six.u('st_mtime'), six.u('st_size'), six.u('size')],
                          self.pipe(sql))

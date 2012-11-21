@@ -58,7 +58,7 @@ class Token(object):
     def _get_repr_value(self):
         raw = six.text_type(self)
         if len(raw) > 7:
-            raw = raw[:6] + u'...'
+            raw = raw[:6] + six.u('...')
         return re.sub('\s+', ' ', raw)
 
     def flatten(self):

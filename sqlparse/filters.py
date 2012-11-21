@@ -139,7 +139,7 @@ class IncludeStatement:
                             raise
 
                         # Put the exception as a comment on the SQL code
-                        yield Comment, u'-- IOError: %s\n' % err
+                        yield Comment, six.u('-- IOError: %s\n') % err
 
                     else:
                         # Create new FilterStack to parse readed file

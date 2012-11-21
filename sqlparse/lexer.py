@@ -226,8 +226,8 @@ class Lexer(six.with_metaclass(LexerMeta, object)):
         if self.encoding == 'guess':
             try:
                 text = text.decode('utf-8')
-                if text.startswith(u'\ufeff'):
-                    text = text[len(u'\ufeff'):]
+                if text.startswith(six.u('\ufeff')):
+                    text = text[len(six.u('\ufeff')):]
             except UnicodeDecodeError:
                 text = text.decode('latin1')
         else:
@@ -337,7 +337,7 @@ class Lexer(six.with_metaclass(LexerMeta, object)):
                         pos += 1
                         statestack = ['root']
                         statetokens = tokendefs['root']
-                        yield pos, tokens.Text, u'\n'
+                        yield pos, tokens.Text, six.u('\n')
                         continue
                     yield pos, tokens.Error, text[pos]
                     pos += 1

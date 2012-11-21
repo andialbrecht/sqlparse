@@ -84,9 +84,9 @@ class SQLSplitTest(TestCaseBase):
         self.ndiffAssertEqual(''.join(six.text_type(q) for q in stmts), sql)
 
     def test_comment_with_umlaut(self):
-        sql = (u'select * from foo;\n'
-               u'-- Testing an umlaut: ä\n'
-               u'select * from bar;')
+        sql = six.u('select * from foo;\n'
+                    '-- Testing an umlaut: ä\n'
+                    'select * from bar;')
         stmts = sqlparse.parse(sql)
         self.assertEqual(len(stmts), 2)
         self.ndiffAssertEqual(''.join(six.text_type(q) for q in stmts), sql)
