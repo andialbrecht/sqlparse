@@ -123,12 +123,12 @@ class SQLSplitTest(TestCaseBase):
     def test_split_stream(self):
         import types
 
-        stream = StringIO(b"SELECT 1; SELECT 2;")
+        stream = StringIO(six.b("SELECT 1; SELECT 2;"))
         stmts = sqlparse.parsestream(stream)
         self.assertEqual(type(stmts), types.GeneratorType)
         self.assertEqual(len(list(stmts)), 2)
 
     def test_encoding_parsestream(self):
-        stream = StringIO(b"SELECT 1; SELECT 2;")
+        stream = StringIO(six.b("SELECT 1; SELECT 2;"))
         stmts = list(sqlparse.parsestream(stream))
         self.assertEqual(type(stmts[0].tokens[0].value), six.text_type)

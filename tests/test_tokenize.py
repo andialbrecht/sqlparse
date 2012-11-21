@@ -132,7 +132,7 @@ class TestTokenList(unittest.TestCase):
 class TestStream(unittest.TestCase):
     def test_simple(self):
 
-        stream = StringIO(b"SELECT 1; SELECT 2;")
+        stream = StringIO(six.b("SELECT 1; SELECT 2;"))
         lex = lexer.Lexer()
 
         tokens = lex.get_tokens(stream)
@@ -150,7 +150,7 @@ class TestStream(unittest.TestCase):
 
     def test_error(self):
 
-        stream = StringIO(b"FOOBAR{")
+        stream = StringIO(six.b("FOOBAR{"))
 
         lex = lexer.Lexer()
         lex.bufsize = 4
