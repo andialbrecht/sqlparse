@@ -11,6 +11,8 @@ try:
     from io import BytesIO as StringIO
 except ImportError:
     from StringIO import StringIO
+import six
+
 
 class TestTokenize(unittest.TestCase):
 
