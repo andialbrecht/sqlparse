@@ -4,6 +4,7 @@ dist
 MANIFEST
 .coverage
 .cache/
+*.egg-info/
 htmlcov/
 extras/appengine/sqlparse
 extras/appengine/lib/

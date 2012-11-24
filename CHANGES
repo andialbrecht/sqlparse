@@ -3,6 +3,8 @@ Development Version
 
 Other
  * py3k fixes (by vthriller).
+ * py3k fixes in setup.py (by Florian Bauer).
+ * setup.py now requires distribute (by Florian Bauer).
 
 
 Release 0.1.5 (Nov 13, 2012)

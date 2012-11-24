@@ -4,6 +4,7 @@ This module contains code (namely the lexer and filter mechanism) from
 the pygments project that was written by Georg Brandl.
 
 Alphabetical list of contributors:
+* Florian Bauer <florian.bauer@zmdi.com>
 * Mike Amy <cocoade@googlemail.com>
 * Jesús Leganés Combarro "Piranna" <piranna@gmail.com>
 * Kevin Jing Qiu <kevin.jing.qiu@gmail.com>

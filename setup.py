@@ -3,21 +3,24 @@
 # This setup script is part of python-sqlparse and is released under
 # the BSD License: http://www.opensource.org/licenses/bsd-license.php.
 
-import os
-from distutils.core import setup
-
-import sqlparse
+import re
+from setuptools import setup, find_packages
 
 
-def find_packages(base):
-    ret = [base]
-    for path in os.listdir(base):
-        if path.startswith('.'):
-            continue
-        full_path = os.path.join(base, path)
-        if os.path.isdir(full_path):
-            ret += find_packages(full_path)
-    return ret
+def get_version():
+    """parse __init__.py for version number instead of importing the file
+
+    see http://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
+    """
+    VERSIONFILE='sqlparse/__init__.py'
+    verstrline = open(VERSIONFILE, "rt").read()
+    VSRE = r'^__version__ = [\'"]([^\'"]*)[\'"]'
+    mo = re.search(VSRE, verstrline, re.M)
+    if mo:
+        return mo.group(1)
+    else:
+        raise RuntimeError('Unable to find version string in %s.'
+                           % (VERSIONFILE,))
 
 
 LONG_DESCRIPTION = """
@@ -71,17 +74,17 @@ Parsing::
 
 """
 
-
+VERSION = get_version()
 DOWNLOAD_URL = (
     'https://github.com/downloads/andialbrecht/sqlparse/'
-    'sqlparse-%s.tar.gz' % sqlparse.__version__
+    'sqlparse-%s.tar.gz' % VERSION
 )
 
 
 setup(
     name='sqlparse',
-    version=sqlparse.__version__,
-    packages=find_packages('sqlparse'),
+    version=VERSION,
+    packages=find_packages(),
     description='Non-validating SQL parser',
     author='Andi Albrecht',
     author_email='albrecht.andi@gmail.com',
@@ -96,9 +99,12 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.4',
         'Programming Language :: Python :: 2.5',
         'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.3',
         'Topic :: Database',
         'Topic :: Software Development'
     ],
