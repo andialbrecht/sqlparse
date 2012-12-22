@@ -134,3 +134,26 @@ def test_issue78():
         for func_name, result in results:
             func = getattr(i, func_name)
             assert func() == result
+
+
+def test_issue83():
+    sql = """
+CREATE OR REPLACE FUNCTION func_a(text)
+  RETURNS boolean  LANGUAGE plpgsql STRICT IMMUTABLE AS
+$_$
+BEGIN
+ ...
+END;
+$_$;
+
+CREATE OR REPLACE FUNCTION func_b(text)
+  RETURNS boolean  LANGUAGE plpgsql STRICT IMMUTABLE AS
+$_$
+BEGIN
+ ...
+END;
+$_$;
+
+ALTER TABLE..... ;"""
+    t = sqlparse.split(sql)
+    assert len(t) == 3

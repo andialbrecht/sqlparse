@@ -1,6 +1,9 @@
 Development Version
 -------------------
 
+Bug Fixes
+ * Fix parsing error with dollar-quoted procedure bodies (issue83).
+
 Other
  * py3k fixes (by vthriller).
  * py3k fixes in setup.py (by Florian Bauer).

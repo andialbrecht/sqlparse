@@ -113,3 +113,24 @@ def test_quoted_identifier():
     assert isinstance(t[2], sqlparse.sql.Identifier)
     assert t[2].get_name() == 'z'
     assert t[2].get_real_name() == 'y'
+
+
+def test_psql_quotation_marks():  # issue83
+    # regression: make sure plain $$ work
+    t = sqlparse.split("""
+    CREATE OR REPLACE FUNCTION testfunc1(integer) RETURNS integer AS $$
+          ....
+    $$ LANGUAGE plpgsql;
+    CREATE OR REPLACE FUNCTION testfunc2(integer) RETURNS integer AS $$
+          ....
+    $$ LANGUAGE plpgsql;""")
+    assert len(t) == 2
+    # make sure $SOMETHING$ works too
+    t = sqlparse.split("""
+    CREATE OR REPLACE FUNCTION testfunc1(integer) RETURNS integer AS $PROC_1$
+          ....
+    $PROC_1$ LANGUAGE plpgsql;
+    CREATE OR REPLACE FUNCTION testfunc2(integer) RETURNS integer AS $PROC_2$
+          ....
+    $PROC_2$ LANGUAGE plpgsql;""")
+    assert len(t) == 2

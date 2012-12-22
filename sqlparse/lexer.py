@@ -177,7 +177,7 @@ class Lexer(object):
             (r'CASE\b', tokens.Keyword),  # extended CASE(foo)
             (r"`(``|[^`])*`", tokens.Name),
             (r"´(´´|[^´])*´", tokens.Name),
-            (r'\$([^\W\d_]\w*)?\$', tokens.Name.Builtin),
+            (r'\$([^\W\d]\w*)?\$', tokens.Name.Builtin),
             (r'\?{1}', tokens.Name.Placeholder),
             (r'[$:?%]\w+', tokens.Name.Placeholder),
             # FIXME(andi): VALUES shouldn't be listed here
