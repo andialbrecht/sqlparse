@@ -3,7 +3,9 @@ python:
   - "2.5"
   - "2.6"
   - "2.7"
+  - "3.2"
   - "pypy"
 install:
   - pip install pytest pytest-cov
+  - if [[ $TRAVIS_PYTHON_VERSION == '3.2' ]]; then 2to3 -w --no-diffs -n tests; fi
 script: py.test -v --cov=sqlparse/ tests/
