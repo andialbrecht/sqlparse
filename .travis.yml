@@ -11,8 +11,7 @@ install:
   - python setup.py install
   - cp -r tests/ extras/
 script:
-  - cd extras/
   - if [[ $TRAVIS_PYTHON_VERSION == '3.2' ]]; then cd py3k/ && py.test -v tests; fi
   # Change directory to avoid that the local sqlparse module is tested
   # instead of the installed one. This is relevant for the 2to3 version.
-  - if [[ $TRAVIS_PYTHON_VERSION != '3.2' ]]; then py.test -v --cov=sqlparse tests; fi
+  - if [[ $TRAVIS_PYTHON_VERSION != '3.2' ]]; then cd extras/ && py.test -v --cov=sqlparse tests; fi
