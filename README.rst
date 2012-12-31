@@ -15,6 +15,8 @@ Run::
 
 to install python-sqlparse on your system.
 
+python-sqlparse is compatible with Python 2.5, 2.6, 2.7 and >= 3.2.
+
 
 Run Tests
 ---------
