@@ -5,6 +5,7 @@ Bug Fixes
  * Fix parsing error with dollar-quoted procedure bodies (issue83).
 
 Other
+ * sqlparse is now compatible with Python 3 without any patches.
  * py3k fixes (by vthriller).
  * py3k fixes in setup.py (by Florian Bauer).
  * setup.py now requires distribute (by Florian Bauer).
