@@ -21,9 +21,9 @@ Run Tests
 
 To run the test suite run::
 
-  py.test
+  tox
 
-Note, you'll need py.test installed.
+Note, you'll need tox installed, of course.
 
 
 Links
