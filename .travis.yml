@@ -8,6 +8,7 @@ python:
 install:
   - pip install pytest pytest-cov
   - if [[ $TRAVIS_PYTHON_VERSION == '3.2' ]]; then 2to3 -w --no-diffs -n tests; fi
+  - cp -r tests/ extras/
 script:
   # Change directory to avoid that the local sqlparse module is tested
   # instead of the installed one. This is relevant for the 2to3 version.
