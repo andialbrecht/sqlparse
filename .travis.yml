@@ -9,6 +9,7 @@ install:
   - pip install pytest pytest-cov
   - if [[ $TRAVIS_PYTHON_VERSION == '3.2' ]]; then mkdir -p py3k/ && cp -r tests/ py3k/ && 2to3 -w --no-diffs -n tests; fi
   - python setup.py install
+  - cp -r tests/ extras/
 script:
   - cd extras/
   - if [[ $TRAVIS_PYTHON_VERSION == '3.2' ]]; then cd py3k/ && py.test -v tests; fi
