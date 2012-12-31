@@ -4,6 +4,7 @@
 # the BSD License: http://www.opensource.org/licenses/bsd-license.php.
 
 import re
+import sys
 from setuptools import setup, find_packages
 
 
@@ -81,6 +82,11 @@ DOWNLOAD_URL = (
 )
 
 
+kwargs = {}
+if sys.version_info[0] == 3:
+    kwargs['use_2to3'] = True
+
+
 setup(
     name='sqlparse',
     version=VERSION,
@@ -109,4 +115,5 @@ setup(
         'Topic :: Software Development'
     ],
     scripts=['bin/sqlformat'],
+    **kwargs
 )

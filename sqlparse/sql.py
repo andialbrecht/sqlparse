@@ -3,6 +3,7 @@
 """This module contains classes representing syntactical elements of SQL."""
 
 import re
+import sys
 
 from sqlparse import tokens as T
 
@@ -25,10 +26,15 @@ class Token(object):
         self.parent = None
 
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        if sys.version_info[0] == 3:
+            return self.value
+        else:
+            return unicode(self).encode('utf-8')
 
     def __repr__(self):
-        short = self._get_repr_value().encode('utf-8')
+        short = self._get_repr_value()
+        if sys.version_info[0] < 3:
+            short = short.encode('utf-8')
         return '<%s \'%s\' at 0x%07x>' % (self._get_repr_name(),
                                           short, id(self))
 
@@ -147,10 +153,22 @@ class TokenList(Token):
         if tokens is None:
             tokens = []
         self.tokens = tokens
-        Token.__init__(self, None, unicode(self))
+        Token.__init__(self, None, self._to_string())
 
     def __unicode__(self):
-        return ''.join(unicode(x) for x in self.flatten())
+        return self._to_string()
+
+    def __str__(self):
+        str_ = self._to_string()
+        if sys.version_info[0] < 2:
+            str_ = str_.encode('utf-8')
+        return str_
+
+    def _to_string(self):
+        if sys.version_info[0] == 3:
+            return ''.join(x.value for x in self.flatten())
+        else:
+            return ''.join(unicode(x) for x in self.flatten())
 
     def _get_repr_name(self):
         return self.__class__.__name__

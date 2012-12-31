@@ -1,8 +1,0 @@
-Initial approach to provide a Python3 version of sqlparse.
-
-All tests pass (as of April 2009), but the Python3 version is
-considered experimental.
-
-To build this version run
-
-  make all

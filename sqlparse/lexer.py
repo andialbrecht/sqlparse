@@ -13,6 +13,7 @@
 # and to allow some customizations.
 
 import re
+import sys
 
 from sqlparse import tokens
 from sqlparse.keywords import KEYWORDS, KEYWORDS_COMMON
@@ -220,6 +221,8 @@ class Lexer(object):
         self.filters.append(filter_)
 
     def _decode(self, text):
+        if sys.version_info[0] == 3:
+            return text
         if self.encoding == 'guess':
             try:
                 text = text.decode('utf-8')
@@ -249,7 +252,7 @@ class Lexer(object):
             elif self.stripnl:
                 text = text.strip('\n')
 
-            if isinstance(text, unicode):
+            if sys.version_info[0] < 3 and isinstance(text, unicode):
                 text = StringIO(text.encode('utf-8'))
                 self.encoding = 'utf-8'
             else:
