@@ -120,6 +120,20 @@ To check out the latest sources of this module run
 
 to check out the latest sources from the repository.
 
+:mod:`sqlparse` is currently tested under Python 2.5, 2.6, 2.7, 3.2 and
+pypy. Tests are automatically run on each commit and for each pull
+request on Travis: https://travis-ci.org/andialbrecht/sqlparse
+
+Make sure to run the test suite before sending a pull request by running
+
+.. code-block:: bash
+
+   $ tox
+
+It's ok, if :command:`tox` doesn't find all interpreters listed
+above. Ideally a Python 2 and a Python 3 version should be tested
+locally.
+
 Please file bug reports and feature requests on the project site at
 https://github.com/andialbrecht/sqlparse/issues/new or if you have
 code to contribute upload it to http://codereview.appspot.com and
