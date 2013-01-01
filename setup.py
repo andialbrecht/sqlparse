@@ -90,7 +90,7 @@ if sys.version_info[0] == 3:
 setup(
     name='sqlparse',
     version=VERSION,
-    packages=find_packages(),
+    packages=find_packages(exclude=('tests',)),
     description='Non-validating SQL parser',
     author='Andi Albrecht',
     author_email='albrecht.andi@gmail.com',
