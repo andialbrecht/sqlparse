@@ -76,10 +76,6 @@ Parsing::
 """
 
 VERSION = get_version()
-DOWNLOAD_URL = (
-    'https://github.com/downloads/andialbrecht/sqlparse/'
-    'sqlparse-%s.tar.gz' % VERSION
-)
 
 
 kwargs = {}
@@ -94,7 +90,6 @@ setup(
     description='Non-validating SQL parser',
     author='Andi Albrecht',
     author_email='albrecht.andi@gmail.com',
-    download_url=DOWNLOAD_URL,
     long_description=LONG_DESCRIPTION,
     license='BSD',
     url='https://github.com/andialbrecht/sqlparse',
