@@ -1,22 +1,13 @@
 Introduction
 ============
 
-:mod:`sqlparse` is a non-validating SQL parser for Python.
-It provides support for parsing, splitting and formatting SQL statements.
-The module is released under the terms of the
-`New BSD license <http://www.opensource.org/licenses/bsd-license.php>`_.
-
-Visit the project page at http://python-sqlparse.googlecode.com for
-further information about this project.
-
 
 Download & Installation
 -----------------------
 
-The latest released version can be obtained from the
-`downloads page <http://code.google.com/p/python-sqlparse/downloads/list>`_
-on the project's website. To extract the source archive and to install
-the module on your system run
+The latest released version can be obtained from the `Python Package
+Index (PyPI) <http://pypi.python.org/pypi/sqlparse/>`_. To extract the
+install the module system-wide run
 
 .. code-block:: bash
 
@@ -24,10 +15,11 @@ the module on your system run
    $ cd python-sqlparse/
    $ sudo python setup.py install
 
-Alternatively you can install :mod:`sqlparse` from the
-`Python Packge Index <http://pypi.python.org/pypi/sqlparse>`_ with your
-favorite tool for installing Python modules. For example when using
-`pip <http://pypi.python.org/pypi/pip>`_ run :command:`pip install sqlparse`.
+Alternatively you can install :mod:`sqlparse` using :command:`pip`:
+
+.. code-block:: bas
+
+   $ pip install sqlparse
 
 
 Getting Started
@@ -108,9 +100,9 @@ Each object can be converted back to a string at any time:
 
 .. code-block:: python
 
-   >>> stmt.to_unicode()
+   >>> unicode(stmt)  # str(stmt) for Python 3
    u'select * from "someschema"."mytable" where id = 1'
-   >>> stmt.tokens[-1].to_unicode()  # or just the WHERE part
+   >>> unicode(stmt.tokens[-1])  # or just the WHERE part
    u'where id = 1'
 
 Details of the returned objects are described in :ref:`analyze`.

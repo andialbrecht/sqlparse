@@ -1,11 +1,15 @@
 Development Version
 -------------------
 
+sqlparse is now compatible with Python 3 without any patches. The
+Python 3 version is generated during install by 2to3. You'll need
+distribute to install sqlparse for Python 3.
+
 Bug Fixes
  * Fix parsing error with dollar-quoted procedure bodies (issue83).
 
 Other
- * sqlparse is now compatible with Python 3 without any patches.
+ * Documentation updates.
  * py3k fixes (by vthriller).
  * py3k fixes in setup.py (by Florian Bauer).
  * setup.py now requires distribute (by Florian Bauer).

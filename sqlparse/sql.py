@@ -45,7 +45,8 @@ class Token(object):
     def to_unicode(self):
         """Returns a unicode representation of this object.
 
-        @deprecated: please use __unicode__()
+        .. deprecated:: 0.1.5
+           Use ``unicode(token)`` (for Python 3: ``str(token)``) instead.
         """
         return unicode(self)
 
