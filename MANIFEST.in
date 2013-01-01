@@ -9,3 +9,5 @@ include TODO
 include AUTHORS
 include CHANGES
 include Makefile
+include pytest.ini
+include tox.ini
