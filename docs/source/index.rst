@@ -17,7 +17,7 @@ Visit the project page at https://github.com/andialbrecht/sqlparse for
 further information about this project.
 
 
-tl;rd
+tl;dr
 -----
 
 .. code-block:: bash
