@@ -5,7 +5,14 @@
 
 import re
 import sys
-from setuptools import setup, find_packages
+
+try:
+    from setuptools import setup, find_packages
+    packages = find_packages(exclude=('tests',))
+except ImportError:
+    if sys.version_info[0] == 3:
+        raise RuntimeError('distribute is required to install this package.')
+    packages = ['sqlparse', 'sqlparse.engine']
 
 
 def get_version():
@@ -86,7 +93,7 @@ if sys.version_info[0] == 3:
 setup(
     name='sqlparse',
     version=VERSION,
-    packages=find_packages(exclude=('tests',)),
+    packages=packages,
     description='Non-validating SQL parser',
     author='Andi Albrecht',
     author_email='albrecht.andi@gmail.com',
