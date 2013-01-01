@@ -3,8 +3,39 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-python-sqlparse's documentation contents
-========================================
+python-sqlparse
+===============
+
+:mod:`sqlparse` is a non-validating SQL parser for Python.
+It provides support for parsing, splitting and formatting SQL statements.
+
+The module is compatible with Python 2 (>= 2.5) and Python 3 (>= 3.2)
+and released under the terms of the `New BSD license
+<http://www.opensource.org/licenses/bsd-license.php>`_.
+
+Visit the project page at https://github.com/andialbrecht/sqlparse for
+further information about this project.
+
+
+tl;rd
+-----
+
+.. code-block:: bash
+
+   $ pip install sqlparse
+   $ python
+   >>> import sqlparse
+   >>> print(sqlparse.format('select * from foo', reindent=True))
+   select *
+   from foo
+   >>> parsed = sqlparse.parse('select * from foo')[0]
+   >>> parsed.tokens
+   [<DML 'select' at 0x7f22c5e15368>, <Whitespace ' ' at 0x7f22c5e153b0>, <Wildcard '*' … ]
+   >>> 
+
+
+Contents
+--------
 
 .. toctree::
    :maxdepth: 2
@@ -14,12 +45,17 @@ python-sqlparse's documentation contents
    analyzing
    ui
    changes
+   indices
 
 
-Indices and tables
-==================
+Resources
+---------
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+Project page
+   https://github.com/andialbrecht/sqlparse
 
+Bug tracker
+   https://github.com/andialbrecht/sqlparse/issues
+
+Documentation
+   http://sqlparse.readthedocs.org/
