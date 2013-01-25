@@ -157,3 +157,11 @@ $_$;
 ALTER TABLE..... ;"""
     t = sqlparse.split(sql)
     assert len(t) == 3
+
+
+def test_comment_encoding_when_reindent():
+    # There was an UnicodeEncodeError in the reindent filter that
+    # casted every comment followed by a keyword to str.
+    sql = u'select foo -- Comment containing Ümläuts\nfrom bar'
+    formatted = sqlparse.format(sql, reindent=True)
+    assert formatted == sql

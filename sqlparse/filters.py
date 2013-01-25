@@ -288,8 +288,8 @@ class ReindentFilter:
                 offset += 1
             if (prev
                 and isinstance(prev, sql.Comment)
-                and (str(prev).endswith('\n')
-                     or str(prev).endswith('\r'))):
+                and (unicode(prev).endswith('\n')
+                     or unicode(prev).endswith('\r'))):
                 nl = tlist.token_next(token)
             else:
                 nl = self.nl()
