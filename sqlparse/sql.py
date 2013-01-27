@@ -196,6 +196,15 @@ class TokenList(Token):
             val = val[1:-1]
         return val
 
+    def get_token_at_offset(self, offset):
+        """Returns the token that is on position offset."""
+        idx = 0
+        for token in self.flatten():
+            end = idx + len(token.value)
+            if idx <= offset <= end:
+                return token
+            idx = end
+
     def flatten(self):
         """Generator yielding ungrouped tokens.
 
