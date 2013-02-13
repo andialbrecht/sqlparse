@@ -1,3 +1,10 @@
+Development Version
+-------------------
+
+Enhancements
+ * Improve parsing speed when SQL contains CLOBs or BLOBs (issue86).
+
+
 Release 0.1.6 (Jan 01, 2013)
 ----------------------------
 

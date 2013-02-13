@@ -161,7 +161,9 @@ class Lexer(object):
     stripnl = False
     tabsize = 0
     flags = re.IGNORECASE | re.UNICODE
-    bufsize = 4096
+    DEFAULT_BUFSIZE = 4096
+    MAX_BUFSIZE = 2 ** 31
+    bufsize = DEFAULT_BUFSIZE
 
     tokens = {
         'root': [
@@ -322,9 +324,14 @@ class Lexer(object):
                         else:
                             assert False, "wrong state def: %r" % new_state
                         statetokens = tokendefs[statestack[-1]]
+                    # reset bufsize
+                    self.bufsize = self.DEFAULT_BUFSIZE
                     break
             else:
                 if hasmore:
+                    # we have no match, increase bufsize to parse lengthy
+                    # tokens faster (see #86).
+                    self.bufsize = min(self.bufsize * 2, self.MAX_BUFSIZE)
                     buf = stream.read(self.bufsize)
                     hasmore = len(buf) == self.bufsize
                     text = text[pos:] + self._decode(buf)
