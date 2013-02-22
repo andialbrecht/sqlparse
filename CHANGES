@@ -1,6 +1,9 @@
 Development Version
 -------------------
 
+Bug Fixes
+ * Fix Python 3 compatibility of sqlformat script (by Piet Delport).
+
 Enhancements
  * Improve parsing speed when SQL contains CLOBs or BLOBs (issue86).
 
