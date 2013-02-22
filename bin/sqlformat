@@ -78,13 +78,15 @@ def main():
     else:
         try:
             data = '\n'.join(open(args[0]).readlines())
-        except OSError, err:
+        except OSError:
+            err = sys.exc_info()[1]  # Python 2.5 compatibility
             _error('Failed to read %s: %s' % (args[0], err), exit_=1)
 
     if options.outfile:
         try:
             stream = open(options.outfile, 'w')
-        except OSError, err:
+        except OSError:
+            err = sys.exc_info()[1]  # Python 2.5 compatibility
             _error('Failed to open %s: %s' % (options.outfile, err), exit_=1)
     else:
         stream = sys.stdout
@@ -92,7 +94,8 @@ def main():
     formatter_opts = _build_formatter_opts(options)
     try:
         formatter_opts = sqlparse.formatter.validate_options(formatter_opts)
-    except SQLParseError, err:
+    except SQLParseError:
+        err = sys.exc_info()[1]  # Python 2.5 compatibility
         _error('Invalid options: %s' % err, exit_=1)
 
     stream.write(sqlparse.format(data, **formatter_opts).encode('utf-8',
