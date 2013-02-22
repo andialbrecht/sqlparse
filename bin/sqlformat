@@ -98,8 +98,10 @@ def main():
         err = sys.exc_info()[1]  # Python 2.5 compatibility
         _error('Invalid options: %s' % err, exit_=1)
 
-    stream.write(sqlparse.format(data, **formatter_opts).encode('utf-8',
-                                                                'replace'))
+    s = sqlparse.format(data, **formatter_opts)
+    if sys.version_info < (3,):
+        s = s.encode('utf-8', 'replace')
+    stream.write(s)
     stream.flush()
 
 
