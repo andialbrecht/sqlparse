@@ -50,7 +50,7 @@ _FORMATTING_GROUP = group
 
 def _error(msg, exit_=None):
     """Print msg and optionally exit with return code exit_."""
-    print >>sys.stderr, '[ERROR] %s' % msg
+    sys.stderr.write('[ERROR] %s\n' % msg)
     if exit_ is not None:
         sys.exit(exit_)
 
@@ -66,7 +66,7 @@ def _build_formatter_opts(options):
 def main():
     options, args = parser.parse_args()
     if options.verbose:
-        print >>sys.stderr, 'Verbose mode'
+        sys.stderr.write('Verbose mode\n')
 
     if len(args) != 1:
         _error('No input data.')
