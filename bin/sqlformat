@@ -50,7 +50,7 @@ _FORMATTING_GROUP = group
 
 def _error(msg, exit_=None):
     """Print msg and optionally exit with return code exit_."""
-    print >>sys.stderr, '[ERROR] %s' % msg
+    sys.stderr.write('[ERROR] %s\n' % msg)
     if exit_ is not None:
         sys.exit(exit_)
 
@@ -66,7 +66,7 @@ def _build_formatter_opts(options):
 def main():
     options, args = parser.parse_args()
     if options.verbose:
-        print >>sys.stderr, 'Verbose mode'
+        sys.stderr.write('Verbose mode\n')
 
     if len(args) != 1:
         _error('No input data.')
@@ -78,13 +78,15 @@ def main():
     else:
         try:
             data = '\n'.join(open(args[0]).readlines())
-        except OSError, err:
+        except OSError:
+            err = sys.exc_info()[1]  # Python 2.5 compatibility
             _error('Failed to read %s: %s' % (args[0], err), exit_=1)
 
     if options.outfile:
         try:
             stream = open(options.outfile, 'w')
-        except OSError, err:
+        except OSError:
+            err = sys.exc_info()[1]  # Python 2.5 compatibility
             _error('Failed to open %s: %s' % (options.outfile, err), exit_=1)
     else:
         stream = sys.stdout
@@ -92,11 +94,14 @@ def main():
     formatter_opts = _build_formatter_opts(options)
     try:
         formatter_opts = sqlparse.formatter.validate_options(formatter_opts)
-    except SQLParseError, err:
+    except SQLParseError:
+        err = sys.exc_info()[1]  # Python 2.5 compatibility
         _error('Invalid options: %s' % err, exit_=1)
 
-    stream.write(sqlparse.format(data, **formatter_opts).encode('utf-8',
-                                                                'replace'))
+    s = sqlparse.format(data, **formatter_opts)
+    if sys.version_info < (3,):
+        s = s.encode('utf-8', 'replace')
+    stream.write(s)
     stream.flush()
 
 
