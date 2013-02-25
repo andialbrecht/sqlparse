@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import sys
+
 from tests.utils import TestCaseBase
 
 import sqlparse
@@ -165,3 +167,14 @@ def test_comment_encoding_when_reindent():
     sql = u'select foo -- Comment containing Ümläuts\nfrom bar'
     formatted = sqlparse.format(sql, reindent=True)
     assert formatted == sql
+
+
+def test_parse_sql_with_binary():
+    # See https://github.com/andialbrecht/sqlparse/pull/88
+    digest = '\x82|\xcb\x0e\xea\x8aplL4\xa1h\x91\xf8N{'
+    sql = 'select * from foo where bar = \'%s\'' % digest
+    formatted = sqlparse.format(sql, reindent=True)
+    tformatted = 'select *\nfrom foo\nwhere bar = \'%s\'' % digest
+    if sys.version_info < (3,):
+        tformatted = tformatted.decode('unicode-escape')
+    assert formatted == tformatted
