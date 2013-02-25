@@ -3,6 +3,8 @@ Development Version
 
 Bug Fixes
  * Fix Python 3 compatibility of sqlformat script (by Piet Delport).
+ * Fix parsing of SQL statements that contain binary data (by Alexey
+   Malyshev).
 
 Enhancements
  * Improve parsing speed when SQL contains CLOBs or BLOBs (issue86).
