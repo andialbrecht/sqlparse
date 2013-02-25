@@ -10,10 +10,10 @@ help:
 	@sed -n '/^[a-zA-Z0-9_.]*:/s/:.*//p' <Makefile | sort
 
 test:
-	$(PYTHON) tests/run_tests.py
+	tox
 
 coverage:
-	nosetests --with-coverage --cover-inclusive --cover-package=sqlparse
+	py.test --cov=sqlparse --cov-report=html --cov-report=term
 
 clean:
 	$(PYTHON) setup.py clean
