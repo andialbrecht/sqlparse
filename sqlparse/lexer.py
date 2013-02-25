@@ -233,7 +233,10 @@ class Lexer(object):
             except UnicodeDecodeError:
                 text = text.decode('latin1')
         else:
-            text = text.decode(self.encoding)
+            try:
+                text = text.decode(self.encoding)
+            except UnicodeDecodeError:
+                text = text.decode('unicode-escape')
 
         if self.tabsize > 0:
             text = text.expandtabs(self.tabsize)
