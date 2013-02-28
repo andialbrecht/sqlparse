@@ -33,7 +33,7 @@ def getcolumns(stream):
     return pipe(stream)
 
 
-class IsType():
+class IsType(object):
     """Functor that return is the statement is of a specific type"""
     def __init__(self, type):
         self.type = type

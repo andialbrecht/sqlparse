@@ -20,7 +20,10 @@ class Token(object):
 
     def __init__(self, ttype, value):
         self.value = value
-        self.normalized = value.upper() if ttype in T.Keyword else value
+        if ttype in T.Keyword:
+            self.normalized = value.upper()
+        else:
+            self.normalized = value
         self.ttype = ttype
         self.is_keyword = ttype in T.Keyword
         self.parent = None
