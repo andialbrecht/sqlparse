@@ -15,7 +15,7 @@ def _group_left_right(tlist, ttype, value, cls,
                       check_right=lambda t: True,
                       check_left=lambda t: True,
                       include_semicolon=False):
-    [_group_left_right(sgroup, ttype, value, cls, check_right,
+    [_group_left_right(sgroup, ttype, value, cls, check_right, check_left,
                        include_semicolon) for sgroup in tlist.get_sublists()
      if not isinstance(sgroup, cls)]
     idx = 0
@@ -26,7 +26,7 @@ def _group_left_right(tlist, ttype, value, cls,
         if right is None or not check_right(right):
             token = tlist.token_next_match(tlist.token_index(token) + 1,
                                            ttype, value)
-        elif left is None or not check_right(left):
+        elif left is None or not check_left(left):
             token = tlist.token_next_match(tlist.token_index(token) + 1,
                                            ttype, value)
         else:
@@ -105,8 +105,13 @@ def group_as(tlist):
         # Currently limited to DML/DDL. Maybe additional more non SQL reserved
         # keywords should appear here (see issue8).
         return not token.ttype in (T.DML, T.DDL)
+
+    def _left_valid(token):
+        return token.ttype is not T.Keyword
+
     _group_left_right(tlist, T.Keyword, 'AS', sql.Identifier,
-                      check_right=_right_valid)
+                      check_right=_right_valid,
+                      check_left=_left_valid)
 
 
 def group_assignment(tlist):

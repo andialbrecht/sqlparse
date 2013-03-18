@@ -178,3 +178,13 @@ def test_parse_sql_with_binary():
     if sys.version_info < (3,):
         tformatted = tformatted.decode('unicode-escape')
     assert formatted == tformatted
+
+
+def test_dont_alias_keywords():
+    # The _group_left_right function had a bug where the check for the
+    # left side wasn't handled correctly. In one case this resulted in
+    # a keyword turning into an identifier.
+    p = sqlparse.parse('FROM AS foo')[0]
+    assert len(p.tokens) == 5
+    assert p.tokens[0].ttype is T.Keyword
+    assert p.tokens[2].ttype is T.Keyword
