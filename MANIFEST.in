@@ -1,6 +1,4 @@
 recursive-include docs source/*
-recursive-include docs agogo/*
-recursive-include docs agogo/static/*
 include docs/sqlformat.1
 include docs/Makefile
 recursive-include tests *.py *.sql
