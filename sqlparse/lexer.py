@@ -224,7 +224,8 @@ class Lexer(object):
 
     def _decode(self, text):
         if sys.version_info[0] == 3:
-            return text
+            if isinstance(text, str):
+                return text
         if self.encoding == 'guess':
             try:
                 text = text.decode('utf-8')
@@ -355,11 +356,13 @@ class Lexer(object):
                     break
 
 
-def tokenize(sql):
+def tokenize(sql, encoding=None):
     """Tokenize sql.
 
     Tokenize *sql* using the :class:`Lexer` and return a 2-tuple stream
     of ``(token type, value)`` items.
     """
     lexer = Lexer()
+    if encoding is not None:
+        lexer.encoding = encoding
     return lexer.get_tokens(sql)

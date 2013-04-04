@@ -12,6 +12,10 @@ The :mod:`sqlparse` module provides the following functions on module-level.
 
 .. autofunction:: sqlparse.parse
 
+In most cases there's no need to set the `encoding` parameter. If
+`encoding` is not set, sqlparse assumes that the given SQL statement
+is encoded either in utf-8 or latin-1.
+
 
 .. _formatting:
 

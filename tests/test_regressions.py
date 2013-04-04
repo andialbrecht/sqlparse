@@ -2,7 +2,7 @@
 
 import sys
 
-from tests.utils import TestCaseBase
+from tests.utils import TestCaseBase, load_file
 
 import sqlparse
 from sqlparse import sql
@@ -188,3 +188,13 @@ def test_dont_alias_keywords():
     assert len(p.tokens) == 5
     assert p.tokens[0].ttype is T.Keyword
     assert p.tokens[2].ttype is T.Keyword
+
+
+def test_format_accepts_encoding():  # issue20
+    sql = load_file('test_cp1251.sql', 'cp1251')
+    formatted = sqlparse.format(sql, reindent=True, encoding='cp1251')
+    if sys.version_info < (3,):
+        tformatted = u'insert into foo\nvalues (1); -- Песня про надежду\n'
+    else:
+        tformatted = 'insert into foo\nvalues (1); -- Песня про надежду\n'
+    assert formatted == tformatted

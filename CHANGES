@@ -10,6 +10,11 @@ Bug Fixes
 
 Enhancements
  * Improve parsing speed when SQL contains CLOBs or BLOBs (issue86).
+ * Top-level API functions now accept encoding keyword to parse
+   statements in certain encodings more reliable (issue20).
+
+Other
+ * Documentation updates.
 
 
 Release 0.1.6 (Jan 01, 2013)
