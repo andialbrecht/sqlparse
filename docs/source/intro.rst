@@ -17,7 +17,7 @@ install the module system-wide run
 
 Alternatively you can install :mod:`sqlparse` using :command:`pip`:
 
-.. code-block:: bas
+.. code-block:: bash
 
    $ pip install sqlparse
 
