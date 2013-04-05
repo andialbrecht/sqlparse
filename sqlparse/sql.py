@@ -495,6 +495,13 @@ class Identifier(TokenList):
             return None
         return unicode(next_)
 
+    def get_ordering(self):
+        """Returns the ordering or ``None`` as uppercase string."""
+        ordering = self.token_next_by_type(0, T.Keyword.Order)
+        if ordering is None:
+            return None
+        return ordering.value.upper()
+
 
 class IdentifierList(TokenList):
     """A list of :class:`~sqlparse.sql.Identifier`\'s."""

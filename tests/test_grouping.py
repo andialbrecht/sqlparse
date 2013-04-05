@@ -231,3 +231,14 @@ def test_identifier_string_concat():
     p = sqlparse.parse('\'foo\' || bar')[0]
     assert len(p.tokens) == 1
     assert isinstance(p.tokens[0], sql.Identifier)
+
+
+def test_identifier_consumes_ordering():  # issue89
+    p = sqlparse.parse('select * from foo order by c1 desc, c2, c3')[0]
+    assert isinstance(p.tokens[-1], sql.IdentifierList)
+    ids = list(p.tokens[-1].get_identifiers())
+    assert len(ids) == 3
+    assert ids[0].get_name() == 'c1'
+    assert ids[0].get_ordering() == 'DESC'
+    assert ids[1].get_name() == 'c2'
+    assert ids[1].get_ordering() is None

@@ -267,3 +267,14 @@ class TestOutputFormat(TestCaseBase):
         sql = 'select * from foo;'
         f = lambda sql: sqlparse.format(sql, output_format='sql')
         self.ndiffAssertEqual(f(sql), 'select * from foo;')
+
+
+def test_format_column_ordering():  # issue89
+    sql = 'select * from foo order by c1 desc, c2, c3;'
+    formatted = sqlparse.format(sql, reindent=True)
+    expected = '\n'.join(['select *',
+                          'from foo',
+                          'order by c1 desc,',
+                          '         c2,',
+                          '         c3;'])
+    assert formatted == expected
