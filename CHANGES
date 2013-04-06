@@ -15,6 +15,9 @@ Enhancements
    statements in certain encodings more reliable (issue20).
  * Improve parsing speed when SQL contains CLOBs or BLOBs (issue86).
  * Improve formatting of ORDER BY clauses (issue89).
+ * Formatter now tries to detect runaway indentations caused by
+   parsing errors or invalid SQL statements. When re-indenting such
+   statements the formatter flips back to column 0 before going crazy.
 
 Other
  * Documentation updates.

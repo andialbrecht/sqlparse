@@ -261,7 +261,13 @@ class ReindentFilter:
 
     def nl(self):
         # TODO: newline character should be configurable
-        ws = '\n' + (self.char * ((self.indent * self.width) + self.offset))
+        space = (self.char * ((self.indent * self.width) + self.offset))
+        # Detect runaway indenting due to parsing errors
+        if len(space) > 200:
+            # something seems to be wrong, flip back
+            self.indent = self.offset = 0
+            space = (self.char * ((self.indent * self.width) + self.offset))
+        ws = '\n' + space
         return sql.Token(T.Whitespace, ws)
 
     def _split_kwds(self, tlist):
