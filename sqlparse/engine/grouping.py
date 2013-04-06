@@ -213,6 +213,7 @@ def group_identifier_list(tlist):
                    lambda t: t.ttype == T.Number.Integer,
                    lambda t: t.ttype == T.String.Single,
                    lambda t: t.ttype == T.Name.Placeholder,
+                   lambda t: t.ttype == T.Keyword,
                    lambda t: isinstance(t, sql.Comparison),
                    lambda t: isinstance(t, sql.Comment),
                    ]

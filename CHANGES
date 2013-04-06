@@ -7,6 +7,8 @@ Bug Fixes
    Malyshev).
  * Fix a bug where keywords were identified as aliased identifiers in
    invalid SQL statements.
+ * Fix parsing of identifier lists where identifiers are keywords too
+   (issue10).
 
 Enhancements
  * Top-level API functions now accept encoding keyword to parse
