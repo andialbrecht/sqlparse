@@ -198,3 +198,23 @@ def test_format_accepts_encoding():  # issue20
     else:
         tformatted = 'insert into foo\nvalues (1); -- Песня про надежду\n'
     assert formatted == tformatted
+
+
+def test_issue90():
+    sql = ('UPDATE "gallery_photo" SET "owner_id" = 4018, "deleted_at" = NULL,'
+           ' "width" = NULL, "height" = NULL, "rating_votes" = 0,'
+           ' "rating_score" = 0, "thumbnail_width" = NULL,'
+           ' "thumbnail_height" = NULL, "price" = 1, "description" = NULL')
+    formatted = sqlparse.format(sql, reindent=True)
+    tformatted = '\n'.join(['UPDATE "gallery_photo"',
+                            'SET "owner_id" = 4018,',
+                            '    "deleted_at" = NULL,',
+                            '    "width" = NULL,',
+                            '    "height" = NULL,',
+                            '    "rating_votes" = 0,',
+                            '    "rating_score" = 0,',
+                            '    "thumbnail_width" = NULL,',
+                            '    "thumbnail_height" = NULL,',
+                            '    "price" = 1,',
+                            '    "description" = NULL'])
+    assert formatted == tformatted

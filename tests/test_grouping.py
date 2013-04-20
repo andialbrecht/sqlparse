@@ -242,3 +242,17 @@ def test_identifier_consumes_ordering():  # issue89
     assert ids[0].get_ordering() == 'DESC'
     assert ids[1].get_name() == 'c2'
     assert ids[1].get_ordering() is None
+
+
+def test_comparison_with_keywords():  # issue90
+    # in fact these are assignments, but for now we don't distinguish them
+    p = sqlparse.parse('foo = NULL')[0]
+    assert len(p.tokens) == 1
+    assert isinstance(p.tokens[0], sql.Comparison)
+    assert len(p.tokens[0].tokens) == 5
+    assert p.tokens[0].tokens[0].value == 'foo'
+    assert p.tokens[0].tokens[-1].value == 'NULL'
+    # make sure it's case-insensitive
+    p = sqlparse.parse('foo = null')[0]
+    assert len(p.tokens) == 1
+    assert isinstance(p.tokens[0], sql.Comparison)

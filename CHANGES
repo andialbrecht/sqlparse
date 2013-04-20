@@ -1,7 +1,8 @@
 Development Version
 -------------------
 
-* Nothing new yet.
+Enhancements
+* Improve parsing of assignments in UPDATE statements (issue90).
 
 
 Release 0.1.7 (Apr 06, 2013)

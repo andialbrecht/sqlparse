@@ -125,7 +125,9 @@ def group_comparison(tlist):
         return (token.ttype in (T.String.Symbol, T.Name, T.Number,
                                 T.Number.Integer, T.Literal,
                                 T.Literal.Number.Integer)
-                or isinstance(token, (sql.Identifier,)))
+                or isinstance(token, (sql.Identifier,))
+                or (token.ttype is T.Keyword
+                    and token.value.upper() in ['NULL', ]))
     _group_left_right(tlist, T.Operator.Comparison, None, sql.Comparison,
                       check_left=_parts_valid, check_right=_parts_valid)
 
