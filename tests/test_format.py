@@ -163,6 +163,7 @@ class TestFormatReindent(TestCaseBase):
                                                'from foo',
                                                'straight_join bar on 1 = 2']
                                               ))
+
     def test_identifier_list(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)
         s = 'select foo, bar, baz from table1, table2 where 1 = 2'
