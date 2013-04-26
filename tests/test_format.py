@@ -158,6 +158,11 @@ class TestFormatReindent(TestCaseBase):
                                                'from foo',
                                                'left outer join bar on 1 = 2']
                                               ))
+        s = 'select * from foo straight_join bar on 1 = 2'
+        self.ndiffAssertEqual(f(s), '\n'.join(['select *',
+                                               'from foo',
+                                               'straight_join bar on 1 = 2']
+                                              ))
 
     def test_identifier_list(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)

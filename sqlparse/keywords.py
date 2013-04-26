@@ -536,6 +536,7 @@ KEYWORDS_COMMON = {
     'FROM': tokens.Keyword,
     'INNER': tokens.Keyword,
     'JOIN': tokens.Keyword,
+    'STRAIGHT_JOIN': tokens.Keyword,
     'AND': tokens.Keyword,
     'OR': tokens.Keyword,
     'LIKE': tokens.Keyword,
