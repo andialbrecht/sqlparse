@@ -271,7 +271,7 @@ class ReindentFilter:
         return sql.Token(T.Whitespace, ws)
 
     def _split_kwds(self, tlist):
-        split_words = ('FROM', 'JOIN$', 'AND', 'OR',
+        split_words = ('FROM', 'STRAIGHT_JOIN$', 'JOIN$', 'AND', 'OR',
                        'GROUP', 'ORDER', 'UNION', 'VALUES',
                        'SET', 'BETWEEN')
 
