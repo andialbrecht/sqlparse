@@ -423,7 +423,7 @@ KEYWORDS = {
 
     'TABLE': tokens.Keyword,
     'TABLE_NAME': tokens.Keyword,
-    ' TEMP': tokens.Keyword,
+    'TEMP': tokens.Keyword,
     'TEMPLATE': tokens.Keyword,
     'TEMPORARY': tokens.Keyword,
     'TERMINATE': tokens.Keyword,
