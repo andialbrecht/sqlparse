@@ -4,6 +4,8 @@ Development Version
 Enhancements
 * Improve parsing of assignments in UPDATE statements (issue90).
 * Add STRAIGHT_JOIN statement (by Yago Riveiro).
+* Function.get_parameters() now returns the parameter if only one parameter is
+  given (issue94, by wayne.wuw).
 
 
 Release 0.1.7 (Apr 06, 2013)

@@ -107,7 +107,7 @@ class SQLParseTest(TestCaseBase):
         self.assertEqual(len(t), 1)
         self.assert_(isinstance(t[0], sqlparse.sql.Identifier))
 
-    def test_function_parameter(self): # see issue94
+    def test_function_parameter(self):  # see issue94
         t = sqlparse.parse('abs(some_col)')[0].tokens[0].get_parameters()
         self.assertEqual(len(t), 1)
         self.assert_(isinstance(t[0], sqlparse.sql.Identifier))
