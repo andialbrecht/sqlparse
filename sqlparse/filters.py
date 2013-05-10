@@ -250,10 +250,17 @@ class ReindentFilter:
         self._curr_stmt = None
         self._last_stmt = None
 
+    def _flatten_up_to_token(self, token):
+        """Yields all tokens up to token plus the next one."""
+        # helper for _get_offset
+        iterator = self._curr_stmt.flatten()
+        for t in iterator:
+            yield t
+            if t == token:
+                raise StopIteration
+
     def _get_offset(self, token):
-        all_ = list(self._curr_stmt.flatten())
-        idx = all_.index(token)
-        raw = ''.join(unicode(x) for x in all_[:idx + 1])
+        raw = ''.join(map(unicode, self._flatten_up_to_token(token)))
         line = raw.splitlines()[-1]
         # Now take current offset into account and return relative offset.
         full_offset = len(line) - len(self.char * (self.width * self.indent))
