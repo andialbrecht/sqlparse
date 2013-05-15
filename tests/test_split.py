@@ -131,3 +131,10 @@ class SQLSplitTest(TestCaseBase):
         stream = StringIO("SELECT 1; SELECT 2;")
         stmts = list(sqlparse.parsestream(stream))
         self.assertEqual(type(stmts[0].tokens[0].value), unicode)
+
+
+def test_split_simple():
+    stmts = sqlparse.split('select * from foo; select * from bar;')
+    assert len(stmts) == 2
+    assert stmts[0] == 'select * from foo;'
+    assert stmts[1] == 'select * from bar;'

@@ -6,6 +6,8 @@ Enhancements
 * Add STRAIGHT_JOIN statement (by Yago Riveiro).
 * Function.get_parameters() now returns the parameter if only one parameter is
   given (issue94, by wayne.wuw).
+* sqlparse.split() now removes leading and trailing whitespaces from splitted
+  statements.
 
 
 Release 0.1.7 (Apr 06, 2013)
