@@ -465,6 +465,7 @@ KEYWORDS = {
     'UNTIL': tokens.Keyword,
     'UPPER': tokens.Keyword,
     'USAGE': tokens.Keyword,
+    'USE': tokens.Keyword,
     'USER': tokens.Keyword,
     'USER_DEFINED_TYPE_CATALOG': tokens.Keyword,
     'USER_DEFINED_TYPE_NAME': tokens.Keyword,
