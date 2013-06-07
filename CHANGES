@@ -8,6 +8,7 @@ Enhancements
   given (issue94, by wayne.wuw).
 * sqlparse.split() now removes leading and trailing whitespaces from splitted
   statements.
+* Add USE as keyword token (by mulos).
 
 
 Release 0.1.7 (Apr 06, 2013)
