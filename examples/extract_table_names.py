@@ -5,8 +5,8 @@
 # http://groups.google.com/group/sqlparse/browse_thread/thread/b0bd9a022e9d4895
 
 sql = """
-select K.a from (select H.b from (select G.c from (select F.d from
-(select E.e from A, B, C, D, E), F), G), H), I, J, K;
+select K.a,K.b from (select H.b from (select G.c from (select F.d from
+(select E.e from A, B, C, D, E), F), G), H), I, J, K order by 1,2;
 """
 
 import sqlparse
@@ -24,12 +24,12 @@ def is_subselect(parsed):
 def extract_from_part(parsed):
     from_seen = False
     for item in parsed.tokens:
-        if item.ttype is Keyword:
-			from_seen = False
-		elif from_seen:
+        if from_seen:
             if is_subselect(item):
                 for x in extract_from_part(item):
                     yield x
+            elif item.ttype is Keyword:
+                raise StopIteration
             else:
                 yield item
         elif item.ttype is Keyword and item.value.upper() == 'FROM':
