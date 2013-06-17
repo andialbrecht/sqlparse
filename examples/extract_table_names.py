@@ -13,6 +13,7 @@ import sqlparse
 from sqlparse.sql import IdentifierList, Identifier
 from sqlparse.tokens import Keyword, DML
 
+
 def is_subselect(parsed):
     if not parsed.is_group():
         return False
@@ -20,6 +21,7 @@ def is_subselect(parsed):
         if item.ttype is DML and item.value.upper() == 'SELECT':
             return True
     return False
+
 
 def extract_from_part(parsed):
     from_seen = False
@@ -35,6 +37,7 @@ def extract_from_part(parsed):
         elif item.ttype is Keyword and item.value.upper() == 'FROM':
             from_seen = True
 
+
 def extract_table_identifiers(token_stream):
     for item in token_stream:
         if isinstance(item, IdentifierList):
@@ -47,9 +50,11 @@ def extract_table_identifiers(token_stream):
         elif item.ttype is Keyword:
             yield item.value
 
+
 def extract_tables():
     stream = extract_from_part(sqlparse.parse(sql)[0])
     return list(extract_table_identifiers(stream))
+
 
 if __name__ == '__main__':
     print 'Tables: %s' % ', '.join(extract_tables())
