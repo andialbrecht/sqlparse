@@ -24,7 +24,9 @@ def is_subselect(parsed):
 def extract_from_part(parsed):
     from_seen = False
     for item in parsed.tokens:
-        if from_seen:
+        if item.ttype is Keyword:
+			from_seen = False
+		elif from_seen:
             if is_subselect(item):
                 for x in extract_from_part(item):
                     yield x
