@@ -1,6 +1,10 @@
 Development Version
 -------------------
 
+Bug Fixes
+* Whitespaces within certain keywords are now allowed (issue97, patch proposed
+  by xcombelle).
+
 Enhancements
 * Improve parsing of assignments in UPDATE statements (issue90).
 * Add STRAIGHT_JOIN statement (by Yago Riveiro).

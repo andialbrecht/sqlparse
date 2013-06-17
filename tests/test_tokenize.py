@@ -161,3 +161,29 @@ class TestStream(unittest.TestCase):
         tokens = list(lex.get_tokens(stream))
         self.assertEqual(len(tokens), 2)
         self.assertEqual(tokens[1][0], Error)
+
+
+def test_parse_join():
+    p = sqlparse.parse('LEFT JOIN foo')[0]
+    assert len(p.tokens) == 3
+    assert p.tokens[0].ttype is Keyword
+    p = sqlparse.parse('LEFT  OUTER  JOIN foo')[0]
+    assert len(p.tokens) == 3
+    assert p.tokens[0].ttype is Keyword
+
+
+def test_parse_endifloop():
+    p = sqlparse.parse('END IF')[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype is Keyword
+    p = sqlparse.parse('END   IF')[0]
+    assert len(p.tokens) == 1
+    p = sqlparse.parse('END\t\nIF')[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype is Keyword
+    p = sqlparse.parse('END LOOP')[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype is Keyword
+    p = sqlparse.parse('END  LOOP')[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype is Keyword
