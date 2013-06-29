@@ -13,6 +13,7 @@ Enhancements
 * sqlparse.split() now removes leading and trailing whitespaces from splitted
   statements.
 * Add USE as keyword token (by mulos).
+* Improve parsing of PEP249-style placeholders (issue103).
 
 
 Release 0.1.7 (Apr 06, 2013)

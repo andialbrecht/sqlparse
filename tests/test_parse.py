@@ -2,10 +2,14 @@
 
 """Tests sqlparse function."""
 
+import pytest
+
 from tests.utils import TestCaseBase
 
 import sqlparse
 import sqlparse.sql
+
+from sqlparse import tokens as T
 
 
 class SQLParseTest(TestCaseBase):
@@ -139,3 +143,10 @@ def test_psql_quotation_marks():  # issue83
           ....
     $PROC_2$ LANGUAGE plpgsql;""")
     assert len(t) == 2
+
+
+@pytest.mark.parametrize('ph', ['?', ':1', ':foo', '%s', '%(foo)s'])
+def test_placeholder(ph):
+    p = sqlparse.parse(ph)[0].tokens
+    assert len(p) == 1
+    assert p[0].ttype is T.Name.Placeholder
