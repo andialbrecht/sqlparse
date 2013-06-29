@@ -1,5 +1,5 @@
-Development Version
--------------------
+Release 0.1.8 (Jun 29, 2013)
+----------------------------
 
 Bug Fixes
 * Whitespaces within certain keywords are now allowed (issue97, patch proposed
