@@ -33,6 +33,19 @@ def validate_options(options):
         raise SQLParseError('Invalid value for strip_whitespace: %r'
                             % strip_ws)
 
+    truncate_strings = options.get('truncate_strings', None)
+    if truncate_strings is not None:
+        try:
+            truncate_strings = int(truncate_strings)
+        except (ValueError, TypeError):
+            raise SQLParseError('Invalid value for truncate_strings: %r'
+                                % truncate_strings)
+        if truncate_strings <= 1:
+            raise SQLParseError('Invalid value for truncate_strings: %r'
+                                % truncate_strings)
+        options['truncate_strings'] = truncate_strings
+        options['truncate_char'] = options.get('truncate_char', '[...]')
+
     reindent = options.get('reindent', False)
     if reindent not in [True, False]:
         raise SQLParseError('Invalid value for reindent: %r'
@@ -83,6 +96,10 @@ def build_filter_stack(stack, options):
     if options.get('identifier_case', None):
         stack.preprocess.append(
             filters.IdentifierCaseFilter(options['identifier_case']))
+
+    if options.get('truncate_strings', None) is not None:
+        stack.preprocess.append(filters.TruncateStringFilter(
+            width=options['truncate_strings'], char=options['truncate_char']))
 
     # After grouping
     if options.get('strip_comments', False):

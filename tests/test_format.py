@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import pytest
+
 from tests.utils import TestCaseBase
 
 import sqlparse
@@ -283,3 +285,27 @@ def test_format_column_ordering():  # issue89
                           '         c2,',
                           '         c3;'])
     assert formatted == expected
+
+
+def test_truncate_strings():
+    sql = 'update foo set value = \'' + 'x' * 1000 + '\';'
+    formatted = sqlparse.format(sql, truncate_strings=10)
+    assert formatted == 'update foo set value = \'xxxxxxxxxx[...]\';'
+    formatted = sqlparse.format(sql, truncate_strings=3, truncate_char='YYY')
+    assert formatted == 'update foo set value = \'xxxYYY\';'
+
+
+def test_truncate_strings_invalid_option():
+    pytest.raises(SQLParseError, sqlparse.format,
+                  'foo', truncate_strings='bar')
+    pytest.raises(SQLParseError, sqlparse.format,
+                  'foo', truncate_strings=-1)
+    pytest.raises(SQLParseError, sqlparse.format,
+                  'foo', truncate_strings=0)
+
+
+@pytest.mark.parametrize('sql', ['select verrrylongcolumn from foo',
+                                 'select "verrrylongcolumn" from "foo"'])
+def test_truncate_strings_doesnt_truncate_identifiers(sql):
+    formatted = sqlparse.format(sql, truncate_strings=2)
+    assert formatted == sql

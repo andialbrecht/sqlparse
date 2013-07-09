@@ -35,6 +35,14 @@ The :meth:`~sqlparse.format` function accepts the following keyword arguments.
 ``strip_comments``
   If ``True`` comments are removed from the statements.
 
+``truncate_strings``
+  If ``truncate_strings`` is a positive integer, string literals longer than
+  the given value will be truncated.
+
+``truncate_char`` (default: "[...]")
+  If long string literals are truncated (see above) this value will be append
+  to the truncated string.
+
 ``reindent``
   If ``True`` the indentations of the statements are changed.
 

@@ -47,6 +47,27 @@ class IdentifierCaseFilter(_CaseFilter):
             yield ttype, value
 
 
+class TruncateStringFilter:
+
+    def __init__(self, width, char):
+        self.width = max(width, 1)
+        self.char = unicode(char)
+
+    def process(self, stack, stream):
+        for ttype, value in stream:
+            if ttype is T.Literal.String.Single:
+                if value[:2] == '\'\'':
+                    inner = value[2:-2]
+                    quote = u'\'\''
+                else:
+                    inner = value[1:-1]
+                    quote = u'\''
+                if len(inner) > self.width:
+                    value = u''.join((quote, inner[:self.width], self.char,
+                                      quote))
+            yield ttype, value
+
+
 class GetComments:
     """Get the comments from a stack"""
     def process(self, stack, stream):
