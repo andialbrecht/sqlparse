@@ -150,3 +150,10 @@ def test_placeholder(ph):
     p = sqlparse.parse(ph)[0].tokens
     assert len(p) == 1
     assert p[0].ttype is T.Name.Placeholder
+
+
+@pytest.mark.parametrize('num', ['6.67428E-8', '1.988e33', '1e-12'])
+def test_scientific_numbers(num):
+    p = sqlparse.parse(num)[0].tokens
+    assert len(p) == 1
+    assert p[0].ttype is T.Number.Float

@@ -3,6 +3,7 @@ Development Version
 
 Enhancements
 * New option to truncate long string literals when formatting.
+* Scientific numbers are pares correctly (issue107).
 
 
 Release 0.1.8 (Jun 29, 2013)
