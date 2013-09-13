@@ -59,6 +59,15 @@ class TestGrouping(TestCaseBase):
         self.assertEquals(types, [T.DML, T.Keyword, None,
                                   T.Keyword, None, T.Punctuation])
 
+        s = "select 1.0*(a+b) as col, sum(c)/sum(d) from myschema.mytable"
+        parsed = sqlparse.parse(s)[0]
+        self.assertEqual(len(parsed.tokens), 7)
+        self.assert_(isinstance(parsed.tokens[2], sql.IdentifierList))
+        self.assertEqual(len(parsed.tokens[2].tokens), 4)
+        identifiers = list(parsed.tokens[2].get_identifiers())
+        self.assertEqual(len(identifiers), 2)
+        self.assertEquals(identifiers[0].get_alias(), u"col")
+
     def test_identifier_wildcard(self):
         p = sqlparse.parse('a.*, b.id')[0]
         self.assert_(isinstance(p.tokens[0], sql.IdentifierList))
