@@ -148,7 +148,9 @@ def group_identifier(tlist):
                                    T.String.Single,
                                    T.Name,
                                    T.Wildcard,
-                                   T.Literal.Number.Integer))))
+                                   T.Literal.Number.Integer,
+                                   T.Literal.Number.Float)
+                       or isinstance(y, (sql.Parenthesis, sql.Function)))))
         for t in tl.tokens[i:]:
             # Don't take whitespaces into account.
             if t.ttype is T.Whitespace:
@@ -163,8 +165,9 @@ def group_identifier(tlist):
         # chooses the next token. if two tokens are found then the
         # first is returned.
         t1 = tl.token_next_by_type(
-            i, (T.String.Symbol, T.String.Single, T.Name))
-        t2 = tl.token_next_by_instance(i, sql.Function)
+            i, (T.String.Symbol, T.String.Single, T.Name, T.Literal.Number.Integer,
+                T.Literal.Number.Float))
+        t2 = tl.token_next_by_instance(i, (sql.Function, sql.Parenthesis))
         if t1 and t2:
             i1 = tl.token_index(t1)
             i2 = tl.token_index(t2)
@@ -192,7 +195,9 @@ def group_identifier(tlist):
         if identifier_tokens and identifier_tokens[-1].ttype is T.Whitespace:
             identifier_tokens = identifier_tokens[:-1]
         if not (len(identifier_tokens) == 1
-                and isinstance(identifier_tokens[0], sql.Function)):
+                and (isinstance(identifier_tokens[0], (sql.Function, sql.Parenthesis))
+                     or identifier_tokens[0].ttype in (T.Literal.Number.Integer,
+                                                       T.Literal.Number.Float))):
             group = tlist.group_tokens(sql.Identifier, identifier_tokens)
             idx = tlist.token_index(group) + 1
         else:
