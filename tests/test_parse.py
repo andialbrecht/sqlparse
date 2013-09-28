@@ -157,3 +157,15 @@ def test_scientific_numbers(num):
     p = sqlparse.parse(num)[0].tokens
     assert len(p) == 1
     assert p[0].ttype is T.Number.Float
+
+
+def test_single_quotes_are_strings():
+    p = sqlparse.parse("'foo'")[0].tokens
+    assert len(p) == 1
+    assert p[0].ttype is T.String.Single
+
+
+def test_double_quotes_are_identifiers():
+    p = sqlparse.parse('"foo"')[0].tokens
+    assert len(p) == 1
+    assert isinstance(p[0], sqlparse.sql.Identifier)

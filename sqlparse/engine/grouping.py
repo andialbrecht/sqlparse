@@ -145,7 +145,6 @@ def group_identifier(tlist):
                        or y.ttype is T.Operator
                        or y.ttype is T.Wildcard),
             lambda y: (y.ttype in (T.String.Symbol,
-                                   T.String.Single,
                                    T.Name,
                                    T.Wildcard,
                                    T.Literal.Number.Integer,
@@ -165,7 +164,7 @@ def group_identifier(tlist):
         # chooses the next token. if two tokens are found then the
         # first is returned.
         t1 = tl.token_next_by_type(
-            i, (T.String.Symbol, T.String.Single, T.Name, T.Literal.Number.Integer,
+            i, (T.String.Symbol, T.Name, T.Literal.Number.Integer,
                 T.Literal.Number.Float))
         t2 = tl.token_next_by_instance(i, (sql.Function, sql.Parenthesis))
         if t1 and t2:

@@ -1,6 +1,11 @@
 Development Version
 -------------------
 
+Bug Fixes
+* Fix an regression introduced in 0.1.5 where sqlparse didn't properly
+  distinguished between single and double quoted strings when tagging
+  identifier (issue111).
+
 Enhancements
 * New option to truncate long string literals when formatting.
 * Scientific numbers are pares correctly (issue107).
