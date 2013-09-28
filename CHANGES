@@ -1,5 +1,5 @@
-Development Version
--------------------
+Release 0.1.9 (Sep 28, 2013)
+----------------------------
 
 Bug Fixes
 * Fix an regression introduced in 0.1.5 where sqlparse didn't properly
