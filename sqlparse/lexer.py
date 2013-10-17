@@ -198,7 +198,7 @@ class Lexer(object):
             # not a real string literal in ANSI SQL:
             (r'(""|".*?[^\\]")', tokens.String.Symbol),
             (r'(\[.*[^\]]\])', tokens.Name),
-            (r'(LEFT\s+|RIGHT\s+|FULL\s+)?(INNER\s+|OUTER\s+|STRAIGHT\s+|CROSS\s+)?JOIN\b', tokens.Keyword),
+            (r'(LEFT\s+|RIGHT\s+|FULL\s+|NATURAL\s+)?(INNER\s+|OUTER\s+|STRAIGHT\s+|CROSS\s+)?JOIN\b', tokens.Keyword),
             (r'END(\s+IF|\s+LOOP)?\b', tokens.Keyword),
             (r'NOT NULL\b', tokens.Keyword),
             (r'CREATE(\s+OR\s+REPLACE)?\b', tokens.Keyword.DDL),
