@@ -1,3 +1,11 @@
+Development Version
+-------------------
+
+Bug Fixes
+* Removed buffered reading again, it obviously causes wrong parsing in some rare
+  cases (issue114).
+
+
 Release 0.1.9 (Sep 28, 2013)
 ----------------------------
 

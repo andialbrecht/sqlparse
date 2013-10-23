@@ -161,9 +161,6 @@ class Lexer(object):
     stripnl = False
     tabsize = 0
     flags = re.IGNORECASE | re.UNICODE
-    DEFAULT_BUFSIZE = 4096
-    MAX_BUFSIZE = 2 ** 31
-    bufsize = DEFAULT_BUFSIZE
 
     tokens = {
         'root': [
@@ -286,18 +283,13 @@ class Lexer(object):
         statetokens = tokendefs[statestack[-1]]
         known_names = {}
 
-        text = stream.read(self.bufsize)
-        hasmore = len(text) == self.bufsize
+        text = stream.read()
         text = self._decode(text)
 
         while 1:
             for rexmatch, action, new_state in statetokens:
                 m = rexmatch(text, pos)
                 if m:
-                    if hasmore and m.end() == len(text):
-                        # Since this is end, token may be truncated
-                        continue
-
                     # print rex.pattern
                     value = m.group()
                     if value in known_names:
@@ -330,20 +322,8 @@ class Lexer(object):
                         else:
                             assert False, "wrong state def: %r" % new_state
                         statetokens = tokendefs[statestack[-1]]
-                    # reset bufsize
-                    self.bufsize = self.DEFAULT_BUFSIZE
                     break
             else:
-                if hasmore:
-                    # we have no match, increase bufsize to parse lengthy
-                    # tokens faster (see #86).
-                    self.bufsize = min(self.bufsize * 2, self.MAX_BUFSIZE)
-                    buf = stream.read(self.bufsize)
-                    hasmore = len(buf) == self.bufsize
-                    text = text[pos:] + self._decode(buf)
-                    pos = 0
-                    continue
-
                 try:
                     if text[pos] == '\n':
                         # at EOL, reset state to "root"
