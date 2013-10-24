@@ -550,6 +550,7 @@ KEYWORDS_COMMON = {
     'ORDER': tokens.Keyword,
     'LEFT': tokens.Keyword,
     'OUTER': tokens.Keyword,
+    'FULL': tokens.Keyword,
 
     'IF': tokens.Keyword,
     'END': tokens.Keyword,
