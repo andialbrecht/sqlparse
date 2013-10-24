@@ -546,6 +546,14 @@ class Comparison(TokenList):
     """A comparison used for example in WHERE clauses."""
     __slots__ = ('value', 'ttype', 'tokens')
 
+    @property
+    def left(self):
+        return self.tokens[0]
+
+    @property
+    def right(self):
+        return self.tokens[-1]
+
 
 class Comment(TokenList):
     """A comment."""
