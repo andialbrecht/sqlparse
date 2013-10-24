@@ -4,6 +4,7 @@ Development Version
 Bug Fixes
 * Removed buffered reading again, it obviously causes wrong parsing in some rare
   cases (issue114).
+* Fix regression in setup.py introduced 10 months ago (issue115).
 
 Enhancements
 * Improved support for JOINs, by Alexander Beedie.

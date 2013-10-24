@@ -12,6 +12,7 @@ try:
 except ImportError:
     if sys.version_info[0] == 3:
         raise RuntimeError('distribute is required to install this package.')
+    from distutils.core import setup
     packages = ['sqlparse', 'sqlparse.engine']
 
 
