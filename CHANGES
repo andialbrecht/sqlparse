@@ -5,6 +5,9 @@ Bug Fixes
 * Removed buffered reading again, it obviously causes wrong parsing in some rare
   cases (issue114).
 
+Enhancements
+* Improved support for JOINs, by Alexander Beedie.
+
 
 Release 0.1.9 (Sep 28, 2013)
 ----------------------------

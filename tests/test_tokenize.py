@@ -163,11 +163,12 @@ class TestStream(unittest.TestCase):
         self.assertEqual(tokens[1][0], Error)
 
 
-def test_parse_join():
-    p = sqlparse.parse('LEFT JOIN foo')[0]
-    assert len(p.tokens) == 3
-    assert p.tokens[0].ttype is Keyword
-    p = sqlparse.parse('LEFT  OUTER  JOIN foo')[0]
+@pytest.mark.parametrize('expr', ['JOIN', 'LEFT JOIN', 'LEFT OUTER JOIN',
+                                  'FULL OUTER JOIN', 'NATURAL JOIN',
+                                  'CROSS JOIN', 'STRAIGHT JOIN',
+                                  'INNER JOIN', 'LEFT INNER JOIN'])
+def test_parse_join(expr):
+    p = sqlparse.parse('%s foo' % expr)[0]
     assert len(p.tokens) == 3
     assert p.tokens[0].ttype is Keyword
 
