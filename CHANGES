@@ -4,6 +4,9 @@ Development
 Bug Fixes
 * Fix incorrect parsing of string literals containing line breaks (issue118).
 
+Enhancements
+* Classify DML keywords (issue116, by Victor Hahn).
+
 
 Release 0.1.10 (Nov 02, 2013)
 -----------------------------
