@@ -191,7 +191,7 @@ class Lexer(object):
             (r'[-]?[0-9]*\.[0-9]+', tokens.Number.Float),
             (r'[-]?[0-9]+', tokens.Number.Integer),
             # TODO: Backslash escapes?
-            (r"(''|'.*?[^\\]')", tokens.String.Single),
+            (r"'(''|\\'|[^'])*'", tokens.String.Single),
             # not a real string literal in ANSI SQL:
             (r'(""|".*?[^\\]")', tokens.String.Symbol),
             (r'(\[.*[^\]]\])', tokens.Name),
@@ -209,7 +209,7 @@ class Lexer(object):
             (r'/\*', tokens.Comment.Multiline, 'multiline-comments'),
             (r'\*/', tokens.Comment.Multiline, '#pop'),
             (r'[^/\*]+', tokens.Comment.Multiline),
-            (r'[/*]', tokens.Comment.Multiline)
+            (r'[/*]', tokens.Comment.Multiline),
         ]}
 
     def __init__(self):

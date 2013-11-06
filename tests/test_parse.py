@@ -169,3 +169,9 @@ def test_double_quotes_are_identifiers():
     p = sqlparse.parse('"foo"')[0].tokens
     assert len(p) == 1
     assert isinstance(p[0], sqlparse.sql.Identifier)
+
+
+def test_single_quotes_with_linebreaks():  # issue118
+    p = sqlparse.parse("'f\nf'")[0].tokens
+    assert len(p) == 1
+    assert p[0].ttype is T.String.Single

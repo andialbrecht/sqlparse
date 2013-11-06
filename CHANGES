@@ -1,3 +1,10 @@
+Development
+-----------
+
+Bug Fixes
+* Fix incorrect parsing of string literals containing line breaks (issue118).
+
+
 Release 0.1.10 (Nov 02, 2013)
 -----------------------------
 
