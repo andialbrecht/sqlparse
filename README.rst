@@ -44,7 +44,7 @@ Issues/Bugs
   https://github.com/andialbrecht/sqlparse/issues
 
 Online Demo
-  http://sqlformat.appspot.com
+  http://sqlformat.org
 
 
 python-sqlparse is licensed under the BSD license.
