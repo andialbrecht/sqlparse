@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import pytest
+
 import sqlparse
 from sqlparse import sql
 from sqlparse import tokens as T
@@ -277,3 +279,40 @@ def test_comparison_with_parenthesis():  # issue23
     comp = p.tokens[0]
     assert isinstance(comp.left, sql.Parenthesis)
     assert comp.right.ttype is T.Number.Integer
+
+
+@pytest.mark.parametrize('start', ['FOR', 'FOREACH'])
+def test_forloops(start):
+    p = sqlparse.parse('%s foo in bar LOOP foobar END LOOP' % start)[0]
+    assert (len(p.tokens)) == 1
+    assert isinstance(p.tokens[0], sql.For)
+
+
+def test_nested_for():
+    p = sqlparse.parse('FOR foo LOOP FOR bar LOOP END LOOP END LOOP')[0]
+    assert len(p.tokens) == 1
+    for1 = p.tokens[0]
+    assert for1.tokens[0].value == 'FOR'
+    assert for1.tokens[-1].value == 'END LOOP'
+    for2 = for1.tokens[6]
+    assert isinstance(for2, sql.For)
+    assert for2.tokens[0].value == 'FOR'
+    assert for2.tokens[-1].value == 'END LOOP'
+
+
+def test_begin():
+    p = sqlparse.parse('BEGIN foo END')[0]
+    assert len(p.tokens) == 1
+    assert isinstance(p.tokens[0], sql.Begin)
+
+
+def test_nested_begin():
+    p = sqlparse.parse('BEGIN foo BEGIN bar END END')[0]
+    assert len(p.tokens) == 1
+    outer = p.tokens[0]
+    assert outer.tokens[0].value == 'BEGIN'
+    assert outer.tokens[-1].value == 'END'
+    inner = outer.tokens[4]
+    assert inner.tokens[0].value == 'BEGIN'
+    assert inner.tokens[-1].value == 'END'
+    assert isinstance(inner, sql.Begin)

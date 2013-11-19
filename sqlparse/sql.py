@@ -629,3 +629,9 @@ class Function(TokenList):
             elif isinstance(t, Identifier):
                 return [t,]
         return []
+
+
+class Begin(TokenList):
+    """A BEGIN/END block."""
+
+    __slots__ = ('value', 'ttype', 'tokens')

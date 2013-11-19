@@ -6,6 +6,8 @@ Bug Fixes
 
 Enhancements
 * Classify DML keywords (issue116, by Victor Hahn).
+* Add missing FOREACH keyword.
+* Grouping of BEGIN/END blocks.
 
 
 Release 0.1.10 (Nov 02, 2013)

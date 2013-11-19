@@ -29,7 +29,7 @@ KEYWORDS = {
 
     'BACKWARD': tokens.Keyword,
     'BEFORE': tokens.Keyword,
-    'BEGIN': tokens.Keyword.DML,
+    'BEGIN': tokens.Keyword,
     'BETWEEN': tokens.Keyword,
     'BITVAR': tokens.Keyword,
     'BIT_LENGTH': tokens.Keyword,
@@ -163,6 +163,7 @@ KEYWORDS = {
     'FINAL': tokens.Keyword,
     'FIRST': tokens.Keyword,
     'FORCE': tokens.Keyword,
+    'FOREACH': tokens.Keyword,
     'FOREIGN': tokens.Keyword,
     'FORTRAN': tokens.Keyword,
     'FORWARD': tokens.Keyword,

@@ -99,6 +99,16 @@ def group_for(tlist):
                     sql.For, True)
 
 
+def group_foreach(tlist):
+    _group_matching(tlist, T.Keyword, 'FOREACH', T.Keyword, 'END LOOP',
+                    sql.For, True)
+
+
+def group_begin(tlist):
+    _group_matching(tlist, T.Keyword, 'BEGIN', T.Keyword, 'END',
+                    sql.Begin, True)
+
+
 def group_as(tlist):
 
     def _right_valid(token):
@@ -369,5 +379,7 @@ def group(tlist):
             group_comparison,
             group_identifier_list,
             group_if,
-            group_for]:
+            group_for,
+            group_foreach,
+            group_begin]:
         func(tlist)
