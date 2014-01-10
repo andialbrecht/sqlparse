@@ -238,6 +238,12 @@ def test_identifier_with_op_trailing_ws():
     assert p.tokens[1].ttype is T.Whitespace
 
 
+def test_identifier_with_string_literals():
+    p = sqlparse.parse('foo + \'bar\'')[0]
+    assert len(p.tokens) == 1
+    assert isinstance(p.tokens[0], sql.Identifier)
+
+
 # This test seems to be wrong. It was introduced when fixing #53, but #111
 # showed that this shouldn't be an identifier at all. I'm leaving this
 # commented in the source for a while.

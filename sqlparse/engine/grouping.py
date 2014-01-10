@@ -157,6 +157,7 @@ def group_identifier(tlist):
             lambda y: (y.ttype in (T.String.Symbol,
                                    T.Name,
                                    T.Wildcard,
+                                   T.Literal.String.Single,
                                    T.Literal.Number.Integer,
                                    T.Literal.Number.Float)
                        or isinstance(y, (sql.Parenthesis, sql.Function)))))
