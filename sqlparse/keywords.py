@@ -68,6 +68,7 @@ KEYWORDS = {
     'COLLATION_CATALOG': tokens.Keyword,
     'COLLATION_NAME': tokens.Keyword,
     'COLLATION_SCHEMA': tokens.Keyword,
+    'COLLECT': tokens.Keyword,
     'COLUMN': tokens.Keyword,
     'COLUMN_NAME': tokens.Keyword,
     'COMMAND_FUNCTION': tokens.Keyword,
