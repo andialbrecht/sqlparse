@@ -3,7 +3,7 @@ Development
 
 Bug Fixes
 * Fix incorrect parsing of string literals containing line breaks (issue118).
-* Fix typo in keywords, add MERGE keywords (issue122, by Cristian Orellana).
+* Fix typo in keywords, add MERGE, COLLECT keywords (issue122/124, by Cristian Orellana).
 * Improve parsing of string literals in columns.
 
 Enhancements
