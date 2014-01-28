@@ -218,3 +218,18 @@ def test_issue90():
                             '    "price" = 1,',
                             '    "description" = NULL'])
     assert formatted == tformatted
+
+
+def test_except_formatting():
+    sql = 'SELECT 1 FROM foo WHERE 2 = 3 EXCEPT SELECT 2 FROM bar WHERE 1 = 2'
+    formatted = sqlparse.format(sql, reindent=True)
+    tformatted = '\n'.join([
+        'SELECT 1',
+        'FROM foo',
+        'WHERE 2 = 3',
+        'EXCEPT',
+        'SELECT 2',
+        'FROM bar',
+        'WHERE 1 = 2'
+    ])
+    assert formatted == tformatted

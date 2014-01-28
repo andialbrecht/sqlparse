@@ -297,7 +297,7 @@ def group_where(tlist):
      if not isinstance(sgroup, sql.Where)]
     idx = 0
     token = tlist.token_next_match(idx, T.Keyword, 'WHERE')
-    stopwords = ('ORDER', 'GROUP', 'LIMIT', 'UNION')
+    stopwords = ('ORDER', 'GROUP', 'LIMIT', 'UNION', 'EXCEPT')
     while token:
         tidx = tlist.token_index(token)
         end = tlist.token_next_match(tidx + 1, T.Keyword, stopwords)
