@@ -1,7 +1,6 @@
 language: python
 python: 2.7
 env:
-  - TOX_ENV=py25 PIP_INSECURE=1
   - TOX_ENV=py26
   - TOX_ENV=py27
   - TOX_ENV=py32

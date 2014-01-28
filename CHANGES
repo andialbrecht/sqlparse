@@ -12,6 +12,10 @@ Enhancements
 * Add missing FOREACH keyword.
 * Grouping of BEGIN/END blocks.
 
+Other
+* Python 2.5 isn't automatically tested anymore, neither Travis nor Tox
+  still support it out of the box.
+
 
 Release 0.1.10 (Nov 02, 2013)
 -----------------------------
