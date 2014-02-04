@@ -116,6 +116,11 @@ class SQLParseTest(TestCaseBase):
         self.assertEqual(len(t), 1)
         self.assert_(isinstance(t[0], sqlparse.sql.Identifier))
 
+    def test_function_param_single_literal(self):
+        t = sqlparse.parse('foo(5)')[0].tokens[0].get_parameters()
+        self.assertEqual(len(t), 1)
+        self.assert_(t[0].ttype is T.Number.Integer)
+
 
 def test_quoted_identifier():
     t = sqlparse.parse('select x.y as "z" from foo')[0].tokens
