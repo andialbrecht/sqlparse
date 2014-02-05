@@ -3,9 +3,12 @@ Development
 
 Bug Fixes
 * Fix incorrect parsing of string literals containing line breaks (issue118).
-* Fix typo in keywords, add MERGE, COLLECT keywords (issue122/124, by Cristian Orellana).
+* Fix typo in keywords, add MERGE, COLLECT keywords (issue122/124,
+  by Cristian Orellana).
 * Improve parsing of string literals in columns.
 * Fix parsing and formatting of statements containing EXCEPT keyword.
+* Fix Function.get_parameters() with 1 literal as its parameter (issue126,
+  by spigwitmer).
 
 Enhancements
 * Classify DML keywords (issue116, by Victor Hahn).
