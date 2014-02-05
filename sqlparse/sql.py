@@ -626,9 +626,9 @@ class Function(TokenList):
         for t in parenthesis.tokens:
             if isinstance(t, IdentifierList):
                 return t.get_identifiers()
-            elif isinstance(t, Identifier):
-                return [t,]
-            elif t.ttype in T.Literal:
+            elif isinstance(t, Identifier) or \
+                isinstance(t, Function) or \
+                t.ttype in T.Literal:
                 return [t,]
         return []
 
