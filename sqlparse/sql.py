@@ -628,6 +628,8 @@ class Function(TokenList):
                 return t.get_identifiers()
             elif isinstance(t, Identifier):
                 return [t,]
+            elif t.ttype in T.Literal:
+                return [t,]
         return []
 
 
