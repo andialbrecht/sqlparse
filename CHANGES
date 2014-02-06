@@ -7,8 +7,7 @@ Bug Fixes
   by Cristian Orellana).
 * Improve parsing of string literals in columns.
 * Fix parsing and formatting of statements containing EXCEPT keyword.
-* Fix Function.get_parameters() with 1 literal as its parameter (issue126,
-  by spigwitmer).
+* Fix Function.get_parameters() (issue126/127, by spigwitmer).
 
 Enhancements
 * Classify DML keywords (issue116, by Victor Hahn).
