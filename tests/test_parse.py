@@ -121,6 +121,11 @@ class SQLParseTest(TestCaseBase):
         self.assertEqual(len(t), 1)
         self.assert_(t[0].ttype is T.Number.Integer)
 
+    def test_nested_function(self):
+        t = sqlparse.parse('foo(bar(5))')[0].tokens[0].get_parameters()
+        self.assertEqual(len(t), 1)
+        self.assert_(type(t[0]) is sqlparse.sql.Function)
+
 
 def test_quoted_identifier():
     t = sqlparse.parse('select x.y as "z" from foo')[0].tokens
