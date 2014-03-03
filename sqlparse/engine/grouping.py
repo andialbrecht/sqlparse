@@ -117,6 +117,8 @@ def group_as(tlist):
         return not token.ttype in (T.DML, T.DDL)
 
     def _left_valid(token):
+        if token.ttype is T.Keyword and token.value in ('NULL'):
+            return True
         return token.ttype is not T.Keyword
 
     _group_left_right(tlist, T.Keyword, 'AS', sql.Identifier,
@@ -233,6 +235,7 @@ def group_identifier_list(tlist):
                    lambda t: t.ttype == T.Keyword,
                    lambda t: isinstance(t, sql.Comparison),
                    lambda t: isinstance(t, sql.Comment),
+                   lambda t: t.ttype == T.Comment.Multiline,
                    ]
     tcomma = tlist.token_next_match(idx, T.Punctuation, ',')
     start = None

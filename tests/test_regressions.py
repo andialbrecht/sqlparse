@@ -233,3 +233,14 @@ def test_except_formatting():
         'WHERE 1 = 2'
     ])
     assert formatted == tformatted
+
+
+def test_null_with_as():
+    sql = 'SELECT NULL AS c1, NULL AS c2 FROM t1'
+    formatted = sqlparse.format(sql, reindent=True)
+    tformatted = '\n'.join([
+        'SELECT NULL AS c1,',
+        '       NULL AS c2',
+        'FROM t1'
+    ])
+    assert formatted == tformatted
