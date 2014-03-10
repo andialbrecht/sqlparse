@@ -94,3 +94,46 @@ def memoize_generator(func):
                 yield item
 
     return wrapped_func
+
+def split_unquoted_newlines(text):
+    """Split a string on all unquoted newlines
+
+    This is a fairly simplistic implementation of splitting a string on all
+    unescaped CR, LF, or CR+LF occurences. Only iterates the string once. Seemed
+    easier than a complex regular expression.
+    """
+    lines = ['']
+    quoted = None
+    escape_next = False
+    last_char = None
+    for c in text:
+        escaped = False
+        # If the previous character was an unescpaed '\', this character is
+        # escaped.
+        if escape_next:
+            escaped = True
+            escape_next = False
+        # If the current character is '\' and it is not escaped, the next
+        # character is escaped.
+        if c == '\\' and not escaped:
+            escape_next = True
+        # Start a quoted portion if a) we aren't in one already, and b) the
+        # quote isn't escaped.
+        if c in '"\'' and not escaped and not quoted:
+            quoted = c
+        # Escaped quotes (obvs) don't count as a closing match.
+        elif c == quoted and not escaped:
+            quoted = None
+
+        if not quoted and c in ['\r', '\n']:
+            if c == '\n' and last_char == '\r':
+                # It's a CR+LF, so don't append another line
+                pass
+            else:
+                lines.append('')
+        else:
+            lines[-1] += c
+
+        last_char = c
+
+    return lines

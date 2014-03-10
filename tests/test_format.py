@@ -77,6 +77,23 @@ class TestFormat(TestCaseBase):
         s = 'select\n* /* foo */  from bar '
         self.ndiffAssertEqual(f(s), 'select * /* foo */ from bar')
 
+    def test_notransform_of_quoted_crlf(self):
+        # Make sure that CR/CR+LF characters inside string literals don't get
+        # affected by the formatter.
+
+        s1 = "SELECT some_column LIKE 'value\r'"
+        s2 = "SELECT some_column LIKE 'value\r'\r\nWHERE id = 1\n"
+        s3 = "SELECT some_column LIKE 'value\\'\r' WHERE id = 1\r"
+        s4 = "SELECT some_column LIKE 'value\\\\\\'\r' WHERE id = 1\r\n"
+
+        f = lambda x: sqlparse.format(x)
+
+        # Because of the use of
+        self.ndiffAssertEqual(f(s1), "SELECT some_column LIKE 'value\r'")
+        self.ndiffAssertEqual(f(s2), "SELECT some_column LIKE 'value\r'\nWHERE id = 1\n")
+        self.ndiffAssertEqual(f(s3), "SELECT some_column LIKE 'value\\'\r' WHERE id = 1\n")
+        self.ndiffAssertEqual(f(s4), "SELECT some_column LIKE 'value\\\\\\'\r' WHERE id = 1\n")
+
     def test_outputformat(self):
         sql = 'select * from foo;'
         self.assertRaises(SQLParseError, sqlparse.format, sql,
