@@ -5,6 +5,9 @@ Bug Fixes
 * Fix handling of NULL keywords in aliased identifiers.
 * Fix SerializerUnicode to split unquoted newlines (issue131, by Michael Schuller).
 
+Enhancements
+* Improve parsing of identifier lists containing placeholders.
+
 
 Release 0.1.11 (Feb 07, 2014)
 -----------------------------
