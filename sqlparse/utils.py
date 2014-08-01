@@ -4,6 +4,8 @@ Created on 17/05/2012
 @author: piranna
 '''
 
+import re
+
 try:
     from collections import OrderedDict
 except ImportError:
@@ -95,45 +97,41 @@ def memoize_generator(func):
 
     return wrapped_func
 
+
+# This regular expression replaces the home-cooked parser that was here before.
+# It is much faster, but requires an extra post-processing step to get the
+# desired results (that are compatible with what you would expect from the
+# str.splitlines() method).
+#
+# It matches groups of characters: newlines, quoted strings, or unquoted text,
+# and splits on that basis. The post-processing step puts those back together
+# into the actual lines of SQL.
+SPLIT_REGEX = re.compile(r"""
+(
+ (?:                     # Start of non-capturing group
+  (?:\r\n|\r|\n)      |  # Match any single newline, or
+  [^\r\n'"]+          |  # Match any character series without quotes or
+                         # newlines, or
+  "(?:[^"\\]|\\.)*"   |  # Match double-quoted strings, or
+  '(?:[^'\\]|\\.)*'      # Match single quoted strings
+ )
+)
+""", re.VERBOSE)
+
+LINE_MATCH = re.compile(r'(\r\n|\r|\n)')
+
 def split_unquoted_newlines(text):
-    """Split a string on all unquoted newlines
+    """Split a string on all unquoted newlines.
 
-    This is a fairly simplistic implementation of splitting a string on all
-    unescaped CR, LF, or CR+LF occurences. Only iterates the string once. Seemed
-    easier than a complex regular expression.
-    """
-    lines = ['']
-    quoted = None
-    escape_next = False
-    last_char = None
-    for c in text:
-        escaped = False
-        # If the previous character was an unescpaed '\', this character is
-        # escaped.
-        if escape_next:
-            escaped = True
-            escape_next = False
-        # If the current character is '\' and it is not escaped, the next
-        # character is escaped.
-        if c == '\\' and not escaped:
-            escape_next = True
-        # Start a quoted portion if a) we aren't in one already, and b) the
-        # quote isn't escaped.
-        if c in '"\'' and not escaped and not quoted:
-            quoted = c
-        # Escaped quotes (obvs) don't count as a closing match.
-        elif c == quoted and not escaped:
-            quoted = None
-
-        if not quoted and c in ['\r', '\n']:
-            if c == '\n' and last_char == '\r':
-                # It's a CR+LF, so don't append another line
-                pass
-            else:
-                lines.append('')
+    Unlike str.splitlines(), this will ignore CR/LF/CR+LF if the requisite
+    character is inside of a string."""
+    lines = SPLIT_REGEX.split(text)
+    outputlines = ['']
+    for line in lines:
+        if not line:
+            continue
+        elif LINE_MATCH.match(line):
+            outputlines.append('')
         else:
-            lines[-1] += c
-
-        last_char = c
-
-    return lines
+            outputlines[-1] += line
+    return outputlines
