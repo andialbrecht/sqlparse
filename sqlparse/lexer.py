@@ -180,7 +180,8 @@ class Lexer(object):
             (r'\$([^\W\d]\w*)?\$', tokens.Name.Builtin),
             (r'\?{1}', tokens.Name.Placeholder),
             (r'%\(\w+\)s', tokens.Name.Placeholder),
-            (r'[$:?%]\w+', tokens.Name.Placeholder),
+            (r'%s', tokens.Name.Placeholder),
+            (r'[$:?]\w+', tokens.Name.Placeholder),
             # FIXME(andi): VALUES shouldn't be listed here
             # see https://github.com/andialbrecht/sqlparse/pull/64
             (r'VALUES', tokens.Keyword),
