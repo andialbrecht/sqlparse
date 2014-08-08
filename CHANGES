@@ -4,9 +4,11 @@ Development Version
 Bug Fixes
 * Fix handling of NULL keywords in aliased identifiers.
 * Fix SerializerUnicode to split unquoted newlines (issue131, by Michael Schuller).
+* Fix handling of modulo operators without spaces (by gavinwahl).
 
 Enhancements
 * Improve parsing of identifier lists containing placeholders.
+* Speed up query parsing of unquoted lines (by Michael Schuller).
 
 
 Release 0.1.11 (Feb 07, 2014)
