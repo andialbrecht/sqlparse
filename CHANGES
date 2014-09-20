@@ -1,5 +1,5 @@
-Development Version
--------------------
+Release 0.1.12 (Sep 20, 2014)
+-----------------------------
 
 Bug Fixes
 * Fix handling of NULL keywords in aliased identifiers.
