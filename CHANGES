@@ -1,3 +1,10 @@
+Development Version
+-------------------
+
+Bug Fixes
+* Fix a regression in handling of NULL keywords introduced in 0.1.12.
+
+
 Release 0.1.12 (Sep 20, 2014)
 -----------------------------
 
