@@ -117,7 +117,7 @@ def group_as(tlist):
         return not token.ttype in (T.DML, T.DDL)
 
     def _left_valid(token):
-        if token.ttype is T.Keyword and token.value in ('NULL'):
+        if token.ttype is T.Keyword and token.value in ('NULL',):
             return True
         return token.ttype is not T.Keyword
 
