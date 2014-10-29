@@ -1,3 +1,11 @@
+Development Version
+-------------------
+
+Bug Fixes
+* Properly handle string literals in comparisons (issue148, change proposed
+  by aadis).
+
+
 Release 0.1.13 (Oct 09, 2014)
 -----------------------------
 

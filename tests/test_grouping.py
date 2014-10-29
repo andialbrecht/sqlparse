@@ -287,6 +287,14 @@ def test_comparison_with_parenthesis():  # issue23
     assert comp.right.ttype is T.Number.Integer
 
 
+def test_comparison_with_strings():  # issue148
+    p = sqlparse.parse('foo = \'bar\'')[0]
+    assert len(p.tokens) == 1
+    assert isinstance(p.tokens[0], sql.Comparison)
+    assert p.tokens[0].right.value == '\'bar\''
+    assert p.tokens[0].right.ttype == T.String.Single
+
+
 @pytest.mark.parametrize('start', ['FOR', 'FOREACH'])
 def test_forloops(start):
     p = sqlparse.parse('%s foo in bar LOOP foobar END LOOP' % start)[0]
