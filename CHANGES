@@ -5,6 +5,7 @@ Bug Fixes
 * Floats in UPDATE statements are now handled correctly (issue145).
 * Properly handle string literals in comparisons (issue148, change proposed
   by aadis).
+* Fix indentation when using tabs (issue146).
 
 
 Release 0.1.13 (Oct 09, 2014)

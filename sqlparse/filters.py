@@ -379,7 +379,12 @@ class ReindentFilter:
         identifiers = list(tlist.get_identifiers())
         if len(identifiers) > 1 and not tlist.within(sql.Function):
             first = list(identifiers[0].flatten())[0]
-            num_offset = self._get_offset(first) - len(first.value)
+            if self.char == '\t':
+                # when using tabs we don't count the actual word length
+                # in spaces.
+                num_offset = 1
+            else:
+                num_offset = self._get_offset(first) - len(first.value)
             self.offset += num_offset
             for token in identifiers[1:]:
                 tlist.insert_before(token, self.nl())
