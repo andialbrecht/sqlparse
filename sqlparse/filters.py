@@ -352,7 +352,10 @@ class ReindentFilter:
 
     def _process_where(self, tlist):
         token = tlist.token_next_match(0, T.Keyword, 'WHERE')
-        tlist.insert_before(token, self.nl())
+        try:
+            tlist.insert_before(token, self.nl())
+        except ValueError:  # issue121, errors in statement
+            pass
         self.indent += 1
         self._process_default(tlist)
         self.indent -= 1
