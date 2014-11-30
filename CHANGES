@@ -1,5 +1,5 @@
-Development Version
--------------------
+Release 0.1.14 (Nov 30, 2014)
+-----------------------------
 
 Bug Fixes
 * Floats in UPDATE statements are now handled correctly (issue145).
