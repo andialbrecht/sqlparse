@@ -135,7 +135,7 @@ def group_comparison(tlist):
 
     def _parts_valid(token):
         return (token.ttype in (T.String.Symbol, T.String.Single,
-                                T.Name, T.Number,
+                                T.Name, T.Number, T.Number.Float,
                                 T.Number.Integer, T.Literal,
                                 T.Literal.Number.Integer, T.Name.Placeholder)
                 or isinstance(token, (sql.Identifier, sql.Parenthesis))

@@ -2,6 +2,7 @@ Development Version
 -------------------
 
 Bug Fixes
+* Floats in UPDATE statements are now handled correctly (issue145).
 * Properly handle string literals in comparisons (issue148, change proposed
   by aadis).
 

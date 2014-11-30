@@ -278,6 +278,15 @@ def test_comparison_with_keywords():  # issue90
     assert isinstance(p.tokens[0], sql.Comparison)
 
 
+def test_comparison_with_floats():  # issue145
+    p = sqlparse.parse('foo = 25.5')[0]
+    assert len(p.tokens) == 1
+    assert isinstance(p.tokens[0], sql.Comparison)
+    assert len(p.tokens[0].tokens) == 5
+    assert p.tokens[0].left.value == 'foo'
+    assert p.tokens[0].right.value == '25.5'
+
+
 def test_comparison_with_parenthesis():  # issue23
     p = sqlparse.parse('(3 + 4) = 7')[0]
     assert len(p.tokens) == 1
