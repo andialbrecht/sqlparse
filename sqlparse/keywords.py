@@ -404,7 +404,7 @@ KEYWORDS = {
     'SQLWARNING': tokens.Keyword,
     'STABLE': tokens.Keyword,
     'START': tokens.Keyword.DML,
-    #'STATE': tokens.Keyword,
+    'STATE': tokens.Keyword,
     'STATEMENT': tokens.Keyword,
     'STATIC': tokens.Keyword,
     'STATISTICS': tokens.Keyword,
