@@ -246,6 +246,20 @@ class StripWhitespaceFilter:
                     token.value = ' '
             last_was_ws = token.is_whitespace()
 
+    def _stripws_identifierlist(self, tlist):
+        # Removes newlines before commas, see issue140
+        last_nl = None
+        for token in tlist.tokens[:]:
+            if (token.ttype is T.Punctuation
+                and token.value == ','
+                and last_nl is not None):
+                tlist.tokens.remove(last_nl)
+            if token.is_whitespace():
+                last_nl = token
+            else:
+                last_nl = None
+        return self._stripws_default(tlist)
+
     def _stripws_parenthesis(self, tlist):
         if tlist.tokens[1].is_whitespace():
             tlist.tokens.pop(1)

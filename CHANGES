@@ -7,6 +7,9 @@ Bug Fixes
   by aadis).
 * Fix indentation when using tabs (issue146).
 
+Enhancements
+* Improved formatting in list when newlines precede commas (issue140).
+
 
 Release 0.1.13 (Oct 09, 2014)
 -----------------------------
