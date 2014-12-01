@@ -19,7 +19,8 @@ _CASE_CHOICES = ['upper', 'lower', 'capitalize']
 parser = optparse.OptionParser(usage='%prog [OPTIONS] FILE, ...',
                                version='%%prog %s' % sqlparse.__version__)
 parser.set_description(('Format FILE according to OPTIONS. Use "-" as FILE '
-                        'to read from stdin.'))
+                        'to read from stdin. Use "!" as FILE to read from '
+                        'arguments'))
 parser.add_option('-v', '--verbose', dest='verbose', action='store_true')
 parser.add_option('-o', '--outfile', dest='outfile', metavar='FILE',
                   help='write output to FILE (defaults to stdout)')
@@ -68,13 +69,15 @@ def main():
     if options.verbose:
         sys.stderr.write('Verbose mode\n')
 
-    if len(args) != 1:
+    if (len(args) != 1) & ('!' not in args):
         _error('No input data.')
         parser.print_usage()
         sys.exit(1)
 
     if '-' in args:  # read from stdin
         data = sys.stdin.read()
+    elif '!' in args:
+        data = args[1] # read from args
     else:
         try:
             data = '\n'.join(open(args[0]).readlines())
