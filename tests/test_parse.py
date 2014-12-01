@@ -110,6 +110,13 @@ class SQLParseTest(TestCaseBase):
         self.assertEqual(t[-1].get_real_name(), '[foo bar]')
         self.assertEqual(t[-1].get_parent_name(), 'a')
 
+    def test_square_brackets_notation_isnt_too_greedy(self):  # see issue153
+        t = sqlparse.parse('[foo], [bar]')[0].tokens
+        self.assert_(isinstance(t[0], sqlparse.sql.IdentifierList))
+        self.assertEqual(len(t[0].tokens), 4)
+        self.assertEqual(t[0].tokens[0].get_real_name(), '[foo]')
+        self.assertEqual(t[0].tokens[-1].get_real_name(), '[bar]')
+
     def test_keyword_like_identifier(self):  # see issue47
         t = sqlparse.parse('foo.key')[0].tokens
         self.assertEqual(len(t), 1)

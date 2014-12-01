@@ -1,3 +1,10 @@
+Development Version
+-------------------
+
+Bug Fixes
+* Fix a regression in identifiers with square bracktes notation (issue153).
+
+
 Release 0.1.14 (Nov 30, 2014)
 -----------------------------
 
