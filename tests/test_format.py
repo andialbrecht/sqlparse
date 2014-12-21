@@ -326,3 +326,18 @@ def test_truncate_strings_invalid_option():
 def test_truncate_strings_doesnt_truncate_identifiers(sql):
     formatted = sqlparse.format(sql, truncate_strings=2)
     assert formatted == sql
+
+
+def test_having_produces_newline():
+    sql = (
+        'select * from foo, bar where bar.id = foo.bar_id'
+        ' having sum(bar.value) > 100')
+    formatted = sqlparse.format(sql, reindent=True)
+    expected = [
+        'select *',
+        'from foo,',
+        '     bar',
+        'where bar.id = foo.bar_id',
+        'having sum(bar.value) > 100'
+    ]
+    assert formatted == '\n'.join(expected)

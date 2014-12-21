@@ -2,7 +2,10 @@ Development Version
 -------------------
 
 Bug Fixes
-* Fix a regression in identifiers with square bracktes notation (issue153).
+* Fix a regression for identifiers with square bracktes notation (issue153).
+
+Enhancements
+* Improved formatting of HAVING statements.
 
 
 Release 0.1.14 (Nov 30, 2014)

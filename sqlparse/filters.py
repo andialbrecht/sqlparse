@@ -316,7 +316,7 @@ class ReindentFilter:
     def _split_kwds(self, tlist):
         split_words = ('FROM', 'STRAIGHT_JOIN$', 'JOIN$', 'AND', 'OR',
                        'GROUP', 'ORDER', 'UNION', 'VALUES',
-                       'SET', 'BETWEEN', 'EXCEPT')
+                       'SET', 'BETWEEN', 'EXCEPT', 'HAVING')
 
         def _next_token(i):
             t = tlist.token_next_match(i, T.Keyword, split_words,
@@ -373,6 +373,17 @@ class ReindentFilter:
         self.indent += 1
         self._process_default(tlist)
         self.indent -= 1
+
+    def _process_having(self, tlist):
+        token = tlist.token_next_match(0, T.Keyword, 'HAVING')
+        try:
+            tlist.insert_before(token, self.nl())
+        except ValueError:  # issue121, errors in statement
+            pass
+        self.indent += 1
+        self._process_default(tlist)
+        self.indent -= 1
+
 
     def _process_parenthesis(self, tlist):
         first = tlist.token_next(0)
