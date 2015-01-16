@@ -559,6 +559,9 @@ class Comment(TokenList):
     """A comment."""
     __slots__ = ('value', 'ttype', 'tokens')
 
+    def is_multiline(self):
+        return self.tokens and self.tokens[0].ttype == T.Comment.Multiline
+
 
 class Where(TokenList):
     """A WHERE clause."""

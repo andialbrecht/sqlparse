@@ -5,7 +5,8 @@ Bug Fixes
 * Fix a regression for identifiers with square bracktes notation (issue153).
 
 Enhancements
-* Improved formatting of HAVING statements.
+* Improve formatting of HAVING statements.
+* Improve parsing of inline comments (issue163).
 
 
 Release 0.1.14 (Nov 30, 2014)

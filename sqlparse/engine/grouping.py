@@ -172,6 +172,8 @@ def group_identifier(tlist):
             if next(x)(t):
                 yield t
             else:
+                if isinstance(t, sql.Comment) and t.is_multiline():
+                    yield t
                 raise StopIteration
 
     def _next_token(tl, i):

@@ -131,6 +131,12 @@ class TestGrouping(TestCaseBase):
         l = p.tokens[2]
         self.assertEqual(len(l.tokens), 13)
 
+    def test_identifier_list_with_inline_comments(self):  # issue163
+        p = sqlparse.parse('foo /* a comment */, bar')[0]
+        self.assert_(isinstance(p.tokens[0], sql.IdentifierList))
+        self.assert_(isinstance(p.tokens[0].tokens[0], sql.Identifier))
+        self.assert_(isinstance(p.tokens[0].tokens[3], sql.Identifier))
+
     def test_where(self):
         s = 'select * from foo where bar = 1 order by id desc'
         p = sqlparse.parse(s)[0]
