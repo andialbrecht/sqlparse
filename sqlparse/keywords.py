@@ -515,6 +515,7 @@ KEYWORDS = {
     'NUMERIC': tokens.Name.Builtin,
     'REAL': tokens.Name.Builtin,
     'SERIAL': tokens.Name.Builtin,
+    'SIGNED': tokens.Name.Builtin,
     'SMALLINT': tokens.Name.Builtin,
     'UNSIGNED': tokens.Name.Builtin,
     'VARCHAR': tokens.Name.Builtin,
