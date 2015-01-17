@@ -370,6 +370,23 @@ def group_order(tlist):
         token = tlist.token_next_by_type(idx, T.Keyword.Order)
 
 
+def align_comments(tlist):
+    [align_comments(sgroup) for sgroup in tlist.get_sublists()]
+    idx = 0
+    token = tlist.token_next_by_instance(idx, sql.Comment)
+    while token:
+        before = tlist.token_prev(tlist.token_index(token))
+        if isinstance(before, sql.TokenList):
+            grp = tlist.tokens_between(before, token)[1:]
+            before.tokens.extend(grp)
+            for t in grp:
+                tlist.tokens.remove(t)
+            idx = tlist.token_index(before) + 1
+        else:
+            idx = tlist.token_index(token) + 1
+        token = tlist.token_next_by_instance(idx, sql.Comment)
+
+
 def group(tlist):
     for func in [
             group_comments,
@@ -384,9 +401,11 @@ def group(tlist):
             group_aliased,
             group_assignment,
             group_comparison,
+            align_comments,
             group_identifier_list,
             group_if,
             group_for,
             group_foreach,
-            group_begin]:
+            group_begin,
+            ]:
         func(tlist)
