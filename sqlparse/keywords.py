@@ -518,6 +518,7 @@ KEYWORDS = {
     'SIGNED': tokens.Name.Builtin,
     'SMALLINT': tokens.Name.Builtin,
     'UNSIGNED': tokens.Name.Builtin,
+    'TINYINT': tokens.Name.Builtin,
     'VARCHAR': tokens.Name.Builtin,
     'VARCHAR2': tokens.Name.Builtin,
     'VARYING': tokens.Name.Builtin,

@@ -3,7 +3,7 @@ Development Version
 
 Bug Fixes
 * Fix a regression for identifiers with square bracktes notation (issue153).
-* Add missing SQL types (issue155, issue156).
+* Add missing SQL types (issue154, issue155, issue156).
 
 Enhancements
 * Improve formatting of HAVING statements.
