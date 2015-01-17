@@ -8,7 +8,7 @@ Bug Fixes
 Enhancements
 * Improve formatting of HAVING statements.
 * Improve parsing of inline comments (issue163).
-* Group comments to parent object (issue160).
+* Group comments to parent object (issue128, issue160).
 
 
 Release 0.1.14 (Nov 30, 2014)
