@@ -494,7 +494,7 @@ KEYWORDS = {
 
     'ZONE': tokens.Keyword,
 
-
+    # Name.Builtin
     'ARRAY': tokens.Name.Builtin,
     'BIGINT': tokens.Name.Builtin,
     'BINARY': tokens.Name.Builtin,
@@ -508,6 +508,7 @@ KEYWORDS = {
     'DECIMAL': tokens.Name.Builtin,
     'FLOAT': tokens.Name.Builtin,
     'INT': tokens.Name.Builtin,
+    'INT8': tokens.Name.Builtin,
     'INTEGER': tokens.Name.Builtin,
     'INTERVAL': tokens.Name.Builtin,
     'LONG': tokens.Name.Builtin,
@@ -515,16 +516,15 @@ KEYWORDS = {
     'NUMERIC': tokens.Name.Builtin,
     'REAL': tokens.Name.Builtin,
     'SERIAL': tokens.Name.Builtin,
+    'SERIAL8': tokens.Name.Builtin,
     'SIGNED': tokens.Name.Builtin,
     'SMALLINT': tokens.Name.Builtin,
-    'UNSIGNED': tokens.Name.Builtin,
+    'TEXT': tokens.Name.Builtin,
     'TINYINT': tokens.Name.Builtin,
+    'UNSIGNED': tokens.Name.Builtin,
     'VARCHAR': tokens.Name.Builtin,
     'VARCHAR2': tokens.Name.Builtin,
     'VARYING': tokens.Name.Builtin,
-    'INT8': tokens.Name.Builtin,
-    'SERIAL8': tokens.Name.Builtin,
-    'TEXT': tokens.Name.Builtin,
 }
 
 
