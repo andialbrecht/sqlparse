@@ -502,6 +502,13 @@ class Identifier(TokenList):
             return None
         return ordering.value.upper()
 
+    def get_array_indices(self):
+        """Returns an iterator of index expressions as strings"""
+
+        # Use [1:-1] index to discard the square brackets
+        return (tok.value[1:-1] for tok in self.tokens
+                if tok.ttype in T.ArrayIndex)
+
 
 class IdentifierList(TokenList):
     """A list of :class:`~sqlparse.sql.Identifier`\'s."""
