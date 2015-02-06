@@ -200,6 +200,7 @@ class Lexer(object):
             (r'END(\s+IF|\s+LOOP)?\b', tokens.Keyword),
             (r'NOT NULL\b', tokens.Keyword),
             (r'CREATE(\s+OR\s+REPLACE)?\b', tokens.Keyword.DDL),
+            (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
             (r'(?<=\.)[^\W\d_]\w*', tokens.Name),
             (r'[^\W\d_]\w*', is_keyword),
             (r'[;:()\[\],\.]', tokens.Punctuation),
