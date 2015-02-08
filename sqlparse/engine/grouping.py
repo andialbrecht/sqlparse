@@ -156,10 +156,12 @@ def group_identifier(tlist):
         x = itertools.cycle((
             lambda y: (y.match(T.Punctuation, '.')
                        or y.ttype is T.Operator
-                       or y.ttype is T.Wildcard),
+                       or y.ttype is T.Wildcard
+                       or y.ttype is T.ArrayIndex),
             lambda y: (y.ttype in (T.String.Symbol,
                                    T.Name,
                                    T.Wildcard,
+                                   T.ArrayIndex,
                                    T.Literal.String.Single,
                                    T.Literal.Number.Integer,
                                    T.Literal.Number.Float)
