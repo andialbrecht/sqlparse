@@ -166,6 +166,14 @@ def test_psql_quotation_marks():  # issue83
     assert len(t) == 2
 
 
+def test_double_precision_is_builtin():
+    sql = 'DOUBLE PRECISION'
+    t = sqlparse.parse(sql)[0].tokens
+    assert (len(t) == 1
+            and t[0].ttype == sqlparse.tokens.Name.Builtin
+            and t[0].value == 'DOUBLE PRECISION')
+
+
 @pytest.mark.parametrize('ph', ['?', ':1', ':foo', '%s', '%(foo)s'])
 def test_placeholder(ph):
     p = sqlparse.parse(ph)[0].tokens
@@ -196,3 +204,4 @@ def test_single_quotes_with_linebreaks():  # issue118
     p = sqlparse.parse("'f\nf'")[0].tokens
     assert len(p) == 1
     assert p[0].ttype is T.String.Single
+
