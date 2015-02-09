@@ -15,11 +15,12 @@ class TestGrouping(TestCaseBase):
         s = 'select (select (x3) x2) and (y2) bar'
         parsed = sqlparse.parse(s)[0]
         self.ndiffAssertEqual(s, str(parsed))
-        self.assertEqual(len(parsed.tokens), 9)
+        self.assertEqual(len(parsed.tokens), 7)
         self.assert_(isinstance(parsed.tokens[2], sql.Parenthesis))
-        self.assert_(isinstance(parsed.tokens[-3], sql.Parenthesis))
-        self.assertEqual(len(parsed.tokens[2].tokens), 7)
-        self.assert_(isinstance(parsed.tokens[2].tokens[3], sql.Parenthesis))
+        self.assert_(isinstance(parsed.tokens[-1], sql.Identifier))
+        self.assertEqual(len(parsed.tokens[2].tokens), 5)
+        self.assert_(isinstance(parsed.tokens[2].tokens[3], sql.Identifier))
+        self.assert_(isinstance(parsed.tokens[2].tokens[3].tokens[0], sql.Parenthesis))
         self.assertEqual(len(parsed.tokens[2].tokens[3].tokens), 3)
 
     def test_comments(self):
