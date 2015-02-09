@@ -422,17 +422,20 @@ class TokenList(Token):
             return self._get_first_name(self.token_index(dot))
 
         return self._get_first_name()
-        if dot is None:
-            next_ = self.token_next_by_type(0, T.Name)
-            if next_ is not None:
-                return self._remove_quotes(next_.value)
-            return None
 
-        next_ = self.token_next_by_type(self.token_index(dot),
-                                        (T.Name, T.Wildcard, T.String.Symbol))
-        if next_ is None:  # invalid identifier, e.g. "a."
+    def get_parent_name(self):
+        """Return name of the parent object if any.
+
+        A parent object is identified by the first occuring dot.
+        """
+        dot = self.token_next_match(0, T.Punctuation, '.')
+        if dot is None:
             return None
-        return self._remove_quotes(next_.value)
+        prev_ = self.token_prev(self.token_index(dot))
+        if prev_ is None:  # something must be verry wrong here..
+            return None
+        return self._remove_quotes(prev_.value)
+
     def _get_first_name(self, idx=None, reverse=False, keywords=False):
         """Returns the name of the first token with a name"""
 
@@ -484,19 +487,6 @@ class Identifier(TokenList):
     """
 
     __slots__ = ('value', 'ttype', 'tokens')
-
-    def get_parent_name(self):
-        """Return name of the parent object if any.
-
-        A parent object is identified by the first occuring dot.
-        """
-        dot = self.token_next_match(0, T.Punctuation, '.')
-        if dot is None:
-            return None
-        prev_ = self.token_prev(self.token_index(dot))
-        if prev_ is None:  # something must be verry wrong here..
-            return None
-        return self._remove_quotes(prev_.value)
 
     def is_wildcard(self):
         """Return ``True`` if this identifier contains a wildcard."""
