@@ -433,7 +433,25 @@ class TokenList(Token):
         if next_ is None:  # invalid identifier, e.g. "a."
             return None
         return self._remove_quotes(next_.value)
+    def _get_first_name(self, idx=None, reverse=False, keywords=False):
+        """Returns the name of the first token with a name"""
 
+        if idx and not isinstance(idx, int):
+            idx = self.token_index(idx) + 1
+
+        tokens = self.tokens[idx:] if idx else self.tokens
+        tokens = reversed(tokens) if reverse else tokens
+        types = [T.Name, T.Wildcard, T.String.Symbol]
+
+        if keywords:
+            types.append(T.Keyword)
+
+        for tok in tokens:
+            if tok.ttype in types:
+                return self._remove_quotes(tok.value)
+            elif isinstance(tok, Identifier) or isinstance(tok, Function):
+                return tok.get_name()
+        return None
 
 class Statement(TokenList):
     """Represents a SQL statement."""
