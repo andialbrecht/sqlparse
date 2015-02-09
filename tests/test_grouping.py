@@ -146,7 +146,7 @@ class TestGrouping(TestCaseBase):
         s = 'select x from (select y from foo where bar = 1) z'
         p = sqlparse.parse(s)[0]
         self.ndiffAssertEqual(s, unicode(p))
-        self.assertTrue(isinstance(p.tokens[-3].tokens[-2], sql.Where))
+        self.assertTrue(isinstance(p.tokens[-1].tokens[0].tokens[-2], sql.Where))
 
     def test_typecast(self):
         s = 'select foo::integer from bar'
