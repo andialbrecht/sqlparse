@@ -390,21 +390,17 @@ class TokenList(Token):
 
     def get_alias(self):
         """Returns the alias for this identifier or ``None``."""
+
+        # "name AS alias"
         kw = self.token_next_match(0, T.Keyword, 'AS')
         if kw is not None:
-            alias = self.token_next(self.token_index(kw))
-            if alias is None:
-                return None
-        else:
-            next_ = self.token_next_by_instance(0, Identifier)
-            if next_ is None:
-                next_ = self.token_next_by_type(0, T.String.Symbol)
-                if next_ is None:
-                    return None
-            alias = next_
-        if isinstance(alias, Identifier):
-            return alias.get_name()
-        return self._remove_quotes(unicode(alias))
+            return self._get_first_name(kw, keywords=True)
+
+        # "name alias" or "complicated column expression alias"
+        if len(self.tokens) > 2:
+            return self._get_first_name(reverse=True)
+
+        return None
 
     def get_name(self):
         """Returns the name of this identifier.
