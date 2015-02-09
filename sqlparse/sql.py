@@ -418,6 +418,10 @@ class TokenList(Token):
         """Returns the real name (object name) of this identifier."""
         # a.b
         dot = self.token_next_match(0, T.Punctuation, '.')
+        if dot is not None:
+            return self._get_first_name(self.token_index(dot))
+
+        return self._get_first_name()
         if dot is None:
             next_ = self.token_next_by_type(0, T.Name)
             if next_ is not None:
