@@ -271,7 +271,11 @@ class StripWhitespaceFilter:
         [self.process(stack, sgroup, depth + 1)
          for sgroup in stmt.get_sublists()]
         self._stripws(stmt)
-        if depth == 0 and stmt.tokens[-1].is_whitespace():
+        if (
+            depth == 0
+            and stmt.tokens
+            and stmt.tokens[-1].is_whitespace()
+        ):
             stmt.tokens.pop(-1)
 
 
