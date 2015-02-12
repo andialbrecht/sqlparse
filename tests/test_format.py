@@ -61,6 +61,9 @@ class TestFormat(TestCaseBase):
         sql = 'select (/* sql starts here */ select 2)'
         res = sqlparse.format(sql, strip_comments=True)
         self.ndiffAssertEqual(res, 'select (select 2)')
+        sql = 'select (/* sql /* starts here */ select 2)'
+        res = sqlparse.format(sql, strip_comments=True)
+        self.ndiffAssertEqual(res, 'select (select 2)')
 
     def test_strip_ws(self):
         f = lambda sql: sqlparse.format(sql, strip_whitespace=True)

@@ -315,7 +315,13 @@ class Lexer(object):
                                     statestack.pop()
                                 elif state == '#push':
                                     statestack.append(statestack[-1])
-                                else:
+                                elif (
+                                    # Ugly hack - multiline-comments
+                                    # are not stackable
+                                    state != 'multiline-comments'
+                                    or not statestack
+                                    or statestack[-1] != 'multiline-comments'
+                                ):
                                     statestack.append(state)
                         elif isinstance(new_state, int):
                             # pop
