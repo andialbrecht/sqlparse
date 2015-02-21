@@ -15,11 +15,12 @@ class TestGrouping(TestCaseBase):
         s = 'select (select (x3) x2) and (y2) bar'
         parsed = sqlparse.parse(s)[0]
         self.ndiffAssertEqual(s, str(parsed))
-        self.assertEqual(len(parsed.tokens), 9)
+        self.assertEqual(len(parsed.tokens), 7)
         self.assert_(isinstance(parsed.tokens[2], sql.Parenthesis))
-        self.assert_(isinstance(parsed.tokens[-3], sql.Parenthesis))
-        self.assertEqual(len(parsed.tokens[2].tokens), 7)
-        self.assert_(isinstance(parsed.tokens[2].tokens[3], sql.Parenthesis))
+        self.assert_(isinstance(parsed.tokens[-1], sql.Identifier))
+        self.assertEqual(len(parsed.tokens[2].tokens), 5)
+        self.assert_(isinstance(parsed.tokens[2].tokens[3], sql.Identifier))
+        self.assert_(isinstance(parsed.tokens[2].tokens[3].tokens[0], sql.Parenthesis))
         self.assertEqual(len(parsed.tokens[2].tokens[3].tokens), 3)
 
     def test_comments(self):
@@ -145,7 +146,7 @@ class TestGrouping(TestCaseBase):
         s = 'select x from (select y from foo where bar = 1) z'
         p = sqlparse.parse(s)[0]
         self.ndiffAssertEqual(s, unicode(p))
-        self.assertTrue(isinstance(p.tokens[-3].tokens[-2], sql.Where))
+        self.assertTrue(isinstance(p.tokens[-1].tokens[0].tokens[-2], sql.Where))
 
     def test_typecast(self):
         s = 'select foo::integer from bar'
@@ -345,3 +346,43 @@ def test_nested_begin():
     assert inner.tokens[0].value == 'BEGIN'
     assert inner.tokens[-1].value == 'END'
     assert isinstance(inner, sql.Begin)
+
+
+def test_aliased_column_without_as():
+    p = sqlparse.parse('foo bar')[0].tokens
+    assert len(p) == 1
+    assert p[0].get_real_name() == 'foo'
+    assert p[0].get_alias() == 'bar'
+
+    p = sqlparse.parse('foo.bar baz')[0].tokens[0]
+    assert p.get_parent_name() == 'foo'
+    assert p.get_real_name() == 'bar'
+    assert p.get_alias() == 'baz'
+
+
+def test_qualified_function():
+    p = sqlparse.parse('foo()')[0].tokens[0]
+    assert p.get_parent_name() is None
+    assert p.get_real_name() == 'foo'
+
+    p = sqlparse.parse('foo.bar()')[0].tokens[0]
+    assert p.get_parent_name() == 'foo'
+    assert p.get_real_name() == 'bar'
+
+
+def test_aliased_function_without_as():
+    p = sqlparse.parse('foo() bar')[0].tokens[0]
+    assert p.get_parent_name() is None
+    assert p.get_real_name() == 'foo'
+    assert p.get_alias() == 'bar'
+
+    p = sqlparse.parse('foo.bar() baz')[0].tokens[0]
+    assert p.get_parent_name() == 'foo'
+    assert p.get_real_name() == 'bar'
+    assert p.get_alias() == 'baz'
+
+
+def test_aliased_literal_without_as():
+    p = sqlparse.parse('1 foo')[0].tokens
+    assert len(p) == 1
+    assert p[0].get_alias() == 'foo'
