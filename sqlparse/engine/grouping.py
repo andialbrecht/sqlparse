@@ -155,9 +155,10 @@ def group_identifier(tlist):
         # TODO: Usage of Wildcard token is ambivalent here.
         x = itertools.cycle((
             lambda y: (y.match(T.Punctuation, '.')
-                       or y.ttype is T.Operator
-                       or y.ttype is T.Wildcard
-                       or y.ttype is T.ArrayIndex),
+                       or y.ttype in (T.Operator,
+                                      T.Wildcard,
+                                      T.ArrayIndex,
+                                      T.Name)),
             lambda y: (y.ttype in (T.String.Symbol,
                                    T.Name,
                                    T.Wildcard,

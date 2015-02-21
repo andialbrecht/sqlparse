@@ -390,21 +390,17 @@ class TokenList(Token):
 
     def get_alias(self):
         """Returns the alias for this identifier or ``None``."""
+
+        # "name AS alias"
         kw = self.token_next_match(0, T.Keyword, 'AS')
         if kw is not None:
-            alias = self.token_next(self.token_index(kw))
-            if alias is None:
-                return None
-        else:
-            next_ = self.token_next_by_instance(0, Identifier)
-            if next_ is None:
-                next_ = self.token_next_by_type(0, T.String.Symbol)
-                if next_ is None:
-                    return None
-            alias = next_
-        if isinstance(alias, Identifier):
-            return alias.get_name()
-        return self._remove_quotes(unicode(alias))
+            return self._get_first_name(kw, keywords=True)
+
+        # "name alias" or "complicated column expression alias"
+        if len(self.tokens) > 2:
+            return self._get_first_name(reverse=True)
+
+        return None
 
     def get_name(self):
         """Returns the name of this identifier.
@@ -422,18 +418,43 @@ class TokenList(Token):
         """Returns the real name (object name) of this identifier."""
         # a.b
         dot = self.token_next_match(0, T.Punctuation, '.')
+        if dot is not None:
+            return self._get_first_name(self.token_index(dot))
+
+        return self._get_first_name()
+
+    def get_parent_name(self):
+        """Return name of the parent object if any.
+
+        A parent object is identified by the first occuring dot.
+        """
+        dot = self.token_next_match(0, T.Punctuation, '.')
         if dot is None:
-            next_ = self.token_next_by_type(0, T.Name)
-            if next_ is not None:
-                return self._remove_quotes(next_.value)
             return None
-
-        next_ = self.token_next_by_type(self.token_index(dot),
-                                        (T.Name, T.Wildcard, T.String.Symbol))
-        if next_ is None:  # invalid identifier, e.g. "a."
+        prev_ = self.token_prev(self.token_index(dot))
+        if prev_ is None:  # something must be verry wrong here..
             return None
-        return self._remove_quotes(next_.value)
+        return self._remove_quotes(prev_.value)
 
+    def _get_first_name(self, idx=None, reverse=False, keywords=False):
+        """Returns the name of the first token with a name"""
+
+        if idx and not isinstance(idx, int):
+            idx = self.token_index(idx) + 1
+
+        tokens = self.tokens[idx:] if idx else self.tokens
+        tokens = reversed(tokens) if reverse else tokens
+        types = [T.Name, T.Wildcard, T.String.Symbol]
+
+        if keywords:
+            types.append(T.Keyword)
+
+        for tok in tokens:
+            if tok.ttype in types:
+                return self._remove_quotes(tok.value)
+            elif isinstance(tok, Identifier) or isinstance(tok, Function):
+                return tok.get_name()
+        return None
 
 class Statement(TokenList):
     """Represents a SQL statement."""
@@ -466,19 +487,6 @@ class Identifier(TokenList):
     """
 
     __slots__ = ('value', 'ttype', 'tokens')
-
-    def get_parent_name(self):
-        """Return name of the parent object if any.
-
-        A parent object is identified by the first occuring dot.
-        """
-        dot = self.token_next_match(0, T.Punctuation, '.')
-        if dot is None:
-            return None
-        prev_ = self.token_prev(self.token_index(dot))
-        if prev_ is None:  # something must be verry wrong here..
-            return None
-        return self._remove_quotes(prev_.value)
 
     def is_wildcard(self):
         """Return ``True`` if this identifier contains a wildcard."""
