@@ -13,6 +13,7 @@ Enhancements
 * Group comments to parent object (issue128, issue160).
 * Add double precision builtin (issue169, by darikg).
 * Add support for square bracket array indexing (issue170, by darikg).
+* Improve grouping of aliased elements (issue171, by darikg).
 
 
 Release 0.1.14 (Nov 30, 2014)
