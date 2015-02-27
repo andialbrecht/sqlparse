@@ -6,6 +6,7 @@ Bug Fixes
   notation (issue153, by darikg).
 * Add missing SQL types (issue154, issue155, issue156, by jukebox).
 * Fix parsing of multi-line comments (issue172, by JacekPliszka).
+* Fix parsing of escaped backslashes (issue174, by caseyching).
 
 Enhancements
 * Improve formatting of HAVING statements.
