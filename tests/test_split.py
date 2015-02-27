@@ -22,6 +22,10 @@ class SQLSplitTest(TestCaseBase):
         self.ndiffAssertEqual(unicode(stmts[0]), self._sql1)
         self.ndiffAssertEqual(unicode(stmts[1]), sql2)
 
+    def test_split_backslash(self):
+        stmts = sqlparse.parse(r"select '\\'; select '\''; select '\\\'';")
+        self.assertEqual(len(stmts), 3)
+
     def test_create_function(self):
         sql = load_file('function.sql')
         stmts = sqlparse.parse(sql)
