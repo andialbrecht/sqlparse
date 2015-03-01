@@ -202,7 +202,7 @@ class Lexer(object):
             (r'CREATE(\s+OR\s+REPLACE)?\b', tokens.Keyword.DDL),
             (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
             (r'(?<=\.)[^\W\d_]\w*', tokens.Name),
-            (r'[^\W\d_]\w*', is_keyword),
+            (r'[^\W\d]\w*', is_keyword),
             (r'[;:()\[\],\.]', tokens.Punctuation),
             (r'[<>=~!]+', tokens.Operator.Comparison),
             (r'[+/@#%^&|`?^-]+', tokens.Operator),
@@ -292,7 +292,6 @@ class Lexer(object):
             for rexmatch, action, new_state in statetokens:
                 m = rexmatch(text, pos)
                 if m:
-                    # print rex.pattern
                     value = m.group()
                     if value in known_names:
                         yield pos, known_names[value], value

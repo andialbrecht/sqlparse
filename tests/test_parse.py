@@ -145,6 +145,15 @@ def test_quoted_identifier():
     assert t[2].get_real_name() == 'y'
 
 
+@pytest.mark.parametrize('name', [
+    'foo',
+    '_foo',
+])
+def test_valid_identifier_names(name):  # issue175
+    t = sqlparse.parse(name)[0].tokens
+    assert isinstance(t[0], sqlparse.sql.Identifier)
+
+
 def test_psql_quotation_marks():  # issue83
     # regression: make sure plain $$ work
     t = sqlparse.split("""
