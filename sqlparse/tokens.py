@@ -57,7 +57,6 @@ Literal = Token.Literal
 String = Literal.String
 Number = Literal.Number
 Punctuation = Token.Punctuation
-ArrayIndex = Punctuation.ArrayIndex
 Operator = Token.Operator
 Comparison = Operator.Comparison
 Wildcard = Token.Wildcard
