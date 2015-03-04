@@ -542,6 +542,15 @@ class Parenthesis(TokenList):
         return self.tokens[1:-1]
 
 
+class SquareBrackets(TokenList):
+    """Tokens between square brackets"""
+
+    __slots__ = ('value', 'ttype', 'tokens')
+
+    @property
+    def _groupable_tokens(self):
+        return self.tokens[1:-1]
+
 class Assignment(TokenList):
     """An assignment like 'var := val;'"""
     __slots__ = ('value', 'ttype', 'tokens')
