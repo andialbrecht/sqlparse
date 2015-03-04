@@ -51,19 +51,21 @@ def _group_left_right(tlist, ttype, value, cls,
                                            ttype, value)
 
 
+def _find_matching(idx, tlist, start_ttype, start_value, end_ttype, end_value):
+    depth = 1
+    for tok in tlist.tokens[idx:]:
+        if tok.match(start_ttype, start_value):
+            depth += 1
+        elif tok.match(end_ttype, end_value):
+            depth -= 1
+            if depth == 1:
+                return tok
+    return None
+
+
 def _group_matching(tlist, start_ttype, start_value, end_ttype, end_value,
                     cls, include_semicolon=False, recurse=False):
-    def _find_matching(i, tl, stt, sva, ett, eva):
-        depth = 1
-        for n in xrange(i, len(tl.tokens)):
-            t = tl.tokens[n]
-            if t.match(stt, sva):
-                depth += 1
-            elif t.match(ett, eva):
-                depth -= 1
-                if depth == 1:
-                    return t
-        return None
+
     [_group_matching(sgroup, start_ttype, start_value, end_ttype, end_value,
                      cls, include_semicolon) for sgroup in tlist.get_sublists()
      if recurse]
