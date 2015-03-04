@@ -215,7 +215,7 @@ def test_single_quotes_with_linebreaks():  # issue118
     assert p[0].ttype is T.String.Single
 
 
-def test_array_indexed_column():
+def test_sqlite_identifiers():
     # Make sure we still parse sqlite style escapes
     p = sqlparse.parse('[col1],[col2]')[0].tokens
     assert (len(p) == 1
@@ -227,39 +227,59 @@ def test_array_indexed_column():
     types = [tok.ttype for tok in p.flatten()]
     assert types == [T.Name, T.Operator, T.Name]
 
+
+def test_simple_1d_array_index():
     p = sqlparse.parse('col[1]')[0].tokens
-    assert (len(p) == 1
-        and tuple(p[0].get_array_indices()) == ('1',)
-        and p[0].get_name() == 'col')
+    assert len(p) == 1
+    assert p[0].get_name() == 'col'
+    indices = list(p[0].get_array_indices())
+    assert (len(indices) == 1  # 1-dimensional index
+            and len(indices[0]) == 1  # index is single token
+            and indices[0][0].value == '1')
 
-    p = sqlparse.parse('col[1][1:5] as mycol')[0].tokens
-    assert (len(p) == 1
-        and tuple(p[0].get_array_indices()) == ('1', '1:5')
-        and p[0].get_name() == 'mycol'
-        and p[0].get_real_name() == 'col')
 
-    p = sqlparse.parse('col[1][other_col]')[0].tokens
-    assert len(p) == 1 and tuple(p[0].get_array_indices()) == ('1', 'other_col')
+def test_2d_array_index():
+    p = sqlparse.parse('col[x][(y+1)*2]')[0].tokens
+    assert len(p) == 1
+    assert p[0].get_name() == 'col'
+    assert len(list(p[0].get_array_indices())) == 2  # 2-dimensional index
 
-    sql = 'SELECT col1, my_1d_array[2] as alias1, my_2d_array[2][5] as alias2'
-    p = sqlparse.parse(sql)[0].tokens
-    assert len(p) == 3 and isinstance(p[2], sqlparse.sql.IdentifierList)
-    ids = list(p[2].get_identifiers())
-    assert (ids[0].get_name() == 'col1'
-            and tuple(ids[0].get_array_indices()) == ()
-            and ids[1].get_name() == 'alias1'
-            and ids[1].get_real_name() == 'my_1d_array'
-            and tuple(ids[1].get_array_indices()) == ('2',)
-            and ids[2].get_name() == 'alias2'
-            and ids[2].get_real_name() == 'my_2d_array'
-            and tuple(ids[2].get_array_indices()) == ('2', '5'))
+
+def test_array_index_function_result():
+    p = sqlparse.parse('somefunc()[1]')[0].tokens
+    assert len(p) == 1
+    assert len(list(p[0].get_array_indices())) == 1
+
+
+def test_schema_qualified_array_index():
+    p = sqlparse.parse('schem.col[1]')[0].tokens
+    assert len(p) == 1
+    assert p[0].get_parent_name() == 'schem'
+    assert p[0].get_name() == 'col'
+    assert list(p[0].get_array_indices())[0][0].value == '1'
+
+
+def test_aliased_array_index():
+    p = sqlparse.parse('col[1] x')[0].tokens
+    assert len(p) == 1
+    assert p[0].get_alias() == 'x'
+    assert p[0].get_real_name() == 'col'
+    assert list(p[0].get_array_indices())[0][0].value == '1'
+
+
+def test_array_literal():
+    # See issue #176
+    p = sqlparse.parse('ARRAY[%s, %s]')[0]
+    assert len(p.tokens) == 2
+    assert len(list(p.flatten())) == 7
 
 
 def test_typed_array_definition():
     # array indices aren't grouped with builtins, but make sure we can extract
     # indentifer names
     p = sqlparse.parse('x int, y int[], z int')[0]
-    names = [x.get_name() for x in p.get_sublists()]
+    names = [x.get_name() for x in p.get_sublists()
+             if isinstance(x, sqlparse.sql.Identifier)]
     assert names == ['x', 'y', 'z']
 
 
