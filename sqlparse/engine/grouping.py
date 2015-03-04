@@ -159,16 +159,17 @@ def group_identifier(tlist):
             lambda y: (y.match(T.Punctuation, '.')
                        or y.ttype in (T.Operator,
                                       T.Wildcard,
-                                      T.ArrayIndex,
-                                      T.Name)),
+                                      T.Name)
+                       or isinstance(y, sql.SquareBrackets)),
             lambda y: (y.ttype in (T.String.Symbol,
                                    T.Name,
                                    T.Wildcard,
-                                   T.ArrayIndex,
                                    T.Literal.String.Single,
                                    T.Literal.Number.Integer,
                                    T.Literal.Number.Float)
-                       or isinstance(y, (sql.Parenthesis, sql.Function)))))
+                       or isinstance(y, (sql.Parenthesis,
+                                         sql.SquareBrackets,
+                                         sql.Function)))))
         for t in tl.tokens[i:]:
             # Don't take whitespaces into account.
             if t.ttype is T.Whitespace:
