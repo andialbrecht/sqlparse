@@ -511,11 +511,12 @@ class Identifier(TokenList):
         return ordering.value.upper()
 
     def get_array_indices(self):
-        """Returns an iterator of index expressions as strings"""
+        """Returns an iterator of index token lists"""
 
-        # Use [1:-1] index to discard the square brackets
-        return (tok.value[1:-1] for tok in self.tokens
-                if tok.ttype in T.ArrayIndex)
+        for tok in self.tokens:
+            if isinstance(tok, SquareBrackets):
+                # Use [1:-1] index to discard the square brackets
+                yield tok.tokens[1:-1]
 
 
 class IdentifierList(TokenList):
@@ -541,6 +542,15 @@ class Parenthesis(TokenList):
     def _groupable_tokens(self):
         return self.tokens[1:-1]
 
+
+class SquareBrackets(TokenList):
+    """Tokens between square brackets"""
+
+    __slots__ = ('value', 'ttype', 'tokens')
+
+    @property
+    def _groupable_tokens(self):
+        return self.tokens[1:-1]
 
 class Assignment(TokenList):
     """An assignment like 'var := val;'"""

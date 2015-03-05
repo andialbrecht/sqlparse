@@ -194,8 +194,10 @@ class Lexer(object):
             (r"'(''|\\\\|\\'|[^'])*'", tokens.String.Single),
             # not a real string literal in ANSI SQL:
             (r'(""|".*?[^\\]")', tokens.String.Symbol),
-            (r'(?<=[\w\]])(\[[^\]]*?\])', tokens.Punctuation.ArrayIndex),
-            (r'(\[[^\]]+\])', tokens.Name),
+            # sqlite names can be escaped with [square brackets]. left bracket
+            # cannot be preceded by word character or a right bracket --
+            # otherwise it's probably an array index
+            (r'(?<![\w\])])(\[[^\]]+\])', tokens.Name),
             (r'((LEFT\s+|RIGHT\s+|FULL\s+)?(INNER\s+|OUTER\s+|STRAIGHT\s+)?|(CROSS\s+|NATURAL\s+)?)?JOIN\b', tokens.Keyword),
             (r'END(\s+IF|\s+LOOP)?\b', tokens.Keyword),
             (r'NOT NULL\b', tokens.Keyword),
