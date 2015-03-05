@@ -14,7 +14,8 @@ Enhancements
 * Improve parsing of inline comments (issue163).
 * Group comments to parent object (issue128, issue160).
 * Add double precision builtin (issue169, by darikg).
-* Add support for square bracket array indexing (issue170, by darikg).
+* Add support for square bracket array indexing (issue170, issue176,
+  issue177 by darikg).
 * Improve grouping of aliased elements (issue167, by darikg).
 
 
