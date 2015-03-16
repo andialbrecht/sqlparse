@@ -17,6 +17,7 @@ Enhancements
 * Add support for square bracket array indexing (issue170, issue176,
   issue177 by darikg).
 * Improve grouping of aliased elements (issue167, by darikg).
+* Support comments starting with '#' character (issue178).
 
 
 Release 0.1.14 (Nov 30, 2014)

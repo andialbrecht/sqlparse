@@ -283,3 +283,13 @@ def test_typed_array_definition():
     assert names == ['x', 'y', 'z']
 
 
+@pytest.mark.parametrize('sql', [
+    'select 1 -- foo',
+    'select 1 # foo'  # see issue178
+])
+def test_single_line_comments(sql):
+    p = sqlparse.parse(sql)[0]
+    assert len(p.tokens) == 5
+    assert p.tokens[-1].ttype == T.Comment.Single
+
+
