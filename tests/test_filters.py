@@ -5,7 +5,12 @@ Created on 24/03/2012
 '''
 import unittest
 
-from sqlparse.filters import StripWhitespace, Tokens2Unicode
+from sqlparse import sql
+from sqlparse.engine import grouping
+from sqlparse.engine.filter import StatementFilter
+from sqlparse.filters import MysqlCreateStatementFilter
+from sqlparse.filters import StripWhitespace
+from sqlparse.filters import Tokens2Unicode
 from sqlparse.lexer import tokenize
 
 
@@ -70,7 +75,233 @@ LIMIT 1"""
             'st_size,COALESCE(files.size,0)AS size FROM dir_entries LEFT JOIN'
             ' files ON dir_entries.inode==files.inode LEFT JOIN links ON '
             'dir_entries.inode==links.child_entry WHERE dir_entries.inode=='
-            ':inode GROUP BY dir_entries.inode LIMIT 1')
+            ':inode GROUP BY dir_entries.inode LIMIT 1'
+        )
+
+
+class TestMysqlCreateStatementFilter(unittest.TestCase):
+
+    create_statement = """
+    CREATE TABLE `abc` (
+      `id` int(11) NOT NULL auto_increment,
+      `name` varchar(64) collate utf8_unicode_ci default NULL,
+      `address` varchar(128) collate utf8_unicode_ci default NULL,
+      `related_id` int(11) NOT NULL default '0',
+      `currency` double(8,2) default NULL,
+      `time_created` int(11) NOT NULL default '0',
+      `age` int(10) unsigned default NULL,
+      `type` tinyint(3) unsigned default NULL,
+      PRIMARY KEY  (`id`),
+      KEY `name_address` (`name`,`address`),
+      KEY `related_id` (`related_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+    """
+
+    create_statement_without_column_type_length = """
+    CREATE TABLE `abc` (
+      `id` int NOT NULL auto_increment,
+      `age` int default NULL,
+      `name` varchar collate utf8_unicode_ci default NULL,
+      PRIMARY KEY  (`id`),
+      KEY `age_name` (`age`,`name`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+    """
+
+    create_statement_without_column_attributes = """
+    CREATE TABLE `abc` (
+      `id` int(11),
+      `age` int(11),
+      `name` varchar(64),
+      PRIMARY KEY  (`id`),
+      KEY `age_name` (`age`,`name`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+    """
+
+    def _pre_process_sql(self, sql):
+        stream = tokenize(sql)
+        stream = StatementFilter().process(None, stream)
+        statements = [statement for statement in stream]
+        self.assertEqual(len(statements), 1)
+        statement = statements[0]
+        grouping.group_brackets(statement)
+        return statement
+
+    def test_complex_create_statement(self):
+        statement = self._pre_process_sql(self.create_statement)
+        stmt = MysqlCreateStatementFilter.process(statement)
+        assert isinstance(stmt, sql.CreateTableStatement)
+        table_name = stmt.get_table_name()
+        self.assertEqual(table_name.value, u'abc')
+        column_definitions = stmt.get_column_definitions()
+        self.assertEqual(len(column_definitions), 8)
+        self._assert_column_definition(
+            column_definition_token=column_definitions[0],
+            column_name=u'id',
+            column_type=u'int',
+            column_type_length=(11, None),
+            column_type_attributes=[],
+            column_attributes=[(u'not null',), (u'auto_increment',)]
+        )
+        self._assert_column_definition(
+            column_definition_token=column_definitions[1],
+            column_name=u'name',
+            column_type=u'varchar',
+            column_type_length=(64, None),
+            column_type_attributes=[(u'collate', u'utf8_unicode_ci')],
+            column_attributes=[(u'default', u'null')]
+        )
+        self._assert_column_definition(
+            column_definition_token=column_definitions[2],
+            column_name=u'address',
+            column_type=u'varchar',
+            column_type_length=(128, None),
+            column_type_attributes=[(u'collate', u'utf8_unicode_ci')],
+            column_attributes=[(u'default', u'null')]
+        )
+        self._assert_column_definition(
+            column_definition_token=column_definitions[3],
+            column_name=u'related_id',
+            column_type=u'int',
+            column_type_length=(11, None),
+            column_type_attributes=[],
+            column_attributes=[(u'not null',), (u'default', u'0',)]
+        )
+        self._assert_column_definition(
+            column_definition_token=column_definitions[4],
+            column_name=u'currency',
+            column_type=u'double',
+            column_type_length=(8, 2),
+            column_type_attributes=[],
+            column_attributes=[(u'default', u'null')]
+        )
+        self._assert_column_definition(
+            column_definition_token=column_definitions[5],
+            column_name=u'time_created',
+            column_type=u'int',
+            column_type_length=(11, None),
+            column_type_attributes=[],
+            column_attributes=[(u'not null',), (u'default', u'0')]
+        )
+        self._assert_column_definition(
+            column_definition_token=column_definitions[6],
+            column_name=u'age',
+            column_type=u'int',
+            column_type_length=(10, None),
+            column_type_attributes=[(u'unsigned',)],
+            column_attributes=[(u'default', u'null')]
+        )
+        self._assert_column_definition(
+            column_definition_token=column_definitions[7],
+            column_name=u'type',
+            column_type=u'tinyint',
+            column_type_length=(3, None),
+            column_type_attributes=[(u'unsigned',)],
+            column_attributes=[(u'default', u'null')]
+        )
+
+    def test_create_statement_without_column_type_length(self):
+        statement = self._pre_process_sql(
+            self.create_statement_without_column_type_length
+        )
+        stmt = MysqlCreateStatementFilter.process(statement)
+        assert isinstance(stmt, sql.CreateTableStatement)
+        table_name = stmt.get_table_name()
+        self.assertEqual(table_name.value, u'abc')
+        column_definitions = stmt.get_column_definitions()
+        self.assertEqual(len(column_definitions), 3)
+        self._assert_column_definition(
+            column_definition_token=column_definitions[0],
+            column_name=u'id',
+            column_type=u'int',
+            column_type_length=None,
+            column_type_attributes=[],
+            column_attributes=[(u'not null',), (u'auto_increment',)]
+        )
+        self._assert_column_definition(
+            column_definition_token=column_definitions[1],
+            column_name=u'age',
+            column_type=u'int',
+            column_type_length=None,
+            column_type_attributes=[],
+            column_attributes=[(u'default', u'null')]
+        )
+        self._assert_column_definition(
+            column_definition_token=column_definitions[2],
+            column_name=u'name',
+            column_type=u'varchar',
+            column_type_length=None,
+            column_type_attributes=[(u'collate', u'utf8_unicode_ci')],
+            column_attributes=[(u'default', u'null')]
+        )
+
+    def test_create_statement_without_column_attributes(self):
+        statement = self._pre_process_sql(
+            self.create_statement_without_column_attributes
+        )
+        stmt = MysqlCreateStatementFilter.process(statement)
+        assert isinstance(stmt, sql.CreateTableStatement)
+        table_name = stmt.get_table_name()
+        self.assertEqual(table_name.value, u'abc')
+        column_definitions = stmt.get_column_definitions()
+        self.assertEqual(len(column_definitions), 3)
+        self._assert_column_definition(
+            column_definition_token=column_definitions[0],
+            column_name=u'id',
+            column_type=u'int',
+            column_type_length=(11, None),
+            column_type_attributes=[],
+            column_attributes=[]
+        )
+        self._assert_column_definition(
+            column_definition_token=column_definitions[1],
+            column_name=u'age',
+            column_type=u'int',
+            column_type_length=(11, None),
+            column_type_attributes=[],
+            column_attributes=[]
+        )
+        self._assert_column_definition(
+            column_definition_token=column_definitions[2],
+            column_name=u'name',
+            column_type=u'varchar',
+            column_type_length=(64, None),
+            column_type_attributes=[],
+            column_attributes=[]
+        )
+
+    def _assert_column_definition(
+        self,
+        column_definition_token,
+        column_name,
+        column_type,
+        column_type_length,
+        column_type_attributes,
+        column_attributes
+    ):
+        assert isinstance(
+            column_definition_token,
+            sql.ColumnDefinition
+        )
+        self.assertEqual(
+            column_definition_token.get_column_name(),
+            column_name
+        )
+        self.assertEqual(
+            column_definition_token.get_column_type(),
+            column_type
+        )
+        self.assertEqual(
+            column_definition_token.get_column_type_length(),
+            column_type_length
+        )
+        self.assertEqual(
+            column_definition_token.get_column_type_attributes(),
+            column_type_attributes
+        )
+        self.assertEqual(
+            column_definition_token.get_column_attributes(),
+            column_attributes
+        )
 
 
 if __name__ == "__main__":

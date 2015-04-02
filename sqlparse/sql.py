@@ -4,6 +4,7 @@
 
 import re
 import sys
+from collections import namedtuple
 
 from sqlparse import tokens as T
 
@@ -659,6 +660,113 @@ class Function(TokenList):
                 t.ttype in T.Literal:
                 return [t,]
         return []
+
+
+class CreateTableStatement(Statement):
+
+    __slots__ = ('value', 'ttype', 'tokens')
+
+    def get_table_name(self):
+        return self.token_next_by_instance(0, TableName)
+
+    def get_column_definitions(self):
+        columns_definition = self.token_next_by_instance(0, ColumnsDefinition)
+        return columns_definition.get_column_definitions()
+
+
+class TableName(Token):
+
+    __slots__ = ('value', 'ttype')
+
+    def get_table_name(self):
+        return self.value
+
+
+class ColumnsDefinition(TokenList):
+
+    __slots__ = ('value', 'ttype', 'tokens')
+
+    def get_column_definitions(self):
+        return self.tokens
+
+
+ColumnTypeAttributeTuple = namedtuple('ColumnTypeAttributeTuple', 'attribute_name attribute_value')
+
+
+class ColumnDefinition(TokenList):
+
+    __slots__ = ('value', 'ttype', 'tokens')
+
+    def get_column_name(self):
+        column_name_token = self.token_next_by_instance(0, ColumnName)
+        return column_name_token.value
+
+    def get_column_type(self):
+        column_type_token = self.token_next_by_instance(0, ColumnType)
+        return column_type_token.value
+
+    def get_column_type_length(self):
+        column_type_length_token = self.token_next_by_instance(
+            0, ColumnTypeLength
+        )
+        return column_type_length_token.value
+
+    def get_column_type_attributes(self):
+        for token in self.tokens:
+            if isinstance(token, ColumnTypeAttributes):
+                return token.get_column_type_attributes()
+        return None
+
+    def get_column_attributes(self):
+        for token in self.tokens:
+            if isinstance(token, ColumnAttributes):
+                return token.get_column_attributes()
+        return None
+
+
+class ColumnName(Token):
+
+    __slots__ = ('value', 'ttype')
+
+
+class ColumnAttributes(TokenList):
+
+    __slots__ = ('value', 'ttype', 'tokens')
+
+    def get_column_attributes(self):
+        return [
+            attribute_token.get_attribute()
+            for attribute_token in self.tokens
+        ]
+
+
+class Attribute(TokenList):
+
+    __slots__ = ('value', 'ttype', 'tokens')
+
+    def get_attribute(self):
+        return tuple(token.value for token in self.tokens)
+
+
+class ColumnType(Token):
+
+    __slots__ = ('value', 'ttype')
+
+
+class ColumnTypeLength(Token):
+
+    __slots__ = ('value', 'ttype')
+
+
+class ColumnTypeAttributes(TokenList):
+
+    __slots__ = ('value', 'ttype', 'tokens')
+
+    def get_column_type_attributes(self):
+        return [
+            attribute_token.get_attribute()
+            for attribute_token in self.tokens
+        ]
 
 
 class Begin(TokenList):

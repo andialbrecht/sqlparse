@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import re
+from collections import deque
+from collections import namedtuple
 
 from os.path import abspath, join
 
 from sqlparse import sql, tokens as T
 from sqlparse.engine import FilterStack
-from sqlparse.lexer import tokenize
+from sqlparse.exceptions import SQLParseError
 from sqlparse.pipeline import Pipeline
 from sqlparse.tokens import (Comment, Comparison, Keyword, Name, Punctuation,
                              String, Whitespace)
@@ -559,6 +561,225 @@ class ColumnsSelect:
                 if token_type == Name or token_type == Keyword:
                     yield value
                     mode = 1
+
+
+ColumnAttributeProperty = namedtuple('ColumnAttributeProperty', 'has_value is_type_attribute')
+
+
+class MysqlCreateStatementFilter(object):
+
+    @classmethod
+    def process(cls, statement):
+        tokens = []
+        create_table_statement = sql.CreateTableStatement(tokens=tokens)
+        table_name = cls._get_table_name(statement)
+        tokens.append(sql.TableName(value=table_name, ttype=T.Name))
+        tokens.append(cls._get_columns(statement))
+        return create_table_statement
+
+    @classmethod
+    def _get_table_name(cls, statement):
+        # 1st Name type is the table name
+        table_name_token = statement.token_next_by_type(0, T.Name)
+        if not table_name_token:
+            raise SQLParseError('Cannot find table name.')
+        return cls._clean_quote(table_name_token.value)
+
+    @classmethod
+    def _clean_quote(cls, text):
+        return text.strip('"`\'')
+
+    @classmethod
+    def _get_columns(cls, statement):
+        # Get the Parenthesis which contains column definitions
+        parenthesis_token = statement.token_next_by_instance(0, sql.Parenthesis)
+        if not parenthesis_token:
+            raise SQLParseError('Cannot find column definitions')
+
+        columns_tokens = parenthesis_token.tokens
+        # Remove the 1st (left parenthesis) and the last token (right parenthesis)
+        columns_tokens = columns_tokens[1:-1]
+        trimmed_columns_tokens = cls._trim_tokens(columns_tokens)
+
+        columns_definition_children_tokens = []
+        columns_definition = sql.ColumnsDefinition(columns_definition_children_tokens)
+
+        for token_list in cls._split_tokens_by_comma(trimmed_columns_tokens):
+            if cls._is_column_definition(token_list):
+                column_definition_token = cls._create_column_definition(token_list)
+                columns_definition_children_tokens.append(column_definition_token)
+        return columns_definition
+
+    @classmethod
+    def _is_column_definition(cls, tokens):
+        # The type of the first token should be Name if the tokens is
+        # for column definition.
+        return tokens[0].ttype is T.Name
+
+    @classmethod
+    def _trim_tokens(cls, token_list):
+        new_token_list = []
+        for token in token_list:
+            if token.ttype is T.Text.Whitespace \
+                    or token.ttype is T.Text.Whitespace.Newline:
+                continue
+            new_token_list.append(token)
+        return new_token_list
+
+    @classmethod
+    def _split_tokens_by_comma(cls, tokens):
+        split_token_lists = []
+        token_list = []
+        for token in tokens:
+            if not token.match(T.Punctuation, ','):
+                token_list.append(token)
+            else:
+                split_token_lists.append(token_list)
+                token_list = []
+        return split_token_lists
+
+    @classmethod
+    def _process_parentheses(cls, token, parentheses):
+        if token.match(T.Punctuation, '('):
+            parentheses.append(token)
+            return True
+        elif token.match(T.Punctuation, ')'):
+            parentheses.pop()
+            return True
+        return False
+
+    @classmethod
+    def _create_column_definition(cls, tokens):
+        # Because we are going to process the same token list in multiple
+        # functions in order. So use deque to store tokens instead
+        # of manually tracking its index. After we processed one token, we
+        # can just pop it out.
+        token_queue = deque(tokens)
+        column_definition_children_tokens = []
+        column_definition = sql.ColumnDefinition(tokens=column_definition_children_tokens)
+        column_definition_children_tokens.append(cls._create_column_name(token_queue))
+        column_definition_children_tokens.append(cls._create_column_type(token_queue))
+        column_definition_children_tokens.append(cls._create_column_type_length(token_queue))
+        column_definition_children_tokens.append(cls._create_column_type_attributes(token_queue))
+        column_definition_children_tokens.append(cls._create_column_attributes(token_queue))
+        return column_definition
+
+    @classmethod
+    def _create_column_name(cls, token_queue):
+        # The first token should be the column name.
+        return sql.ColumnName(
+            value=cls._clean_quote(token_queue.popleft().value),
+            ttype=T.Name
+        )
+
+    @classmethod
+    def _create_column_type(cls, token_queue):
+        return sql.ColumnType(value=token_queue.popleft().value, ttype=T.Keyword)
+
+    @classmethod
+    def _create_column_type_length(cls, token_queue):
+        # It returns a tuple of two integers.
+        # For example: (255, None) for varchar or char
+        # (10, 2) for decimal or numeric
+        # The first parenthesis token defines the length of the type.
+        if isinstance(token_queue[0], sql.Parenthesis):
+            parenthesis_token = token_queue.popleft()
+            parenthesis_children_tokens = cls._trim_tokens(parenthesis_token.tokens)
+            precision = None
+            scale = None
+            for child_token in parenthesis_children_tokens:
+                if child_token.ttype is T.Literal.Number.Integer:
+                    if precision is None:
+                        precision = int(child_token.value)
+                    elif scale is None:
+                        scale = int(child_token.value)
+                    else:
+                        raise Exception('Error when parsing column length.')
+            return sql.ColumnTypeLength(value=(precision, scale), ttype=None)
+        return sql.ColumnTypeLength(value=None, ttype=None)
+
+    @classmethod
+    def _create_column_attributes(cls, token_queue):
+        attribute_name_to_has_value_map = {
+            u'not null': False,
+            u'null': False,
+            u'default': True,
+            u'auto_increment': False,
+            u'comment': True
+        }
+        column_attributes_children_tokens = cls._get_attributes(
+            attribute_name_to_has_value_map,
+            token_queue
+        )
+        return sql.ColumnAttributes(tokens=column_attributes_children_tokens)
+
+
+    @classmethod
+    def _create_column_type_attributes(cls, token_queue):
+        attribute_name_to_has_value_map = {
+            u'unsigned': False,
+            u'zerofill': False,
+            u'binary': False,
+            u'collate': True
+        }
+        column_type_attributes_children_tokens = cls._get_attributes(
+            attribute_name_to_has_value_map,
+            token_queue
+        )
+        return sql.ColumnTypeAttributes(tokens=column_type_attributes_children_tokens)
+
+
+    @classmethod
+    def _get_attributes(cls, attribute_name_to_has_value_map, token_queue):
+        """It only supports the case in which one keyword is contained in one
+        token currently. If one keyword is contained in more than one continuous
+        tokens, it will be discarded.
+        """
+        # With one exception: `character set`. sqlparse considers `character` as
+        # one of the types and marks it as `Builtin` instead of `Keyword`
+        # (TODO: add support for this)
+
+        attributes = []
+        attribute_names = attribute_name_to_has_value_map.keys()
+        attribute_name = None
+        while len(token_queue) > 0:
+            token = token_queue.popleft()
+            if attribute_name is None:
+                token_value = token.value.lower()
+                if token_value in attribute_names:
+                    attribute_name = token_value
+                    if not attribute_name_to_has_value_map.get(attribute_name):
+                        attributes.append(
+                            sql.Attribute(
+                                tokens=[
+                                    sql.Token(
+                                        value=attribute_name,
+                                        ttype=T.Keyword
+                                    )
+                                ]
+                            )
+                        )
+                        attribute_name = None
+                else:
+                    token_queue.appendleft(token)
+                    return attributes
+            else:
+                attributes.append(
+                    sql.Attribute(
+                        tokens=[
+                            sql.Token(
+                                value=attribute_name,
+                                ttype=T.Keyword
+                            ),
+                            sql.Token(
+                                value=cls._clean_quote(token.value.lower()),
+                                ttype=T.String
+                            )
+                        ]
+                    )
+                )
+                attribute_name = None
+        return attributes
 
 
 # ---------------------------

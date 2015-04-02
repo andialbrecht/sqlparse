@@ -13,6 +13,8 @@ __version__ = '0.1.14'
 from sqlparse import engine
 from sqlparse import filters
 from sqlparse import formatter
+from sqlparse import lexer
+from sqlparse.engine import grouping
 
 # Deprecated in 0.1.5. Will be removed in 0.2.0
 from sqlparse.exceptions import SQLParseError
@@ -38,6 +40,22 @@ def parsestream(stream, encoding=None):
     stack = engine.FilterStack()
     stack.full_analyze()
     return stack.run(stream, encoding)
+
+
+def parse_mysql_create_statements(sql, encoding=None):
+    """Parses mysql statements from mysql create table statement.
+
+    :param sql: mysql create table statement.
+    :param encoding: The encoding of the stream contents (optional).
+    :returns: A generator of :class:`~sqlparse.sql.CreateTableStatement` instances.
+    """
+    stream = lexer.tokenize(sql, encoding=encoding)
+    splitter = StatementFilter()
+    stream = splitter.process(None, stream)
+    for stmt in stream:
+        grouping.group_brackets(stmt)
+        stmt = filters.MysqlCreateStatementFilter.process(stmt)
+        yield stmt
 
 
 def format(sql, **options):
