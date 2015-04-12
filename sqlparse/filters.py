@@ -347,6 +347,7 @@ class ReindentFilter:
                 nl = self.nl()
                 added.add(nl)
                 tlist.insert_before(token, nl)
+                offset += 1
             token = _next_token(tlist.token_index(nl) + offset)
 
     def _split_statements(self, tlist):
