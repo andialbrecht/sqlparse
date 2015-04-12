@@ -8,6 +8,7 @@ Bug Fixes
 * Fix parsing of multi-line comments (issue172, by JacekPliszka).
 * Fix parsing of escaped backslashes (issue174, by caseyching).
 * Fix parsing of identifiers starting with underscore (issue175).
+* Fix misinterpretation of IN keyword (issue183).
 
 Enhancements
 * Improve formatting of HAVING statements.

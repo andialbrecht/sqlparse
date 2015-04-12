@@ -186,6 +186,9 @@ class Lexer(object):
             # see https://github.com/andialbrecht/sqlparse/pull/64
             (r'VALUES', tokens.Keyword),
             (r'@[^\W\d_]\w+', tokens.Name),
+            # IN is special, it may be followed by a parenthesis, but
+            # is never a functino, see issue183
+            (r'in\b(?=[ (])?', tokens.Keyword),
             (r'[^\W\d_]\w*(?=[.(])', tokens.Name),  # see issue39
             (r'[-]?0x[0-9a-fA-F]+', tokens.Number.Hexadecimal),
             (r'[-]?[0-9]*(\.[0-9]+)?[eE][-]?[0-9]+', tokens.Number.Float),
