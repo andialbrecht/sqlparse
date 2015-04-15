@@ -1,5 +1,5 @@
-Development Version
--------------------
+Release 0.1.15 (Apr 15, 2015)
+-----------------------------
 
 Bug Fixes
 * Fix a regression for identifiers with square bracktes
