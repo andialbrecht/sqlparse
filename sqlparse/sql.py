@@ -397,7 +397,8 @@ class TokenList(Token):
             return self._get_first_name(kw, keywords=True)
 
         # "name alias" or "complicated column expression alias"
-        if len(self.tokens) > 2:
+        if len(self.tokens) > 2 \
+           and self.token_next_by_type(0, T.Whitespace) is not None:
             return self._get_first_name(reverse=True)
 
         return None

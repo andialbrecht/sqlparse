@@ -186,6 +186,11 @@ class TestGrouping(TestCaseBase):
         self.assertEqual(len(p.tokens), 1)
         self.assertEqual(p.tokens[0].get_alias(), 'foo')
 
+    def test_alias_returns_none(self):  # see issue185
+        p = sqlparse.parse('foo.bar')[0]
+        self.assertEqual(len(p.tokens), 1)
+        self.assertEqual(p.tokens[0].get_alias(), None)
+
     def test_idlist_function(self):  # see issue10 too
         p = sqlparse.parse('foo(1) x, bar')[0]
         self.assert_(isinstance(p.tokens[0], sql.IdentifierList))
