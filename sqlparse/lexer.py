@@ -252,7 +252,7 @@ class Lexer(object):
         `text`. If `unfiltered` is set to `True`, the filtering mechanism
         is bypassed even if filters are defined.
 
-        Also pre_processes the text, i.e. expand tabs and strip it if
+        Also preprocess the text, i.e. expand tabs and strip it if
         wanted and applies registered filters.
         """
         if isinstance(text, basestring):
