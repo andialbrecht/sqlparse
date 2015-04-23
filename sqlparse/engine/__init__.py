@@ -15,10 +15,38 @@ Filter = object
 
 class FilterStack(object):
 
-    def __init__(self):
-        self.preprocess = []
-        self.stmtprocess = []
-        self.postprocess = []
+    default_grouping_funcs = [
+        grouping.group_comments,
+        grouping.group_brackets,
+        grouping.group_functions,
+        grouping.group_where,
+        grouping.group_case,
+        grouping.group_identifier,
+        grouping.group_order,
+        grouping.group_typecasts,
+        grouping.group_as,
+        grouping.group_aliased,
+        grouping.group_assignment,
+        grouping.group_comparison,
+        grouping.align_comments,
+        grouping.group_identifier_list,
+        grouping.group_if,
+        grouping.group_for,
+        grouping.group_foreach,
+        grouping.group_begin
+    ]
+
+    def __init__(
+        self,
+        pre_processes=[],
+        stmt_processes=[],
+        post_processes=[],
+        grouping_funcs=default_grouping_funcs
+    ):
+        self.pre_processes = pre_processes
+        self.stmt_processes = stmt_processes
+        self.post_processes = post_processes
+        self.grouping_funcs = grouping_funcs
         self.split_statements = False
         self._grouping = False
 
@@ -39,11 +67,11 @@ class FilterStack(object):
     def run(self, sql, encoding=None):
         stream = lexer.tokenize(sql, encoding)
         # Process token stream
-        if self.preprocess:
-            for filter_ in self.preprocess:
+        if self.pre_processes:
+            for filter_ in self.pre_processes:
                 stream = filter_.process(self, stream)
 
-        if (self.stmtprocess or self.postprocess or self.split_statements
+        if (self.stmt_processes or self.post_processes or self.split_statements
             or self._grouping):
             splitter = StatementFilter()
             stream = splitter.process(self, stream)
@@ -52,27 +80,27 @@ class FilterStack(object):
 
             def _group(stream):
                 for stmt in stream:
-                    grouping.group(stmt)
+                    grouping.group(stmt, self.grouping_funcs)
                     yield stmt
             stream = _group(stream)
 
-        if self.stmtprocess:
+        if self.stmt_processes:
 
             def _run1(stream):
                 ret = []
                 for stmt in stream:
-                    for filter_ in self.stmtprocess:
+                    for filter_ in self.stmt_processes:
                         filter_.process(self, stmt)
                     ret.append(stmt)
                 return ret
             stream = _run1(stream)
 
-        if self.postprocess:
+        if self.post_processes:
 
             def _run2(stream):
                 for stmt in stream:
                     stmt.tokens = list(self._flatten(stmt.tokens))
-                    for filter_ in self.postprocess:
+                    for filter_ in self.post_processes:
                         stmt = filter_.process(self, stmt)
                     yield stmt
             stream = _run2(stream)

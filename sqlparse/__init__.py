@@ -20,42 +20,65 @@ from sqlparse.engine import grouping
 from sqlparse.exceptions import SQLParseError
 
 
-def parse(sql, encoding=None):
+def parse(
+    sql,
+    encoding=None,
+    pre_processes=[],
+    stmt_processes=[],
+    post_processes=[],
+    grouping_funcs=[]
+):
     """Parse sql and return a list of statements.
 
     :param sql: A string containting one or more SQL statements.
     :param encoding: The encoding of the statement (optional).
+    :param pre_processes: pre_processes you want to run against parsed statements (optional).
+    :param stmt_processes: stmt_processes you want to run against parsed statements (optional).
+    :param post_processes: post_processes you want to run against parsed statements (optional).
+    :param grouping_funcs: grouping_funcs you want to run against parsed statements (optional).
     :returns: A tuple of :class:`~sqlparse.sql.Statement` instances.
     """
-    return tuple(parsestream(sql, encoding))
+    stream = parse_stream(
+        sql,
+        encoding,
+        pre_processes=pre_processes,
+        stmt_processes=stmt_processes,
+        post_processes=post_processes,
+        grouping_funcs=grouping_funcs
+    )
+    # for statement in stream:
+    #     if statement.get_type() == 'CREATE':
+
+    return tuple(stream)
 
 
-def parsestream(stream, encoding=None):
+def parse_stream(
+    stream,
+    encoding=None,
+    pre_processes=[],
+    stmt_processes=[],
+    post_processes=[],
+    grouping_funcs=[]
+):
     """Parses sql statements from file-like object.
 
     :param stream: A file-like object.
     :param encoding: The encoding of the stream contents (optional).
+    :param pre_processes: pre_processes you want to run against parsed statements (optional).
+    :param stmt_processes: stmt_processes you want to run against parsed statements (optional).
+    :param post_processes: post_processes you want to run against parsed statements (optional).
+    :param grouping_funcs: grouping_funcs you want to run against parsed statements (optional).
     :returns: A generator of :class:`~sqlparse.sql.Statement` instances.
     """
-    stack = engine.FilterStack()
+    stack = engine.FilterStack(
+        pre_processes=pre_processes,
+        stmt_processes=stmt_processes,
+        post_processes=post_processes
+    )
     stack.full_analyze()
+    if grouping_funcs:
+        stack.grouping_funcs = grouping_funcs
     return stack.run(stream, encoding)
-
-
-def parse_mysql_create_statements(sql, encoding=None):
-    """Parses mysql statements from mysql create table statement.
-
-    :param sql: mysql create table statement.
-    :param encoding: The encoding of the stream contents (optional).
-    :returns: A generator of :class:`~sqlparse.sql.CreateTableStatement` instances.
-    """
-    stream = lexer.tokenize(sql, encoding=encoding)
-    splitter = StatementFilter()
-    stream = splitter.process(None, stream)
-    for stmt in stream:
-        grouping.group_brackets(stmt)
-        stmt = filters.MysqlCreateStatementFilter.process(stmt)
-        yield stmt
 
 
 def format(sql, **options):

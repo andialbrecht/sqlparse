@@ -662,32 +662,14 @@ class Function(TokenList):
         return []
 
 
-class CreateTableStatement(Statement):
-
-    __slots__ = ('value', 'ttype', 'tokens')
-
-    def get_table_name(self):
-        return self.token_next_by_instance(0, TableName)
-
-    def get_column_definitions(self):
-        columns_definition = self.token_next_by_instance(0, ColumnsDefinition)
-        return columns_definition.get_column_definitions()
-
-
 class TableName(Token):
 
     __slots__ = ('value', 'ttype')
-
-    def get_table_name(self):
-        return self.value
 
 
 class ColumnsDefinition(TokenList):
 
     __slots__ = ('value', 'ttype', 'tokens')
-
-    def get_column_definitions(self):
-        return self.tokens
 
 
 ColumnTypeAttributeTuple = namedtuple('ColumnTypeAttributeTuple', 'attribute_name attribute_value')

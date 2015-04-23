@@ -182,7 +182,7 @@ class IncludeStatement:
                             yield Comment, u'-- ValueError: %s\n' % err
 
                         stack = FilterStack()
-                        stack.preprocess.append(filtr)
+                        stack.pre_processes.append(filtr)
 
                         for tv in stack.run(raw_sql):
                             yield tv
@@ -569,13 +569,16 @@ ColumnAttributeProperty = namedtuple('ColumnAttributeProperty', 'has_value is_ty
 class MysqlCreateStatementFilter(object):
 
     @classmethod
-    def process(cls, statement):
+    def process(cls, stack, statement):
+        if statement.get_type() != 'CREATE':
+            return
         tokens = []
-        create_table_statement = sql.CreateTableStatement(tokens=tokens)
+        tokens.append(statement.token_first())
         table_name = cls._get_table_name(statement)
         tokens.append(sql.TableName(value=table_name, ttype=T.Name))
         tokens.append(cls._get_columns(statement))
-        return create_table_statement
+        statement.tokens = tokens
+        return
 
     @classmethod
     def _get_table_name(cls, statement):
@@ -584,6 +587,7 @@ class MysqlCreateStatementFilter(object):
         if not table_name_token:
             raise SQLParseError('Cannot find table name.')
         return cls._clean_quote(table_name_token.value)
+
 
     @classmethod
     def _clean_quote(cls, text):
@@ -783,7 +787,7 @@ class MysqlCreateStatementFilter(object):
 
 
 # ---------------------------
-# postprocess
+# post_processes
 
 class SerializerUnicode:
 

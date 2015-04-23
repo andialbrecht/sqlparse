@@ -5,9 +5,9 @@ Created on 24/03/2012
 '''
 import unittest
 
+import sqlparse
 from sqlparse import sql
 from sqlparse.engine import grouping
-from sqlparse.engine.filter import StatementFilter
 from sqlparse.filters import MysqlCreateStatementFilter
 from sqlparse.filters import StripWhitespace
 from sqlparse.filters import Tokens2Unicode
@@ -118,21 +118,20 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
     """
 
     def _pre_process_sql(self, sql):
-        stream = tokenize(sql)
-        stream = StatementFilter().process(None, stream)
-        statements = [statement for statement in stream]
-        self.assertEqual(len(statements), 1)
-        statement = statements[0]
-        grouping.group_brackets(statement)
-        return statement
+        stream = sqlparse.parse(
+            sql,
+            stmt_processes=[MysqlCreateStatementFilter],
+            grouping_funcs=[grouping.group_brackets]
+        )
+        return stream[0]
 
     def test_complex_create_statement(self):
         statement = self._pre_process_sql(self.create_statement)
-        stmt = MysqlCreateStatementFilter.process(statement)
-        assert isinstance(stmt, sql.CreateTableStatement)
-        table_name = stmt.get_table_name()
+        assert isinstance(statement, sql.Statement)
+        assert statement.get_type() == 'CREATE'
+        table_name = statement.token_next_by_instance(0, sql.TableName)
         self.assertEqual(table_name.value, u'abc')
-        column_definitions = stmt.get_column_definitions()
+        column_definitions = statement.token_next_by_instance(0, sql.ColumnsDefinition).tokens
         self.assertEqual(len(column_definitions), 8)
         self._assert_column_definition(
             column_definition_token=column_definitions[0],
@@ -203,11 +202,11 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
         statement = self._pre_process_sql(
             self.create_statement_without_column_type_length
         )
-        stmt = MysqlCreateStatementFilter.process(statement)
-        assert isinstance(stmt, sql.CreateTableStatement)
-        table_name = stmt.get_table_name()
+        assert isinstance(statement, sql.Statement)
+        assert statement.get_type() == 'CREATE'
+        table_name = statement.token_next_by_instance(0, sql.TableName)
         self.assertEqual(table_name.value, u'abc')
-        column_definitions = stmt.get_column_definitions()
+        column_definitions = statement.token_next_by_instance(0, sql.ColumnsDefinition).tokens
         self.assertEqual(len(column_definitions), 3)
         self._assert_column_definition(
             column_definition_token=column_definitions[0],
@@ -238,11 +237,11 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
         statement = self._pre_process_sql(
             self.create_statement_without_column_attributes
         )
-        stmt = MysqlCreateStatementFilter.process(statement)
-        assert isinstance(stmt, sql.CreateTableStatement)
-        table_name = stmt.get_table_name()
+        assert isinstance(statement, sql.Statement)
+        assert statement.get_type() == 'CREATE'
+        table_name = statement.token_next_by_instance(0, sql.TableName)
         self.assertEqual(table_name.value, u'abc')
-        column_definitions = stmt.get_column_definitions()
+        column_definitions = statement.token_next_by_instance(0, sql.ColumnsDefinition).tokens
         self.assertEqual(len(column_definitions), 3)
         self._assert_column_definition(
             column_definition_token=column_definitions[0],
@@ -302,6 +301,11 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
             column_definition_token.get_column_attributes(),
             column_attributes
         )
+
+    def test(self):
+        stmts = sqlparse.parse(self.create_statement)
+        for stmt in stmts:
+            print stmt.get_type()
 
 
 if __name__ == "__main__":
