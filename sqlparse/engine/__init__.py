@@ -38,15 +38,15 @@ class FilterStack(object):
 
     def __init__(
         self,
-        pre_processes=[],
-        stmt_processes=[],
-        post_processes=[],
+        pre_processes=None,
+        stmt_processes=None,
+        post_processes=None,
         grouping_funcs=default_grouping_funcs
     ):
-        self.pre_processes = pre_processes
-        self.stmt_processes = stmt_processes
-        self.post_processes = post_processes
-        self.grouping_funcs = grouping_funcs
+        self.pre_processes = pre_processes or []
+        self.stmt_processes = stmt_processes or []
+        self.post_processes = post_processes or []
+        self.grouping_funcs = grouping_funcs or []
         self.split_statements = False
         self._grouping = False
 

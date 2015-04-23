@@ -23,10 +23,10 @@ from sqlparse.exceptions import SQLParseError
 def parse(
     sql,
     encoding=None,
-    pre_processes=[],
-    stmt_processes=[],
-    post_processes=[],
-    grouping_funcs=[]
+    pre_processes=None,
+    stmt_processes=None,
+    post_processes=None,
+    grouping_funcs=None
 ):
     """Parse sql and return a list of statements.
 
@@ -41,10 +41,10 @@ def parse(
     stream = parse_stream(
         sql,
         encoding,
-        pre_processes=pre_processes,
-        stmt_processes=stmt_processes,
-        post_processes=post_processes,
-        grouping_funcs=grouping_funcs
+        pre_processes=pre_processes or [],
+        stmt_processes=stmt_processes or [],
+        post_processes=post_processes or [],
+        grouping_funcs=grouping_funcs or []
     )
     # for statement in stream:
     #     if statement.get_type() == 'CREATE':
@@ -55,10 +55,10 @@ def parse(
 def parse_stream(
     stream,
     encoding=None,
-    pre_processes=[],
-    stmt_processes=[],
-    post_processes=[],
-    grouping_funcs=[]
+    pre_processes=None,
+    stmt_processes=None,
+    post_processes=None,
+    grouping_funcs=None
 ):
     """Parses sql statements from file-like object.
 
@@ -71,9 +71,9 @@ def parse_stream(
     :returns: A generator of :class:`~sqlparse.sql.Statement` instances.
     """
     stack = engine.FilterStack(
-        pre_processes=pre_processes,
-        stmt_processes=stmt_processes,
-        post_processes=post_processes
+        pre_processes=pre_processes or [],
+        stmt_processes=stmt_processes or [],
+        post_processes=post_processes or []
     )
     stack.full_analyze()
     if grouping_funcs:
@@ -95,7 +95,7 @@ def format(sql, **options):
     stack = engine.FilterStack()
     options = formatter.validate_options(options)
     stack = formatter.build_filter_stack(stack, options)
-    stack.postprocess.append(filters.SerializerUnicode())
+    stack.post_processes.append(filters.SerializerUnicode())
     return ''.join(stack.run(sql, encoding))
 
 
