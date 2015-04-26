@@ -170,7 +170,7 @@ class Test_GetCreateTableInfo(TestCase, TestCasePy27Features):
         CREATE TABLE item (
             id INT PRIMARY KEY NOT NULL,
             type VARCHAR(3) NOT NULL,
-            score DOUBLE NULL,
+            score DOUBLE,
             url TEXT NULL,
             text TEXT NOT NULL,
             item2other INT NULL,
@@ -185,9 +185,9 @@ class Test_GetCreateTableInfo(TestCase, TestCasePy27Features):
 
     sql3 = """
         CREATE TABLE a ( afield INT PRIMARY KEY NOT NULL );
-        CREATE TABLE b ( bfield VARCHAR(10) PRIMARY KEY NOT NULL ) ;
+        CREATE TABLE b ( bfield VARCHAR(10) NULL ) ;
         CREATE TABLE c ( cfield TEXT PRIMARY KEY NOT NULL ) this gets ignored;
-        CREATE TABLE d ( dfield NVARCHAR PRIMARY KEY NOT NULL )
+        CREATE TABLE d ( dfield NVARCHAR PRIMARY KEY )
     """
 
     sql4 = """
@@ -207,7 +207,7 @@ class Test_GetCreateTableInfo(TestCase, TestCasePy27Features):
             `f` VARCHAR(1) not null ,
             `g` VARCHAR(1) not null,
             `h` DECIMAL(13,2)unsigned not null ,
-            `i` DECIMAL(4,0)unsigned not null ,
+            `i` DECIMAL(4,0)unsigned ,
             `j` VARCHAR(30)unsigned not null,
             `k` DECIMAL(13,2) unsigned not null,
             `l` VARCHAR(1)not null ,
@@ -221,12 +221,12 @@ class Test_GetCreateTableInfo(TestCase, TestCasePy27Features):
         info = get_create_table_info(tokenize(self.sql1))
 
         self.assertEqual(info, [('item', {
-            0: ('id',         'INT'),
-            1: ('type',       'VARCHAR'),
-            2: ('score',      'DOUBLE'),
-            3: ('url',        'TEXT'),
-            4: ('text',       'TEXT'),
-            5: ('item2other', 'INT'),
+            0: ('id',         'INT',     'NOT NULL'),
+            1: ('type',       'VARCHAR', 'NOT NULL'),
+            2: ('score',      'DOUBLE',  None),
+            3: ('url',        'TEXT',    'NULL'),
+            4: ('text',       'TEXT',    'NOT NULL'),
+            5: ('item2other', 'INT',     'NULL'),
         })])
 
     def test_get_create_table_info2(self):
@@ -238,16 +238,16 @@ class Test_GetCreateTableInfo(TestCase, TestCasePy27Features):
 
         self.assertEqual(info, [
             ('a', {
-                0: ('afield', 'INT'),
+                0: ('afield', 'INT', 'NOT NULL'),
             }),
             ('b', {
-                0: ('bfield', 'VARCHAR'),
+                0: ('bfield', 'VARCHAR', 'NULL'),
             }),
             ('c', {
-                0: ('cfield', 'TEXT'),
+                0: ('cfield', 'TEXT', 'NOT NULL'),
             }),
             ('d', {
-                0: ('dfield', 'NVARCHAR'),
+                0: ('dfield', 'NVARCHAR', None),
             }),
         ])
 
@@ -255,28 +255,28 @@ class Test_GetCreateTableInfo(TestCase, TestCasePy27Features):
         info = get_create_table_info(tokenize(self.sql4))
 
         self.assertEqual(info, [('example', {
-            0: ('id', 'INT'),
-            1: ('data', 'VARCHAR'),
+            0: ('id', 'INT', None),
+            1: ('data', 'VARCHAR', None),
         })])
 
     def test_get_create_table_info5(self):
         info = get_create_table_info(tokenize(self.sql5))
 
         self.assertEqual(info, [('mydb.mytable', {
-             0: ('a', 'INT'),
-             1: ('b', 'DECIMAL'),
-             2: ('c', 'DATE'),
-             3: ('d', 'DECIMAL'),
-             4: ('e', 'VARCHAR'),
-             5: ('f', 'VARCHAR'),
-             6: ('g', 'VARCHAR'),
-             7: ('h', 'DECIMAL'),
-             8: ('i', 'DECIMAL'),
-             9: ('j', 'VARCHAR'),
-            10: ('k', 'DECIMAL'),
-            11: ('l', 'VARCHAR'),
-            12: ('m', 'DECIMAL'),
-            13: ('n', 'VARCHAR'),
+             0: ('a', 'INT',     'NOT NULL'),
+             1: ('b', 'DECIMAL', 'NOT NULL'),
+             2: ('c', 'DATE',    None),
+             3: ('d', 'DECIMAL', 'NOT NULL'),
+             4: ('e', 'VARCHAR', 'NOT NULL'),
+             5: ('f', 'VARCHAR', 'NOT NULL'),
+             6: ('g', 'VARCHAR', 'NOT NULL'),
+             7: ('h', 'DECIMAL', 'NOT NULL'),
+             8: ('i', 'DECIMAL', None),
+             9: ('j', 'VARCHAR', 'NOT NULL'),
+            10: ('k', 'DECIMAL', 'NOT NULL'),
+            11: ('l', 'VARCHAR', 'NOT NULL'),
+            12: ('m', 'DECIMAL', 'NOT NULL'),
+            13: ('n', 'VARCHAR', 'NOT NULL'),
         })])
 
 

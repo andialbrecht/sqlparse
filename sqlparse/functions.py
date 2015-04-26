@@ -12,7 +12,6 @@ from sqlparse.tokens import Keyword, Whitespace
 
 
 def getlimit(stream):
-    """Function that return the LIMIT of a input SQL """
     pipe = Pipeline()
 
     pipe.append(Limit())
@@ -35,7 +34,12 @@ def getcolumns(stream):
 
 
 def get_create_table_info(stream):
-    """Function that return the colums of a CREATE TABLE statement including their type"""
+    """
+    Function that returns the columns of a CREATE TABLE statement including their type and NULL
+    declaration.
+
+    The nullable declaration is None if not specified, else 'NOT NULL' or 'NULL'.
+    """
     pipe = Pipeline()
 
     pipe.append(InfoCreateTable())

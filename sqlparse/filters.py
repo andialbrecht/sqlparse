@@ -576,7 +576,7 @@ class InfoCreateTable(object):
                     error = 'No opening paren for CREATE TABLE'
             elif state == St.column_name:
                 if token_type in Name or (token_type in Keyword and value.lower() in InfoCreateTable.ALLOWED_KEYWORD_AS_NAME):
-                    column = [self._to_column_name(value), None]
+                    column = [self._to_column_name(value), None, None]
                     state = St.column_type
                 elif token_type in Keyword:
                     state = St.ignore_rest
@@ -625,6 +625,10 @@ class InfoCreateTable(object):
                             columns[len(columns)] = tuple(column)
 
                         column = None
+                elif token_type in Keyword and parens == 0:
+                    keyword_value = value.upper()
+                    if keyword_value in ('NULL', 'NOT NULL'):
+                        column[2] = keyword_value
                 elif token_type in Punctuation and parens > 0:
                     # ignore anything in parens
                     if value == '(':
