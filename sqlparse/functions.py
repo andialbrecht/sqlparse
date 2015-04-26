@@ -6,7 +6,7 @@ Created on 17/05/2012
 Several utility functions to extract info from the SQL sentences
 '''
 
-from sqlparse.filters import ColumnsSelect, Limit
+from sqlparse.filters import ColumnsSelect, InfoCreateTable, Limit
 from sqlparse.pipeline import Pipeline
 from sqlparse.tokens import Keyword, Whitespace
 
@@ -31,6 +31,17 @@ def getcolumns(stream):
     pipe.append(ColumnsSelect())
 
     return pipe(stream)
+
+
+
+def get_create_table_info(stream):
+    """Function that return the colums of a CREATE TABLE statement including their type"""
+    pipe = Pipeline()
+
+    pipe.append(InfoCreateTable())
+
+    return pipe(stream)
+
 
 
 class IsType(object):
