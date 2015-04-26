@@ -185,7 +185,9 @@ class Test_GetCreateTableInfo(TestCase, TestCasePy27Features):
 
     sql3 = """
         CREATE TABLE a ( afield INT PRIMARY KEY NOT NULL );
-        CREATE TABLE b ( bfield INT PRIMARY KEY NOT NULL );
+        CREATE TABLE b ( bfield VARCHAR(10) PRIMARY KEY NOT NULL ) ;
+        CREATE TABLE c ( cfield TEXT PRIMARY KEY NOT NULL ) this gets ignored;
+        CREATE TABLE d ( dfield NVARCHAR PRIMARY KEY NOT NULL )
     """
 
     sql4 = """
@@ -218,14 +220,14 @@ class Test_GetCreateTableInfo(TestCase, TestCasePy27Features):
     def test_get_create_table_info1(self):
         info = get_create_table_info(tokenize(self.sql1))
 
-        self.assertEqual(info, ('item', {
+        self.assertEqual(info, [('item', {
             0: ('id',         'INT'),
             1: ('type',       'VARCHAR'),
             2: ('score',      'DOUBLE'),
             3: ('url',        'TEXT'),
             4: ('text',       'TEXT'),
             5: ('item2other', 'INT'),
-        }))
+        })])
 
     def test_get_create_table_info2(self):
         with self.assertRaisesRegexp(ValueError, 'Not a CREATE TABLE statement'):
@@ -234,23 +236,33 @@ class Test_GetCreateTableInfo(TestCase, TestCasePy27Features):
     def test_get_create_table_info3(self):
         info = get_create_table_info(tokenize(self.sql3))
 
-        # TODO: multiple statements in stream not handled
-        self.assertEqual(info, ('a', {
-            0: ('afield', 'INT'),
-        }))
+        self.assertEqual(info, [
+            ('a', {
+                0: ('afield', 'INT'),
+            }),
+            ('b', {
+                0: ('bfield', 'VARCHAR'),
+            }),
+            ('c', {
+                0: ('cfield', 'TEXT'),
+            }),
+            ('d', {
+                0: ('dfield', 'NVARCHAR'),
+            }),
+        ])
 
     def test_get_create_table_info4(self):
         info = get_create_table_info(tokenize(self.sql4))
 
-        self.assertEqual(info, ('example', {
+        self.assertEqual(info, [('example', {
             0: ('id', 'INT'),
             1: ('data', 'VARCHAR'),
-        }))
+        })])
 
     def test_get_create_table_info5(self):
         info = get_create_table_info(tokenize(self.sql5))
 
-        self.assertEqual(info, ('mydb.mytable', {
+        self.assertEqual(info, [('mydb.mytable', {
              0: ('a', 'INT'),
              1: ('b', 'DECIMAL'),
              2: ('c', 'DATE'),
@@ -265,7 +277,7 @@ class Test_GetCreateTableInfo(TestCase, TestCasePy27Features):
             11: ('l', 'VARCHAR'),
             12: ('m', 'DECIMAL'),
             13: ('n', 'VARCHAR'),
-        }))
+        })])
 
 
 class Test_GetLimit(Test_SQL):

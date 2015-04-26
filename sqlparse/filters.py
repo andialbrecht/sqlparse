@@ -529,15 +529,11 @@ class InfoCreateTable(object):
             column_ignore_rest = 6
             ignore_rest = 7
             finished = 8
+            ignore_remaining_statement = 9
 
         state = St.create
         error = ''
         parens = 0
-
-        table_name = ''
-        columns = {} # index => (name, type)
-        column_names = set()
-        column = None
 
         for token_type, value in StripWhitespace(stream):
             if error:
@@ -548,6 +544,11 @@ class InfoCreateTable(object):
                 continue
 
             if state == St.create:
+                table_name = ''
+                columns = {} # index => (name, type)
+                column_names = set()
+                column = None
+
                 if token_type in Keyword and value.upper() == 'CREATE':
                     state = St.table
                 else:
@@ -594,8 +595,8 @@ class InfoCreateTable(object):
                     elif value == ')':
                         if parens == 0: # closes 'CREATE TABLE ('
                             state = St.finished
-
-                        parens -= 1
+                        else:
+                            parens -= 1
                     elif value == ',':
                         state = St.column_name
             elif state == St.column_ignore_rest:
@@ -611,8 +612,6 @@ class InfoCreateTable(object):
                             add_column = True
                         else:
                             error = 'Logic error (end of column declaration #1)'
-
-                        parens -= 1
                     elif value == ',':
                         add_column = True
 
@@ -635,21 +634,32 @@ class InfoCreateTable(object):
 
                 # else ignore until comma or end of statement
             elif state == St.finished:
-                # Finished :)
-                break
+                # Finished one CREATE TABLE statement, yield result and try to parse next statement
+                # (after semicolon)
+                yield (table_name, columns)
+
+                if token_type in Punctuation and value == ';':
+                    state = St.create
+                else:
+                    state = St.ignore_remaining_statement
+            elif state == St.ignore_remaining_statement:
+                # Ignore until semicolon
+                if token_type in Punctuation and value == ';':
+                    state = St.create
             else:
                 error = 'Unknown state %r' % state
 
             if error:
                 raise ValueError('%s (token_type: %r, value: %r, column: %r)' % (error, token_type, value, column))
 
-        if state != St.finished and not error:
-            error = 'Unexpected end state %r (token_type: %r, value: %r, column: %r)' % (state, token_type, value, column)
-
         if error:
             raise ValueError(error)
 
-        return table_name, columns
+        if state == St.finished: # no more tokens after ')'
+            yield (table_name, columns)
+
+        if state not in (St.create, St.finished, St.ignore_remaining_statement):
+            error = 'Unexpected end state %r (token_type: %r, value: %r, column: %r)' % (state, token_type, value, column)
 
     @staticmethod
     def _to_column_name(token_value):
