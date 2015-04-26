@@ -536,8 +536,6 @@ class InfoCreateTable(object):
         parens = 0
 
         for token_type, value in StripWhitespace(stream):
-            if error:
-                break
 
             # Ignore comments
             if token_type in (Comment, Whitespace):
@@ -610,7 +608,7 @@ class InfoCreateTable(object):
                             state = St.finished
 
                             add_column = True
-                        else:
+                        else: # pragma: no cover
                             error = 'Logic error (end of column declaration #1)'
                     elif value == ',':
                         add_column = True
@@ -621,6 +619,7 @@ class InfoCreateTable(object):
                         if column[0] in column_names:
                             error = 'Duplicate column name: %s' % column[0]
                         else:
+                            column_names.add(column[0])
                             # Store column index, name and type
                             columns[len(columns)] = tuple(column)
 
@@ -650,20 +649,21 @@ class InfoCreateTable(object):
                 # Ignore until semicolon
                 if token_type in Punctuation and value == ';':
                     state = St.create
-            else:
+            else: # pragma: no cover
                 error = 'Unknown state %r' % state
 
             if error:
                 raise ValueError('%s (token_type: %r, value: %r, column: %r)' % (error, token_type, value, column))
 
+        if not error:
+            if state == St.finished: # no more tokens after ')'
+                yield (table_name, columns)
+
+            if state not in (St.create, St.finished, St.ignore_remaining_statement):
+                error = 'Unexpected end state %r (token_type: %r, value: %r, column: %r)' % (state, token_type, value, column)
+
         if error:
             raise ValueError(error)
-
-        if state == St.finished: # no more tokens after ')'
-            yield (table_name, columns)
-
-        if state not in (St.create, St.finished, St.ignore_remaining_statement):
-            error = 'Unexpected end state %r (token_type: %r, value: %r, column: %r)' % (state, token_type, value, column)
 
     @staticmethod
     def _to_column_name(token_value):

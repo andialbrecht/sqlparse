@@ -217,6 +217,23 @@ class Test_GetCreateTableInfo(TestCase, TestCasePy27Features):
         )ENGINE=InnoDB;
     """
 
+    sql6 = 'SELECT * FROM a'
+    sql7 = 'CREATE TABLE ('
+    sql8 = 'CREATE TABLE'
+    sql9 = 'CREATE TABLE t (,)'
+    sql10 = 'CREATE TABLE t ( a NULL )'
+
+    sql11 = """
+        CREATE TABLE t (
+            a INT,
+            PRIMARY KEY (a),
+            FOREIGN KEY (a) REFERENCES other(id)
+        )
+    """
+
+    sql12 = 'CREATE TABLE a,'
+    sql13 = 'CREATE TABLE t (a INT, a INT)'
+
     def test_get_create_table_info1(self):
         info = get_create_table_info(tokenize(self.sql1))
 
@@ -228,10 +245,6 @@ class Test_GetCreateTableInfo(TestCase, TestCasePy27Features):
             4: ('text',       'TEXT',    'NOT NULL'),
             5: ('item2other', 'INT',     'NULL'),
         })])
-
-    def test_get_create_table_info2(self):
-        with self.assertRaisesRegexp(ValueError, 'Not a CREATE TABLE statement'):
-            info = get_create_table_info(tokenize(self.sql2))
 
     def test_get_create_table_info3(self):
         info = get_create_table_info(tokenize(self.sql3))
@@ -278,6 +291,30 @@ class Test_GetCreateTableInfo(TestCase, TestCasePy27Features):
             12: ('m', 'DECIMAL', 'NOT NULL'),
             13: ('n', 'VARCHAR', 'NOT NULL'),
         })])
+
+    def test_get_create_table_info11(self):
+        info = get_create_table_info(tokenize(self.sql11))
+
+        self.assertEqual(info, [('t', {
+            0: ('a', 'INT', None),
+        })])
+
+    def test_get_create_table_info_errors(self):
+        for test, expected_regexp in (
+            ('sql6', 'Not a CREATE statement'),
+            ('sql2', 'Not a CREATE TABLE statement'),
+            ('sql7', 'No table name given'),
+            ('sql8', 'Unexpected end state'),
+            ('sql9', 'No column name given'),
+            ('sql10', 'No column type given'),
+            ('sql12', 'No opening paren for CREATE TABLE'),
+            ('sql13', 'Duplicate column name'),
+        ):
+            try:
+                with self.assertRaisesRegexp(ValueError, expected_regexp):
+                    get_create_table_info(tokenize(getattr(self, test)))
+            except self.failureException, e:
+                raise self.failureException('%s (in test %r)' % (e, test))
 
 
 class Test_GetLimit(Test_SQL):
