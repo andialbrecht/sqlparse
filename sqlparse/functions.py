@@ -39,6 +39,10 @@ def get_create_table_info(stream):
     declaration.
 
     The nullable declaration is None if not specified, else 'NOT NULL' or 'NULL'.
+
+    >>> import lexer
+    >>> get_create_table_info(lexer.tokenize('CREATE TABLE t ( a INT NOT NULL )'))
+    [('t', {0: ('a', 'INT', 'NOT NULL')})]
     """
     pipe = Pipeline()
 
@@ -57,3 +61,7 @@ class IsType(object):
         for token_type, value in stream:
             if token_type not in Whitespace:
                 return token_type in Keyword and value == self.type
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
