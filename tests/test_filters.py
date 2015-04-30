@@ -118,11 +118,7 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
     """
 
     def _pre_process_sql(self, sql):
-        stream = sqlparse.parse(
-            sql,
-            stmt_processes=[MysqlCreateStatementFilter],
-            grouping_funcs=[grouping.group_brackets]
-        )
+        stream = sqlparse.parse(sql)
         return stream[0]
 
     def test_complex_create_statement(self):

@@ -14,72 +14,46 @@ from sqlparse import engine
 from sqlparse import filters
 from sqlparse import formatter
 from sqlparse import lexer
+from sqlparse import tokens as T
 from sqlparse.engine import grouping
 
 # Deprecated in 0.1.5. Will be removed in 0.2.0
 from sqlparse.exceptions import SQLParseError
 
 
-def parse(
-    sql,
-    encoding=None,
-    pre_processes=None,
-    stmt_processes=None,
-    post_processes=None,
-    grouping_funcs=None
-):
+def parse(sql, encoding=None):
     """Parse sql and return a list of statements.
 
     :param sql: A string containting one or more SQL statements.
     :param encoding: The encoding of the statement (optional).
-    :param pre_processes: pre_processes you want to run against parsed statements (optional).
-    :param stmt_processes: stmt_processes you want to run against parsed statements (optional).
-    :param post_processes: post_processes you want to run against parsed statements (optional).
-    :param grouping_funcs: grouping_funcs you want to run against parsed statements (optional).
     :returns: A tuple of :class:`~sqlparse.sql.Statement` instances.
     """
-    stream = parse_stream(
-        sql,
-        encoding,
-        pre_processes=pre_processes or [],
-        stmt_processes=stmt_processes or [],
-        post_processes=post_processes or [],
-        grouping_funcs=grouping_funcs or []
-    )
-    # for statement in stream:
-    #     if statement.get_type() == 'CREATE':
+    stream = parse_stream(sql, encoding)
 
     return tuple(stream)
 
 
-def parse_stream(
-    stream,
-    encoding=None,
-    pre_processes=None,
-    stmt_processes=None,
-    post_processes=None,
-    grouping_funcs=None
-):
+def parse_stream(stream, encoding=None):
     """Parses sql statements from file-like object.
 
     :param stream: A file-like object.
     :param encoding: The encoding of the stream contents (optional).
-    :param pre_processes: pre_processes you want to run against parsed statements (optional).
-    :param stmt_processes: stmt_processes you want to run against parsed statements (optional).
-    :param post_processes: post_processes you want to run against parsed statements (optional).
-    :param grouping_funcs: grouping_funcs you want to run against parsed statements (optional).
     :returns: A generator of :class:`~sqlparse.sql.Statement` instances.
     """
-    stack = engine.FilterStack(
-        pre_processes=pre_processes or [],
-        stmt_processes=stmt_processes or [],
-        post_processes=post_processes or []
+    stream = _tokenize(stream, encoding)
+    statements = split2(stream)
+    create_table_stack = engine.FilterStack(
+        stmt_processes=[filters.MysqlCreateStatementFilter()],
+        grouping_funcs=[grouping.group_brackets]
     )
-    stack.full_analyze()
-    if grouping_funcs:
-        stack.grouping_funcs = grouping_funcs
-    return stack.run(stream, encoding)
-
+    default_stack = engine.FilterStack()
+    for statement in statements:
+        if _is_create_table_statement(statement):
+            stack = create_table_stack
+        else:
+            stack = default_stack
+        stack.enable_grouping()
+        yield list(stack.run(unicode(statement), encoding))[0]
 
 def format(sql, **options):
     """Format *sql* according to *options*.
@@ -97,6 +71,21 @@ def format(sql, **options):
     stack = formatter.build_filter_stack(stack, options)
     stack.post_processes.append(filters.SerializerUnicode())
     return ''.join(stack.run(sql, encoding))
+
+def _tokenize(sql, encoding):
+    return lexer.tokenize(sql, encoding)
+
+def _is_create_table_statement(statement):
+    if statement.get_type() == 'CREATE':
+        first_keyword_token = statement.token_first()
+        first_keyword_token_index = statement.token_index(first_keyword_token)
+        second_keyword_token = statement.token_next_by_type(
+            first_keyword_token_index+1,
+            T.Keyword
+        )
+        if second_keyword_token and second_keyword_token.normalized == 'TABLE':
+            return True
+    return False
 
 
 def split(sql, encoding=None):
