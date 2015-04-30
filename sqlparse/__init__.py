@@ -55,6 +55,7 @@ def parse_stream(stream, encoding=None):
         stack.enable_grouping()
         yield list(stack.run(unicode(statement), encoding))[0]
 
+
 def format(sql, **options):
     """Format *sql* according to *options*.
 
@@ -72,8 +73,10 @@ def format(sql, **options):
     stack.post_processes.append(filters.SerializerUnicode())
     return ''.join(stack.run(sql, encoding))
 
+
 def _tokenize(sql, encoding):
     return lexer.tokenize(sql, encoding)
+
 
 def _is_create_table_statement(statement):
     if statement.get_type() == 'CREATE':
