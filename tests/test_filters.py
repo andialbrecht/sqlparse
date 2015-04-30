@@ -8,10 +8,8 @@ import unittest
 import sqlparse
 from sqlparse import sql
 from sqlparse import tokens as T
-from sqlparse.filters import MysqlCreateStatementFilter
 from sqlparse.filters import StripWhitespace
 from sqlparse.filters import Tokens2Unicode
-from sqlparse.engine import grouping
 from sqlparse.lexer import tokenize
 
 
@@ -119,11 +117,7 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
     """
 
     def _pre_process_sql(self, sql):
-        stream = sqlparse.parse(
-            sql,
-            stmt_processes=[MysqlCreateStatementFilter()],
-            grouping_funcs=[grouping.group_brackets]
-        )
+        stream = sqlparse.parse(sql, dialect='mysql')
         return stream[0]
 
     def test_complex_create_statement(self):
