@@ -563,65 +563,59 @@ class ColumnsSelect:
                     mode = 1
 
 
-ColumnAttributeProperty = namedtuple('ColumnAttributeProperty', 'has_value is_type_attribute')
-
-
 class MysqlCreateStatementFilter(object):
 
-    @classmethod
-    def process(cls, stack, statement):
+    def process(self, stack, statement):
         if statement.get_type() != 'CREATE':
             return
-        tokens = []
-        tokens.append(statement.token_first())
-        table_name = cls._get_table_name(statement)
-        tokens.append(sql.TableName(value=table_name, ttype=T.Name))
-        tokens.append(cls._get_columns(statement))
-        statement.tokens = tokens
-        return
+        self._process_table_name(statement)
+        self._process_columns(statement)
 
-    @classmethod
-    def _get_table_name(cls, statement):
+    def _process_table_name(self, statement):
         # 1st Name type is the table name
         table_name_token = statement.token_next_by_type(0, T.Name)
         if not table_name_token:
             raise SQLParseError('Cannot find table name.')
-        return cls._clean_quote(table_name_token.value)
+        table_name_token_index = statement.token_index(table_name_token)
+        table_name = self._clean_quote(table_name_token.value)
+        statement.tokens[table_name_token_index] = sql.TableName(
+            value=table_name,
+            ttype=T.Name
+        )
 
-
-    @classmethod
-    def _clean_quote(cls, text):
+    def _clean_quote(self, text):
         return text.strip('"`\'')
 
-    @classmethod
-    def _get_columns(cls, statement):
+    def _process_columns(self, statement):
         # Get the Parenthesis which contains column definitions
         parenthesis_token = statement.token_next_by_instance(0, sql.Parenthesis)
         if not parenthesis_token:
             raise SQLParseError('Cannot find column definitions')
 
+        parenthesis_token_index = statement.token_index(parenthesis_token)
+        del statement.tokens[parenthesis_token_index]
         columns_tokens = parenthesis_token.tokens
-        # Remove the 1st (left parenthesis) and the last token (right parenthesis)
-        columns_tokens = columns_tokens[1:-1]
-        trimmed_columns_tokens = cls._trim_tokens(columns_tokens)
-
         columns_definition_children_tokens = []
         columns_definition = sql.ColumnsDefinition(columns_definition_children_tokens)
-
-        for token_list in cls._split_tokens_by_comma(trimmed_columns_tokens):
-            if cls._is_column_definition(token_list):
-                column_definition_token = cls._create_column_definition(token_list)
+        parenthesis_token_list = [
+            columns_tokens[0],
+            columns_definition
+        ]
+        for token_list in self._split_tokens_by_comma(columns_tokens[1:-1]):
+            if self._is_column_definition(token_list):
+                column_definition_token = self._create_column_definition(token_list)
                 columns_definition_children_tokens.append(column_definition_token)
-        return columns_definition
+            else:
+                parenthesis_token_list.extend(token_list.tokens)
+        parenthesis_token_list.append(columns_tokens[-1])
+        statement.tokens[parenthesis_token_index:parenthesis_token_index] = parenthesis_token_list
 
-    @classmethod
-    def _is_column_definition(cls, tokens):
+    def _is_column_definition(self, token_list):
         # The type of the first token should be Name if the tokens is
         # for column definition.
-        return tokens[0].ttype is T.Name
+        return token_list.token_first().ttype is T.Name
 
-    @classmethod
-    def _trim_tokens(cls, token_list):
+    def _trim_tokens(self, token_list):
         new_token_list = []
         for token in token_list:
             if token.ttype is T.Text.Whitespace \
@@ -630,20 +624,18 @@ class MysqlCreateStatementFilter(object):
             new_token_list.append(token)
         return new_token_list
 
-    @classmethod
-    def _split_tokens_by_comma(cls, tokens):
+    def _split_tokens_by_comma(self, tokens):
         split_token_lists = []
         token_list = []
         for token in tokens:
             if not token.match(T.Punctuation, ','):
                 token_list.append(token)
             else:
-                split_token_lists.append(token_list)
+                split_token_lists.append(sql.TokenList(token_list))
                 token_list = []
         return split_token_lists
 
-    @classmethod
-    def _process_parentheses(cls, token, parentheses):
+    def _process_parentheses(self, token, parentheses):
         if token.match(T.Punctuation, '('):
             parentheses.append(token)
             return True
@@ -652,43 +644,39 @@ class MysqlCreateStatementFilter(object):
             return True
         return False
 
-    @classmethod
-    def _create_column_definition(cls, tokens):
+    def _create_column_definition(self, token_list):
         # Because we are going to process the same token list in multiple
         # functions in order. So use deque to store tokens instead
         # of manually tracking its index. After we processed one token, we
         # can just pop it out.
-        token_queue = deque(tokens)
+        token_queue = deque(self._trim_tokens(token_list.tokens))
         column_definition_children_tokens = []
         column_definition = sql.ColumnDefinition(tokens=column_definition_children_tokens)
-        column_definition_children_tokens.append(cls._create_column_name(token_queue))
-        column_definition_children_tokens.append(cls._create_column_type(token_queue))
-        column_definition_children_tokens.append(cls._create_column_type_length(token_queue))
-        column_definition_children_tokens.append(cls._create_column_type_attributes(token_queue))
-        column_definition_children_tokens.append(cls._create_column_attributes(token_queue))
+        column_definition_children_tokens.append(self._create_column_name(token_queue))
+        column_definition_children_tokens.append(self._create_column_type(token_queue))
+        column_definition_children_tokens.append(self._create_column_type_length(token_queue))
+        column_definition_children_tokens.append(self._create_column_type_attributes(token_queue))
+        column_definition_children_tokens.append(self._create_column_attributes(token_queue))
         return column_definition
 
-    @classmethod
-    def _create_column_name(cls, token_queue):
+    def _create_column_name(self, token_queue):
         # The first token should be the column name.
         return sql.ColumnName(
-            value=cls._clean_quote(token_queue.popleft().value),
+            value=self._clean_quote(token_queue.popleft().value),
             ttype=T.Name
         )
 
-    @classmethod
-    def _create_column_type(cls, token_queue):
+    def _create_column_type(self, token_queue):
         return sql.ColumnType(value=token_queue.popleft().value, ttype=T.Keyword)
 
-    @classmethod
-    def _create_column_type_length(cls, token_queue):
+    def _create_column_type_length(self, token_queue):
         # It returns a tuple of two integers.
         # For example: (255, None) for varchar or char
         # (10, 2) for decimal or numeric
         # The first parenthesis token defines the length of the type.
         if isinstance(token_queue[0], sql.Parenthesis):
             parenthesis_token = token_queue.popleft()
-            parenthesis_children_tokens = cls._trim_tokens(parenthesis_token.tokens)
+            parenthesis_children_tokens = self._trim_tokens(parenthesis_token.tokens)
             precision = None
             scale = None
             for child_token in parenthesis_children_tokens:
@@ -702,8 +690,7 @@ class MysqlCreateStatementFilter(object):
             return sql.ColumnTypeLength(value=(precision, scale), ttype=None)
         return sql.ColumnTypeLength(value=None, ttype=None)
 
-    @classmethod
-    def _create_column_attributes(cls, token_queue):
+    def _create_column_attributes(self, token_queue):
         attribute_name_to_has_value_map = {
             u'not null': False,
             u'null': False,
@@ -711,30 +698,26 @@ class MysqlCreateStatementFilter(object):
             u'auto_increment': False,
             u'comment': True
         }
-        column_attributes_children_tokens = cls._get_attributes(
+        column_attributes_children_tokens = self._get_attributes(
             attribute_name_to_has_value_map,
             token_queue
         )
         return sql.ColumnAttributes(tokens=column_attributes_children_tokens)
 
-
-    @classmethod
-    def _create_column_type_attributes(cls, token_queue):
+    def _create_column_type_attributes(self, token_queue):
         attribute_name_to_has_value_map = {
             u'unsigned': False,
             u'zerofill': False,
             u'binary': False,
             u'collate': True
         }
-        column_type_attributes_children_tokens = cls._get_attributes(
+        column_type_attributes_children_tokens = self._get_attributes(
             attribute_name_to_has_value_map,
             token_queue
         )
         return sql.ColumnTypeAttributes(tokens=column_type_attributes_children_tokens)
 
-
-    @classmethod
-    def _get_attributes(cls, attribute_name_to_has_value_map, token_queue):
+    def _get_attributes(self, attribute_name_to_has_value_map, token_queue):
         """It only supports the case in which one keyword is contained in one
         token currently. If one keyword is contained in more than one continuous
         tokens, it will be discarded.
@@ -776,7 +759,7 @@ class MysqlCreateStatementFilter(object):
                                 ttype=T.Keyword
                             ),
                             sql.Token(
-                                value=cls._clean_quote(token.value.lower()),
+                                value=self._clean_quote(token.value.lower()),
                                 ttype=T.String
                             )
                         ]

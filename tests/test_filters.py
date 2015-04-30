@@ -7,8 +7,6 @@ import unittest
 
 import sqlparse
 from sqlparse import sql
-from sqlparse.engine import grouping
-from sqlparse.filters import MysqlCreateStatementFilter
 from sqlparse.filters import StripWhitespace
 from sqlparse.filters import Tokens2Unicode
 from sqlparse.lexer import tokenize
@@ -278,23 +276,23 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
             sql.ColumnDefinition
         )
         self.assertEqual(
-            column_definition_token.get_column_name(),
+            self._get_column_name(column_definition_token),
             column_name
         )
         self.assertEqual(
-            column_definition_token.get_column_type(),
+            self._get_column_type(column_definition_token),
             column_type
         )
         self.assertEqual(
-            column_definition_token.get_column_type_length(),
+            self._get_column_type_length(column_definition_token),
             column_type_length
         )
         self.assertEqual(
-            column_definition_token.get_column_type_attributes(),
+            self._get_column_type_attributes(column_definition_token),
             column_type_attributes
         )
         self.assertEqual(
-            column_definition_token.get_column_attributes(),
+            self._get_column_attributes(column_definition_token),
             column_attributes
         )
 
@@ -302,6 +300,35 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
         stmts = sqlparse.parse(self.create_statement)
         for stmt in stmts:
             print stmt.get_type()
+
+    def _get_column_name(self, column_definition_token):
+        column_name_token = column_definition_token.token_next_by_instance(0, sql.ColumnName)
+        return column_name_token.value
+
+    def _get_column_type(self, column_definition_token):
+        column_type_token = column_definition_token.token_next_by_instance(0, sql.ColumnType)
+        return column_type_token.value
+
+    def _get_column_type_length(self, column_definition_token):
+        column_type_length_token = column_definition_token.token_next_by_instance(
+            0, sql.ColumnTypeLength
+        )
+        return column_type_length_token.value
+
+    def _get_column_type_attributes(self, column_definition_token):
+        for token in column_definition_token.tokens:
+            if isinstance(token, sql.ColumnTypeAttributes):
+                return [self._get_attribute(attribute_token) for attribute_token in token.tokens]
+        return None
+
+    def _get_column_attributes(self, column_definition_token):
+        for token in column_definition_token.tokens:
+            if isinstance(token, sql.ColumnAttributes):
+                return [self._get_attribute(attribute_token) for attribute_token in token.tokens]
+        return None
+
+    def _get_attribute(self, attribute):
+        return tuple(token.value for token in attribute.tokens)
 
 
 if __name__ == "__main__":

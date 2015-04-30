@@ -28,12 +28,12 @@ def parse(sql, encoding=None):
     :param encoding: The encoding of the statement (optional).
     :returns: A tuple of :class:`~sqlparse.sql.Statement` instances.
     """
-    stream = parse_stream(sql, encoding)
+    stream = parsestream(sql, encoding)
 
     return tuple(stream)
 
 
-def parse_stream(stream, encoding=None):
+def parsestream(stream, encoding=None):
     """Parses sql statements from file-like object.
 
     :param stream: A file-like object.

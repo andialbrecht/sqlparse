@@ -672,38 +672,9 @@ class ColumnsDefinition(TokenList):
     __slots__ = ('value', 'ttype', 'tokens')
 
 
-ColumnTypeAttributeTuple = namedtuple('ColumnTypeAttributeTuple', 'attribute_name attribute_value')
-
-
 class ColumnDefinition(TokenList):
 
     __slots__ = ('value', 'ttype', 'tokens')
-
-    def get_column_name(self):
-        column_name_token = self.token_next_by_instance(0, ColumnName)
-        return column_name_token.value
-
-    def get_column_type(self):
-        column_type_token = self.token_next_by_instance(0, ColumnType)
-        return column_type_token.value
-
-    def get_column_type_length(self):
-        column_type_length_token = self.token_next_by_instance(
-            0, ColumnTypeLength
-        )
-        return column_type_length_token.value
-
-    def get_column_type_attributes(self):
-        for token in self.tokens:
-            if isinstance(token, ColumnTypeAttributes):
-                return token.get_column_type_attributes()
-        return None
-
-    def get_column_attributes(self):
-        for token in self.tokens:
-            if isinstance(token, ColumnAttributes):
-                return token.get_column_attributes()
-        return None
 
 
 class ColumnName(Token):
@@ -715,19 +686,10 @@ class ColumnAttributes(TokenList):
 
     __slots__ = ('value', 'ttype', 'tokens')
 
-    def get_column_attributes(self):
-        return [
-            attribute_token.get_attribute()
-            for attribute_token in self.tokens
-        ]
-
 
 class Attribute(TokenList):
 
     __slots__ = ('value', 'ttype', 'tokens')
-
-    def get_attribute(self):
-        return tuple(token.value for token in self.tokens)
 
 
 class ColumnType(Token):
@@ -743,12 +705,6 @@ class ColumnTypeLength(Token):
 class ColumnTypeAttributes(TokenList):
 
     __slots__ = ('value', 'ttype', 'tokens')
-
-    def get_column_type_attributes(self):
-        return [
-            attribute_token.get_attribute()
-            for attribute_token in self.tokens
-        ]
 
 
 class Begin(TokenList):
