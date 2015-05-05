@@ -757,7 +757,6 @@ class MysqlCreateStatementFilter(object):
         )
 
 
-
 # ---------------------------
 # postprocess
 

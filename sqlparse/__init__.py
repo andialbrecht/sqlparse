@@ -13,8 +13,6 @@ __version__ = '0.1.14'
 from sqlparse import engine
 from sqlparse import filters
 from sqlparse import formatter
-from sqlparse import lexer
-from sqlparse.engine import grouping
 
 # Deprecated in 0.1.5. Will be removed in 0.2.0
 from sqlparse.exceptions import SQLParseError
