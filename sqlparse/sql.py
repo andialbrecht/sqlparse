@@ -697,12 +697,7 @@ class ColumnType(Token):
     __slots__ = ('value', 'ttype')
 
 
-class ColumnTypeLength(Token):
-
-    __slots__ = ('value', 'ttype')
-
-
-class ColumnTypeAttributes(TokenList):
+class ColumnTypeLength(TokenList):
 
     __slots__ = ('value', 'ttype', 'tokens')
 

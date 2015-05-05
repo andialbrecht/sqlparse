@@ -90,36 +90,36 @@ def build_filter_stack(stack, options):
     """
     # Token filter
     if options.get('keyword_case', None):
-        stack.pre_processes.append(
+        stack.preprocess.append(
             filters.KeywordCaseFilter(options['keyword_case']))
 
     if options.get('identifier_case', None):
-        stack.pre_processes.append(
+        stack.preprocess.append(
             filters.IdentifierCaseFilter(options['identifier_case']))
 
     if options.get('truncate_strings', None) is not None:
-        stack.pre_processes.append(filters.TruncateStringFilter(
+        stack.preprocess.append(filters.TruncateStringFilter(
             width=options['truncate_strings'], char=options['truncate_char']))
 
     # After grouping
     if options.get('strip_comments', False):
         stack.enable_grouping()
-        stack.stmt_processes.append(filters.StripCommentsFilter())
+        stack.stmtprocess.append(filters.StripCommentsFilter())
 
     if (options.get('strip_whitespace', False)
         or options.get('reindent', False)):
         stack.enable_grouping()
-        stack.stmt_processes.append(filters.StripWhitespaceFilter())
+        stack.stmtprocess.append(filters.StripWhitespaceFilter())
 
     if options.get('reindent', False):
         stack.enable_grouping()
-        stack.stmt_processes.append(
+        stack.stmtprocess.append(
             filters.ReindentFilter(char=options['indent_char'],
                                    width=options['indent_width']))
 
     if options.get('right_margin', False):
         stack.enable_grouping()
-        stack.stmt_processes.append(
+        stack.stmtprocess.append(
             filters.RightMarginFilter(width=options['right_margin']))
 
     # Serializer
@@ -132,6 +132,6 @@ def build_filter_stack(stack, options):
         else:
             fltr = None
         if fltr is not None:
-            stack.post_processes.append(fltr)
+            stack.postprocess.append(fltr)
 
     return stack

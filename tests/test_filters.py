@@ -7,8 +7,11 @@ import unittest
 
 import sqlparse
 from sqlparse import sql
+from sqlparse import tokens as T
+from sqlparse.filters import MysqlCreateStatementFilter
 from sqlparse.filters import StripWhitespace
 from sqlparse.filters import Tokens2Unicode
+from sqlparse.engine import grouping
 from sqlparse.lexer import tokenize
 
 
@@ -116,7 +119,11 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
     """
 
     def _pre_process_sql(self, sql):
-        stream = sqlparse.parse(sql)
+        stream = sqlparse.parse(
+            sql,
+            stmt_processes=[MysqlCreateStatementFilter()],
+            grouping_funcs=[grouping.group_brackets]
+        )
         return stream[0]
 
     def test_complex_create_statement(self):
@@ -131,65 +138,57 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
             column_definition_token=column_definitions[0],
             column_name=u'id',
             column_type=u'int',
-            column_type_length=(11, None),
-            column_type_attributes=[],
+            column_type_length=(u'11',),
             column_attributes=[(u'not null',), (u'auto_increment',)]
         )
         self._assert_column_definition(
             column_definition_token=column_definitions[1],
             column_name=u'name',
             column_type=u'varchar',
-            column_type_length=(64, None),
-            column_type_attributes=[(u'collate', u'utf8_unicode_ci')],
-            column_attributes=[(u'default', u'null')]
+            column_type_length=(u'64',),
+            column_attributes=[(u'collate', u'utf8_unicode_ci'), (u'default', u'null')]
         )
         self._assert_column_definition(
             column_definition_token=column_definitions[2],
             column_name=u'address',
             column_type=u'varchar',
-            column_type_length=(128, None),
-            column_type_attributes=[(u'collate', u'utf8_unicode_ci')],
-            column_attributes=[(u'default', u'null')]
+            column_type_length=(u'128',),
+            column_attributes=[(u'collate', u'utf8_unicode_ci'), (u'default', u'null')]
         )
         self._assert_column_definition(
             column_definition_token=column_definitions[3],
             column_name=u'related_id',
             column_type=u'int',
-            column_type_length=(11, None),
-            column_type_attributes=[],
+            column_type_length=(u'11',),
             column_attributes=[(u'not null',), (u'default', u'0',)]
         )
         self._assert_column_definition(
             column_definition_token=column_definitions[4],
             column_name=u'currency',
             column_type=u'double',
-            column_type_length=(8, 2),
-            column_type_attributes=[],
+            column_type_length=(u'8', u'2'),
             column_attributes=[(u'default', u'null')]
         )
         self._assert_column_definition(
             column_definition_token=column_definitions[5],
             column_name=u'time_created',
             column_type=u'int',
-            column_type_length=(11, None),
-            column_type_attributes=[],
+            column_type_length=(u'11',),
             column_attributes=[(u'not null',), (u'default', u'0')]
         )
         self._assert_column_definition(
             column_definition_token=column_definitions[6],
             column_name=u'age',
             column_type=u'int',
-            column_type_length=(10, None),
-            column_type_attributes=[(u'unsigned',)],
-            column_attributes=[(u'default', u'null')]
+            column_type_length=(u'10',),
+            column_attributes=[(u'unsigned',), (u'default', u'null')]
         )
         self._assert_column_definition(
             column_definition_token=column_definitions[7],
             column_name=u'type',
             column_type=u'tinyint',
-            column_type_length=(3, None),
-            column_type_attributes=[(u'unsigned',)],
-            column_attributes=[(u'default', u'null')]
+            column_type_length=(u'3',),
+            column_attributes=[(u'unsigned',), (u'default', u'null')]
         )
 
     def test_create_statement_without_column_type_length(self):
@@ -207,7 +206,6 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
             column_name=u'id',
             column_type=u'int',
             column_type_length=None,
-            column_type_attributes=[],
             column_attributes=[(u'not null',), (u'auto_increment',)]
         )
         self._assert_column_definition(
@@ -215,7 +213,6 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
             column_name=u'age',
             column_type=u'int',
             column_type_length=None,
-            column_type_attributes=[],
             column_attributes=[(u'default', u'null')]
         )
         self._assert_column_definition(
@@ -223,8 +220,7 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
             column_name=u'name',
             column_type=u'varchar',
             column_type_length=None,
-            column_type_attributes=[(u'collate', u'utf8_unicode_ci')],
-            column_attributes=[(u'default', u'null')]
+            column_attributes=[(u'collate', u'utf8_unicode_ci'), (u'default', u'null')]
         )
 
     def test_create_statement_without_column_attributes(self):
@@ -241,24 +237,21 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
             column_definition_token=column_definitions[0],
             column_name=u'id',
             column_type=u'int',
-            column_type_length=(11, None),
-            column_type_attributes=[],
+            column_type_length=(u'11',),
             column_attributes=[]
         )
         self._assert_column_definition(
             column_definition_token=column_definitions[1],
             column_name=u'age',
             column_type=u'int',
-            column_type_length=(11, None),
-            column_type_attributes=[],
+            column_type_length=(u'11',),
             column_attributes=[]
         )
         self._assert_column_definition(
             column_definition_token=column_definitions[2],
             column_name=u'name',
             column_type=u'varchar',
-            column_type_length=(64, None),
-            column_type_attributes=[],
+            column_type_length=(u'64',),
             column_attributes=[]
         )
 
@@ -268,7 +261,6 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
         column_name,
         column_type,
         column_type_length,
-        column_type_attributes,
         column_attributes
     ):
         assert isinstance(
@@ -286,10 +278,6 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
         self.assertEqual(
             self._get_column_type_length(column_definition_token),
             column_type_length
-        )
-        self.assertEqual(
-            self._get_column_type_attributes(column_definition_token),
-            column_type_attributes
         )
         self.assertEqual(
             self._get_column_attributes(column_definition_token),
@@ -313,22 +301,26 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
         column_type_length_token = column_definition_token.token_next_by_instance(
             0, sql.ColumnTypeLength
         )
-        return column_type_length_token.value
-
-    def _get_column_type_attributes(self, column_definition_token):
-        for token in column_definition_token.tokens:
-            if isinstance(token, sql.ColumnTypeAttributes):
-                return [self._get_attribute(attribute_token) for attribute_token in token.tokens]
+        if column_type_length_token is not None:
+            return tuple(
+                token.value
+                for token in column_type_length_token.tokens
+                if token.ttype is T.Literal.Number.Integer
+            )
         return None
 
     def _get_column_attributes(self, column_definition_token):
         for token in column_definition_token.tokens:
             if isinstance(token, sql.ColumnAttributes):
-                return [self._get_attribute(attribute_token) for attribute_token in token.tokens]
+                return [
+                    self._get_attribute(attribute_token)
+                    for attribute_token in token.tokens
+                    if isinstance(attribute_token, sql.Attribute)
+                ]
         return None
 
     def _get_attribute(self, attribute):
-        return tuple(token.value for token in attribute.tokens)
+        return tuple(token.value.lower() for token in attribute.tokens)
 
 
 if __name__ == "__main__":

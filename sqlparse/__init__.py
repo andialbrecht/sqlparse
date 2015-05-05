@@ -14,46 +14,55 @@ from sqlparse import engine
 from sqlparse import filters
 from sqlparse import formatter
 from sqlparse import lexer
-from sqlparse import tokens as T
 from sqlparse.engine import grouping
 
 # Deprecated in 0.1.5. Will be removed in 0.2.0
 from sqlparse.exceptions import SQLParseError
 
 
-def parse(sql, encoding=None):
+def parse(
+    sql,
+    encoding=None,
+    stmt_processes=None,
+    grouping_funcs=None
+):
     """Parse sql and return a list of statements.
 
     :param sql: A string containting one or more SQL statements.
     :param encoding: The encoding of the statement (optional).
+    :param stmt_processes: stmt_processes you want to run against parsed statements (optional).
+    :param grouping_funcs: grouping_funcs you want to run against parsed statements (optional).
     :returns: A tuple of :class:`~sqlparse.sql.Statement` instances.
     """
-    stream = parsestream(sql, encoding)
-
+    stream = parsestream(
+        sql,
+        encoding,
+        stmt_processes=stmt_processes,
+        grouping_funcs=grouping_funcs
+    )
     return tuple(stream)
 
 
-def parsestream(stream, encoding=None):
+def parsestream(
+    stream,
+    encoding=None,
+    stmt_processes=None,
+    grouping_funcs=None
+):
     """Parses sql statements from file-like object.
 
     :param stream: A file-like object.
     :param encoding: The encoding of the stream contents (optional).
+    :param stmt_processes: stmtprocess you want to run against parsed statements (optional).
+    :param grouping_funcs: grouping_funcs you want to run against parsed statements (optional).
     :returns: A generator of :class:`~sqlparse.sql.Statement` instances.
     """
-    stream = _tokenize(stream, encoding)
-    statements = split2(stream)
-    create_table_stack = engine.FilterStack(
-        stmt_processes=[filters.MysqlCreateStatementFilter()],
-        grouping_funcs=[grouping.group_brackets]
+    stack = engine.FilterStack(
+        stmtprocess=stmt_processes,
+        grouping_funcs=grouping_funcs
     )
-    default_stack = engine.FilterStack()
-    for statement in statements:
-        if _is_create_table_statement(statement):
-            stack = create_table_stack
-        else:
-            stack = default_stack
-        stack.enable_grouping()
-        yield list(stack.run(unicode(statement), encoding))[0]
+    stack.full_analyze()
+    return stack.run(stream, encoding)
 
 
 def format(sql, **options):
@@ -70,25 +79,8 @@ def format(sql, **options):
     stack = engine.FilterStack()
     options = formatter.validate_options(options)
     stack = formatter.build_filter_stack(stack, options)
-    stack.post_processes.append(filters.SerializerUnicode())
+    stack.postprocess.append(filters.SerializerUnicode())
     return ''.join(stack.run(sql, encoding))
-
-
-def _tokenize(sql, encoding):
-    return lexer.tokenize(sql, encoding)
-
-
-def _is_create_table_statement(statement):
-    if statement.get_type() == 'CREATE':
-        first_keyword_token = statement.token_first()
-        first_keyword_token_index = statement.token_index(first_keyword_token)
-        second_keyword_token = statement.token_next_by_type(
-            first_keyword_token_index+1,
-            T.Keyword
-        )
-        if second_keyword_token and second_keyword_token.normalized == 'TABLE':
-            return True
-    return False
 
 
 def split(sql, encoding=None):
