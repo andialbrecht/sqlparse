@@ -634,23 +634,13 @@ class MysqlCreateStatementFilter(object):
         split_token_lists = []
         token_list = []
         for token in tokens:
-            if not token.match(T.Punctuation, ','):
-                token_list.append(token)
-            else:
+            token_list.append(token)
+            if token.match(T.Punctuation, ','):
                 split_token_lists.append(sql.TokenList(token_list))
                 token_list = []
         if token_list:
             split_token_lists.append(sql.TokenList(token_list))
         return split_token_lists
-
-    def _process_parentheses(self, token, parentheses):
-        if token.match(T.Punctuation, '('):
-            parentheses.append(token)
-            return True
-        elif token.match(T.Punctuation, ')'):
-            parentheses.pop()
-            return True
-        return False
 
     def _create_column_definition(self, token_list):
         # Because we are going to process the same token list in multiple

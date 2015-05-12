@@ -27,7 +27,8 @@ def parse(sql, encoding=None, dialect=None):
     :param sql: A string containting one or more SQL statements.
     :param encoding: The encoding of the statement (optional).
     :param dialect: The sql engine dialect of the input sql statements.
-    It only supports "mysql" right now. (optional)
+    It only supports "mysql" right now. If dialect is not specified,
+    The input sql will be parsed using the generic sql syntax. (optional)
     :returns: A tuple of :class:`~sqlparse.sql.Statement` instances.
     """
     stream = parsestream(sql, encoding, dialect)
