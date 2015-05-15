@@ -7,7 +7,6 @@ from os.path import abspath, join
 
 from sqlparse import lexer
 from sqlparse import sql, tokens as T
-from sqlparse.engine import FilterStack
 from sqlparse.exceptions import SQLParseError
 from sqlparse.pipeline import Pipeline
 from sqlparse.tokens import (Comment, Comparison, Keyword, Name, Punctuation,

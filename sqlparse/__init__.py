@@ -16,9 +16,20 @@ from sqlparse import formatter
 from sqlparse import lexer
 from sqlparse import tokens as T
 from sqlparse.engine import grouping
+from sqlparse.parsers import SQLParser
 
 # Deprecated in 0.1.5. Will be removed in 0.2.0
 from sqlparse.exceptions import SQLParseError
+
+
+def build_parsers():
+    parsers = dict()
+    for cls in SQLParser.__subclasses__():
+        parsers[cls.dialect] = cls()
+    return parsers
+
+
+parsers = build_parsers()
 
 
 def parse(sql, encoding=None, dialect=None):
@@ -45,20 +56,11 @@ def parsestream(stream, encoding=None, dialect=None):
     It only supports "mysql" right now. (optional)
     :returns: A generator of :class:`~sqlparse.sql.Statement` instances.
     """
-    stream = _tokenize(stream, encoding)
-    statements = split2(stream)
-
-    default_stack = engine.FilterStack()
-    for statement in statements:
-        if _is_create_table_statement(statement) and dialect is 'mysql':
-            stack = engine.FilterStack(
-                stmtprocess=[filters.MysqlCreateStatementFilter()],
-                grouping_funcs=[grouping.group_brackets]
-            )
-        else:
-            stack = default_stack
-        stack.enable_grouping()
-        yield stack.run(statement)
+    parser = parsers.get(dialect)
+    if parser is None:
+        raise Exception("Unable to find parser to parse dialect ({0})."
+                        .format(dialect))
+    return parser.parse(stream, encoding)
 
 
 def format(sql, **options):
@@ -73,7 +75,7 @@ def format(sql, **options):
     """
     options = formatter.validate_options(options)
     encoding = options.pop('encoding', None)
-    stream = _tokenize(sql, encoding)
+    stream = lexer.tokenize(sql, encoding)
     stream = _format_pre_process(stream, options)
     stack = engine.FilterStack()
     stack = formatter.build_filter_stack(stack, options)
@@ -105,23 +107,6 @@ def _pre_process(stream, pre_processes):
     return stream
 
 
-def _tokenize(sql, encoding):
-    return lexer.tokenize(sql, encoding)
-
-
-def _is_create_table_statement(statement):
-    if statement.get_type() == 'CREATE':
-        first_keyword_token = statement.token_first()
-        first_keyword_token_index = statement.token_index(first_keyword_token)
-        second_keyword_token = statement.token_next_by_type(
-            first_keyword_token_index+1,
-            T.Keyword
-        )
-        if second_keyword_token and second_keyword_token.normalized == 'TABLE':
-            return True
-    return False
-
-
 def split(sql, encoding=None):
     """Split *sql* into single statements.
 
@@ -129,7 +114,7 @@ def split(sql, encoding=None):
     :param encoding: The encoding of the statement (optional).
     :returns: A list of strings.
     """
-    stream = _tokenize(sql, encoding)
+    stream = lexer.tokenize(sql, encoding)
     splitter = StatementFilter()
     stream = splitter.process(None, stream)
     return [unicode(stmt).strip() for stmt in stream]
