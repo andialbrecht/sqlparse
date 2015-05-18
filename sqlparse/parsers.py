@@ -46,8 +46,8 @@ class GeneralSQLParser(SQLParser):
         stream = lexer.tokenize(sql, encoding)
         statements = _split_statements(stream)
         stack = engine.FilterStack()
+        stack.enable_grouping()
         for statement in statements:
-            stack.enable_grouping()
             yield stack.run(statement)
 
 
@@ -60,13 +60,14 @@ class MysqlSQLParser(SQLParser):
         statements = _split_statements(stream)
 
         default_stack = engine.FilterStack()
+        default_stack.enable_grouping()
+        create_table_statement_filter_stack = engine.FilterStack(
+            stmtprocess=[filters.MysqlCreateStatementFilter()],
+            grouping_funcs=[grouping.group_brackets]
+        )
+        create_table_statement_filter_stack.enable_grouping()
         for statement in statements:
             if _is_create_table_statement(statement):
-                stack = engine.FilterStack(
-                    stmtprocess=[filters.MysqlCreateStatementFilter()],
-                    grouping_funcs=[grouping.group_brackets]
-                )
+                yield create_table_statement_filter_stack.run(statement)
             else:
-                stack = default_stack
-            stack.enable_grouping()
-            yield stack.run(statement)
+                yield default_stack.run(statement)
