@@ -4,6 +4,7 @@
 
 import re
 import sys
+from collections import namedtuple
 
 from sqlparse import tokens as T
 
@@ -659,6 +660,46 @@ class Function(TokenList):
                 t.ttype in T.Literal:
                 return [t,]
         return []
+
+
+class TableName(Token):
+
+    __slots__ = ('value', 'ttype')
+
+
+class ColumnsDefinition(TokenList):
+
+    __slots__ = ('value', 'ttype', 'tokens')
+
+
+class ColumnDefinition(TokenList):
+
+    __slots__ = ('value', 'ttype', 'tokens')
+
+
+class ColumnName(Token):
+
+    __slots__ = ('value', 'ttype')
+
+
+class ColumnAttributes(TokenList):
+
+    __slots__ = ('value', 'ttype', 'tokens')
+
+
+class Attribute(TokenList):
+
+    __slots__ = ('value', 'ttype', 'tokens')
+
+
+class ColumnType(Token):
+
+    __slots__ = ('value', 'ttype')
+
+
+class ColumnTypeLength(TokenList):
+
+    __slots__ = ('value', 'ttype', 'tokens')
 
 
 class Begin(TokenList):

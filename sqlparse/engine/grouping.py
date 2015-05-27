@@ -432,25 +432,6 @@ def align_comments(tlist):
         token = tlist.token_next_by_instance(idx, sql.Comment)
 
 
-def group(tlist):
-    for func in [
-            group_comments,
-            group_brackets,
-            group_functions,
-            group_where,
-            group_case,
-            group_identifier,
-            group_order,
-            group_typecasts,
-            group_as,
-            group_aliased,
-            group_assignment,
-            group_comparison,
-            align_comments,
-            group_identifier_list,
-            group_if,
-            group_for,
-            group_foreach,
-            group_begin,
-            ]:
+def group(tlist, grouping_funcs):
+    for func in grouping_funcs:
         func(tlist)

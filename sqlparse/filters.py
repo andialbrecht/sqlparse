@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import re
+from collections import deque
 
 from os.path import abspath, join
 
+from sqlparse import lexer
 from sqlparse import sql, tokens as T
-from sqlparse.engine import FilterStack
-from sqlparse.lexer import tokenize
+from sqlparse.exceptions import SQLParseError
 from sqlparse.pipeline import Pipeline
 from sqlparse.tokens import (Comment, Comparison, Keyword, Name, Punctuation,
                              String, Whitespace)
@@ -179,10 +180,10 @@ class IncludeStatement:
                             # Put the exception as a comment on the SQL code
                             yield Comment, u'-- ValueError: %s\n' % err
 
-                        stack = FilterStack()
-                        stack.preprocess.append(filtr)
+                        tokens = lexer.tokenize(raw_sql)
+                        tokens = filtr.process(None, tokens)
 
-                        for tv in stack.run(raw_sql):
+                        for tv in tokens:
                             yield tv
 
                     # Set normal mode
@@ -559,6 +560,197 @@ class ColumnsSelect:
                 if token_type == Name or token_type == Keyword:
                     yield value
                     mode = 1
+
+
+class MysqlCreateStatementFilter(object):
+
+    @property
+    def attribute_name_to_has_value_map(self):
+        return {
+            u'not null': False,
+            u'null': False,
+            u'default': True,
+            u'auto_increment': False,
+            u'comment': True,
+            u'unsigned': False,
+            u'zerofill': False,
+            u'binary': False,
+            u'collate': True
+        }
+
+    def process(self, stack, statement):
+        if statement.get_type() != 'CREATE':
+            return
+        self._process_table_name(statement)
+        self._process_columns(statement)
+
+    def _process_table_name(self, statement):
+        # 1st Name type is the table name
+        table_name_token = statement.token_next_by_type(0, T.Name)
+        if not table_name_token:
+            raise SQLParseError('Cannot find table name.')
+        table_name_token_index = statement.token_index(table_name_token)
+        table_name = self._clean_quote(table_name_token.value)
+        statement.tokens[table_name_token_index] = sql.TableName(
+            value=table_name,
+            ttype=T.Name
+        )
+
+    def _clean_quote(self, text):
+        return text.strip('"`\'')
+
+    def _process_columns(self, statement):
+        # Get the Parenthesis which contains column definitions
+        parenthesis_token = statement.token_next_by_instance(0, sql.Parenthesis)
+        if not parenthesis_token:
+            raise SQLParseError('Cannot find column definitions')
+
+        parenthesis_token_index = statement.token_index(parenthesis_token)
+        columns_tokens = parenthesis_token.tokens
+        columns_definition_tokens = []
+        non_columns_definition_tokens = []
+        for token_list in self._split_tokens_by_comma(columns_tokens[1:-1]):
+            if self._is_column_definition(token_list):
+                column_definition_token = self._create_column_definition(token_list)
+                columns_definition_tokens.append(column_definition_token)
+            else:
+                non_columns_definition_tokens.extend(token_list.tokens)
+        columns_definition = sql.ColumnsDefinition(columns_definition_tokens)
+        parenthesis_token_list = [
+            columns_tokens[0],
+            columns_definition
+        ]
+        parenthesis_token_list.extend(non_columns_definition_tokens)
+        parenthesis_token_list.append(columns_tokens[-1])
+        statement.tokens[parenthesis_token_index:parenthesis_token_index+1] = parenthesis_token_list
+
+    def _is_column_definition(self, token_list):
+        # The type of the first token should be Name if the tokens is
+        # for column definition.
+        return token_list.token_first().ttype is T.Name
+
+    def _split_tokens_by_comma(self, tokens):
+        split_token_lists = []
+        token_list = []
+        for token in tokens:
+            token_list.append(token)
+            if token.match(T.Punctuation, ','):
+                split_token_lists.append(sql.TokenList(token_list))
+                token_list = []
+        if token_list:
+            split_token_lists.append(sql.TokenList(token_list))
+        return split_token_lists
+
+    def _create_column_definition(self, token_list):
+        # Because we are going to process the same token list in multiple
+        # functions in order. So use deque to store tokens instead
+        # of manually tracking its index. After we processed one token, we
+        # can just pop it out.
+        token_queue = deque(token_list.tokens)
+        column_definition_children_tokens = []
+
+        column_definition_children_tokens.extend(
+            self._skip_white_space_and_new_line_tokens(token_queue)
+        )
+        column_definition_children_tokens.append(self._create_column_name(token_queue))
+
+        column_definition_children_tokens.extend(
+            self._skip_white_space_and_new_line_tokens(token_queue)
+        )
+        column_definition_children_tokens.append(self._create_column_type(token_queue))
+
+        column_definition_children_tokens.extend(
+            self._skip_white_space_and_new_line_tokens(token_queue)
+        )
+        column_type_length_token = self._create_column_type_length(token_queue)
+        if column_type_length_token:
+            column_definition_children_tokens.append(column_type_length_token)
+
+        column_definition_children_tokens.extend(
+            self._skip_white_space_and_new_line_tokens(token_queue)
+        )
+        column_definition_children_tokens.append(self._create_column_attributes(token_queue))
+
+        column_definition = sql.ColumnDefinition(tokens=column_definition_children_tokens)
+        return column_definition
+
+    def _create_column_name(self, token_queue):
+        return sql.ColumnName(
+            value=self._clean_quote(token_queue.popleft().value),
+            ttype=T.Name
+        )
+
+    def _skip_white_space_and_new_line_tokens(self, token_queue):
+        token_list = []
+        while((len(token_queue) > 0
+               and (token_queue[0].ttype in (T.Text.Whitespace, T.Text.Whitespace.Newline)))
+        ):
+            token_list.append(token_queue.popleft())
+        return token_list
+
+    def _create_column_type(self, token_queue):
+        token = token_queue.popleft()
+        return sql.ColumnType(
+            value=token.value,
+            ttype=T.Keyword
+        )
+
+    def _create_column_type_length(self, token_queue):
+        if isinstance(token_queue[0], sql.Parenthesis):
+            parenthesis_token = token_queue.popleft()
+            return sql.ColumnTypeLength(
+                tokens=parenthesis_token.tokens
+            )
+
+    def _create_column_attributes(self, token_queue):
+        column_attributes_children_tokens = self._get_attributes(
+            token_queue
+        )
+        return sql.ColumnAttributes(tokens=column_attributes_children_tokens)
+
+    def _get_attributes(self, token_queue):
+        attributes = []
+        attribute_name_token = None
+        while len(token_queue) > 0:
+            attributes.extend(self._skip_white_space_and_new_line_tokens(token_queue))
+            token = token_queue.popleft()
+            if attribute_name_token is None:
+                has_value = self.attribute_name_to_has_value_map.get(token.value.lower())
+                if has_value is None:
+                    attributes.append(token)
+                elif has_value:
+                    attribute_name_token = token
+                else:
+                    attributes.append(self._generate_attribute_token(token))
+            else:
+                attributes.append(
+                    self._generate_attribute_token(
+                        attribute_name_token,
+                        token
+                    )
+                )
+                attribute_name_token = None
+        if attribute_name_token is not None:
+            attributes.append(self._generate_attribute_token(attribute_name_token))
+        return attributes
+
+    def _generate_attribute_token(self, attribute_name_token, attribute_value_token=None):
+        attribute_token_list = [
+            sql.Token(
+                value=attribute_name_token.value,
+                ttype=T.Keyword
+            )
+        ]
+        if attribute_value_token is not None:
+            attribute_token_list.append(
+                sql.Token(
+                    value=self._clean_quote(attribute_value_token.value),
+                    ttype=attribute_value_token.ttype
+                )
+            )
+        return sql.Attribute(
+            tokens=attribute_token_list
+        )
 
 
 # ---------------------------

@@ -13,31 +13,54 @@ __version__ = '0.1.14'
 from sqlparse import engine
 from sqlparse import filters
 from sqlparse import formatter
+from sqlparse import lexer
+from sqlparse import tokens as T
+from sqlparse.engine import grouping
+from sqlparse.parsers import SQLParser
 
 # Deprecated in 0.1.5. Will be removed in 0.2.0
 from sqlparse.exceptions import SQLParseError
 
 
-def parse(sql, encoding=None):
+def build_parsers():
+    parsers = dict()
+    for cls in SQLParser.__subclasses__():
+        parsers[cls.dialect] = cls()
+    return parsers
+
+
+parsers = build_parsers()
+
+
+def parse(sql, encoding=None, dialect=None):
     """Parse sql and return a list of statements.
 
     :param sql: A string containting one or more SQL statements.
     :param encoding: The encoding of the statement (optional).
+    :param dialect: The sql engine dialect of the input sql statements.
+    It only supports "mysql" right now. If dialect is not specified,
+    The input sql will be parsed using the generic sql syntax. (optional)
     :returns: A tuple of :class:`~sqlparse.sql.Statement` instances.
     """
-    return tuple(parsestream(sql, encoding))
+    stream = parsestream(sql, encoding, dialect)
+
+    return tuple(stream)
 
 
-def parsestream(stream, encoding=None):
+def parsestream(stream, encoding=None, dialect=None):
     """Parses sql statements from file-like object.
 
     :param stream: A file-like object.
     :param encoding: The encoding of the stream contents (optional).
+    :param dialect: The sql engine dialect of the input sql statements.
+    It only supports "mysql" right now. (optional)
     :returns: A generator of :class:`~sqlparse.sql.Statement` instances.
     """
-    stack = engine.FilterStack()
-    stack.full_analyze()
-    return stack.run(stream, encoding)
+    parser = parsers.get(dialect)
+    if parser is None:
+        raise Exception("Unable to find parser to parse dialect ({0})."
+                        .format(dialect))
+    return parser.parse(stream, encoding)
 
 
 def format(sql, **options):
@@ -50,12 +73,38 @@ def format(sql, **options):
 
     :returns: The formatted SQL statement as string.
     """
-    encoding = options.pop('encoding', None)
-    stack = engine.FilterStack()
     options = formatter.validate_options(options)
+    encoding = options.pop('encoding', None)
+    stream = lexer.tokenize(sql, encoding)
+    stream = _format_pre_process(stream, options)
+    stack = engine.FilterStack()
     stack = formatter.build_filter_stack(stack, options)
     stack.postprocess.append(filters.SerializerUnicode())
-    return ''.join(stack.run(sql, encoding))
+    statements = split2(stream)
+    return ''.join(stack.run(statement) for statement in statements)
+
+
+def _format_pre_process(stream, options):
+    pre_processes = []
+    if options.get('keyword_case', None):
+        pre_processes.append(
+            filters.KeywordCaseFilter(options['keyword_case']))
+
+    if options.get('identifier_case', None):
+        pre_processes.append(
+            filters.IdentifierCaseFilter(options['identifier_case']))
+
+    if options.get('truncate_strings', None) is not None:
+        pre_processes.append(filters.TruncateStringFilter(
+            width=options['truncate_strings'], char=options['truncate_char']))
+    return _pre_process(stream, pre_processes)
+
+
+def _pre_process(stream, pre_processes):
+    if pre_processes:
+        for pre_process in pre_processes:
+            stream = pre_process.process(None, stream)
+    return stream
 
 
 def split(sql, encoding=None):
@@ -65,9 +114,10 @@ def split(sql, encoding=None):
     :param encoding: The encoding of the statement (optional).
     :returns: A list of strings.
     """
-    stack = engine.FilterStack()
-    stack.split_statements = True
-    return [unicode(stmt).strip() for stmt in stack.run(sql, encoding)]
+    stream = lexer.tokenize(sql, encoding)
+    splitter = StatementFilter()
+    stream = splitter.process(None, stream)
+    return [unicode(stmt).strip() for stmt in stream]
 
 
 from sqlparse.engine.filter import StatementFilter

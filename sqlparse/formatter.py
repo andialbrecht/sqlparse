@@ -88,19 +88,6 @@ def build_filter_stack(stack, options):
       stack: :class:`~sqlparse.filters.FilterStack` instance
       options: Dictionary with options validated by validate_options.
     """
-    # Token filter
-    if options.get('keyword_case', None):
-        stack.preprocess.append(
-            filters.KeywordCaseFilter(options['keyword_case']))
-
-    if options.get('identifier_case', None):
-        stack.preprocess.append(
-            filters.IdentifierCaseFilter(options['identifier_case']))
-
-    if options.get('truncate_strings', None) is not None:
-        stack.preprocess.append(filters.TruncateStringFilter(
-            width=options['truncate_strings'], char=options['truncate_char']))
-
     # After grouping
     if options.get('strip_comments', False):
         stack.enable_grouping()
