@@ -515,6 +515,7 @@ class InfoCreateTable(object):
     # sqlparse outputs some tokens as Keyword type at places where they are names
     ALLOWED_KEYWORD_AS_NAME = set((
         'data',
+        'source',
         'type',
     ))
 
