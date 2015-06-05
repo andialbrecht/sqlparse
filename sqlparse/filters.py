@@ -596,7 +596,7 @@ class InfoCreateTable(object):
                             state = St.finished
                         else:
                             parens -= 1
-                    elif value == ',':
+                    elif value == ',' and parens == 0:
                         state = St.column_name
             elif state == St.column_ignore_rest:
                 if token_type in Punctuation and parens == 0: # ignore anything in parens

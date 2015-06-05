@@ -234,6 +234,15 @@ class Test_GetCreateTableInfo(TestCase, TestCasePy27Features):
     sql12 = 'CREATE TABLE a,'
     sql13 = 'CREATE TABLE t (a INT, a INT)'
     sql14 = 'CREATE TABLE pair ( id VARCHAR(10) PRIMARY KEY NOT NULL, source VARCHAR(3) NOT NULL, target VARCHAR(3) NOT NULL );'
+    sql15 = """
+        CREATE TABLE t (
+            a TEXT NOT NULL,
+            b TEXT NOT NULL,
+            PRIMARY KEY (a),
+            FOREIGN KEY (a) REFERENCES other(id),
+            FOREIGN KEY (b) REFERENCES other(id)
+        )
+    """
 
     def test_get_create_table_info1(self):
         info = get_create_table_info(tokenize(self.sql1))
@@ -307,6 +316,14 @@ class Test_GetCreateTableInfo(TestCase, TestCasePy27Features):
             0: ('id', 'VARCHAR', 'NOT NULL'),
             1: ('source', 'VARCHAR', 'NOT NULL'),
             2: ('target', 'VARCHAR', 'NOT NULL'),
+        })])
+
+    def test_get_create_table_info15(self):
+        info = get_create_table_info(tokenize(self.sql15))
+
+        self.assertEqual(info, [('t', {
+            0: ('a', 'TEXT', 'NOT NULL'),
+            1: ('b', 'TEXT', 'NOT NULL'),
         })])
 
     def test_get_create_table_info_errors(self):
