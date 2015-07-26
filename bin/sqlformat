@@ -77,7 +77,7 @@ def main():
         data = sys.stdin.read()
     else:
         try:
-            data = '\n'.join(open(args[0]).readlines())
+            data = ''.join(open(args[0]).readlines())
         except OSError:
             err = sys.exc_info()[1]  # Python 2.5 compatibility
             _error('Failed to read %s: %s' % (args[0], err), exit_=1)
