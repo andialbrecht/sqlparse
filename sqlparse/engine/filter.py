@@ -40,7 +40,7 @@ class StatementFilter:
 
         unified = value.upper()
 
-        if unified == 'DECLARE' and self._is_create:
+        if unified == 'DECLARE' and self._is_create and self._begin_depth == 0:
             self._in_declare = True
             return 1
 

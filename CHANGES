@@ -3,6 +3,7 @@ Development version
 
 Bug Fixes
 * Fix a regression in get_alias() introduced in 0.1.15 (issue185).
+* Fix a bug in the splitter regarding DECLARE (issue193).
 
 
 Release 0.1.15 (Apr 15, 2015)

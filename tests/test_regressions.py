@@ -244,3 +244,14 @@ def test_null_with_as():
         'FROM t1'
     ])
     assert formatted == tformatted
+
+
+def test_issue193_splitting_function():
+    sql = """CREATE FUNCTION a(x VARCHAR(20)) RETURNS VARCHAR(20)
+BEGIN
+ DECLARE y VARCHAR(20);
+ RETURN x;
+END;
+SELECT * FROM a.b;"""
+    splitted = sqlparse.split(sql)
+    assert len(splitted) == 2
