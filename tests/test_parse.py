@@ -293,3 +293,13 @@ def test_single_line_comments(sql):
     assert p.tokens[-1].ttype == T.Comment.Single
 
 
+@pytest.mark.parametrize('sql', [
+    'foo',
+    '@foo',
+    '#foo',  # see issue192
+    '##foo'
+])
+def test_names_and_special_names(sql):
+    p = sqlparse.parse(sql)[0]
+    assert len(p.tokens) == 1
+    assert isinstance(p.tokens[0], sqlparse.sql.Identifier)
