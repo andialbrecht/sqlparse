@@ -1,5 +1,5 @@
-Development version
--------------------
+Release 0.1.16 (Jul 26, 2015)
+-----------------------------
 
 Bug Fixes
 * Fix a regression in get_alias() introduced in 0.1.15 (issue185).
