@@ -7,6 +7,8 @@ Bug Fixes
 * sqlformat command line tool doesn't duplicat newlines anymore (issue191).
 * Don't mix up MySQL comments starting with hash and MSSQL
   temp tables (issue192).
+* Statement.get_type() now ignores comments at the beginning of
+  a statement (issue186).
 
 
 Release 0.1.15 (Apr 15, 2015)

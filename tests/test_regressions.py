@@ -255,3 +255,9 @@ END;
 SELECT * FROM a.b;"""
     splitted = sqlparse.split(sql)
     assert len(splitted) == 2
+
+
+def test_issue186_get_type():
+    sql = "-- comment\ninsert into foo"
+    p = sqlparse.parse(sql)[0]
+    assert p.get_type() == 'INSERT'

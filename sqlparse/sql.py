@@ -240,14 +240,19 @@ class TokenList(Token):
     def _groupable_tokens(self):
         return self.tokens
 
-    def token_first(self, ignore_whitespace=True):
+    def token_first(self, ignore_whitespace=True, ignore_comments=False):
         """Returns the first child token.
 
         If *ignore_whitespace* is ``True`` (the default), whitespace
         tokens are ignored.
+
+        if *ignore_comments* is ``True`` (default: ``False``), comments are
+        ignored too.
         """
         for token in self.tokens:
             if ignore_whitespace and token.is_whitespace():
+                continue
+            if ignore_comments and isinstance(token, Comment):
                 continue
             return token
 
@@ -468,8 +473,11 @@ class Statement(TokenList):
         The returned value is a string holding an upper-cased reprint of
         the first DML or DDL keyword. If the first token in this group
         isn't a DML or DDL keyword "UNKNOWN" is returned.
+
+        Whitespaces and comments at the beginning of the statement
+        are ignored.
         """
-        first_token = self.token_first()
+        first_token = self.token_first(ignore_comments=True)
         if first_token is None:
             # An "empty" statement that either has not tokens at all
             # or only whitespace tokens.
