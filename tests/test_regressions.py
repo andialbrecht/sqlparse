@@ -256,6 +256,19 @@ SELECT * FROM a.b;"""
     splitted = sqlparse.split(sql)
     assert len(splitted) == 2
 
+def test_issue194_splitting_function():
+    sql = """CREATE FUNCTION a(x VARCHAR(20)) RETURNS VARCHAR(20)
+BEGIN
+ DECLARE y VARCHAR(20);
+ IF (1 = 1) THEN
+ SET x = y;
+ END IF;
+ RETURN x;
+END;
+SELECT * FROM a.b;"""
+    splitted = sqlparse.split(sql)
+    assert len(splitted) == 2
+
 
 def test_issue186_get_type():
     sql = "-- comment\ninsert into foo"

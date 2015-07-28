@@ -51,6 +51,9 @@ class StatementFilter:
                 return 1
             return 0
 
+        if unified in ('END IF', 'END FOR'):
+            return -1
+
         if unified == 'END':
             # Should this respect a preceeding BEGIN?
             # In CASE ... WHEN ... END this results in a split level -1.

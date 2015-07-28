@@ -1,7 +1,8 @@
 Development Version
 -------------------
 
-Nothing yet.
+Bug Fixes
+* Fix another splitter bug regarding DECLARE (issue194).
 
 
 Release 0.1.16 (Jul 26, 2015)
