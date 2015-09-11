@@ -106,6 +106,38 @@ class TestFormat(TestCaseBase):
                           output_format='foo')
 
 
+class TestFormatReindentAligned(TestCaseBase):
+    @staticmethod
+    def formatter(sql):
+        return sqlparse.format(sql, reindent_aligned=True)
+
+    def test_basic(self):
+        sql = """
+            select a, b as bb,c from table
+            join (select a * 2 as a from new_table) other
+            on table.a = other.a
+            where c is true
+            and b between 3 and 4
+            or d is 'blue'
+            """
+        self.ndiffAssertEqual(
+            self.formatter(sql),
+            '\n'.join([
+                'select a,',
+                '       b as bb,',
+                '       c',
+                '  from table',
+                '  join (',
+                '        select a * 2 as a',
+                '          from new_table',
+                '       ) other',
+                '    on table.a = other.a',
+                ' where c is true',
+                '   and b between 3 and 4',
+                "    or d is 'blue'",
+            ]))
+
+
 class TestFormatReindent(TestCaseBase):
 
     def test_option(self):

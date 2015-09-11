@@ -55,6 +55,13 @@ def validate_options(options):
     elif reindent:
         options['strip_whitespace'] = True
 
+    reindent_aligned = options.get('reindent_aligned', False)
+    if reindent_aligned not in [True, False]:
+        raise SQLParseError('Invalid value for reindent_aligned: %r'
+                            % reindent)
+    elif reindent_aligned:
+        options['strip_whitespace'] = True
+
     indent_tabs = options.get('indent_tabs', False)
     if indent_tabs not in [True, False]:
         raise SQLParseError('Invalid value for indent_tabs: %r' % indent_tabs)
@@ -129,6 +136,11 @@ def build_filter_stack(stack, options):
             filters.ReindentFilter(char=options['indent_char'],
                                    width=options['indent_width'],
                                    wrap_after=options['wrap_after']))
+
+    if options.get('reindent_aligned', False):
+        stack.enable_grouping()
+        stack.stmtprocess.append(
+            filters.AlignedIndentFilter(char=options['indent_char']))
 
     if options.get('right_margin'):
         stack.enable_grouping()

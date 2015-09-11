@@ -335,6 +335,98 @@ class ReindentFilter(object):
                 self._last_stmt = stmt
 
 
+class AlignedIndentFilter:
+    split_words = (
+        'FROM',
+        'JOIN', 'ON',
+        'WHERE', 'AND', 'OR',
+        'GROUP', 'HAVING',
+        'ORDER', 'UNION', 'VALUES',
+        'SET', 'BETWEEN', 'EXCEPT',
+        )
+
+    def __init__(self, char=' ', line_width=None):
+        self.char = char
+        self._max_kwd_len = len('select')
+
+    def newline(self):
+        return sql.Token(T.Newline, '\n')
+
+    def whitespace(self, chars=0, newline_before=False, newline_after=False):
+        return sql.Token(
+            T.Whitespace,
+            (str(self.newline()) if newline_before else '') + self.char * chars + (str(self.newline()) if newline_after else ''))
+
+    def _process_statement(self, tlist, base_indent=0):
+        if tlist.tokens[0].is_whitespace() and base_indent == 0:
+            tlist.tokens.pop(0)
+
+        # process the main query body
+        return self._process(sql.TokenList(tlist.tokens), base_indent=base_indent)
+
+    def _process_parenthesis(self, tlist, base_indent=0):
+        sub_indent = base_indent + self._max_kwd_len + 2  # add two for the space and parens
+        tlist.insert_after(tlist.tokens[0], self.whitespace(sub_indent, newline_before=True))
+        # de-indent the last parenthesis
+        tlist.insert_before(tlist.tokens[-1], self.whitespace(sub_indent - 1, newline_before=True))
+
+        # process the inside of the parantheses
+        tlist.tokens = (
+            [tlist.tokens[0]] +
+            self._process(sql.TokenList(tlist._groupable_tokens), base_indent=sub_indent).tokens +
+            [tlist.tokens[-1]]
+            )
+        return tlist
+
+    def _process_identifierlist(self, tlist, base_indent=0):
+        # columns being selected
+        new_tokens = []
+        identifiers = filter(lambda t: isinstance(t, sql.Identifier), tlist.tokens)
+        for i, token in enumerate(identifiers):
+            if i > 0:
+                new_tokens.append(self.newline())
+                new_tokens.append(self.whitespace(self._max_kwd_len + base_indent + 1))
+            new_tokens.append(token)
+            if i < len(identifiers) - 1:
+                # if not last column in select, add a comma seperator
+                new_tokens.append(sql.Token(T.Punctuation, ','))
+        tlist.tokens = new_tokens
+        return tlist
+
+    def _process_substatement(self, tlist, base_indent=0):
+        def _next_token(i):
+            t = tlist.token_next_match(i, T.Keyword, self.split_words, regex=True)
+            # treat "BETWEEN x and y" as a single statement
+            if t and t.value.upper() == 'BETWEEN':
+                t = _next_token(tlist.token_index(t) + 1)
+                if t and t.value.upper() == 'AND':
+                    t = _next_token(tlist.token_index(t) + 1)
+            return t
+
+        idx = 0
+        token = _next_token(idx)
+        while token:
+            tlist.insert_before(token, self.whitespace(self._max_kwd_len - len(str(token)) + base_indent, newline_before=True))
+            next_idx = tlist.token_index(token) + 1
+            token = _next_token(next_idx)
+
+        # process any sub-sub statements
+        for sgroup in tlist.get_sublists():
+            self._process(sgroup, base_indent=base_indent)
+        return tlist
+
+    def _process(self, tlist, base_indent=0, verbose=False):
+        token_name = tlist.__class__.__name__.lower()
+        func_name = '_process_%s' % token_name
+        func = getattr(self, func_name, self._process_substatement)
+        if verbose:
+            print func.__name__, token_name, str(tlist)
+        return func(tlist, base_indent=base_indent)
+
+    def process(self, stack, stmt):
+        self._process(stmt)
+
+
 # FIXME: Doesn't work
 class RightMarginFilter(object):
     keep_together = (
