@@ -47,7 +47,7 @@ def validate_options(options):
         options['truncate_char'] = options.get('truncate_char', '[...]')
 
     reindent = options.get('reindent', False)
-    if reindent not in [True, False]:
+    if reindent not in [True, False, 'aligned']:
         raise SQLParseError('Invalid value for reindent: %r'
                             % reindent)
     elif reindent:
@@ -111,11 +111,16 @@ def build_filter_stack(stack, options):
         stack.enable_grouping()
         stack.stmtprocess.append(filters.StripWhitespaceFilter())
 
-    if options.get('reindent', False):
+    reindent_opt = options.get('reindent', False)
+    if reindent_opt:
         stack.enable_grouping()
-        stack.stmtprocess.append(
-            filters.ReindentFilter(char=options['indent_char'],
-                                   width=options['indent_width']))
+        if reindent_opt is True:
+            stack.stmtprocess.append(
+                filters.ReindentFilter(char=options['indent_char'],
+                                       width=options['indent_width']))
+        elif reindent_opt == 'aligned':
+            stack.stmtprocess.append(
+                filters.AlignedIndentFilter(char=options['indent_char']))
 
     if options.get('right_margin', False):
         stack.enable_grouping()

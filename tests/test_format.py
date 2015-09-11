@@ -103,6 +103,32 @@ class TestFormat(TestCaseBase):
                           output_format='foo')
 
 
+class TestFormatReindentAligned(TestCaseBase):
+    @staticmethod
+    def formatter(sql):
+        return sqlparse.format(sql, reindent='aligned')
+
+    def test_basic(self):
+        sql = """select a, b as bb,c from table join (select a * 2 as a from new_table) other on table.a = other.a where c is true"""
+        out = self.formatter(sql)
+        import logging
+        logging.info('\n\n{}\n'.format(out))
+        self.assertEqual(
+            out,
+            '\n'.join([
+                'select a,',
+                '       b as bb,',
+                '       c',
+                '  from table',
+                '  join (',
+                '        select a * 2 as a',
+                '          from new_table',
+                '       ) other',
+                '    on table.a = other.a',
+                ' where c is true'
+            ]))
+
+
 class TestFormatReindent(TestCaseBase):
 
     def test_option(self):

@@ -14,6 +14,8 @@ from sqlparse.utils import memoize_generator
 from sqlparse.utils import split_unquoted_newlines
 
 
+import logging  # DEBUGGING - remove
+
 # --------------------------
 # token process
 
@@ -280,6 +282,9 @@ class StripWhitespaceFilter:
 
 
 class ReindentFilter:
+    split_words = ('FROM', 'STRAIGHT_JOIN$', 'JOIN$', 'AND', 'OR',
+                   'GROUP', 'ORDER', 'UNION', 'VALUES',
+                   'SET', 'BETWEEN', 'EXCEPT', 'HAVING')
 
     def __init__(self, width=2, char=' ', line_width=None):
         self.width = width
@@ -306,7 +311,7 @@ class ReindentFilter:
         full_offset = len(line) - len(self.char * (self.width * self.indent))
         return full_offset - self.offset
 
-    def nl(self):
+    def nl(self, curr_token=None, prev_token=None):
         # TODO: newline character should be configurable
         space = (self.char * ((self.indent * self.width) + self.offset))
         # Detect runaway indenting due to parsing errors
@@ -318,12 +323,8 @@ class ReindentFilter:
         return sql.Token(T.Whitespace, ws)
 
     def _split_kwds(self, tlist):
-        split_words = ('FROM', 'STRAIGHT_JOIN$', 'JOIN$', 'AND', 'OR',
-                       'GROUP', 'ORDER', 'UNION', 'VALUES',
-                       'SET', 'BETWEEN', 'EXCEPT', 'HAVING')
-
         def _next_token(i):
-            t = tlist.token_next_match(i, T.Keyword, split_words,
+            t = tlist.token_next_match(i, T.Keyword, self.split_words,
                                        regex=True)
             if t and t.value.upper() == 'BETWEEN':
                 t = _next_token(tlist.token_index(t) + 1)
@@ -470,6 +471,134 @@ class ReindentFilter:
                     0, sql.Token(T.Whitespace, nl))
             if self._last_stmt != stmt:
                 self._last_stmt = stmt
+
+
+class AlignedIndentFilter:
+    split_words = (
+        'FROM', 'JOIN', 'ON',
+        'WHERE', 'AND', 'OR',
+        'GROUP', 'ORDER', 'UNION', 'VALUES',
+        'SET', 'BETWEEN', 'EXCEPT', 'HAVING',)
+
+    def __init__(self, char=' ', line_width=None):
+        self.char = char
+        self.indent = 0
+        self.offset = 0
+        self.width = 2  # DEBUGGING
+        self.line_width = line_width
+        self._curr_stmt = None
+        self._last_stmt = None
+        self._max_kwd_len = 0
+
+    def _space_before_kwd(self, kwd):
+        kwd_len = len(str(kwd))
+        self._max_kwd_len = max(self._max_kwd_len, kwd_len)
+        return sql.Token(T.Whitespace, self.char * (self._max_kwd_len - kwd_len))
+
+    def nl(self, *args, **kwds):
+        return sql.Token(T.Whitespace, '')
+
+    def whitespace(self, chars=0, newline_before=False, newline_after=False):
+        return sql.Token(
+            T.Whitespace,
+            (str(self.newline()) if newline_before else '') + self.char * chars + (str(self.newline()) if newline_after else ''))
+
+    def newline(self):
+        return sql.Token(T.Whitespace, '\n')
+
+    def update_max_len(self, kwd):
+        self._max_kwd_len = max(self._max_kwd_len, len(str(kwd)))
+
+    def _split_statements(self, tlist):
+        idx = 0
+        token = tlist.token_next_by_type(idx, (T.Keyword.DDL, T.Keyword.DML))
+        while token:
+            self.indent = int(self._max_kwd_len)
+            self.update_max_len(token)
+            prev = tlist.token_prev(tlist.token_index(token), False)
+            if prev and prev.is_whitespace():
+                tlist.tokens.pop(tlist.token_index(prev))
+            # only break if it's not the first token
+            if prev:
+                self.indent = len(str(prev))
+                # import ipdb; ipdb.set_trace()
+                tlist.insert_before(token, self.whitespace(self.indent + self._max_kwd_len, newline_before=True))
+            logging.info('stm: %s, indent: %s, kwd_len: %s, prev: %s' % (str(token), self.indent, self._max_kwd_len, prev))
+            token = tlist.token_next_by_type(tlist.token_index(token) + 1, (T.Keyword.DDL, T.Keyword.DML))
+            if token is None and isinstance(tlist, sql.Parenthesis):
+                tlist.insert_before(tlist.tokens[-1], self.whitespace(self.indent + self._max_kwd_len, newline_before=True))
+                self.indent = 0
+
+    def _split_identifiers(self, tlist):
+        # columns being selected
+        new_tokens = []
+        identifiers = filter(lambda t: isinstance(t, sql.Identifier), tlist.tokens)
+        for i, token in enumerate(identifiers):
+            if i > 0:
+                new_tokens.append(self.newline())
+                new_tokens.append(self.whitespace(self._max_kwd_len + self.indent + 1))
+            new_tokens.append(token)
+            if i < len(identifiers) - 1:
+                # if not last column in select, add a comma seperator
+                new_tokens.append(sql.Token(T.Punctuation, ','))
+        tlist.tokens = new_tokens
+
+    def _split_kwds(self, tlist):
+        def _next_token(i):
+            t = tlist.token_next_match(i, T.Keyword, self.split_words, regex=True)
+            if t and t.value.upper() == 'BETWEEN':
+                t = _next_token(tlist.token_index(t) + 1)
+                if t and t.value.upper() == 'AND':
+                    t = _next_token(tlist.token_index(t) + 1)
+            return t
+
+        idx = 0
+        token = _next_token(idx)
+        added = set()
+        while token:
+            self.update_max_len(token)
+            prev = tlist.token_prev(tlist.token_index(token), False)
+            offset = 1
+            if prev and prev.is_whitespace() and prev not in added:
+                tlist.tokens.pop(tlist.token_index(prev))
+                offset += 1
+            uprev = unicode(prev)
+            logging.info('kwd: %s, indent: %s, kwd_len: %s, prev: %s' % (str(token), self.indent, self._max_kwd_len, uprev))
+            if (prev and (uprev.endswith('\n') or uprev.endswith('\r'))):
+                next_token = tlist.token_next(token)
+            else:
+                tlist.insert_before(token, self.whitespace(self._max_kwd_len - len(str(token)) + self.indent, newline_before=True))
+                next_token = tlist.token_next(token)
+            token = _next_token(tlist.token_index(next_token))
+
+    def _process(self, tlist):
+        token_name = tlist.__class__.__name__.lower()
+        func_name = '_process_%s' % token_name
+        func = getattr(self, func_name, self._process_default)
+        func(tlist)
+
+    def _process_default(self, tlist, split_stmts=True, split_kwds=True, split_identifiers=True):
+        if split_stmts:
+            self._split_statements(tlist)
+        if split_kwds:
+            self._split_kwds(tlist)
+        if split_identifiers and isinstance(tlist, sql.IdentifierList):
+            self._split_identifiers(tlist)
+        for sgroup in tlist.get_sublists():
+            self._process(sgroup)
+
+    def process(self, stack, stmt):
+        if isinstance(stmt, sql.Statement):
+            self._curr_stmt = stmt
+        self._process(stmt)
+
+    def _flatten_before_token(self, token):
+        """Yields all tokens up to but not including the current token"""
+        iterator = self._curr_stmt.flatten()
+        for t in iterator:
+            if t == token:
+                raise StopIteration
+            yield t
 
 
 # FIXME: Doesn't work ;)
