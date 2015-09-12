@@ -14,8 +14,6 @@ from sqlparse.utils import memoize_generator
 from sqlparse.utils import split_unquoted_newlines
 
 
-import logging  # DEBUGGING - remove
-
 # --------------------------
 # token process
 
@@ -484,35 +482,34 @@ class AlignedIndentFilter:
         self.char = char
         self._max_kwd_len = len('select')
 
+    def newline(self):
+        return sql.Token(T.Whitespace, '\n')
+
     def whitespace(self, chars=0, newline_before=False, newline_after=False):
         return sql.Token(
             T.Whitespace,
             (str(self.newline()) if newline_before else '') + self.char * chars + (str(self.newline()) if newline_after else ''))
 
-    def newline(self):
-        return sql.Token(T.Whitespace, '\n')
-
-    def _process_statement(self, tlist):
-        if tlist.tokens[0].is_whitespace():
+    def _process_statement(self, tlist, base_indent=0):
+        if tlist.tokens[0].is_whitespace() and base_indent == 0:
             tlist.tokens.pop(0)
 
-        for sgroup in tlist.get_sublists():
-            self._process(sgroup)
+        # process the main query body
+        return self._process(sql.TokenList(tlist.tokens), base_indent=base_indent)
 
-    def _process_parenthesis(self, tlist):
-        idx = 0
-        token = tlist.token_next_by_type(idx, (T.Keyword.DDL, T.Keyword.DML))
-        while token:
-            base_indent = int(self._max_kwd_len)
-            prev = tlist.token_prev(tlist.token_index(token), skip_ws=False)
-            if prev:
-                base_indent = len(str(prev))
-                tlist.insert_before(token, self.whitespace(base_indent + self._max_kwd_len, newline_before=True))
-            logging.info('stm: %s, indent: %s, kwd_len: %s, prev: %s' % (str(token), base_indent, self._max_kwd_len, prev))
-            token = tlist.token_next_by_type(tlist.token_index(token) + 1, (T.Keyword.DDL, T.Keyword.DML))
-            if token is None:
-                tlist.insert_before(tlist.tokens[-1], self.whitespace(base_indent + self._max_kwd_len, newline_before=True))
-        self._process_substatement(tlist, base_indent=base_indent)
+    def _process_parenthesis(self, tlist, base_indent=0):
+
+        sub_indent = base_indent + self._max_kwd_len + 2  # add two for the space and parens
+        tlist.insert_after(tlist.tokens[0], self.whitespace(sub_indent, newline_before=True))
+        # de-indent the last parenthesis
+        tlist.insert_before(tlist.tokens[-1], self.whitespace(sub_indent - 1, newline_before=True))
+
+        tlist.tokens = (
+            [tlist.tokens[0]] +
+            self._process(sql.TokenList(tlist._groupable_tokens), base_indent=sub_indent).tokens +
+            [tlist.tokens[-1]]
+            )
+        return tlist
 
     def _process_identifierlist(self, tlist, base_indent=0):
         # columns being selected
@@ -527,6 +524,7 @@ class AlignedIndentFilter:
                 # if not last column in select, add a comma seperator
                 new_tokens.append(sql.Token(T.Punctuation, ','))
         tlist.tokens = new_tokens
+        return tlist
 
     def _process_substatement(self, tlist, base_indent=0):
         def _next_token(i):
@@ -540,26 +538,20 @@ class AlignedIndentFilter:
         idx = 0
         token = _next_token(idx)
         while token:
-            prev = tlist.token_prev(tlist.token_index(token), False)
-            uprev = unicode(prev)
-            logging.info('kwd: %s, indent: %s, kwd_len: %s, prev: %s' % (str(token), base_indent, self._max_kwd_len, uprev))
-            if (prev and (uprev.endswith('\n') or uprev.endswith('\r'))):
-                next_token = tlist.token_next(token)
-            else:
-                tlist.insert_before(token, self.whitespace(self._max_kwd_len - len(str(token)) + base_indent, newline_before=True))
-                next_token = tlist.token_next(token)
-            token = _next_token(tlist.token_index(next_token))
+            tlist.insert_before(token, self.whitespace(self._max_kwd_len - len(str(token)) + base_indent, newline_before=True))
+            next_idx = tlist.token_index(token) + 1
+            token = _next_token(next_idx)
 
-    def _process(self, tlist):
+        # process any sub-sub statements
+        for sgroup in tlist.get_sublists():
+            self._process(sgroup, base_indent=base_indent)
+        return tlist
+
+    def _process(self, tlist, base_indent=0):
         token_name = tlist.__class__.__name__.lower()
         func_name = '_process_%s' % token_name
-        func = getattr(self, func_name, self._process_default)
-        print func.__name__, token_name, str(tlist)
-        func(tlist)
-
-    def _process_default(self, tlist):
-        for sgroup in tlist.get_sublists():
-            self._process(sgroup)
+        func = getattr(self, func_name, self._process_substatement)
+        return func(tlist, base_indent=base_indent)
 
     def process(self, stack, stmt):
         self._process(stmt)
