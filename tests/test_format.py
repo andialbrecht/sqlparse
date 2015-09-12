@@ -2,7 +2,7 @@
 
 import pytest
 
-from tests.utils import TestCaseBase
+from utils import TestCaseBase
 
 import sqlparse
 from sqlparse.exceptions import SQLParseError
