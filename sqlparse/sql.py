@@ -633,7 +633,7 @@ class Case(TokenList):
             if token.match(T.Keyword, 'CASE'):
                 continue
 
-            if token.ttype is T.Whitespace:
+            if token.ttype is T.Whitespace or token.ttype is T.Newline:
                 continue
 
             elif token.match(T.Keyword, 'WHEN'):

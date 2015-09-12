@@ -546,7 +546,7 @@ class AlignedIndentFilter:
         end_token = tlist.token_next_match(0, T.Keyword, 'END')
         cases.append((None, [end_token]))
 
-        condition_width = max(len(str(cond)) for cond, value in cases)
+        condition_width = max(len(' '.join(map(str, cond))) for cond, value in cases if cond)
         for i, (cond, value) in enumerate(cases):
             if cond is None:  # else or end
                 stmt = value[0]
@@ -557,7 +557,7 @@ class AlignedIndentFilter:
             if i > 0:
                 tlist.insert_before(stmt, self.whitespace(base_offset + case_offset - len(str(stmt))))
             if cond:
-                tlist.insert_after(cond[-1], self.whitespace(condition_width - len(str(cond))))
+                tlist.insert_after(cond[-1], self.whitespace(condition_width - len(' '.join(map(str, cond)))))
 
             if i < len(cases) - 1:
                 # if not the END add a newline
