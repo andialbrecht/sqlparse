@@ -518,8 +518,7 @@ class AlignedIndentFilter:
     def _process_identifierlist(self, tlist, base_indent=0):
         # columns being selected
         new_tokens = []
-        identifiers = filter(
-            lambda t: isinstance(t, sql.Identifier) or t.ttype in (T.Number.Integer, T.Wildcard), tlist.tokens)
+        identifiers = filter(lambda t: t.ttype not in (T.Punctuation, T.Whitespace, T.Newline), tlist.tokens)
         for i, token in enumerate(identifiers):
             if i > 0:
                 new_tokens.append(self.newline())
@@ -588,7 +587,7 @@ class AlignedIndentFilter:
             self._process(sgroup, base_indent=base_indent + indent_offset)
         return tlist
 
-    def _process(self, tlist, base_indent=0, verbose=False):
+    def _process(self, tlist, base_indent=0, verbose=True):
         token_name = tlist.__class__.__name__.lower()
         func_name = '_process_%s' % token_name
         func = getattr(self, func_name, self._process_substatement)

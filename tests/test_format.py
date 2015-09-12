@@ -208,6 +208,23 @@ class TestFormatReindentAligned(TestCaseBase):
                 '          2',
                 ]))
 
+    def test_window_functions(self):
+        sql = """
+            select a,
+            SUM(a) OVER (PARTITION BY b ORDER BY c ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as sum_a,
+            ROW_NUMBER() OVER (PARTITION BY b, c ORDER BY d DESC) as row_num
+            from table
+            """
+        # print(self.formatter(sql))
+        self.ndiffAssertEqual(
+            self.formatter(sql),
+            '\n'.join([
+                'select a,',
+                '       SUM(a) OVER (PARTITION BY b ORDER BY c ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as sum_a,',
+                '       ROW_NUMBER() OVER (PARTITION BY b, c ORDER BY d DESC) as row_num',
+                '  from table',
+                ]))
+
 
 class TestFormatReindent(TestCaseBase):
 
