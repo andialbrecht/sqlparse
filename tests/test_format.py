@@ -165,6 +165,60 @@ class TestFormatReindentAligned(TestCaseBase):
                 '   and b between 3 and 4'
             ]))
 
+    def test_group_by(self):
+        sql = """
+            select a, b, c, sum(x) as sum_x, count(y) as cnt_y
+            from table
+            group by a,b,c
+            having sum(x) > 1
+            and count(y) > 5
+            order by 3,2,1
+            """
+        self.ndiffAssertEqual(
+            self.formatter(sql),
+            '\n'.join([
+                'select a,',
+                '       b,',
+                '       c,',
+                '       sum(x) as sum_x,',
+                '       count(y) as cnt_y',
+                '  from table',
+                ' group by a,',
+                '          b,',
+                '          c',
+                'having sum(x) > 1',
+                '   and count(y) > 5',
+                ' order by 3,',
+                '          2,',
+                '          1',
+            ]))
+
+    def test_group_by_subquery(self):
+        # TODO: add subquery alias in again when test_grouping.TestGrouping.test_identifier_list_subquery fixed
+        sql = """
+            select *, sum_b + 2 as mod_sum
+            from (
+              select a, sum(b) as sum_b
+              from table
+              group by a,z)
+            order by 1,2
+            """
+        self.ndiffAssertEqual(
+            self.formatter(sql),
+            '\n'.join([
+                'select *,',
+                '       sum_b + 2 as mod_sum',
+                '  from (',
+                '        select a,',
+                '               sum(b) as sum_b',
+                '          from table',
+                '         group by a,',
+                '                  z',
+                '       )',
+                ' order by 1,',
+                '          2',
+                ]))
+
 
 class TestFormatReindent(TestCaseBase):
 
