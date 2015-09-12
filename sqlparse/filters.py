@@ -482,13 +482,7 @@ class AlignedIndentFilter:
 
     def __init__(self, char=' ', line_width=None):
         self.char = char
-        self.indent = 0
-        self.offset = 0
-        self.width = 2  # DEBUGGING
-        self.line_width = line_width
-        self._curr_stmt = None
-        self._last_stmt = None
-        self._max_kwd_len = 0
+        self._max_kwd_len = len('select')
 
     def whitespace(self, chars=0, newline_before=False, newline_after=False):
         return sql.Token(
@@ -498,44 +492,43 @@ class AlignedIndentFilter:
     def newline(self):
         return sql.Token(T.Whitespace, '\n')
 
-    def update_max_len(self, kwd):
-        self._max_kwd_len = max(self._max_kwd_len, len(str(kwd)))
+    def _process_statement(self, tlist):
+        if tlist.tokens[0].is_whitespace():
+            tlist.tokens.pop(0)
 
-    def _process_statements(self, tlist):
+        for sgroup in tlist.get_sublists():
+            self._process(sgroup)
+
+    def _process_parenthesis(self, tlist):
         idx = 0
         token = tlist.token_next_by_type(idx, (T.Keyword.DDL, T.Keyword.DML))
         while token:
-            self.indent = int(self._max_kwd_len)
-            self.update_max_len(token)
-            prev = tlist.token_prev(tlist.token_index(token), False)
-            if prev and prev.is_whitespace():
-                tlist.tokens.pop(tlist.token_index(prev))
-            # only break if it's not the first token
+            base_indent = int(self._max_kwd_len)
+            prev = tlist.token_prev(tlist.token_index(token), skip_ws=False)
             if prev:
-                self.indent = len(str(prev))
-                # import ipdb; ipdb.set_trace()
-                tlist.insert_before(token, self.whitespace(self.indent + self._max_kwd_len, newline_before=True))
-            logging.info('stm: %s, indent: %s, kwd_len: %s, prev: %s' % (str(token), self.indent, self._max_kwd_len, prev))
+                base_indent = len(str(prev))
+                tlist.insert_before(token, self.whitespace(base_indent + self._max_kwd_len, newline_before=True))
+            logging.info('stm: %s, indent: %s, kwd_len: %s, prev: %s' % (str(token), base_indent, self._max_kwd_len, prev))
             token = tlist.token_next_by_type(tlist.token_index(token) + 1, (T.Keyword.DDL, T.Keyword.DML))
-            if token is None and isinstance(tlist, sql.Parenthesis):
-                tlist.insert_before(tlist.tokens[-1], self.whitespace(self.indent + self._max_kwd_len, newline_before=True))
-                self.indent = 0
+            if token is None:
+                tlist.insert_before(tlist.tokens[-1], self.whitespace(base_indent + self._max_kwd_len, newline_before=True))
+        self._process_substatement(tlist, base_indent=base_indent)
 
-    def _process_identifiers(self, tlist):
+    def _process_identifierlist(self, tlist, base_indent=0):
         # columns being selected
         new_tokens = []
         identifiers = filter(lambda t: isinstance(t, sql.Identifier), tlist.tokens)
         for i, token in enumerate(identifiers):
             if i > 0:
                 new_tokens.append(self.newline())
-                new_tokens.append(self.whitespace(self._max_kwd_len + self.indent + 1))
+                new_tokens.append(self.whitespace(self._max_kwd_len + base_indent + 1))
             new_tokens.append(token)
             if i < len(identifiers) - 1:
                 # if not last column in select, add a comma seperator
                 new_tokens.append(sql.Token(T.Punctuation, ','))
         tlist.tokens = new_tokens
 
-    def _split_kwds(self, tlist):
+    def _process_substatement(self, tlist, base_indent=0):
         def _next_token(i):
             t = tlist.token_next_match(i, T.Keyword, self.split_words, regex=True)
             if t and t.value.upper() == 'BETWEEN':
@@ -546,20 +539,14 @@ class AlignedIndentFilter:
 
         idx = 0
         token = _next_token(idx)
-        added = set()
         while token:
-            self.update_max_len(token)
             prev = tlist.token_prev(tlist.token_index(token), False)
-            offset = 1
-            if prev and prev.is_whitespace() and prev not in added:
-                tlist.tokens.pop(tlist.token_index(prev))
-                offset += 1
             uprev = unicode(prev)
-            logging.info('kwd: %s, indent: %s, kwd_len: %s, prev: %s' % (str(token), self.indent, self._max_kwd_len, uprev))
+            logging.info('kwd: %s, indent: %s, kwd_len: %s, prev: %s' % (str(token), base_indent, self._max_kwd_len, uprev))
             if (prev and (uprev.endswith('\n') or uprev.endswith('\r'))):
                 next_token = tlist.token_next(token)
             else:
-                tlist.insert_before(token, self.whitespace(self._max_kwd_len - len(str(token)) + self.indent, newline_before=True))
+                tlist.insert_before(token, self.whitespace(self._max_kwd_len - len(str(token)) + base_indent, newline_before=True))
                 next_token = tlist.token_next(token)
             token = _next_token(tlist.token_index(next_token))
 
@@ -567,13 +554,10 @@ class AlignedIndentFilter:
         token_name = tlist.__class__.__name__.lower()
         func_name = '_process_%s' % token_name
         func = getattr(self, func_name, self._process_default)
+        print func.__name__, token_name, str(tlist)
         func(tlist)
 
     def _process_default(self, tlist):
-        self._process_statements(tlist)
-        self._split_kwds(tlist)
-        if isinstance(tlist, sql.IdentifierList):
-            self._process_identifiers(tlist)
         for sgroup in tlist.get_sublists():
             self._process(sgroup)
 
