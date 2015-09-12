@@ -490,14 +490,6 @@ class AlignedIndentFilter:
         self._last_stmt = None
         self._max_kwd_len = 0
 
-    def _space_before_kwd(self, kwd):
-        kwd_len = len(str(kwd))
-        self._max_kwd_len = max(self._max_kwd_len, kwd_len)
-        return sql.Token(T.Whitespace, self.char * (self._max_kwd_len - kwd_len))
-
-    def nl(self, *args, **kwds):
-        return sql.Token(T.Whitespace, '')
-
     def whitespace(self, chars=0, newline_before=False, newline_after=False):
         return sql.Token(
             T.Whitespace,
@@ -509,7 +501,7 @@ class AlignedIndentFilter:
     def update_max_len(self, kwd):
         self._max_kwd_len = max(self._max_kwd_len, len(str(kwd)))
 
-    def _split_statements(self, tlist):
+    def _process_statements(self, tlist):
         idx = 0
         token = tlist.token_next_by_type(idx, (T.Keyword.DDL, T.Keyword.DML))
         while token:
@@ -529,7 +521,7 @@ class AlignedIndentFilter:
                 tlist.insert_before(tlist.tokens[-1], self.whitespace(self.indent + self._max_kwd_len, newline_before=True))
                 self.indent = 0
 
-    def _split_identifiers(self, tlist):
+    def _process_identifiers(self, tlist):
         # columns being selected
         new_tokens = []
         identifiers = filter(lambda t: isinstance(t, sql.Identifier), tlist.tokens)
@@ -577,28 +569,16 @@ class AlignedIndentFilter:
         func = getattr(self, func_name, self._process_default)
         func(tlist)
 
-    def _process_default(self, tlist, split_stmts=True, split_kwds=True, split_identifiers=True):
-        if split_stmts:
-            self._split_statements(tlist)
-        if split_kwds:
-            self._split_kwds(tlist)
-        if split_identifiers and isinstance(tlist, sql.IdentifierList):
-            self._split_identifiers(tlist)
+    def _process_default(self, tlist):
+        self._process_statements(tlist)
+        self._split_kwds(tlist)
+        if isinstance(tlist, sql.IdentifierList):
+            self._process_identifiers(tlist)
         for sgroup in tlist.get_sublists():
             self._process(sgroup)
 
     def process(self, stack, stmt):
-        if isinstance(stmt, sql.Statement):
-            self._curr_stmt = stmt
         self._process(stmt)
-
-    def _flatten_before_token(self, token):
-        """Yields all tokens up to but not including the current token"""
-        iterator = self._curr_stmt.flatten()
-        for t in iterator:
-            if t == token:
-                raise StopIteration
-            yield t
 
 
 # FIXME: Doesn't work ;)

@@ -109,7 +109,13 @@ class TestFormatReindentAligned(TestCaseBase):
         return sqlparse.format(sql, reindent='aligned')
 
     def test_basic(self):
-        sql = """select a, b as bb,c from table join (select a * 2 as a from new_table) other on table.a = other.a where c is true"""
+        sql = """
+            select a, b as bb,c from table
+            join (select a * 2 as a from new_table) other
+            on table.a = other.a
+            where c is true
+            and b between 3 and 4
+            """
         out = self.formatter(sql)
         import logging
         logging.info('\n\n{}\n'.format(out))
@@ -125,7 +131,8 @@ class TestFormatReindentAligned(TestCaseBase):
                 '          from new_table',
                 '       ) other',
                 '    on table.a = other.a',
-                ' where c is true'
+                ' where c is true',
+                '   and b between 3 and 4'
             ]))
 
 
