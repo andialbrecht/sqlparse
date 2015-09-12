@@ -340,7 +340,7 @@ class AlignedIndentFilter:
         'FROM',
         'JOIN', 'ON',
         'WHERE', 'AND', 'OR',
-        'GROUP', 'HAVING',
+        'GROUP', 'HAVING', 'LIMIT',
         'ORDER', 'UNION', 'VALUES',
         'SET', 'BETWEEN', 'EXCEPT',
         )
