@@ -139,6 +139,36 @@ class StripWhitespaceFilter(object):
             stmt.tokens.pop(-1)
 
 
+class SpacesAroundOperatorsFilter:
+    whitelist = (sql.Identifier, sql.Comparison, sql.Where)
+
+    def _process(self, tlist):
+        def next_token(idx):
+            # HACK: distinguish between real wildcard from multiplication operator
+            return tlist.token_next_by_type(idx, (T.Operator, T.Comparison, T.Wildcard))
+        idx = 0
+        token = next_token(idx)
+        while token:
+            idx = tlist.token_index(token)
+            if idx > 0 and tlist.tokens[idx - 1].ttype != T.Whitespace:
+                tlist.tokens.insert(idx, sql.Token(T.Whitespace, ' '))  # insert before
+                idx += 1
+            if idx < len(tlist.tokens) - 1:
+                if token.ttype == T.Wildcard and tlist.tokens[idx + 1].match(T.Punctuation, ','):
+                    pass  # this must have been a real wildcard, not multiplication
+                elif tlist.tokens[idx + 1].ttype != T.Whitespace:
+                    tlist.tokens.insert(idx + 1, sql.Token(T.Whitespace, ' '))
+
+            idx += 1
+            token = next_token(idx)
+
+        for sgroup in tlist.get_sublists():
+            self._process(sgroup)
+
+    def process(self, stack, stmt):
+        self._process(stmt)
+
+
 class ReindentFilter(object):
     def __init__(self, width=2, char=' ', line_width=None, wrap_after=0):
         self.width = width
