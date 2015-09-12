@@ -310,9 +310,6 @@ class SpacesAroundOperatorsFilter:
 
 
 class ReindentFilter:
-    split_words = ('FROM', 'STRAIGHT_JOIN$', 'JOIN$', 'AND', 'OR',
-                   'GROUP', 'ORDER', 'UNION', 'VALUES',
-                   'SET', 'BETWEEN', 'EXCEPT', 'HAVING')
 
     def __init__(self, width=2, char=' ', line_width=None):
         self.width = width
@@ -339,7 +336,7 @@ class ReindentFilter:
         full_offset = len(line) - len(self.char * (self.width * self.indent))
         return full_offset - self.offset
 
-    def nl(self, curr_token=None, prev_token=None):
+    def nl(self):
         # TODO: newline character should be configurable
         space = (self.char * ((self.indent * self.width) + self.offset))
         # Detect runaway indenting due to parsing errors
@@ -351,8 +348,12 @@ class ReindentFilter:
         return sql.Token(T.Whitespace, ws)
 
     def _split_kwds(self, tlist):
+        split_words = ('FROM', 'STRAIGHT_JOIN$', 'JOIN$', 'AND', 'OR',
+                       'GROUP', 'ORDER', 'UNION', 'VALUES',
+                       'SET', 'BETWEEN', 'EXCEPT', 'HAVING')
+
         def _next_token(i):
-            t = tlist.token_next_match(i, T.Keyword, self.split_words,
+            t = tlist.token_next_match(i, T.Keyword, split_words,
                                        regex=True)
             if t and t.value.upper() == 'BETWEEN':
                 t = _next_token(tlist.token_index(t) + 1)
