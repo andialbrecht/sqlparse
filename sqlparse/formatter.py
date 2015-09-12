@@ -28,6 +28,11 @@ def validate_options(options):
         raise SQLParseError('Invalid value for strip_comments: %r'
                             % strip_comments)
 
+    use_space_around_operators = options.get('use_space_around_operators', False)
+    if use_space_around_operators not in [True, False]:
+        raise SQLParseError('Invalid value for use_space_around_operators: %r'
+                            % use_space_around_operators)
+
     strip_ws = options.get('strip_whitespace', False)
     if strip_ws not in [True, False]:
         raise SQLParseError('Invalid value for strip_whitespace: %r'
@@ -100,6 +105,10 @@ def build_filter_stack(stack, options):
     if options.get('truncate_strings', None) is not None:
         stack.preprocess.append(filters.TruncateStringFilter(
             width=options['truncate_strings'], char=options['truncate_char']))
+
+    if options.get('use_space_around_operators', False):
+        stack.enable_grouping()
+        stack.stmtprocess.append(filters.SpacesAroundOperatorsFilter())
 
     # After grouping
     if options.get('strip_comments', False):

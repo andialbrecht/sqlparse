@@ -282,7 +282,6 @@ class TestFormatReindentAligned(TestCaseBase):
             ROW_NUMBER() OVER (PARTITION BY b, c ORDER BY d DESC) as row_num
             from table
             """
-        # print(self.formatter(sql))
         self.ndiffAssertEqual(
             self.formatter(sql),
             '\n'.join([
@@ -291,6 +290,40 @@ class TestFormatReindentAligned(TestCaseBase):
                 '       ROW_NUMBER() OVER (PARTITION BY b, c ORDER BY d DESC) as row_num',
                 '  from table',
                 ]))
+
+
+class TestSpacesAroundOperators(TestCaseBase):
+    @staticmethod
+    def formatter(sql):
+        return sqlparse.format(sql, use_space_around_operators=True)
+
+    def test_basic(self):
+        sql = 'select a+b as d from table where (c-d)%2= 1 and e> 3.0/4 and z^2 <100'
+        self.ndiffAssertEqual(
+            self.formatter(sql),
+            'select a + b as d from table where (c - d) % 2 = 1 and e > 3.0 / 4 and z ^ 2 < 100'
+            )
+
+    def test_bools(self):
+        sql = 'select * from table where a &&b or c||d'
+        self.ndiffAssertEqual(
+            self.formatter(sql),
+            'select * from table where a && b or c || d'
+            )
+
+    def test_nested(self):
+        sql = 'select *, case when a-b then c end from table'
+        self.ndiffAssertEqual(
+            self.formatter(sql),
+            'select *, case when a - b then c end from table'
+            )
+
+    def test_wildcard_vs_mult(self):
+        sql = 'select a*b-c from table'
+        self.ndiffAssertEqual(
+            self.formatter(sql),
+            'select a * b - c from table'
+            )
 
 
 class TestFormatReindent(TestCaseBase):

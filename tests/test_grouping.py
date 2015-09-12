@@ -147,6 +147,10 @@ class TestGrouping(TestCaseBase):
         self.assert_(isinstance(p.tokens[0].tokens[0], sql.Identifier))
         self.assert_(isinstance(p.tokens[0].tokens[3], sql.Identifier))
 
+    def test_identifiers_with_operators(self):
+        p = sqlparse.parse('a+b as c from table where (d-e)%2= 1')[0]
+        self.assertEqual(len([x for x in p.flatten() if x.ttype == sqlparse.tokens.Name]), 5)
+
     def test_where(self):
         s = 'select * from foo where bar = 1 order by id desc'
         p = sqlparse.parse(s)[0]
