@@ -504,6 +504,7 @@ class AlignedIndentFilter:
         # de-indent the last parenthesis
         tlist.insert_before(tlist.tokens[-1], self.whitespace(sub_indent - 1, newline_before=True))
 
+        # process the inside of the parantheses
         tlist.tokens = (
             [tlist.tokens[0]] +
             self._process(sql.TokenList(tlist._groupable_tokens), base_indent=sub_indent).tokens +
@@ -524,11 +525,41 @@ class AlignedIndentFilter:
                 # if not last column in select, add a comma seperator
                 new_tokens.append(sql.Token(T.Punctuation, ','))
         tlist.tokens = new_tokens
+
+        # process any sub-sub statements (like case statements)
+        for sgroup in tlist.get_sublists():
+            self._process(sgroup, base_indent=base_indent)
         return tlist
+
+    def _process_case(self, tlist, base_indent=0):
+        base_offset = base_indent + self._max_kwd_len + len('case ')
+        case_offset = len('when ')
+        cases = tlist.get_cases()
+        # align the end as well
+        end_token = tlist.token_next_match(0, T.Keyword, 'END')
+        cases.append((None, [end_token]))
+
+        condition_width = max(len(str(cond)) for cond, value in cases)
+        for i, (cond, value) in enumerate(cases):
+            if cond is None:  # else or end
+                stmt = value[0]
+                line = value
+            else:
+                stmt = cond[0]
+                line = cond + value
+            if i > 0:
+                tlist.insert_before(stmt, self.whitespace(base_offset + case_offset - len(str(stmt))))
+            if cond:
+                tlist.insert_after(cond[-1], self.whitespace(condition_width - len(str(cond))))
+
+            if i < len(cases) - 1:
+                # if not the END add a newline
+                tlist.insert_after(line[-1], self.newline())
 
     def _process_substatement(self, tlist, base_indent=0):
         def _next_token(i):
             t = tlist.token_next_match(i, T.Keyword, self.split_words, regex=True)
+            # treat "BETWEEN x and y" as a single statement
             if t and t.value.upper() == 'BETWEEN':
                 t = _next_token(tlist.token_index(t) + 1)
                 if t and t.value.upper() == 'AND':
@@ -547,10 +578,12 @@ class AlignedIndentFilter:
             self._process(sgroup, base_indent=base_indent)
         return tlist
 
-    def _process(self, tlist, base_indent=0):
+    def _process(self, tlist, base_indent=0, verbose=False):
         token_name = tlist.__class__.__name__.lower()
         func_name = '_process_%s' % token_name
         func = getattr(self, func_name, self._process_substatement)
+        if verbose:
+            print func.__name__, token_name, str(tlist)
         return func(tlist, base_indent=base_indent)
 
     def process(self, stack, stmt):

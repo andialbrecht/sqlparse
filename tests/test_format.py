@@ -135,10 +135,8 @@ class TestFormatReindentAligned(TestCaseBase):
 
     def test_case_statement(self):
         sql = """
-            select a, b as bb,c, case when a = 0 then 1
-            when bb = 1 then 1 when 1 =2 then 2 else 0 end as d from table
-            join (select a * 2 as a from new_table) other
-            on table.a = other.a
+            select a, case when a = 0 then 1 when bb = 1 then 1 when c = 2 then 2 else 0 end as d, extra_col
+            from table
             where c is true
             and b between 3 and 4
             """
@@ -147,19 +145,13 @@ class TestFormatReindentAligned(TestCaseBase):
             out,
             '\n'.join([
                 'select a,',
-                '       b as bb,',
-                '       c',
                 '       case when a = 0  then 1',
                 '            when bb = 1 then 1',
-                '            when 1 = 2  then 2',
+                '            when c = 2  then 2',
                 '            else 0',
-                '             end as d',
+                '             end as d,',
+                '       extra_col',
                 '  from table',
-                '  join (',
-                '        select a * 2 as a',
-                '          from new_table',
-                '       ) other',
-                '    on table.a = other.a',
                 ' where c is true',
                 '   and b between 3 and 4'
             ]))

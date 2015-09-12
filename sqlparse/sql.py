@@ -623,6 +623,9 @@ class Case(TokenList):
             if token.match(T.Keyword, 'CASE'):
                 continue
 
+            if token.ttype is T.Whitespace:
+                continue
+
             elif token.match(T.Keyword, 'WHEN'):
                 ret.append(([], []))
                 mode = CONDITION
