@@ -336,9 +336,10 @@ class ReindentFilter(object):
 
 
 class AlignedIndentFilter:
+    join_words = r'((LEFT\s+|RIGHT\s+|FULL\s+)?(INNER\s+|OUTER\s+|STRAIGHT\s+)?|(CROSS\s+|NATURAL\s+)?)?JOIN\b'
     split_words = (
         'FROM',
-        'JOIN', 'ON',
+        join_words, 'ON',
         'WHERE', 'AND', 'OR',
         'GROUP', 'HAVING', 'LIMIT',
         'ORDER', 'UNION', 'VALUES',
@@ -439,7 +440,12 @@ class AlignedIndentFilter:
         idx = 0
         token = _next_token(idx)
         while token:
-            tlist.insert_before(token, self.whitespace(self._max_kwd_len - len(str(token)) + base_indent, newline_before=True))
+            if token.match(T.Keyword, self.join_words, regex=True):
+                # joins are a special case. we only consider the first word of the join as the aligner
+                token_indent = len(token.value.split()[0])
+            else:
+                token_indent = len(str(token))
+            tlist.insert_before(token, self.whitespace(self._max_kwd_len - token_indent + base_indent, newline_before=True))
             next_idx = tlist.token_index(token) + 1
             token = _next_token(next_idx)
 
