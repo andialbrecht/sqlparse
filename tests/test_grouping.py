@@ -122,6 +122,16 @@ class TestGrouping(TestCaseBase):
         p = sqlparse.parse('(a, b, c)')[0]
         self.assert_(isinstance(p.tokens[0].tokens[1], sql.IdentifierList))
 
+    @pytest.mark.xfail(strict=True)
+    def test_identifier_list_subquery(self):
+        """identifier lists should still work in subqueries with aliases"""
+        p = sqlparse.parse("""select * from (select a, b + c as d from table) sub""")[0]
+        subquery = p.tokens[-1].tokens[0]
+        iden_list = subquery.token_next_by_instance(0, sql.IdentifierList)
+        self.assert_(iden_list is not None)
+        # all the identifiers should be within the IdentifierList
+        self.assert_(subquery.token_next_by_instance(subquery.token_index(iden_list), sql.Identifier) is None)
+
     def test_identifier_list_case(self):
         p = sqlparse.parse('a, case when 1 then 2 else 3 end as b, c')[0]
         self.assert_(isinstance(p.tokens[0], sql.IdentifierList))
