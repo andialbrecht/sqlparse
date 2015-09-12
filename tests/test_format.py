@@ -115,6 +115,7 @@ class TestFormatReindentAligned(TestCaseBase):
             on table.a = other.a
             where c is true
             and b between 3 and 4
+            limit 10
             """
         self.ndiffAssertEqual(
             self.formatter(sql),
@@ -129,7 +130,8 @@ class TestFormatReindentAligned(TestCaseBase):
                 '       ) other',
                 '    on table.a = other.a',
                 ' where c is true',
-                '   and b between 3 and 4'
+                '   and b between 3 and 4',
+                ' limit 10',
             ]))
 
     def test_case_statement(self):

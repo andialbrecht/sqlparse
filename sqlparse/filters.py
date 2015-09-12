@@ -473,10 +473,13 @@ class ReindentFilter:
 
 class AlignedIndentFilter:
     split_words = (
-        'FROM', 'JOIN', 'ON',
+        'FROM',
+        'JOIN', 'ON',
         'WHERE', 'AND', 'OR',
-        'GROUP', 'ORDER', 'UNION', 'VALUES',
-        'SET', 'BETWEEN', 'EXCEPT', 'HAVING',)
+        'GROUP', 'HAVING', 'LIMIT',
+        'ORDER', 'UNION', 'VALUES',
+        'SET', 'BETWEEN', 'EXCEPT',
+        )
 
     def __init__(self, char=' ', line_width=None):
         self.char = char
@@ -587,7 +590,7 @@ class AlignedIndentFilter:
             self._process(sgroup, base_indent=base_indent + indent_offset)
         return tlist
 
-    def _process(self, tlist, base_indent=0, verbose=True):
+    def _process(self, tlist, base_indent=0, verbose=False):
         token_name = tlist.__class__.__name__.lower()
         func_name = '_process_%s' % token_name
         func = getattr(self, func_name, self._process_substatement)
