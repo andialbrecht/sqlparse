@@ -117,47 +117,12 @@ class TestFormatReindentAligned(TestCaseBase):
             and b between 3 and 4
             """
         out = self.formatter(sql)
-        import logging
-        logging.info('\n\n{}\n'.format(out))
-        self.assertEqual(
+        self.ndiffAssertEqual(
             out,
             '\n'.join([
                 'select a,',
                 '       b as bb,',
                 '       c',
-                '  from table',
-                '  join (',
-                '        select a * 2 as a',
-                '          from new_table',
-                '       ) other',
-                '    on table.a = other.a',
-                ' where c is true',
-                '   and b between 3 and 4'
-            ]))
-            
-    def test_case_statement(self):
-        sql = """
-            select a, b as bb,c, case when a = 0 then 1 
-            when bb = 1 then 1 when 1 =2 then 2 else 0 end as d from table
-            join (select a * 2 as a from new_table) other
-            on table.a = other.a
-            where c is true
-            and b between 3 and 4
-            """
-        out = self.formatter(sql)
-        import logging
-        logging.info('\n\n{}\n'.format(out))
-        self.assertEqual(
-            out,
-            '\n'.join([
-                'select a,',
-                '       b as bb,',
-                '       c',
-                '       case when a = 0  then 1',
-                '            when bb = 1 then 1',
-                '            when 1 = 2  then 2',
-                '            else 0',
-                '       end as d',
                 '  from table',
                 '  join (',
                 '        select a * 2 as a',
@@ -168,6 +133,36 @@ class TestFormatReindentAligned(TestCaseBase):
                 '   and b between 3 and 4'
             ]))
 
+    def test_case_statement(self):
+        sql = """
+            select a, b as bb,c, case when a = 0 then 1
+            when bb = 1 then 1 when 1 =2 then 2 else 0 end as d from table
+            join (select a * 2 as a from new_table) other
+            on table.a = other.a
+            where c is true
+            and b between 3 and 4
+            """
+        out = self.formatter(sql)
+        self.ndiffAssertEqual(
+            out,
+            '\n'.join([
+                'select a,',
+                '       b as bb,',
+                '       c',
+                '       case when a = 0  then 1',
+                '            when bb = 1 then 1',
+                '            when 1 = 2  then 2',
+                '            else 0',
+                '             end as d',
+                '  from table',
+                '  join (',
+                '        select a * 2 as a',
+                '          from new_table',
+                '       ) other',
+                '    on table.a = other.a',
+                ' where c is true',
+                '   and b between 3 and 4'
+            ]))
 
 
 class TestFormatReindent(TestCaseBase):
