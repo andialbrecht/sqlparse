@@ -498,7 +498,9 @@ class AlignedIndentFilter:
         return self._process(sql.TokenList(tlist.tokens), base_indent=base_indent)
 
     def _process_parenthesis(self, tlist, base_indent=0):
-
+        if not tlist.token_next_by_instance(0, sql.Statement):
+            # if this isn't a subquery, don't re-indent
+            return tlist
         sub_indent = base_indent + self._max_kwd_len + 2  # add two for the space and parens
         tlist.insert_after(tlist.tokens[0], self.whitespace(sub_indent, newline_before=True))
         # de-indent the last parenthesis
@@ -515,7 +517,7 @@ class AlignedIndentFilter:
     def _process_identifierlist(self, tlist, base_indent=0):
         # columns being selected
         new_tokens = []
-        identifiers = filter(lambda t: isinstance(t, sql.Identifier), tlist.tokens)
+        identifiers = filter(lambda t: isinstance(t, sql.Identifier) or t.ttype == T.Number.Integer, tlist.tokens)
         for i, token in enumerate(identifiers):
             if i > 0:
                 new_tokens.append(self.newline())
@@ -575,7 +577,13 @@ class AlignedIndentFilter:
 
         # process any sub-sub statements
         for sgroup in tlist.get_sublists():
-            self._process(sgroup, base_indent=base_indent)
+            prev_token = tlist.token_prev(tlist.token_index(sgroup))
+            indent_offset = 0
+            if prev_token and prev_token.match(T.Keyword, 'BY'):
+                # HACK: make "group by" and "order by" indents work. these are longer than _max_kwd_len.
+                # TODO: generalize this
+                indent_offset = 3
+            self._process(sgroup, base_indent=base_indent + indent_offset)
         return tlist
 
     def _process(self, tlist, base_indent=0, verbose=False):

@@ -290,6 +290,16 @@ class TokenList(Token):
             if token.match(ttype, value, regex=regex):
                 return token
 
+    def token_prev_match(self, idx, ttype, value, regex=False):
+        """Returns prev token where it's ``match`` method returns ``True``."""
+        if not isinstance(idx, int):
+            idx = self.token_index(idx)
+
+        for n in reversed(xrange(0, idx + 1)):
+            token = self.tokens[n]
+            if token.match(ttype, value, regex=regex):
+                return token
+
     def token_not_matching(self, idx, funcs):
         for token in self.tokens[idx:]:
             passed = False
