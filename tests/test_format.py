@@ -115,6 +115,7 @@ class TestFormatReindentAligned(TestCaseBase):
             on table.a = other.a
             where c is true
             and b between 3 and 4
+            or d is 'blue'
             limit 10
             """
         self.ndiffAssertEqual(
@@ -131,7 +132,35 @@ class TestFormatReindentAligned(TestCaseBase):
                 '    on table.a = other.a',
                 ' where c is true',
                 '   and b between 3 and 4',
+                "    or d is 'blue'",
                 ' limit 10',
+            ]))
+
+    def test_joins(self):
+        sql = """
+            select * from a
+            join b on a.one = b.one
+            left join c on c.two = a.two and c.three = a.three
+            full outer join d on d.three = a.three
+            cross join e on e.four = a.four
+            join f using (one, two, three)
+            """
+        print(self.formatter(sql))
+        self.ndiffAssertEqual(
+            self.formatter(sql),
+            '\n'.join([
+                'select *',
+                '  from a',
+                '  join b',
+                '    on a.one = b.one',
+                '  left join c',
+                '    on c.two = a.two',
+                '   and c.three = a.three',
+                '  full outer join d',
+                '    on d.three = a.three',
+                ' cross join e',
+                '    on e.four = a.four',
+                '  join f using (one, two, three)',
             ]))
 
     def test_case_statement(self):
