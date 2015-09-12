@@ -66,7 +66,7 @@ class Token(object):
         """Resolve subgroups."""
         yield self
 
-    def match(self, ttype, values, regex=False, include_subtypes=False):
+    def match(self, ttype, values, regex=False):
         """Checks whether the token matches the given arguments.
 
         *ttype* is a token type. If this token doesn't match the given token
@@ -79,8 +79,6 @@ class Token(object):
         treated as regular expressions.
         """
         type_matched = self.ttype is ttype
-        if include_subtypes:
-            type_matched |= (self.ttype is not None and self.ttype.parent is ttype)
         if not type_matched or values is None:
             return type_matched
 
@@ -88,7 +86,7 @@ class Token(object):
             if isinstance(values, basestring):
                 values = set([values])
 
-            if (self.ttype is T.Keyword) or (include_subtypes and self.ttype is not None and self.ttype.parent is T.Keyword):
+            if self.ttype is T.Keyword:
                 values = set(re.compile(v, re.IGNORECASE) for v in values)
             else:
                 values = set(re.compile(v) for v in values)
@@ -282,14 +280,14 @@ class TokenList(Token):
             if token.ttype in ttypes:
                 return token
 
-    def token_next_match(self, idx, ttype, value, regex=False, include_subtypes=False):
+    def token_next_match(self, idx, ttype, value, regex=False):
         """Returns next token where it's ``match`` method returns ``True``."""
         if not isinstance(idx, int):
             idx = self.token_index(idx)
 
         for n in xrange(idx, len(self.tokens)):
             token = self.tokens[n]
-            if token.match(ttype, value, regex=regex, include_subtypes=include_subtypes):
+            if token.match(ttype, value, regex=regex):
                 return token
 
     def token_not_matching(self, idx, funcs):
