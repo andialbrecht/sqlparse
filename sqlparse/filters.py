@@ -391,7 +391,36 @@ class AlignedIndentFilter:
                 # if not last column in select, add a comma seperator
                 new_tokens.append(sql.Token(T.Punctuation, ','))
         tlist.tokens = new_tokens
+
+        # process any sub-sub statements (like case statements)
+        for sgroup in tlist.get_sublists():
+            self._process(sgroup, base_indent=base_indent)
         return tlist
+
+    def _process_case(self, tlist, base_indent=0):
+        base_offset = base_indent + self._max_kwd_len + len('case ')
+        case_offset = len('when ')
+        cases = tlist.get_cases(skip_ws=True)
+        # align the end as well
+        end_token = tlist.token_next_match(0, T.Keyword, 'END')
+        cases.append((None, [end_token]))
+
+        condition_width = max(len(str(cond)) for cond, value in cases)
+        for i, (cond, value) in enumerate(cases):
+            if cond is None:  # else or end
+                stmt = value[0]
+                line = value
+            else:
+                stmt = cond[0]
+                line = cond + value
+            if i > 0:
+                tlist.insert_before(stmt, self.whitespace(base_offset + case_offset - len(str(stmt))))
+            if cond:
+                tlist.insert_after(cond[-1], self.whitespace(condition_width - len(str(cond))))
+
+            if i < len(cases) - 1:
+                # if not the END add a newline
+                tlist.insert_after(line[-1], self.newline())
 
     def _process_substatement(self, tlist, base_indent=0):
         def _next_token(i):
