@@ -137,6 +137,34 @@ class TestFormatReindentAligned(TestCaseBase):
                 "    or d is 'blue'",
             ]))
 
+    def test_case_statement(self):
+        sql = """
+            select a,
+            case when a = 0
+            then 1
+            when bb = 1 then 1
+            when c = 2 then 2
+            else 0 end as d,
+            extra_col
+            from table
+            where c is true
+            and b between 3 and 4
+            """
+        self.ndiffAssertEqual(
+            self.formatter(sql),
+            '\n'.join([
+                'select a,',
+                '       case when a = 0  then 1',
+                '            when bb = 1 then 1',
+                '            when c = 2  then 2',
+                '            else 0',
+                '             end as d,',
+                '       extra_col',
+                '  from table',
+                ' where c is true',
+                '   and b between 3 and 4'
+            ]))
+
 
 class TestFormatReindent(TestCaseBase):
 
