@@ -116,9 +116,8 @@ class TestFormatReindentAligned(TestCaseBase):
             where c is true
             and b between 3 and 4
             """
-        out = self.formatter(sql)
         self.ndiffAssertEqual(
-            out,
+            self.formatter(sql),
             '\n'.join([
                 'select a,',
                 '       b as bb,',
@@ -140,9 +139,8 @@ class TestFormatReindentAligned(TestCaseBase):
             where c is true
             and b between 3 and 4
             """
-        out = self.formatter(sql)
         self.ndiffAssertEqual(
-            out,
+            self.formatter(sql),
             '\n'.join([
                 'select a,',
                 '       case when a = 0  then 1',
@@ -165,9 +163,8 @@ class TestFormatReindentAligned(TestCaseBase):
             and count(y) > 5
             order by 3,2,1
             """
-        out = self.formatter(sql)
         self.ndiffAssertEqual(
-            out,
+            self.formatter(sql),
             '\n'.join([
                 'select a,',
                 '       b,',
@@ -184,6 +181,32 @@ class TestFormatReindentAligned(TestCaseBase):
                 '          2,',
                 '          1',
             ]))
+
+    def test_group_by_subquery(self):
+        # TODO: add subquery alias in again when test_grouping.TestGrouping.test_identifier_list_subquery fixed
+        sql = """
+            select *, sum_b + 2 as mod_sum
+            from (
+              select a, sum(b) as sum_b
+              from table
+              group by a,z)
+            order by 1,2
+            """
+        self.ndiffAssertEqual(
+            self.formatter(sql),
+            '\n'.join([
+                'select *,',
+                '       sum_b + 2 as mod_sum',
+                '  from (',
+                '        select a,',
+                '               sum(b) as sum_b',
+                '          from table',
+                '         group by a,',
+                '                  z',
+                '       )',
+                ' order by 1,',
+                '          2',
+                ]))
 
 
 class TestFormatReindent(TestCaseBase):

@@ -498,9 +498,10 @@ class AlignedIndentFilter:
         return self._process(sql.TokenList(tlist.tokens), base_indent=base_indent)
 
     def _process_parenthesis(self, tlist, base_indent=0):
-        if not tlist.token_next_by_instance(0, sql.Statement):
+        if not tlist.token_next_match(0, T.DML, 'SELECT'):
             # if this isn't a subquery, don't re-indent
             return tlist
+
         sub_indent = base_indent + self._max_kwd_len + 2  # add two for the space and parens
         tlist.insert_after(tlist.tokens[0], self.whitespace(sub_indent, newline_before=True))
         # de-indent the last parenthesis
@@ -517,7 +518,8 @@ class AlignedIndentFilter:
     def _process_identifierlist(self, tlist, base_indent=0):
         # columns being selected
         new_tokens = []
-        identifiers = filter(lambda t: isinstance(t, sql.Identifier) or t.ttype == T.Number.Integer, tlist.tokens)
+        identifiers = filter(
+            lambda t: isinstance(t, sql.Identifier) or t.ttype in (T.Number.Integer, T.Wildcard), tlist.tokens)
         for i, token in enumerate(identifiers):
             if i > 0:
                 new_tokens.append(self.newline())
