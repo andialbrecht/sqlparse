@@ -7,15 +7,12 @@
 # the BSD License: http://www.opensource.org/licenses/bsd-license.php
 
 import optparse
-import os
 import sys
 
 import sqlparse
 from sqlparse.exceptions import SQLParseError
 
-
 _CASE_CHOICES = ['upper', 'lower', 'capitalize']
-
 
 parser = optparse.OptionParser(usage='%prog [OPTIONS] FILE, ...',
                                version='%%prog %s' % sqlparse.__version__)
@@ -45,6 +42,12 @@ group.add_option('-r', '--reindent', dest='reindent',
                  help='reindent statements')
 group.add_option('--indent_width', dest='indent_width', default=2,
                  help='indentation width (defaults to 2 spaces)')
+group.add_option('-a', '--reindent_aligned',
+                 action='store_true', default=False,
+                 help='reindent statements to aligned format')
+group.add_option('-s', '--use_space_around_operators',
+                 action='store_true', default=False,
+                 help='place spaces around mathematical operators')
 group.add_option('--wrap_after', dest='wrap_after', default=0,
                  help='Column after which lists should be wrapped')
 
