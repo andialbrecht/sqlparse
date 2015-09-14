@@ -52,11 +52,19 @@ def validate_options(options):
         options['truncate_char'] = options.get('truncate_char', '[...]')
 
     reindent = options.get('reindent', False)
-    if reindent not in [True, False, 'aligned']:
+    if reindent not in [True, False]:
         raise SQLParseError('Invalid value for reindent: %r'
                             % reindent)
     elif reindent:
         options['strip_whitespace'] = True
+
+    reindent_aligned = options.get('reindent_aligned', False)
+    if reindent_aligned not in [True, False]:
+        raise SQLParseError('Invalid value for reindent_aligned: %r'
+                            % reindent)
+    elif reindent_aligned:
+        options['strip_whitespace'] = True
+
     indent_tabs = options.get('indent_tabs', False)
     if indent_tabs not in [True, False]:
         raise SQLParseError('Invalid value for indent_tabs: %r' % indent_tabs)
@@ -84,6 +92,11 @@ def validate_options(options):
     options['right_margin'] = right_margin
 
     return options
+
+
+def _add_grouping_and_remove_whitespace(stack):
+    stack.enable_grouping()
+    stack.stmtprocess.append(filters.StripWhitespaceFilter())
 
 
 def build_filter_stack(stack, options):
@@ -115,21 +128,19 @@ def build_filter_stack(stack, options):
         stack.enable_grouping()
         stack.stmtprocess.append(filters.StripCommentsFilter())
 
-    if (options.get('strip_whitespace', False)
-        or options.get('reindent', False)):
-        stack.enable_grouping()
-        stack.stmtprocess.append(filters.StripWhitespaceFilter())
+    if options.get('strip_whitespace', False):
+        _add_grouping_and_remove_whitespace(stack)
 
-    reindent_opt = options.get('reindent', False)
-    if reindent_opt:
-        stack.enable_grouping()
-        if reindent_opt is True:
-            stack.stmtprocess.append(
-                filters.ReindentFilter(char=options['indent_char'],
-                                       width=options['indent_width']))
-        elif reindent_opt == 'aligned':
-            stack.stmtprocess.append(
-                filters.AlignedIndentFilter(char=options['indent_char']))
+    if options.get('reindent', False):
+        _add_grouping_and_remove_whitespace(stack)
+        stack.stmtprocess.append(
+            filters.ReindentFilter(char=options['indent_char'],
+                                   width=options['indent_width']))
+
+    if options.get('reindent_aligned', False):
+        _add_grouping_and_remove_whitespace(stack)
+        stack.stmtprocess.append(
+            filters.AlignedIndentFilter(char=options['indent_char']))
 
     if options.get('right_margin', False):
         stack.enable_grouping()

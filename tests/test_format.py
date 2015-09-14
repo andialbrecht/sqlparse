@@ -106,7 +106,7 @@ class TestFormat(TestCaseBase):
 class TestFormatReindentAligned(TestCaseBase):
     @staticmethod
     def formatter(sql):
-        return sqlparse.format(sql, reindent='aligned')
+        return sqlparse.format(sql, reindent_aligned=True)
 
     def test_basic(self):
         sql = """
