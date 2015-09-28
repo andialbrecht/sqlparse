@@ -80,48 +80,54 @@ LIMIT 1"""
 
 class TestMysqlCreateStatementFilter(unittest.TestCase):
 
-    create_statement = """
-    CREATE TABLE `abc` (
-      `id` int(11) NOT NULL auto_increment,
-      `name` varchar(64) collate utf8_unicode_ci default NULL,
-      `address` varchar(128) collate utf8_unicode_ci default NULL,
-      `related_id` int(11) NOT NULL default '0',
-      `currency` double(8,2) default NULL,
-      `time_created` int(11) NOT NULL default '0',
-      `age` int(10) unsigned default NULL,
-      `type` tinyint(3) unsigned default NULL,
-      PRIMARY KEY  (`id`),
-      KEY `name_address` (`name`,`address`),
-      KEY `related_id` (`related_id`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
-    """
+    @property
+    def create_stmt(self):
+        return """
+            CREATE TABLE `abc` (
+                `id` int(11) NOT NULL auto_increment,
+                `name` varchar(64) collate utf8_unicode_ci default NULL,
+                `address` varchar(128) collate utf8_unicode_ci default NULL,
+                `related_id` int(11) NOT NULL default '0',
+                `currency` double(8,2) default NULL,
+                `time_created` int(11) NOT NULL default '0',
+                `age` int(10) unsigned default NULL,
+                `type` tinyint(3) unsigned default NULL,
+                PRIMARY KEY  (`id`),
+                KEY `name_address` (`name`,`address`),
+                KEY `related_id` (`related_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+        """
 
-    create_statement_without_column_type_length = """
-    CREATE TABLE `abc` (
-      `id` int NOT NULL auto_increment,
-      `age` int default NULL,
-      `name` varchar collate utf8_unicode_ci default NULL,
-      PRIMARY KEY  (`id`),
-      KEY `age_name` (`age`,`name`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
-    """
+    @property
+    def create_stmt_without_col_type_length(self):
+        return """
+            CREATE TABLE `abc` (
+                `id` int NOT NULL auto_increment,
+                `age` int default NULL,
+                `name` varchar collate utf8_unicode_ci default NULL,
+                PRIMARY KEY  (`id`),
+                KEY `age_name` (`age`,`name`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+        """
 
-    create_statement_without_column_attributes = """
-    CREATE TABLE `abc` (
-      `id` int(11),
-      `age` int(11),
-      `name` varchar(64),
-      PRIMARY KEY  (`id`),
-      KEY `age_name` (`age`,`name`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
-    """
+    @property
+    def create_stmt_without_col_attributes(self):
+        return """
+            CREATE TABLE `abc` (
+                `id` int(11),
+                `age` int(11),
+                `name` varchar(64),
+                PRIMARY KEY  (`id`),
+                KEY `age_name` (`age`,`name`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+        """
 
     def _pre_process_sql(self, sql):
         stream = sqlparse.parse(sql, dialect='mysql')
         return stream[0]
 
     def test_complex_create_statement(self):
-        statement = self._pre_process_sql(self.create_statement)
+        statement = self._pre_process_sql(self.create_stmt)
         assert isinstance(statement, sql.Statement)
         assert statement.get_type() == 'CREATE'
         table_name = statement.token_next_by_instance(0, sql.TableName)
@@ -187,7 +193,7 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
 
     def test_create_statement_without_column_type_length(self):
         statement = self._pre_process_sql(
-            self.create_statement_without_column_type_length
+            self.create_stmt_without_col_type_length
         )
         assert isinstance(statement, sql.Statement)
         assert statement.get_type() == 'CREATE'
@@ -219,7 +225,7 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
 
     def test_create_statement_without_column_attributes(self):
         statement = self._pre_process_sql(
-            self.create_statement_without_column_attributes
+            self.create_stmt_without_col_attributes
         )
         assert isinstance(statement, sql.Statement)
         assert statement.get_type() == 'CREATE'
@@ -247,6 +253,39 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
             column_type=u'varchar',
             column_type_length=(u'64',),
             column_attributes=[]
+        )
+
+    @property
+    def create_stmt_without_keys(self):
+        return """
+            CREATE TABLE `abc` (
+                `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+                `count` int(11) unsigned DEFAULT '0'
+            ) ENGINE=BLACKHOLE DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+        """
+
+    def test_create_stmt_without_keys(self):
+        statement = self._pre_process_sql(self.create_stmt_without_keys)
+
+        assert isinstance(statement, sql.Statement)
+        assert statement.get_type() == 'CREATE'
+        table_name = statement.token_next_by_instance(0, sql.TableName)
+        self.assertEqual(table_name.value, u'abc')
+        column_definitions = statement.token_next_by_instance(0, sql.ColumnsDefinition).tokens
+        self.assertEqual(len(column_definitions), 2)
+        self._assert_column_definition(
+            column_definition_token=column_definitions[0],
+            column_name=u'name',
+            column_type=u'varchar',
+            column_type_length=(u'255',),
+            column_attributes=[(u'collate', u'utf8_unicode_ci'), (u'not null',)]
+        )
+        self._assert_column_definition(
+            column_definition_token=column_definitions[1],
+            column_name=u'count',
+            column_type=u'int',
+            column_type_length=(u'11',),
+            column_attributes=[(u'unsigned',), (u'default', u'0')]
         )
 
     def _assert_column_definition(
@@ -277,11 +316,6 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
             self._get_column_attributes(column_definition_token),
             column_attributes
         )
-
-    def test(self):
-        stmts = sqlparse.parse(self.create_statement)
-        for stmt in stmts:
-            print stmt.get_type()
 
     def _get_column_name(self, column_definition_token):
         column_name_token = column_definition_token.token_next_by_instance(0, sql.ColumnName)
@@ -318,5 +352,4 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

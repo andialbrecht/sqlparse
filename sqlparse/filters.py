@@ -631,21 +631,22 @@ class MysqlCreateStatementFilter(object):
 
     def _split_tokens_by_comma(self, tokens):
         split_token_lists = []
-        token_list = []
-        for token in tokens:
-            token_list.append(token)
+
+        start = 0
+        for index, token in enumerate(tokens):
             if token.match(T.Punctuation, ','):
-                split_token_lists.append(sql.TokenList(token_list))
-                token_list = []
-        if token_list:
-            split_token_lists.append(sql.TokenList(token_list))
+                split_token_lists.append(sql.TokenList(tokens[start:index]))
+                start = index + 1
+        if tokens[start:]:
+            split_token_lists.append(sql.TokenList(tokens[start:]))
+
         return split_token_lists
 
     def _create_column_definition(self, token_list):
         # Because we are going to process the same token list in multiple
-        # functions in order. So use deque to store tokens instead
-        # of manually tracking its index. After we processed one token, we
-        # can just pop it out.
+        # functions in order. So use deque to store tokens instead of
+        # manually tracking its index. After we processed one token, we can
+        # just pop it out.
         token_queue = deque(token_list.tokens)
         column_definition_children_tokens = []
 
@@ -675,6 +676,8 @@ class MysqlCreateStatementFilter(object):
         return column_definition
 
     def _create_column_name(self, token_queue):
+        if len(token_queue) <= 0:
+            raise SQLParseError("Unable to get column name. token_queue is empty.")
         return sql.ColumnName(
             value=self._clean_quote(token_queue.popleft().value),
             ttype=T.Name
@@ -682,13 +685,14 @@ class MysqlCreateStatementFilter(object):
 
     def _skip_white_space_and_new_line_tokens(self, token_queue):
         token_list = []
-        while((len(token_queue) > 0
-               and (token_queue[0].ttype in (T.Text.Whitespace, T.Text.Whitespace.Newline)))
-        ):
+        while (len(token_queue) > 0
+               and (token_queue[0].ttype in (T.Text.Whitespace, T.Text.Whitespace.Newline))):
             token_list.append(token_queue.popleft())
         return token_list
 
     def _create_column_type(self, token_queue):
+        if len(token_queue) <= 0:
+            raise SQLParseError("Unable to get column type. token_queue is empty.")
         token = token_queue.popleft()
         return sql.ColumnType(
             value=token.value,
@@ -696,6 +700,8 @@ class MysqlCreateStatementFilter(object):
         )
 
     def _create_column_type_length(self, token_queue):
+        if len(token_queue) <= 0:
+            raise SQLParseError("Unable to get column type length. token_queue is empty.")
         if isinstance(token_queue[0], sql.Parenthesis):
             parenthesis_token = token_queue.popleft()
             return sql.ColumnTypeLength(
@@ -703,9 +709,7 @@ class MysqlCreateStatementFilter(object):
             )
 
     def _create_column_attributes(self, token_queue):
-        column_attributes_children_tokens = self._get_attributes(
-            token_queue
-        )
+        column_attributes_children_tokens = self._get_attributes(token_queue)
         return sql.ColumnAttributes(tokens=column_attributes_children_tokens)
 
     def _get_attributes(self, token_queue):
@@ -713,6 +717,9 @@ class MysqlCreateStatementFilter(object):
         attribute_name_token = None
         while len(token_queue) > 0:
             attributes.extend(self._skip_white_space_and_new_line_tokens(token_queue))
+            if len(token_queue) <= 0:
+                break
+
             token = token_queue.popleft()
             if attribute_name_token is None:
                 has_value = self.attribute_name_to_has_value_map.get(token.value.lower())
