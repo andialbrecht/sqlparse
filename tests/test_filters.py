@@ -288,6 +288,31 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
             column_attributes=[(u'unsigned',), (u'default', u'0')]
         )
 
+    @property
+    def create_stmt_with_simple_column(self):
+        return """
+            CREATE TABLE `abc` (
+                `amount` double
+            ) ENGINE=BLACKHOLE DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+        """
+
+    def test_create_stmt_with_simple_column(self):
+        statement = self._pre_process_sql(self.create_stmt_with_simple_column)
+
+        assert isinstance(statement, sql.Statement)
+        assert statement.get_type() == 'CREATE'
+        table_name = statement.token_next_by_instance(0, sql.TableName)
+        self.assertEqual(table_name.value, u'abc')
+        column_definitions = statement.token_next_by_instance(0, sql.ColumnsDefinition).tokens
+        self.assertEqual(len(column_definitions), 1)
+        self._assert_column_definition(
+            column_definition_token=column_definitions[0],
+            column_name=u'amount',
+            column_type=u'double',
+            column_type_length=None,
+            column_attributes=[]
+        )
+
     def _assert_column_definition(
         self,
         column_definition_token,

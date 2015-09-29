@@ -701,7 +701,7 @@ class MysqlCreateStatementFilter(object):
 
     def _create_column_type_length(self, token_queue):
         if len(token_queue) <= 0:
-            raise SQLParseError("Unable to get column type length. token_queue is empty.")
+            return None
         if isinstance(token_queue[0], sql.Parenthesis):
             parenthesis_token = token_queue.popleft()
             return sql.ColumnTypeLength(
