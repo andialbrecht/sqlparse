@@ -597,7 +597,22 @@ class MysqlCreateStatementFilter(object):
         )
 
     def _clean_quote(self, text):
-        return text.strip('"`\'')
+        """Clean the quotes for identifiers.  For the information of identifier:
+        https://dev.mysql.com/doc/refman/5.5/en/identifiers.html.
+        """
+        clean_text = self._remove_quote(text, '`')
+        if clean_text == text:
+            clean_text = self._remove_quote(clean_text, '"')
+        return clean_text
+
+    def _remove_quote(self, text, quote):
+        clean_text = text
+        if clean_text:
+            first_char = clean_text[0]
+            last_char = clean_text[-1]
+            if first_char == quote and first_char == last_char:
+                clean_text = text[1:-1].replace(quote*2, quote)
+        return clean_text
 
     def _process_columns(self, statement):
         # Get the Parenthesis which contains column definitions
@@ -751,7 +766,7 @@ class MysqlCreateStatementFilter(object):
         if attribute_value_token is not None:
             attribute_token_list.append(
                 sql.Token(
-                    value=self._clean_quote(attribute_value_token.value),
+                    value=attribute_value_token.value.strip('`"\''),
                     ttype=attribute_value_token.ttype
                 )
             )

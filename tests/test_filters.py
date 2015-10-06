@@ -313,6 +313,24 @@ class TestMysqlCreateStatementFilter(unittest.TestCase):
             column_attributes=[]
         )
 
+    def test_clean_quotes(self):
+        filter = sqlparse.filters.MysqlCreateStatementFilter()
+        assert filter._clean_quote('abc') == 'abc'
+        assert filter._clean_quote('"abc"') == 'abc'
+        assert filter._clean_quote('ab`c') == 'ab`c'
+        assert filter._clean_quote('ab"c') == 'ab"c'
+        assert filter._clean_quote('`abc') == '`abc'
+        assert filter._clean_quote('abc"') == 'abc"'
+        assert filter._clean_quote('`ab``c`') == 'ab`c'
+        assert filter._clean_quote('"ab""c"') == 'ab"c'
+        assert filter._clean_quote('`ab""c`') == 'ab""c'
+        assert filter._clean_quote('"ab``c"') == 'ab``c'
+        assert filter._clean_quote('"ab""c"') == 'ab"c'
+        assert filter._clean_quote('`"abc"`') == '"abc"'
+        assert filter._clean_quote('"`abc`"') == '`abc`'
+        assert filter._clean_quote('`"a""b``c"`') == '"a""b`c"'
+        assert filter._clean_quote('"`a``b""c`"') == '`a``b"c`'
+
     def _assert_column_definition(
         self,
         column_definition_token,
