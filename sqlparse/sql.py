@@ -343,8 +343,16 @@ class TokenList(Token):
                 continue
             return self.tokens[idx]
 
-    def token_index(self, token):
+    def token_index(self, token, start=0):
         """Return list index of token."""
+        if start > 0:
+            # Performing `index` manually is much faster when starting in the middle
+            # of the list of tokens and expecting to find the token near to the starting
+            # index.
+            for i in xrange(start, len(self.tokens)):
+                if self.tokens[i] == token:
+                    return i
+            return -1
         return self.tokens.index(token)
 
     def tokens_between(self, start, end, exclude_end=False):

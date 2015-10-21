@@ -189,12 +189,12 @@ def group_identifier(tlist):
             i, (T.String.Symbol, T.Name, T.Literal.Number.Integer,
                 T.Literal.Number.Float))
 
-        i1 = tl.token_index(t1) if t1 else None
+        i1 = tl.token_index(t1, start=i) if t1 else None
         t2_end = None if i1 is None else i1 + 1
         t2 = tl.token_next_by_instance(i, (sql.Function, sql.Parenthesis), end=t2_end)
 
         if t1 and t2:
-            i2 = tl.token_index(t2)
+            i2 = tl.token_index(t2, start=i)
             if i1 > i2:
                 return t2
             else:
@@ -214,7 +214,7 @@ def group_identifier(tlist):
     while token:
         identifier_tokens = [token] + list(
             _consume_cycle(tlist,
-                           tlist.token_index(token) + 1))
+                           tlist.token_index(token, start=idx) + 1))
         # remove trailing whitespace
         if identifier_tokens and identifier_tokens[-1].ttype is T.Whitespace:
             identifier_tokens = identifier_tokens[:-1]
@@ -223,7 +223,7 @@ def group_identifier(tlist):
                      or identifier_tokens[0].ttype in (T.Literal.Number.Integer,
                                                        T.Literal.Number.Float))):
             group = tlist.group_tokens(sql.Identifier, identifier_tokens)
-            idx = tlist.token_index(group) + 1
+            idx = tlist.token_index(group, start=idx) + 1
         else:
             idx += 1
         token = _next_token(tlist, idx)
@@ -252,8 +252,9 @@ def group_identifier_list(tlist):
     tcomma = tlist.token_next_match(idx, T.Punctuation, ',')
     start = None
     while tcomma is not None:
-        before = tlist.token_prev(tcomma)
-        after = tlist.token_next(tcomma)
+        idx = tlist.token_index(tcomma, start=idx)
+        before = tlist.token_prev(idx)
+        after = tlist.token_next(idx)
         # Check if the tokens around tcomma belong to a list
         bpassed = apassed = False
         for func in fend1_funcs:
@@ -264,12 +265,13 @@ def group_identifier_list(tlist):
         if not bpassed or not apassed:
             # Something's wrong here, skip ahead to next ","
             start = None
-            tcomma = tlist.token_next_match(tlist.token_index(tcomma) + 1,
+            tcomma = tlist.token_next_match(idx + 1,
                                             T.Punctuation, ',')
         else:
             if start is None:
                 start = before
-            next_ = tlist.token_next(after)
+            after_idx = tlist.token_index(after, start=idx)
+            next_ = tlist.token_next(after_idx)
             if next_ is None or not next_.match(T.Punctuation, ','):
                 # Reached the end of the list
                 tokens = tlist.tokens_between(start, after)
