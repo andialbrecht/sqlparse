@@ -256,7 +256,7 @@ class TokenList(Token):
                 continue
             return token
 
-    def token_next_by_instance(self, idx, clss):
+    def token_next_by_instance(self, idx, clss, end=None):
         """Returns the next token matching a class.
 
         *idx* is where to start searching in the list of child tokens.
@@ -267,7 +267,7 @@ class TokenList(Token):
         if not isinstance(clss, (list, tuple)):
             clss = (clss,)
 
-        for token in self.tokens[idx:]:
+        for token in self.tokens[idx:end]:
             if isinstance(token, clss):
                 return token
 

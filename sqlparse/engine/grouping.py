@@ -188,9 +188,12 @@ def group_identifier(tlist):
         t1 = tl.token_next_by_type(
             i, (T.String.Symbol, T.Name, T.Literal.Number.Integer,
                 T.Literal.Number.Float))
-        t2 = tl.token_next_by_instance(i, (sql.Function, sql.Parenthesis))
+
+        i1 = tl.token_index(t1) if t1 else None
+        t2_end = None if i1 is None else i1 + 1
+        t2 = tl.token_next_by_instance(i, (sql.Function, sql.Parenthesis), end=t2_end)
+
         if t1 and t2:
-            i1 = tl.token_index(t1)
             i2 = tl.token_index(t2)
             if i1 > i2:
                 return t2
