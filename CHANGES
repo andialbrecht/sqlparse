@@ -1,6 +1,10 @@
 Development Version
 -------------------
 
+Enhancements
+* Speed up parsing of large SQL statements (pull request: issue201, fixes the
+  following issues: issue199, issue135, issue62, issue41, by Ryan Wooden).
+
 Bug Fixes
 * Fix another splitter bug regarding DECLARE (issue194).
 
