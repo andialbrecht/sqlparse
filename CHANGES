@@ -1,5 +1,5 @@
-Development Version
--------------------
+Release 0.1.17 (Oct 24, 2015)
+-----------------------------
 
 Enhancements
 * Speed up parsing of large SQL statements (pull request: issue201, fixes the
@@ -7,6 +7,9 @@ Enhancements
 
 Bug Fixes
 * Fix another splitter bug regarding DECLARE (issue194).
+
+Misc
+* Packages on PyPI are signed from now on.
 
 
 Release 0.1.16 (Jul 26, 2015)

@@ -6,7 +6,7 @@
 """Parse SQL statements."""
 
 
-__version__ = '0.1.17-dev'
+__version__ = '0.1.17'
 
 
 # Setup namespace
