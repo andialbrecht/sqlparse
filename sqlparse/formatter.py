@@ -28,6 +28,11 @@ def validate_options(options):
         raise SQLParseError('Invalid value for strip_comments: %r'
                             % strip_comments)
 
+    use_space_around_operators = options.get('use_space_around_operators', False)
+    if use_space_around_operators not in [True, False]:
+        raise SQLParseError('Invalid value for use_space_around_operators: %r'
+                            % use_space_around_operators)
+
     strip_ws = options.get('strip_whitespace', False)
     if strip_ws not in [True, False]:
         raise SQLParseError('Invalid value for strip_whitespace: %r'
@@ -52,6 +57,14 @@ def validate_options(options):
                             % reindent)
     elif reindent:
         options['strip_whitespace'] = True
+
+    reindent_aligned = options.get('reindent_aligned', False)
+    if reindent_aligned not in [True, False]:
+        raise SQLParseError('Invalid value for reindent_aligned: %r'
+                            % reindent)
+    elif reindent_aligned:
+        options['strip_whitespace'] = True
+
     indent_tabs = options.get('indent_tabs', False)
     if indent_tabs not in [True, False]:
         raise SQLParseError('Invalid value for indent_tabs: %r' % indent_tabs)
@@ -81,6 +94,11 @@ def validate_options(options):
     return options
 
 
+def _add_grouping_and_remove_whitespace(stack):
+    stack.enable_grouping()
+    stack.stmtprocess.append(filters.StripWhitespaceFilter())
+
+
 def build_filter_stack(stack, options):
     """Setup and return a filter stack.
 
@@ -101,21 +119,28 @@ def build_filter_stack(stack, options):
         stack.preprocess.append(filters.TruncateStringFilter(
             width=options['truncate_strings'], char=options['truncate_char']))
 
+    if options.get('use_space_around_operators', False):
+        stack.enable_grouping()
+        stack.stmtprocess.append(filters.SpacesAroundOperatorsFilter())
+
     # After grouping
     if options.get('strip_comments', False):
         stack.enable_grouping()
         stack.stmtprocess.append(filters.StripCommentsFilter())
 
-    if (options.get('strip_whitespace', False)
-        or options.get('reindent', False)):
-        stack.enable_grouping()
-        stack.stmtprocess.append(filters.StripWhitespaceFilter())
+    if options.get('strip_whitespace', False):
+        _add_grouping_and_remove_whitespace(stack)
 
     if options.get('reindent', False):
-        stack.enable_grouping()
+        _add_grouping_and_remove_whitespace(stack)
         stack.stmtprocess.append(
             filters.ReindentFilter(char=options['indent_char'],
                                    width=options['indent_width']))
+
+    if options.get('reindent_aligned', False):
+        _add_grouping_and_remove_whitespace(stack)
+        stack.stmtprocess.append(
+            filters.AlignedIndentFilter(char=options['indent_char']))
 
     if options.get('right_margin', False):
         stack.enable_grouping()

@@ -42,5 +42,4 @@ class TestCaseBase(unittest.TestCase):
             fp = StringIO()
             fp.write(NL)
             fp.write(NL.join(diff))
-            print fp.getvalue()
             raise self.failureException, fp.getvalue()

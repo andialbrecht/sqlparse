@@ -6,7 +6,6 @@
 # the BSD License: http://www.opensource.org/licenses/bsd-license.php.
 
 import optparse
-import os
 import sys
 
 import sqlparse
@@ -24,11 +23,11 @@ parser.add_option('-v', '--verbose', dest='verbose', action='store_true')
 parser.add_option('-o', '--outfile', dest='outfile', metavar='FILE',
                   help='write output to FILE (defaults to stdout)')
 group = parser.add_option_group('Formatting Options')
-group.add_option('-k', '--keywords', metavar='CHOICE',
+group.add_option('-k', '--keyword_case', metavar='CHOICE',
                  dest='keyword_case', choices=_CASE_CHOICES,
                  help=('change case of keywords, CHOICE is one of %s'
                        % ', '.join('"%s"' % x for x in _CASE_CHOICES)))
-group.add_option('-i', '--identifiers', metavar='CHOICE',
+group.add_option('-i', '--identifier_case', metavar='CHOICE',
                  dest='identifier_case', choices=_CASE_CHOICES,
                  help=('change case of identifiers, CHOICE is one of %s'
                        % ', '.join('"%s"' % x for x in _CASE_CHOICES)))
@@ -41,9 +40,15 @@ group.add_option('--strip-comments', dest='strip_comments',
                  help='remove comments')
 group.add_option('-r', '--reindent', dest='reindent',
                  action='store_true', default=False,
-                 help='reindent statements')
+                 help='reindent statements to a fixed width')
 group.add_option('--indent_width', dest='indent_width', default=2,
                  help='indentation width (defaults to 2 spaces)')
+group.add_option('-a', '--reindent_aligned',
+                 action='store_true', default=False,
+                 help='reindent statements to aligned format')
+group.add_option('-s', '--use_space_around_operators',
+                 action='store_true', default=False,
+                 help='place spaces around mathematical operators')
 
 _FORMATTING_GROUP = group
 

@@ -287,7 +287,17 @@ class TokenList(Token):
 
         for n in xrange(idx, len(self.tokens)):
             token = self.tokens[n]
-            if token.match(ttype, value, regex):
+            if token.match(ttype, value, regex=regex):
+                return token
+
+    def token_prev_match(self, idx, ttype, value, regex=False):
+        """Returns prev token where it's ``match`` method returns ``True``."""
+        if not isinstance(idx, int):
+            idx = self.token_index(idx)
+
+        for n in reversed(xrange(0, idx + 1)):
+            token = self.tokens[n]
+            if token.match(ttype, value, regex=regex):
                 return token
 
     def token_not_matching(self, idx, funcs):
@@ -629,6 +639,9 @@ class Case(TokenList):
         for token in self.tokens:
             # Set mode from the current statement
             if token.match(T.Keyword, 'CASE'):
+                continue
+
+            if token.ttype is T.Whitespace or token.ttype is T.Newline:
                 continue
 
             elif token.match(T.Keyword, 'WHEN'):
