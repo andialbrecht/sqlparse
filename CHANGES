@@ -3,6 +3,11 @@ Development Version
 
 Nothing yet.
 
+Release 0.1.18 (Oct 24, 2015)
+-----------------------------
+
+Bug Fixes
+* Remove universal wheel support, added in 0.1.17 by mistake.
 
 Release 0.1.17 (Oct 24, 2015)
 -----------------------------
