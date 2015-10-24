@@ -19,3 +19,7 @@ clean:
 	$(PYTHON) setup.py clean
 	find . -name '*.pyc' -delete
 	find . -name '*~' -delete
+
+release:
+	@rm -rf dist/
+	python setup.py sdist upload --sign --identity E0B84F81
