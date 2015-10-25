@@ -6,6 +6,11 @@ env:
   - TOX_ENV=py33
   - TOX_ENV=py34
   - TOX_ENV=pypy
+matrix:
+  include:
+    - python: 3.5
+      env:
+      - TOX_ENV=py35
 before_install:
   - sudo apt-get install pypy
 install:
