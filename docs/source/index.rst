@@ -9,7 +9,7 @@ python-sqlparse
 :mod:`sqlparse` is a non-validating SQL parser for Python.
 It provides support for parsing, splitting and formatting SQL statements.
 
-The module is compatible with Python 2 (>= 2.5) and Python 3 (>= 3.2)
+The module is compatible with Python 2.7 and Python 3 (>= 3.2)
 and released under the terms of the `New BSD license
 <http://www.opensource.org/licenses/bsd-license.php>`_.
 
@@ -31,7 +31,7 @@ tl;dr
    >>> parsed = sqlparse.parse('select * from foo')[0]
    >>> parsed.tokens
    [<DML 'select' at 0x7f22c5e15368>, <Whitespace ' ' at 0x7f22c5e153b0>, <Wildcard '*' … ]
-   >>> 
+   >>>
 
 
 Contents
