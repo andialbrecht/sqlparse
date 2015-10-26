@@ -73,8 +73,6 @@ class TestTokenize(unittest.TestCase):
         self.assertEqual(tokens[2][0], Number.Integer)
         self.assertEqual(tokens[2][1], '-1')
 
-    # Somehow this test fails on Python 3.2
-    @pytest.mark.skipif('sys.version_info >= (3,0)')
     def test_tab_expansion(self):
         s = "\t"
         lex = lexer.Lexer()

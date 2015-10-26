@@ -227,10 +227,15 @@ class _Lexer(object):
             filter_ = filter_(**options)
         self.filters.append(filter_)
 
+    def _expandtabs(self, text):
+        if self.tabsize > 0:
+            text = text.expandtabs(self.tabsize)
+        return text
+
     def _decode(self, text):
         if sys.version_info[0] == 3:
             if isinstance(text, str):
-                return text
+                return self._expandtabs(text)
         if self.encoding == 'guess':
             try:
                 text = text.decode('utf-8')
@@ -243,10 +248,7 @@ class _Lexer(object):
                 text = text.decode(self.encoding)
             except UnicodeDecodeError:
                 text = text.decode('unicode-escape')
-
-        if self.tabsize > 0:
-            text = text.expandtabs(self.tabsize)
-        return text
+        return self._expandtabs(text)
 
     def get_tokens(self, text, unfiltered=False):
         """
