@@ -15,8 +15,6 @@ from sqlparse import filters
 from sqlparse import formatter
 
 from sqlparse.compat import u
-# Deprecated in 0.1.5. Will be removed in 0.2.0
-from sqlparse.exceptions import SQLParseError  # noqa
 
 
 def parse(sql, encoding=None):
