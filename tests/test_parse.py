@@ -221,7 +221,7 @@ def test_sqlite_identifiers():
     assert (len(p) == 1
             and isinstance(p[0], sqlparse.sql.IdentifierList)
             and [id.get_name() for id in p[0].get_identifiers()]
-                    == ['[col1]', '[col2]'])
+            == ['[col1]', '[col2]'])
 
     p = sqlparse.parse('[col1]+[col2]')[0]
     types = [tok.ttype for tok in p.flatten()]

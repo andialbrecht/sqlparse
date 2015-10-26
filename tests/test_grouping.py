@@ -21,7 +21,8 @@ class TestGrouping(TestCaseBase):
         self.assert_(isinstance(parsed.tokens[-1], sql.Identifier))
         self.assertEqual(len(parsed.tokens[2].tokens), 5)
         self.assert_(isinstance(parsed.tokens[2].tokens[3], sql.Identifier))
-        self.assert_(isinstance(parsed.tokens[2].tokens[3].tokens[0], sql.Parenthesis))
+        self.assert_(isinstance(parsed.tokens[2].tokens[3].tokens[0],
+                     sql.Parenthesis))
         self.assertEqual(len(parsed.tokens[2].tokens[3].tokens), 3)
 
     def test_comments(self):
@@ -147,7 +148,8 @@ class TestGrouping(TestCaseBase):
         s = 'select x from (select y from foo where bar = 1) z'
         p = sqlparse.parse(s)[0]
         self.ndiffAssertEqual(s, u(p))
-        self.assertTrue(isinstance(p.tokens[-1].tokens[0].tokens[-2], sql.Where))
+        self.assertTrue(isinstance(p.tokens[-1].tokens[0].tokens[-2],
+                        sql.Where))
 
     def test_typecast(self):
         s = 'select foo::integer from bar'

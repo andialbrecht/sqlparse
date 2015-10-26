@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import sys
 import types
 import unittest
 
@@ -9,8 +8,8 @@ import pytest
 import sqlparse
 from sqlparse import lexer
 from sqlparse import sql
+from sqlparse import tokens as T
 from sqlparse.compat import StringIO
-from sqlparse.tokens import *
 
 
 class TestTokenize(unittest.TestCase):
@@ -22,14 +21,14 @@ class TestTokenize(unittest.TestCase):
         tokens = list(stream)
         self.assertEqual(len(tokens), 8)
         self.assertEqual(len(tokens[0]), 2)
-        self.assertEqual(tokens[0], (Keyword.DML, u'select'))
-        self.assertEqual(tokens[-1], (Punctuation, u';'))
+        self.assertEqual(tokens[0], (T.Keyword.DML, u'select'))
+        self.assertEqual(tokens[-1], (T.Punctuation, u';'))
 
     def test_backticks(self):
         s = '`foo`.`bar`'
         tokens = list(lexer.tokenize(s))
         self.assertEqual(len(tokens), 3)
-        self.assertEqual(tokens[0], (Name, u'`foo`'))
+        self.assertEqual(tokens[0], (T.Name, u'`foo`'))
 
     def test_linebreaks(self):  # issue1
         s = 'foo\nbar\n'
@@ -49,28 +48,28 @@ class TestTokenize(unittest.TestCase):
         s = "create created_foo"
         tokens = list(lexer.tokenize(s))
         self.assertEqual(len(tokens), 3)
-        self.assertEqual(tokens[0][0], Keyword.DDL)
-        self.assertEqual(tokens[2][0], Name)
+        self.assertEqual(tokens[0][0], T.Keyword.DDL)
+        self.assertEqual(tokens[2][0], T.Name)
         self.assertEqual(tokens[2][1], u'created_foo')
         s = "enddate"
         tokens = list(lexer.tokenize(s))
         self.assertEqual(len(tokens), 1)
-        self.assertEqual(tokens[0][0], Name)
+        self.assertEqual(tokens[0][0], T.Name)
         s = "join_col"
         tokens = list(lexer.tokenize(s))
         self.assertEqual(len(tokens), 1)
-        self.assertEqual(tokens[0][0], Name)
+        self.assertEqual(tokens[0][0], T.Name)
         s = "left join_col"
         tokens = list(lexer.tokenize(s))
         self.assertEqual(len(tokens), 3)
-        self.assertEqual(tokens[2][0], Name)
+        self.assertEqual(tokens[2][0], T.Name)
         self.assertEqual(tokens[2][1], 'join_col')
 
     def test_negative_numbers(self):
         s = "values(-1)"
         tokens = list(lexer.tokenize(s))
         self.assertEqual(len(tokens), 4)
-        self.assertEqual(tokens[2][0], Number.Integer)
+        self.assertEqual(tokens[2][0], T.Number.Integer)
         self.assertEqual(tokens[2][1], '-1')
 
     def test_tab_expansion(self):
@@ -88,15 +87,15 @@ class TestToken(unittest.TestCase):
         self.assertEqual(str(token), 'FoO')
 
     def test_repr(self):
-        token = sql.Token(Keyword, 'foo')
+        token = sql.Token(T.Keyword, 'foo')
         tst = "<Keyword 'foo' at 0x"
         self.assertEqual(repr(token)[:len(tst)], tst)
-        token = sql.Token(Keyword, '1234567890')
+        token = sql.Token(T.Keyword, '1234567890')
         tst = "<Keyword '123456...' at 0x"
         self.assertEqual(repr(token)[:len(tst)], tst)
 
     def test_flatten(self):
-        token = sql.Token(Keyword, 'foo')
+        token = sql.Token(T.Keyword, 'foo')
         gen = token.flatten()
         self.assertEqual(type(gen), types.GeneratorType)
         lgen = list(gen)
@@ -118,15 +117,16 @@ class TestTokenList(unittest.TestCase):
         self.assertEqual(sql.TokenList([]).token_first(), None)
 
     def test_token_matching(self):
-        t1 = sql.Token(Keyword, 'foo')
-        t2 = sql.Token(Punctuation, ',')
+        t1 = sql.Token(T.Keyword, 'foo')
+        t2 = sql.Token(T.Punctuation, ',')
         x = sql.TokenList([t1, t2])
-        self.assertEqual(x.token_matching(0, [lambda t: t.ttype is Keyword]),
+        self.assertEqual(x.token_matching(0, [lambda t: t.ttype is T.Keyword]),
                          t1)
-        self.assertEqual(x.token_matching(0,
-                                          [lambda t: t.ttype is Punctuation]),
-                         t2)
-        self.assertEqual(x.token_matching(1, [lambda t: t.ttype is Keyword]),
+        self.assertEqual(x.token_matching(
+            0,
+            [lambda t: t.ttype is T.Punctuation]),
+            t2)
+        self.assertEqual(x.token_matching(1, [lambda t: t.ttype is T.Keyword]),
                          None)
 
 
@@ -155,7 +155,7 @@ class TestStream(unittest.TestCase):
         lex.bufsize = 4
         tokens = list(lex.get_tokens(stream))
         self.assertEqual(len(tokens), 2)
-        self.assertEqual(tokens[1][0], Error)
+        self.assertEqual(tokens[1][0], T.Error)
 
 
 @pytest.mark.parametrize('expr', ['JOIN', 'LEFT JOIN', 'LEFT OUTER JOIN',
@@ -165,21 +165,21 @@ class TestStream(unittest.TestCase):
 def test_parse_join(expr):
     p = sqlparse.parse('%s foo' % expr)[0]
     assert len(p.tokens) == 3
-    assert p.tokens[0].ttype is Keyword
+    assert p.tokens[0].ttype is T.Keyword
 
 
 def test_parse_endifloop():
     p = sqlparse.parse('END IF')[0]
     assert len(p.tokens) == 1
-    assert p.tokens[0].ttype is Keyword
+    assert p.tokens[0].ttype is T.Keyword
     p = sqlparse.parse('END   IF')[0]
     assert len(p.tokens) == 1
     p = sqlparse.parse('END\t\nIF')[0]
     assert len(p.tokens) == 1
-    assert p.tokens[0].ttype is Keyword
+    assert p.tokens[0].ttype is T.Keyword
     p = sqlparse.parse('END LOOP')[0]
     assert len(p.tokens) == 1
-    assert p.tokens[0].ttype is Keyword
+    assert p.tokens[0].ttype is T.Keyword
     p = sqlparse.parse('END  LOOP')[0]
     assert len(p.tokens) == 1
-    assert p.tokens[0].ttype is Keyword
+    assert p.tokens[0].ttype is T.Keyword
