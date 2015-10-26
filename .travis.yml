@@ -12,7 +12,7 @@ matrix:
       env:
       - TOX_ENV=py35
 before_install:
-  - sudo apt-get install pypy
+  - sudo apt-get install pypy pypy3
 install:
   - pip install tox
 script:
