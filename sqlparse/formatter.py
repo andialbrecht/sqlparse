@@ -106,8 +106,8 @@ def build_filter_stack(stack, options):
         stack.enable_grouping()
         stack.stmtprocess.append(filters.StripCommentsFilter())
 
-    if (options.get('strip_whitespace', False)
-        or options.get('reindent', False)):
+    if options.get('strip_whitespace', False) \
+       or options.get('reindent', False):
         stack.enable_grouping()
         stack.stmtprocess.append(filters.StripWhitespaceFilter())
 

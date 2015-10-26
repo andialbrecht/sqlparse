@@ -73,7 +73,6 @@ def memoize_generator(func):
     cache = Cache()
 
     def wrapped_func(*args, **kwargs):
-#        params = (args, kwargs)
         params = (args, tuple(sorted(kwargs.items())))
 
         # Look if cached
@@ -119,6 +118,7 @@ SPLIT_REGEX = re.compile(r"""
 """, re.VERBOSE)
 
 LINE_MATCH = re.compile(r'(\r\n|\r|\n)')
+
 
 def split_unquoted_newlines(text):
     """Split a string on all unquoted newlines.

@@ -232,7 +232,6 @@ class TokenList(Token):
         return True
 
     def get_sublists(self):
-#        return [x for x in self.tokens if isinstance(x, TokenList)]
         for x in self.tokens:
             if isinstance(x, TokenList):
                 yield x
@@ -347,9 +346,9 @@ class TokenList(Token):
     def token_index(self, token, start=0):
         """Return list index of token."""
         if start > 0:
-            # Performing `index` manually is much faster when starting in the middle
-            # of the list of tokens and expecting to find the token near to the starting
-            # index.
+            # Performing `index` manually is much faster when starting
+            # in the middle of the list of tokens and expecting to find
+            # the token near to the starting index.
             for i in range(start, len(self.tokens)):
                 if self.tokens[i] == token:
                     return i
@@ -471,6 +470,7 @@ class TokenList(Token):
                 return tok.get_name()
         return None
 
+
 class Statement(TokenList):
     """Represents a SQL statement."""
 
@@ -569,6 +569,7 @@ class SquareBrackets(TokenList):
     @property
     def _groupable_tokens(self):
         return self.tokens[1:-1]
+
 
 class Assignment(TokenList):
     """An assignment like 'var := val;'"""
@@ -672,10 +673,10 @@ class Function(TokenList):
         for t in parenthesis.tokens:
             if isinstance(t, IdentifierList):
                 return t.get_identifiers()
-            elif isinstance(t, Identifier) or \
-                isinstance(t, Function) or \
-                t.ttype in T.Literal:
-                return [t,]
+            elif (isinstance(t, Identifier) or
+                  isinstance(t, Function) or
+                  t.ttype in T.Literal):
+                return [t, ]
         return []
 
 

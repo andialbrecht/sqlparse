@@ -123,7 +123,7 @@ class LexerMeta(type):
                     for state in tdef2:
                         assert (state in unprocessed or
                                 state in ('#pop', '#push')), \
-                                'unknown new state ' + state
+                            'unknown new state ' + state
                     new_state = tdef2
                 else:
                     assert False, 'unknown new state def %r' % tdef2

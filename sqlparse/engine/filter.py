@@ -23,8 +23,8 @@ class StatementFilter:
     def _change_splitlevel(self, ttype, value):
         "Get the new split level (increase, decrease or remain equal)"
         # PostgreSQL
-        if (ttype == T.Name.Builtin
-            and value.startswith('$') and value.endswith('$')):
+        if ttype == T.Name.Builtin \
+           and value.startswith('$') and value.endswith('$'):
             if self._in_dbldollar:
                 self._in_dbldollar = False
                 return -1
@@ -64,8 +64,8 @@ class StatementFilter:
             self._is_create = True
             return 0
 
-        if (unified in ('IF', 'FOR')
-            and self._is_create and self._begin_depth > 0):
+        if unified in ('IF', 'FOR') \
+           and self._is_create and self._begin_depth > 0:
             return 1
 
         # Default

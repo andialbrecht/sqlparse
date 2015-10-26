@@ -7,7 +7,6 @@ from os.path import abspath, join
 from sqlparse import sql, tokens as T
 from sqlparse.compat import u, text_type
 from sqlparse.engine import FilterStack
-from sqlparse.lexer import tokenize
 from sqlparse.pipeline import Pipeline
 from sqlparse.tokens import (Comment, Comparison, Keyword, Name, Punctuation,
                              String, Whitespace)
@@ -144,8 +143,6 @@ class IncludeStatement:
 
                 # Found file path to include
                 if token_type in String.Symbol:
-#                if token_type in tokens.String.Symbol:
-
                     # Get path of file to include
                     path = join(self.dirpath, value[1:-1])
 
@@ -251,9 +248,9 @@ class StripWhitespaceFilter:
         # Removes newlines before commas, see issue140
         last_nl = None
         for token in tlist.tokens[:]:
-            if (token.ttype is T.Punctuation
-                and token.value == ','
-                and last_nl is not None):
+            if token.ttype is T.Punctuation \
+               and token.value == ',' \
+               and last_nl is not None:
                 tlist.tokens.remove(last_nl)
             if token.is_whitespace():
                 last_nl = token
@@ -492,7 +489,7 @@ class RightMarginFilter:
                 else:
                     self.line = token.value.splitlines()[-1]
             elif (token.is_group()
-                  and not token.__class__ in self.keep_together):
+                  and token.__class__ not in self.keep_together):
                 token.tokens = self._process(stack, token, token.tokens)
             else:
                 val = u(token)
