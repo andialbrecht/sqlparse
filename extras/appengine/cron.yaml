@@ -1,4 +1,0 @@
-cron:
-- description: Daily exception report
-  url: /_ereporter?sender=albrecht.andi@googlemail.com&versions=all&delete=false
-  schedule: every day 00:00

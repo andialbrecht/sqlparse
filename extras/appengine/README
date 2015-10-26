@@ -1,3 +1,0 @@
-- Run "./bootstrap.py" to download all required Python modules.
-- Run "dev_appserver.py ." for a local server.
-- Have a look at config.py :)
