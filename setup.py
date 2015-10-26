@@ -17,11 +17,8 @@ except ImportError:
 
 
 def get_version():
-    """parse __init__.py for version number instead of importing the file
-
-    see http://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package
-    """
-    VERSIONFILE='sqlparse/__init__.py'
+    """Parse __init__.py for version number instead of importing the file."""
+    VERSIONFILE = 'sqlparse/__init__.py'
     verstrline = open(VERSIONFILE, "rt").read()
     VSRE = r'^__version__ = [\'"]([^\'"]*)[\'"]'
     mo = re.search(VSRE, verstrline, re.M)

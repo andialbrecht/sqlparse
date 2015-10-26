@@ -57,4 +57,4 @@ def extract_tables():
 
 
 if __name__ == '__main__':
-    print 'Tables: %s' % ', '.join(extract_tables())
+    print('Tables: %s' % ', '.join(extract_tables()))

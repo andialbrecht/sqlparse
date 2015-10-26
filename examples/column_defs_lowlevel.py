@@ -29,9 +29,9 @@ def extract_definitions(token_list):
         idx = token_list.token_index(token)
         # grab the next token, this times including whitespace
         token = token_list.token_next(idx, skip_ws=False)
-        # split on ","
-        if (token is not None  # = end of statement
-            and token.match(sqlparse.tokens.Punctuation, ',')):
+        # split on ",", except when on end of statement
+        if token is not None \
+           and token.match(sqlparse.tokens.Punctuation, ','):
             definitions.append(tmp)
             tmp = []
             idx = token_list.token_index(token)
@@ -44,5 +44,5 @@ def extract_definitions(token_list):
 columns = extract_definitions(par)
 
 for column in columns:
-    print 'NAME: %-12s DEFINITION: %s' % (column[0],
-                                         ''.join(str(t) for t in column[1:]))
+    print('NAME: %-12s DEFINITION: %s' % (column[0],
+                                          ''.join(str(t) for t in column[1:])))
