@@ -46,14 +46,6 @@ class Token(object):
         """Returns a unicode representation of this object."""
         return self.value or ''
 
-    def to_unicode(self):
-        """Returns a unicode representation of this object.
-
-        .. deprecated:: 0.1.5
-           Use ``unicode(token)`` (for Python 3: ``str(token)``) instead.
-        """
-        return u(self)
-
     def _get_repr_name(self):
         return str(self.ttype).split('.')[-1]
 
