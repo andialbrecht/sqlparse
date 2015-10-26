@@ -15,7 +15,10 @@ matrix:
     - python: "nightly"
 
 install:
-  - pip install pytest
+  - pip install pytest pytest-cov coveralls
   - pip install -e .
 
-script: py.test
+script: py.test --cov=sqlparse
+
+after_success:
+  coveralls
