@@ -14,6 +14,7 @@ from sqlparse import engine
 from sqlparse import filters
 from sqlparse import formatter
 
+from sqlparse.compat import u
 # Deprecated in 0.1.5. Will be removed in 0.2.0
 from sqlparse.exceptions import SQLParseError
 
@@ -67,7 +68,7 @@ def split(sql, encoding=None):
     """
     stack = engine.FilterStack()
     stack.split_statements = True
-    return [unicode(stmt).strip() for stmt in stack.run(sql, encoding)]
+    return [u(stmt).strip() for stmt in stack.run(sql, encoding)]
 
 
 from sqlparse.engine.filter import StatementFilter

@@ -9,6 +9,7 @@ import pytest
 import sqlparse
 from sqlparse import lexer
 from sqlparse import sql
+from sqlparse.compat import StringIO
 from sqlparse.tokens import *
 
 
@@ -133,8 +134,6 @@ class TestTokenList(unittest.TestCase):
 
 class TestStream(unittest.TestCase):
     def test_simple(self):
-        from cStringIO import StringIO
-
         stream = StringIO("SELECT 1; SELECT 2;")
         lex = lexer.Lexer()
 
@@ -152,8 +151,6 @@ class TestStream(unittest.TestCase):
         self.assertEqual(len(tokens), 9)
 
     def test_error(self):
-        from cStringIO import StringIO
-
         stream = StringIO("FOOBAR{")
 
         lex = lexer.Lexer()

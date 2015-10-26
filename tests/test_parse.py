@@ -8,8 +8,8 @@ from tests.utils import TestCaseBase
 
 import sqlparse
 import sqlparse.sql
-
 from sqlparse import tokens as T
+from sqlparse.compat import u
 
 
 class SQLParseTest(TestCaseBase):
@@ -32,16 +32,16 @@ class SQLParseTest(TestCaseBase):
     def test_newlines(self):
         sql = u'select\n*from foo;'
         p = sqlparse.parse(sql)[0]
-        self.assertEqual(unicode(p), sql)
+        self.assertEqual(u(p), sql)
         sql = u'select\r\n*from foo'
         p = sqlparse.parse(sql)[0]
-        self.assertEqual(unicode(p), sql)
+        self.assertEqual(u(p), sql)
         sql = u'select\r*from foo'
         p = sqlparse.parse(sql)[0]
-        self.assertEqual(unicode(p), sql)
+        self.assertEqual(u(p), sql)
         sql = u'select\r\n*from foo\n'
         p = sqlparse.parse(sql)[0]
-        self.assertEqual(unicode(p), sql)
+        self.assertEqual(u(p), sql)
 
     def test_within(self):
         sql = 'foo(col1, col2)'

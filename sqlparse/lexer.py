@@ -17,7 +17,7 @@ import sys
 
 from sqlparse import tokens
 from sqlparse.keywords import KEYWORDS, KEYWORDS_COMMON
-from cStringIO import StringIO
+from sqlparse.compat import StringIO, string_types, with_metaclass, text_type
 
 
 class include(str):
@@ -81,14 +81,14 @@ class LexerMeta(type):
 
             try:
                 rex = re.compile(tdef[0], rflags).match
-            except Exception, err:
+            except Exception as err:
                 raise ValueError(("uncompilable regex %r in state"
                                   " %r of %r: %s"
                                   % (tdef[0], state, cls, err)))
 
             assert type(tdef[1]) is tokens._TokenType or callable(tdef[1]), \
-                   ('token type must be simple type or callable, not %r'
-                    % (tdef[1],))
+                ('token type must be simple type or callable, not %r'
+                 % (tdef[1],))
 
             if len(tdef) == 2:
                 new_state = None
@@ -113,7 +113,7 @@ class LexerMeta(type):
                     itokens = []
                     for istate in tdef2:
                         assert istate != state, \
-                               'circular state ref %r' % istate
+                            'circular state ref %r' % istate
                         itokens.extend(cls._process_state(unprocessed,
                                                           processed, istate))
                     processed[new_state] = itokens
@@ -123,7 +123,7 @@ class LexerMeta(type):
                     for state in tdef2:
                         assert (state in unprocessed or
                                 state in ('#pop', '#push')), \
-                               'unknown new state ' + state
+                                'unknown new state ' + state
                     new_state = tdef2
                 else:
                     assert False, 'unknown new state def %r' % tdef2
@@ -134,7 +134,7 @@ class LexerMeta(type):
         cls._all_tokens = {}
         cls._tmpname = 0
         processed = cls._all_tokens[cls.__name__] = {}
-        #tokendefs = tokendefs or cls.tokens[name]
+        # tokendefs = tokendefs or cls.tokens[name]
         for state in cls.tokens.keys():
             cls._process_state(cls.tokens, processed, state)
         return processed
@@ -152,9 +152,7 @@ class LexerMeta(type):
         return type.__call__(cls, *args, **kwds)
 
 
-class Lexer(object):
-
-    __metaclass__ = LexerMeta
+class _Lexer(object):
 
     encoding = 'utf-8'
     stripall = False
@@ -201,7 +199,8 @@ class Lexer(object):
             # cannot be preceded by word character or a right bracket --
             # otherwise it's probably an array index
             (r'(?<![\w\])])(\[[^\]]+\])', tokens.Name),
-            (r'((LEFT\s+|RIGHT\s+|FULL\s+)?(INNER\s+|OUTER\s+|STRAIGHT\s+)?|(CROSS\s+|NATURAL\s+)?)?JOIN\b', tokens.Keyword),
+            (r'((LEFT\s+|RIGHT\s+|FULL\s+)?(INNER\s+|OUTER\s+|STRAIGHT\s+)?'
+             r'|(CROSS\s+|NATURAL\s+)?)?JOIN\b', tokens.Keyword),
             (r'END(\s+IF|\s+LOOP)?\b', tokens.Keyword),
             (r'NOT NULL\b', tokens.Keyword),
             (r'CREATE(\s+OR\s+REPLACE)?\b', tokens.Keyword.DDL),
@@ -258,13 +257,13 @@ class Lexer(object):
         Also preprocess the text, i.e. expand tabs and strip it if
         wanted and applies registered filters.
         """
-        if isinstance(text, basestring):
+        if isinstance(text, string_types):
             if self.stripall:
                 text = text.strip()
             elif self.stripnl:
                 text = text.strip('\n')
 
-            if sys.version_info[0] < 3 and isinstance(text, unicode):
+            if sys.version_info[0] < 3 and isinstance(text, text_type):
                 text = StringIO(text.encode('utf-8'))
                 self.encoding = 'utf-8'
             else:
@@ -348,6 +347,10 @@ class Lexer(object):
                     pos += 1
                 except IndexError:
                     break
+
+
+class Lexer(with_metaclass(LexerMeta, _Lexer)):
+    pass
 
 
 def tokenize(sql, encoding=None):

@@ -67,8 +67,8 @@ Parsing::
    >>> res
    (<Statement 'select...' at 0x9ad08ec>,)
    >>> stmt = res[0]
-   >>> unicode(stmt)  # converting it back to unicode
-   u'select * from someschema.mytable where id = 1'
+   >>> str(stmt)  # converting it back to unicode
+   'select * from someschema.mytable where id = 1'
    >>> # This is how the internal representation looks like:
    >>> stmt.tokens
    (<DML 'select' at 0x9b63c34>,
@@ -110,7 +110,6 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',

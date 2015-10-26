@@ -100,10 +100,10 @@ Each object can be converted back to a string at any time:
 
 .. code-block:: python
 
-   >>> unicode(stmt)  # str(stmt) for Python 3
-   u'select * from "someschema"."mytable" where id = 1'
-   >>> unicode(stmt.tokens[-1])  # or just the WHERE part
-   u'where id = 1'
+   >>> str(stmt)  # str(stmt) for Python 3
+   'select * from "someschema"."mytable" where id = 1'
+   >>> str(stmt.tokens[-1])  # or just the WHERE part
+   'where id = 1'
 
 Details of the returned objects are described in :ref:`analyze`.
 

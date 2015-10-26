@@ -19,7 +19,7 @@ if PY3:
     from io import StringIO
 
     def u(s):
-        return s
+        return str(s)
 
 elif PY2:
     text_type = unicode
@@ -27,7 +27,7 @@ elif PY2:
     from StringIO import StringIO  # flake8: noqa
 
     def u(s):
-        return unicode(s, 'unicode_escape')
+        return unicode(s)
 
 
 # Directly copied from six:

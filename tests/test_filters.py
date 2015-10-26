@@ -5,6 +5,7 @@ Created on 24/03/2012
 '''
 import unittest
 
+from sqlparse.compat import u
 from sqlparse.filters import StripWhitespace, Tokens2Unicode
 from sqlparse.lexer import tokenize
 

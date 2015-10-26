@@ -256,6 +256,7 @@ SELECT * FROM a.b;"""
     splitted = sqlparse.split(sql)
     assert len(splitted) == 2
 
+
 def test_issue194_splitting_function():
     sql = """CREATE FUNCTION a(x VARCHAR(20)) RETURNS VARCHAR(20)
 BEGIN
