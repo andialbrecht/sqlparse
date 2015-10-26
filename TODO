@@ -2,6 +2,4 @@
   https://groups.google.com/d/msg/sqlparse/huz9lKXt0Lc/11ybIKPJWbUJ
   for some interesting hints and suggestions.
 * Provide a function to replace tokens. See this thread: https://groups.google.com/d/msg/sqlparse/5xmBL2UKqX4/ZX9z_peve-AJ
-* Fix bugs on issue tracker.
 * Document filter stack and processing phases.
-* See KnownIssues http://code.google.com/p/python-sqlparse/wiki/KnownIssues
