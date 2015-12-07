@@ -232,7 +232,6 @@ def group_identifier(tlist):
 def group_identifier_list(tlist):
     [group_identifier_list(sgroup) for sgroup in tlist.get_sublists()
      if not isinstance(sgroup, sql.IdentifierList)]
-    idx = 0
     # Allowed list items
     fend1_funcs = [lambda t: isinstance(t, (sql.Identifier, sql.Function,
                                             sql.Case)),
@@ -249,10 +248,11 @@ def group_identifier_list(tlist):
                    lambda t: isinstance(t, sql.Comment),
                    lambda t: t.ttype == T.Comment.Multiline,
                    ]
-    tcomma = tlist.token_next_match(idx, T.Punctuation, ',')
+    tcomma = tlist.token_next_match(0, T.Punctuation, ',')
     start = None
     while tcomma is not None:
-        idx = tlist.token_index(tcomma, start=idx)
+        # Go back one idx to make sure to find the correct tcomma
+        idx = tlist.token_index(tcomma)
         before = tlist.token_prev(idx)
         after = tlist.token_next(idx)
         # Check if the tokens around tcomma belong to a list
