@@ -83,11 +83,6 @@ Parsing::
 VERSION = get_version()
 
 
-kwargs = {}
-if sys.version_info[0] == 3:
-    kwargs['use_2to3'] = True
-
-
 setup(
     name='sqlparse',
     version=VERSION,
@@ -114,5 +109,4 @@ setup(
         'Topic :: Software Development'
     ],
     scripts=['bin/sqlformat'],
-    **kwargs
 )
