@@ -7,6 +7,7 @@ from tests.utils import TestCaseBase, load_file
 import sqlparse
 from sqlparse import sql
 from sqlparse import tokens as T
+from sqlparse.compat import u
 
 
 class RegressionTests(TestCaseBase):
@@ -275,3 +276,13 @@ def test_issue186_get_type():
     sql = "-- comment\ninsert into foo"
     p = sqlparse.parse(sql)[0]
     assert p.get_type() == 'INSERT'
+
+
+def test_issue212_py2unicode():
+    if sys.version_info < (3,):
+        t1 = sql.Token(T.String, u"schöner ")
+    else:
+        t1 = sql.Token(T.String, "schöner ")
+    t2 = sql.Token(T.String, u"bug")
+    l = sql.TokenList([t1, t2])
+    assert str(l) == 'schöner bug'

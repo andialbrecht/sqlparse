@@ -157,7 +157,7 @@ class TokenList(Token):
 
     def __str__(self):
         str_ = self._to_string()
-        if sys.version_info[0] < 2:
+        if sys.version_info[0] <= 2:
             str_ = str_.encode('utf-8')
         return str_
 
