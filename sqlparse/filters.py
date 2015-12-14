@@ -236,13 +236,15 @@ class StripWhitespaceFilter:
 
     def _stripws_default(self, tlist):
         last_was_ws = False
+        is_first_char = True
         for token in tlist.tokens:
             if token.is_whitespace():
-                if last_was_ws:
+                if last_was_ws or is_first_char:
                     token.value = ''
                 else:
                     token.value = ' '
             last_was_ws = token.is_whitespace()
+            is_first_char = False
 
     def _stripws_identifierlist(self, tlist):
         # Removes newlines before commas, see issue140
