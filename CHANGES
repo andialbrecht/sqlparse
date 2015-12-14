@@ -9,6 +9,10 @@ Internal Changes
   sqlparse.exceptions.
 * sqlparse.sql.Token.to_unicode was removed.
 
+Bug Fixes
+* Leading whitespaces are now removed when format() is called with
+  strip_whitespace=True (issue213, by shenlongxing).
+
 
 Release 0.1.18 (Oct 25, 2015)
 -----------------------------

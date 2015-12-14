@@ -286,3 +286,8 @@ def test_issue212_py2unicode():
     t2 = sql.Token(T.String, u"bug")
     l = sql.TokenList([t1, t2])
     assert str(l) == 'schöner bug'
+
+
+def test_issue213_leadingws():
+    sql = " select * from foo"
+    assert sqlparse.format(sql, strip_whitespace=True) == "select * from foo"
