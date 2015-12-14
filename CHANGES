@@ -14,6 +14,13 @@ Bug Fixes
   strip_whitespace=True (issue213, by shenlongxing).
 
 
+Hotfix (not released yet)
+-------------------------
+
+Bug Fixes
+* Fix IndexError when statement contains WITH clauses (issue205).
+
+
 Release 0.1.18 (Oct 25, 2015)
 -----------------------------
 
