@@ -201,7 +201,7 @@ class _Lexer(object):
             (r'(?<![\w\])])(\[[^\]]+\])', tokens.Name),
             (r'((LEFT\s+|RIGHT\s+|FULL\s+)?(INNER\s+|OUTER\s+|STRAIGHT\s+)?'
              r'|(CROSS\s+|NATURAL\s+)?)?JOIN\b', tokens.Keyword),
-            (r'END(\s+IF|\s+LOOP)?\b', tokens.Keyword),
+            (r'END(\s+IF|\s+LOOP|\s+WHILE)?\b', tokens.Keyword),
             (r'NOT NULL\b', tokens.Keyword),
             (r'CREATE(\s+OR\s+REPLACE)?\b', tokens.Keyword.DDL),
             (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
