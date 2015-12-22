@@ -565,6 +565,7 @@ KEYWORDS_COMMON = {
     'AS': tokens.Keyword,
     'ELSE': tokens.Keyword,
     'FOR': tokens.Keyword,
+    'WHILE': tokens.Keyword,
 
     'CASE': tokens.Keyword,
     'WHEN': tokens.Keyword,

@@ -51,7 +51,7 @@ class StatementFilter:
                 return 1
             return 0
 
-        if unified in ('END IF', 'END FOR'):
+        if unified in ('END IF', 'END FOR', 'END WHILE'):
             return -1
 
         if unified == 'END':
@@ -64,7 +64,7 @@ class StatementFilter:
             self._is_create = True
             return 0
 
-        if unified in ('IF', 'FOR') \
+        if unified in ('IF', 'FOR', 'WHILE') \
            and self._is_create and self._begin_depth > 0:
             return 1
 
