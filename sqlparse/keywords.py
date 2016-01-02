@@ -379,6 +379,7 @@ KEYWORDS = {
     'SECURITY': tokens.Keyword,
     'SELF': tokens.Keyword,
     'SENSITIVE': tokens.Keyword,
+    'SEQUENCE': tokens.Keyword,
     'SERIALIZABLE': tokens.Keyword,
     'SERVER_NAME': tokens.Keyword,
     'SESSION': tokens.Keyword,
