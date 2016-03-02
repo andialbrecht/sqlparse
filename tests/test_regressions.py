@@ -294,7 +294,13 @@ def test_issue213_leadingws():
 
 
 def test_issue227_gettype_cte():
-    select_stmt = sqlparse.parse('SELECT 1, 2, 3 FROM foo;')[0]
-    assert select_stmt.get_type() == 'SELECT'
-    with_stmt = sqlparse.parse('WITH foo AS (SELECT 1, 2, 3) SELECT * FROM foo;')[0]
-    assert with_stmt.get_type() == 'SELECT'
+    select_stmt = sqlparse.parse('SELECT 1, 2, 3 FROM foo;')
+    assert select_stmt[0].get_type() == 'SELECT'
+    with_stmt = sqlparse.parse('WITH foo AS (SELECT 1, 2, 3) SELECT * FROM foo;')
+    assert with_stmt[0].get_type() == 'SELECT'
+    with2_stmt = sqlparse.parse('''
+        WITH foo AS (SELECT 1 AS abc, 2 AS def),
+             bar AS (SELECT * FROM something WHERE x > 1)
+        INSERT INTO elsewhere SELECT * FROM foo JOIN bar;
+    ''')
+    assert with2_stmt[0].get_type() == 'INSERT'

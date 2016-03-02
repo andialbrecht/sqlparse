@@ -75,6 +75,7 @@ Token.Number = Number
 # SQL specific tokens
 DML = Keyword.DML
 DDL = Keyword.DDL
+CTE = Keyword.CTE
 Command = Keyword.Command
 
 Group = Token.Group
