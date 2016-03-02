@@ -291,3 +291,10 @@ def test_issue212_py2unicode():
 def test_issue213_leadingws():
     sql = " select * from foo"
     assert sqlparse.format(sql, strip_whitespace=True) == "select * from foo"
+
+
+def test_issue227_gettype_cte():
+    select_stmt = sqlparse.parse('SELECT 1, 2, 3 FROM foo;')[0]
+    assert select_stmt.get_type() == 'SELECT'
+    with_stmt = sqlparse.parse('WITH foo AS (SELECT 1, 2, 3) SELECT * FROM foo;')[0]
+    assert with_stmt.get_type() == 'SELECT'
