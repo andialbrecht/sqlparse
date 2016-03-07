@@ -1,3 +1,10 @@
+Release 0.1.19 (Mar 07, 2015)
+-----------------------------
+
+Bug Fixes
+* Fix IndexError when statement contains WITH clauses (issue205).
+
+
 Release 0.1.18 (Oct 25, 2015)
 -----------------------------
 
