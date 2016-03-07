@@ -11,6 +11,7 @@ Internal Changes
 
 Enhancements
 * Support WHILE loops (issue215, by shenlongxing).
+* Better support for CTEs (issue217, by Andrew Tipton).
 
 Bug Fixes
 * Leading whitespaces are now removed when format() is called with
