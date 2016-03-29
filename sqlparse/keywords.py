@@ -149,7 +149,7 @@ KEYWORDS = {
     'ESCAPE': tokens.Keyword,
     'EVERY': tokens.Keyword,
     'EXCEPT': tokens.Keyword,
-    'ESCEPTION': tokens.Keyword,
+    'EXCEPTION': tokens.Keyword,
     'EXCLUDING': tokens.Keyword,
     'EXCLUSIVE': tokens.Keyword,
     'EXEC': tokens.Keyword,
