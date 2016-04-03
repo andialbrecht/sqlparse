@@ -10,11 +10,11 @@ __version__ = '0.2.0.dev0'
 
 
 # Setup namespace
-from sqlparse import engine
-from sqlparse import filters
-from sqlparse import formatter
+from sqlparse import engine  # noqa
+from sqlparse import filters  # noqa
+from sqlparse import formatter  # noqa
 
-from sqlparse.compat import u
+from sqlparse.compat import u  # noqa
 
 
 def parse(sql, encoding=None):
@@ -69,9 +69,7 @@ def split(sql, encoding=None):
     return [u(stmt).strip() for stmt in stack.run(sql, encoding)]
 
 
-from sqlparse.engine.filter import StatementFilter
-
-
 def split2(stream):
+    from sqlparse.engine.filter import StatementFilter
     splitter = StatementFilter()
     return list(splitter.process(None, stream))

@@ -491,9 +491,11 @@ class Statement(TokenList):
             # The WITH keyword should be followed by either an Identifier or
             # an IdentifierList containing the CTE definitions;  the actual
             # DML keyword (e.g. SELECT, INSERT) will follow next.
-            idents = self.token_next(self.token_index(first_token), skip_ws=True)
+            idents = self.token_next(
+                self.token_index(first_token), skip_ws=True)
             if isinstance(idents, (Identifier, IdentifierList)):
-                dml_keyword = self.token_next(self.token_index(idents), skip_ws=True)
+                dml_keyword = self.token_next(
+                    self.token_index(idents), skip_ws=True)
                 if dml_keyword.ttype == T.Keyword.DML:
                     return dml_keyword.normalized
             # Hmm, probably invalid syntax, so return unknown.

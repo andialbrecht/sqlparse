@@ -5,11 +5,6 @@ import itertools
 from sqlparse import sql
 from sqlparse import tokens as T
 
-try:
-    next
-except NameError:  # Python < 2.6
-    next = lambda i: i.next()
-
 
 def _group_left_right(tlist, ttype, value, cls,
                       check_right=lambda t: True,
@@ -441,23 +436,23 @@ def align_comments(tlist):
 
 def group(tlist):
     for func in [
-            group_comments,
-            group_brackets,
-            group_functions,
-            group_where,
-            group_case,
-            group_identifier,
-            group_order,
-            group_typecasts,
-            group_as,
-            group_aliased,
-            group_assignment,
-            group_comparison,
-            align_comments,
-            group_identifier_list,
-            group_if,
-            group_for,
-            group_foreach,
-            group_begin,
-            ]:
+        group_comments,
+        group_brackets,
+        group_functions,
+        group_where,
+        group_case,
+        group_identifier,
+        group_order,
+        group_typecasts,
+        group_as,
+        group_aliased,
+        group_assignment,
+        group_comparison,
+        align_comments,
+        group_identifier_list,
+        group_if,
+        group_for,
+        group_foreach,
+        group_begin,
+    ]:
         func(tlist)
