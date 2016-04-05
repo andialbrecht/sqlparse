@@ -135,7 +135,8 @@ def group_comparison(tlist):
                                 T.Name, T.Number, T.Number.Float,
                                 T.Number.Integer, T.Literal,
                                 T.Literal.Number.Integer, T.Name.Placeholder)
-                or isinstance(token, (sql.Identifier, sql.Parenthesis))
+                or isinstance(token, (sql.Identifier, sql.Parenthesis,
+                                      sql.Function))
                 or (token.ttype is T.Keyword
                     and token.value.upper() in ['NULL', ]))
     _group_left_right(tlist, T.Operator.Comparison, None, sql.Comparison,

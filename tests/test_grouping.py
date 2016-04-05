@@ -325,6 +325,29 @@ def test_comparison_with_strings():  # issue148
     assert p.tokens[0].right.ttype == T.String.Single
 
 
+def test_comparison_with_functions():  # issue230
+    p = sqlparse.parse('foo = DATE(bar.baz)')[0]
+    assert len(p.tokens) == 1
+    assert isinstance(p.tokens[0], sql.Comparison)
+    assert len(p.tokens[0].tokens) == 5
+    assert p.tokens[0].left.value == 'foo'
+    assert p.tokens[0].right.value == 'DATE(bar.baz)'
+    
+    p = sqlparse.parse('DATE(foo.bar) = DATE(bar.baz)')[0]
+    assert len(p.tokens) == 1
+    assert isinstance(p.tokens[0], sql.Comparison)
+    assert len(p.tokens[0].tokens) == 5
+    assert p.tokens[0].left.value == 'DATE(foo.bar)'
+    assert p.tokens[0].right.value == 'DATE(bar.baz)'
+    
+    p = sqlparse.parse('DATE(foo.bar) = bar.baz')[0]
+    assert len(p.tokens) == 1
+    assert isinstance(p.tokens[0], sql.Comparison)
+    assert len(p.tokens[0].tokens) == 5
+    assert p.tokens[0].left.value == 'DATE(foo.bar)'
+    assert p.tokens[0].right.value == 'bar.baz'
+
+
 @pytest.mark.parametrize('start', ['FOR', 'FOREACH'])
 def test_forloops(start):
     p = sqlparse.parse('%s foo in bar LOOP foobar END LOOP' % start)[0]
