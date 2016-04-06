@@ -229,7 +229,8 @@ class TestGrouping(TestCaseBase):
 class TestStatement(TestCaseBase):
 
     def test_get_type(self):
-        f = lambda sql: sqlparse.parse(sql)[0]
+        def f(sql):
+            return sqlparse.parse(sql)[0]
         self.assertEqual(f('select * from foo').get_type(), 'SELECT')
         self.assertEqual(f('update foo').get_type(), 'UPDATE')
         self.assertEqual(f(' update foo').get_type(), 'UPDATE')
@@ -332,14 +333,14 @@ def test_comparison_with_functions():  # issue230
     assert len(p.tokens[0].tokens) == 5
     assert p.tokens[0].left.value == 'foo'
     assert p.tokens[0].right.value == 'DATE(bar.baz)'
-    
+
     p = sqlparse.parse('DATE(foo.bar) = DATE(bar.baz)')[0]
     assert len(p.tokens) == 1
     assert isinstance(p.tokens[0], sql.Comparison)
     assert len(p.tokens[0].tokens) == 5
     assert p.tokens[0].left.value == 'DATE(foo.bar)'
     assert p.tokens[0].right.value == 'DATE(bar.baz)'
-    
+
     p = sqlparse.parse('DATE(foo.bar) = bar.baz')[0]
     assert len(p.tokens) == 1
     assert isinstance(p.tokens[0], sql.Comparison)
