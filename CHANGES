@@ -18,6 +18,7 @@ Bug Fixes
   strip_whitespace=True (issue213, by shenlongxing).
 * Fix typo in keywords list (issue229, by cbeloni).
 * Fix parsing of functions in comparisons (issue230, by saaj).
+* Minor bug fixes (issue101).
 
 
 Release 0.1.19 (Mar 07, 2015)

@@ -176,6 +176,8 @@ def group_identifier(tlist):
             else:
                 if isinstance(t, sql.Comment) and t.is_multiline():
                     yield t
+                if t.ttype is T.Keyword.Order:
+                    yield t
                 return
 
     def _next_token(tl, i):
