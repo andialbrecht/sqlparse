@@ -17,6 +17,7 @@ Bug Fixes
 * Leading whitespaces are now removed when format() is called with
   strip_whitespace=True (issue213, by shenlongxing).
 * Fix typo in keywords list (issue229, by cbeloni).
+* Fix parsing of functions in comparisons (issue230, by saaj).
 
 
 Release 0.1.19 (Mar 07, 2015)
