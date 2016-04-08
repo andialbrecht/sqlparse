@@ -6,13 +6,12 @@ Created on 17/05/2012
 Several utility functions to extract info from the SQL sentences
 '''
 
-from sqlparse.filters import ColumnsSelect, Limit
+from sqlparse.filters import ColumnsSelect, InfoCreateTable, Limit
 from sqlparse.pipeline import Pipeline
 from sqlparse.tokens import Keyword, Whitespace
 
 
 def getlimit(stream):
-    """Function that return the LIMIT of a input SQL """
     pipe = Pipeline()
 
     pipe.append(Limit())
@@ -33,6 +32,26 @@ def getcolumns(stream):
     return pipe(stream)
 
 
+
+def get_create_table_info(stream):
+    """
+    Function that returns the columns of a CREATE TABLE statement including their type and NULL
+    declaration.
+
+    The nullable declaration is None if not specified, else 'NOT NULL' or 'NULL'.
+
+    >>> import lexer
+    >>> get_create_table_info(lexer.tokenize('CREATE TABLE t ( a INT NOT NULL )'))
+    [('t', {0: ('a', 'INT', 'NOT NULL')})]
+    """
+    pipe = Pipeline()
+
+    pipe.append(InfoCreateTable())
+
+    return pipe(stream)
+
+
+
 class IsType(object):
     """Functor that return is the statement is of a specific type"""
     def __init__(self, type):
@@ -42,3 +61,7 @@ class IsType(object):
         for token_type, value in stream:
             if token_type not in Whitespace:
                 return token_type in Keyword and value == self.type
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()

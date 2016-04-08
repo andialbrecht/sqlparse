@@ -60,6 +60,8 @@ Bug Fixes
 * Statement.get_type() now ignores comments at the beginning of
   a statement (issue186).
 
+Enhancements
+* Add high-level function to parse column names and types in CREATE TABLE statements
 
 Release 0.1.15 (Apr 15, 2015)
 -----------------------------
