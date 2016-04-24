@@ -1,3 +1,6 @@
+# PyCharm
+.idea/
+
 *.pyc
 docs/build
 dist
