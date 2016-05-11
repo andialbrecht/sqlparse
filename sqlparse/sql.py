@@ -7,6 +7,7 @@ import sys
 
 from sqlparse import tokens as T
 from sqlparse.compat import string_types, u
+from sqlparse.utils import imt
 
 
 class Token(object):
@@ -232,6 +233,27 @@ class TokenList(Token):
     def _groupable_tokens(self):
         return self.tokens
 
+    def _token_matching(self, funcs, start=0, end=None, reverse=False):
+        """next token that match functions"""
+        if start is None:
+            return None
+
+        if not isinstance(start, int):
+            start = self.token_index(start) + 1
+
+        if not isinstance(funcs, (list, tuple)):
+            funcs = (funcs,)
+
+        if reverse:
+            iterable = iter(reversed(self.tokens[end:start - 1]))
+        else:
+            iterable = self.tokens[start:end]
+
+        for token in iterable:
+            for func in funcs:
+                if func(token):
+                    return token
+
     def token_first(self, ignore_whitespace=True, ignore_comments=False):
         """Returns the first child token.
 
@@ -244,9 +266,13 @@ class TokenList(Token):
         for token in self.tokens:
             if ignore_whitespace and token.is_whitespace():
                 continue
-            if ignore_comments and isinstance(token, Comment):
+            if ignore_comments and imt(token, i=Comment):
                 continue
             return token
+
+    def token_next_by(self, i=None, m=None, t=None, idx=0, end=None):
+        funcs = lambda tk: imt(tk, i, m, t)
+        return self._token_matching(funcs, idx, end)
 
     def token_next_by_instance(self, idx, clss, end=None):
         """Returns the next token matching a class.
@@ -403,7 +429,7 @@ class TokenList(Token):
 
         # "name alias" or "complicated column expression alias"
         if len(self.tokens) > 2 \
-           and self.token_next_by_type(0, T.Whitespace) is not None:
+            and self.token_next_by_type(0, T.Whitespace) is not None:
             return self._get_first_name(reverse=True)
 
         return None
@@ -677,11 +703,9 @@ class Function(TokenList):
         """Return a list of parameters."""
         parenthesis = self.tokens[-1]
         for t in parenthesis.tokens:
-            if isinstance(t, IdentifierList):
+            if imt(t, i=IdentifierList):
                 return t.get_identifiers()
-            elif (isinstance(t, Identifier) or
-                  isinstance(t, Function) or
-                  t.ttype in T.Literal):
+            elif imt(t, i=(Function, Identifier), t=T.Literal):
                 return [t, ]
         return []
 
