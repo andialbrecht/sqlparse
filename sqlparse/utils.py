@@ -1,16 +1,13 @@
-'''
-Created on 17/05/2012
-
-@author: piranna
-'''
-
+import itertools
 import re
-from collections import OrderedDict
+from collections import OrderedDict, deque
+from contextlib import contextmanager
 
 
 class Cache(OrderedDict):
     """Cache with LRU algorithm using an OrderedDict as basis
     """
+
     def __init__(self, maxsize=100):
         OrderedDict.__init__(self)
 
@@ -113,3 +110,80 @@ def split_unquoted_newlines(text):
         else:
             outputlines[-1] += line
     return outputlines
+
+
+def remove_quotes(val):
+    """Helper that removes surrounding quotes from strings."""
+    if val is None:
+        return
+    if val[0] in ('"', "'") and val[0] == val[-1]:
+        val = val[1:-1]
+    return val
+
+
+def recurse(*cls):
+    def wrap(f):
+        def wrapped_f(tlist):
+            for sgroup in tlist.get_sublists():
+                if not isinstance(sgroup, cls):
+                    wrapped_f(sgroup)
+            f(tlist)
+
+        return wrapped_f
+
+    return wrap
+
+
+def imt(token, i=None, m=None, t=None):
+    """Aid function to refactor comparisons for Instance, Match and TokenType
+    Aid fun
+    :param token:
+    :param i: Class or Tuple/List of Classes
+    :param m: Tuple of TokenType & Value. Can be list of Tuple for multiple
+    :param t: TokenType or Tuple/List of TokenTypes
+    :return:  bool
+    """
+    t = (t,) if t and not isinstance(t, (list, tuple)) else t
+    m = (m,) if m and not isinstance(m, (list,)) else m
+
+    if token is None:
+        return False
+    elif i is not None and isinstance(token, i):
+        return True
+    elif m is not None and any((token.match(*x) for x in m)):
+        return True
+    elif t is not None and token.ttype in t:
+        return True
+    else:
+        return False
+
+
+def find_matching(tlist, token, M1, M2):
+    idx = tlist.token_index(token)
+    depth = 0
+    for token in tlist[idx:]:
+        if token.match(*M1):
+            depth += 1
+        elif token.match(*M2):
+            depth -= 1
+            if depth == 0:
+                return token
+
+
+def consume(iterator, n):
+    """Advance the iterator n-steps ahead. If n is none, consume entirely."""
+    deque(itertools.islice(iterator, n), maxlen=0)
+
+
+@contextmanager
+def offset(filter_, n=0):
+    filter_.offset += n
+    yield
+    filter_.offset -= n
+
+
+@contextmanager
+def indent(filter_, n=1):
+    filter_.indent += n
+    yield
+    filter_.indent -= n
