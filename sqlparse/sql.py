@@ -373,8 +373,6 @@ class TokenList(Token):
         if len(self.tokens) > 2 and self.token_next_by(t=T.Whitespace):
             return self._get_first_name(reverse=True)
 
-        return None
-
     def get_name(self):
         """Returns the name of this identifier.
 
@@ -382,32 +380,22 @@ class TokenList(Token):
         be considered as the name under which the object corresponding to
         this identifier is known within the current statement.
         """
-        alias = self.get_alias()
-        if alias is not None:
-            return alias
-        return self.get_real_name()
+        return self.get_alias() or self.get_real_name()
 
     def get_real_name(self):
         """Returns the real name (object name) of this identifier."""
         # a.b
-        dot = self.token_next_match(0, T.Punctuation, '.')
-        if dot is not None:
-            return self._get_first_name(self.token_index(dot))
-
-        return self._get_first_name()
+        dot = self.token_next_by(m=(T.Punctuation, '.'))
+        return self._get_first_name(dot)
 
     def get_parent_name(self):
         """Return name of the parent object if any.
 
         A parent object is identified by the first occuring dot.
         """
-        dot = self.token_next_match(0, T.Punctuation, '.')
-        if dot is None:
-            return None
-        prev_ = self.token_prev(self.token_index(dot))
-        if prev_ is None:  # something must be verry wrong here..
-            return None
-        return remove_quotes(prev_.value)
+        dot = self.token_next_by(m=(T.Punctuation, '.'))
+        prev_ = self.token_prev(dot)
+        return remove_quotes(prev_.value) if prev_ is not None else None
 
     def _get_first_name(self, idx=None, reverse=False, keywords=False):
         """Returns the name of the first token with a name"""
@@ -427,7 +415,6 @@ class TokenList(Token):
                 return remove_quotes(tok.value)
             elif isinstance(tok, Identifier) or isinstance(tok, Function):
                 return tok.get_name()
-        return None
 
 
 class Statement(TokenList):
