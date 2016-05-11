@@ -6,45 +6,33 @@ from sqlparse import sql
 from sqlparse import tokens as T
 from sqlparse.utils import recurse, imt, find_matching
 
+M_ROLE = (T.Keyword, ('null', 'role'))
+M_SEMICOLON = (T.Punctuation, ';')
 
-def _group_left_right(tlist, ttype, value, cls,
-                      check_right=lambda t: True,
-                      check_left=lambda t: True,
-                      include_semicolon=False):
-    [_group_left_right(sgroup, ttype, value, cls, check_right, check_left,
-                       include_semicolon) for sgroup in tlist.get_sublists()
-     if not isinstance(sgroup, cls)]
-    idx = 0
-    token = tlist.token_next_match(idx, ttype, value)
+T_NUMERICAL = (T.Number, T.Number.Integer, T.Number.Float)
+T_STRING = (T.String, T.String.Single, T.String.Symbol)
+T_NAME = (T.Name, T.Name.Placeholder)
+
+
+def _group_left_right(tlist, m, cls,
+                      valid_left=lambda t: t is not None,
+                      valid_right=lambda t: t is not None,
+                      semicolon=False):
+    """Groups together tokens that are joined by a middle token. ie. x < y"""
+    [_group_left_right(sgroup, m, cls, valid_left, valid_right, semicolon)
+     for sgroup in tlist.get_sublists() if not isinstance(sgroup, cls)]
+
+    token = tlist.token_next_by(m=m)
     while token:
-        right = tlist.token_next(tlist.token_index(token))
-        left = tlist.token_prev(tlist.token_index(token))
-        if right is None or not check_right(right):
-            token = tlist.token_next_match(tlist.token_index(token) + 1,
-                                           ttype, value)
-        elif left is None or not check_left(left):
-            token = tlist.token_next_match(tlist.token_index(token) + 1,
-                                           ttype, value)
-        else:
-            if include_semicolon:
-                sright = tlist.token_next_match(tlist.token_index(right),
-                                                T.Punctuation, ';')
-                if sright is not None:
-                    # only overwrite "right" if a semicolon is actually
-                    # present.
-                    right = sright
-            tokens = tlist.tokens_between(left, right)[1:]
-            if not isinstance(left, cls):
-                new = cls([left])
-                new_idx = tlist.token_index(left)
-                tlist.tokens.remove(left)
-                tlist.tokens.insert(new_idx, new)
-                left = new
-            left.tokens.extend(tokens)
-            for t in tokens:
-                tlist.tokens.remove(t)
-            token = tlist.token_next_match(tlist.token_index(left) + 1,
-                                           ttype, value)
+        left, right = tlist.token_prev(token), tlist.token_next(token)
+
+        if valid_left(left) and valid_right(right):
+            if semicolon:
+                sright = tlist.token_next_by(m=M_SEMICOLON, idx=right)
+                right = sright or right  # only overwrite if a semicolon present.
+            tokens = tlist.tokens_between(left, right)
+            token = tlist.group_tokens(cls, tokens, extend=True)
+        token = tlist.token_next_by(m=m, idx=token)
 
 
 def _group_matching(tlist, cls):
@@ -77,39 +65,26 @@ def group_begin(tlist):
 
 
 def group_as(tlist):
-    def _right_valid(token):
-        # Currently limited to DML/DDL. Maybe additional more non SQL reserved
-        # keywords should appear here (see issue8).
-        return token.ttype not in (T.DML, T.DDL)
-
-    def _left_valid(token):
-        if token.ttype is T.Keyword and token.value in ('NULL',):
-            return True
-        return token.ttype is not T.Keyword
-
-    _group_left_right(tlist, T.Keyword, 'AS', sql.Identifier,
-                      check_right=_right_valid,
-                      check_left=_left_valid)
+    lfunc = lambda tk: not imt(tk, t=T.Keyword) or tk.value == 'NULL'
+    rfunc = lambda tk: not imt(tk, t=(T.DML, T.DDL))
+    _group_left_right(tlist, (T.Keyword, 'AS'), sql.Identifier,
+                      valid_left=lfunc, valid_right=rfunc)
 
 
 def group_assignment(tlist):
-    _group_left_right(tlist, T.Assignment, ':=', sql.Assignment,
-                      include_semicolon=True)
+    _group_left_right(tlist, (T.Assignment, ':='), sql.Assignment,
+                      semicolon=True)
 
 
 def group_comparison(tlist):
-    def _parts_valid(token):
-        return (token.ttype in (T.String.Symbol, T.String.Single,
-                                T.Name, T.Number, T.Number.Float,
-                                T.Number.Integer, T.Literal,
-                                T.Literal.Number.Integer, T.Name.Placeholder)
-                or isinstance(token, (sql.Identifier, sql.Parenthesis,
-                                      sql.Function))
-                or (token.ttype is T.Keyword
-                    and token.value.upper() in ['NULL', ]))
+    I_COMPERABLE = (sql.Parenthesis, sql.Function, sql.Identifier)
+    T_COMPERABLE = T_NUMERICAL + T_STRING + T_NAME
 
-    _group_left_right(tlist, T.Operator.Comparison, None, sql.Comparison,
-                      check_left=_parts_valid, check_right=_parts_valid)
+    func = lambda tk: imt(tk, t=T_COMPERABLE, i=I_COMPERABLE) or (
+        imt(tk, t=T.Keyword) and tk.value.upper() == 'NULL')
+
+    _group_left_right(tlist, (T.Operator.Comparison, None), sql.Comparison,
+                      valid_left=func, valid_right=func)
 
 
 def group_case(tlist):
@@ -312,7 +287,7 @@ def group_aliased(tlist):
 
 
 def group_typecasts(tlist):
-    _group_left_right(tlist, T.Punctuation, '::', sql.Identifier)
+    _group_left_right(tlist, (T.Punctuation, '::'), sql.Identifier)
 
 
 @recurse(sql.Function)
