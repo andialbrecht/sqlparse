@@ -422,19 +422,13 @@ def group_order(tlist):
 
 def align_comments(tlist):
     [align_comments(sgroup) for sgroup in tlist.get_sublists()]
-    idx = 0
-    token = tlist.token_next_by_instance(idx, sql.Comment)
+    token = tlist.token_next_by(i=sql.Comment)
     while token:
         before = tlist.token_prev(tlist.token_index(token))
         if isinstance(before, sql.TokenList):
-            grp = tlist.tokens_between(before, token)[1:]
-            before.tokens.extend(grp)
-            for t in grp:
-                tlist.tokens.remove(t)
-            idx = tlist.token_index(before) + 1
-        else:
-            idx = tlist.token_index(token) + 1
-        token = tlist.token_next_by_instance(idx, sql.Comment)
+            tokens = tlist.tokens_between(before, token)
+            token = tlist.group_tokens(sql.TokenList, tokens, extend=True)
+        token = tlist.token_next_by(i=sql.Comment, idx=token)
 
 
 def group(tlist):
