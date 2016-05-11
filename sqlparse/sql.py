@@ -7,7 +7,7 @@ import sys
 
 from sqlparse import tokens as T
 from sqlparse.compat import string_types, u
-from sqlparse.utils import imt
+from sqlparse.utils import imt, remove_quotes
 
 
 class Token(object):
@@ -184,14 +184,6 @@ class TokenList(Token):
                                         token._get_repr_value()))
             if (token.is_group() and (max_depth is None or depth < max_depth)):
                 token._pprint_tree(max_depth, depth + 1)
-
-    def _remove_quotes(self, val):
-        """Helper that removes surrounding quotes from strings."""
-        if not val:
-            return val
-        if val[0] in ('"', '\'') and val[-1] == val[0]:
-            val = val[1:-1]
-        return val
 
     def get_token_at_offset(self, offset):
         """Returns the token that is on position offset."""
@@ -482,7 +474,7 @@ class TokenList(Token):
         prev_ = self.token_prev(self.token_index(dot))
         if prev_ is None:  # something must be verry wrong here..
             return None
-        return self._remove_quotes(prev_.value)
+        return remove_quotes(prev_.value)
 
     def _get_first_name(self, idx=None, reverse=False, keywords=False):
         """Returns the name of the first token with a name"""
@@ -499,7 +491,7 @@ class TokenList(Token):
 
         for tok in tokens:
             if tok.ttype in types:
-                return self._remove_quotes(tok.value)
+                return remove_quotes(tok.value)
             elif isinstance(tok, Identifier) or isinstance(tok, Function):
                 return tok.get_name()
         return None
