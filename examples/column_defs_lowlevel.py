@@ -15,7 +15,7 @@ SQL = """CREATE TABLE foo (
 parsed = sqlparse.parse(SQL)[0]
 
 # extract the parenthesis which holds column definitions
-par = parsed.token_next_by_instance(0, sqlparse.sql.Parenthesis)
+par = parsed.token_next_by(i=sqlparse.sql.Parenthesis)
 
 
 def extract_definitions(token_list):

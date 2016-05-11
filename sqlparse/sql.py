@@ -255,12 +255,9 @@ class TokenList(Token):
         if *ignore_comments* is ``True`` (default: ``False``), comments are
         ignored too.
         """
-        for token in self.tokens:
-            if ignore_whitespace and token.is_whitespace():
-                continue
-            if ignore_comments and imt(token, i=Comment):
-                continue
-            return token
+        funcs = lambda tk: not ((ignore_whitespace and tk.is_whitespace()) or
+                                (ignore_comments and imt(tk, i=Comment)))
+        return self._token_matching(funcs)
 
     def token_next_by(self, i=None, m=None, t=None, idx=0, end=None):
         funcs = lambda tk: imt(tk, i, m, t)
@@ -274,48 +271,26 @@ class TokenList(Token):
 
         If no matching token can be found ``None`` is returned.
         """
-        if not isinstance(clss, (list, tuple)):
-            clss = (clss,)
-
-        for token in self.tokens[idx:end]:
-            if isinstance(token, clss):
-                return token
+        funcs = lambda tk: imt(tk, i=clss)
+        return self._token_matching(funcs, idx, end)
 
     def token_next_by_type(self, idx, ttypes):
         """Returns next matching token by it's token type."""
-        if not isinstance(ttypes, (list, tuple)):
-            ttypes = [ttypes]
-
-        for token in self.tokens[idx:]:
-            if token.ttype in ttypes:
-                return token
+        funcs = lambda tk: imt(tk, t=ttypes)
+        return self._token_matching(funcs, idx)
 
     def token_next_match(self, idx, ttype, value, regex=False):
         """Returns next token where it's ``match`` method returns ``True``."""
-        if not isinstance(idx, int):
-            idx = self.token_index(idx)
-
-        for n in range(idx, len(self.tokens)):
-            token = self.tokens[n]
-            if token.match(ttype, value, regex):
-                return token
+        funcs = lambda tk: imt(tk, m=(ttype, value, regex))
+        return self._token_matching(funcs, idx)
 
     def token_not_matching(self, idx, funcs):
-        for token in self.tokens[idx:]:
-            passed = False
-            for func in funcs:
-                if func(token):
-                    passed = True
-                    break
-
-            if not passed:
-                return token
+        funcs = (funcs,) if not isinstance(funcs, (list, tuple)) else funcs
+        funcs = [lambda tk: not func(tk) for func in funcs]
+        return self._token_matching(funcs, idx)
 
     def token_matching(self, idx, funcs):
-        for token in self.tokens[idx:]:
-            for func in funcs:
-                if func(token):
-                    return token
+        return self._token_matching(funcs, idx)
 
     def token_prev(self, idx, skip_ws=True):
         """Returns the previous token relative to *idx*.
@@ -323,17 +298,10 @@ class TokenList(Token):
         If *skip_ws* is ``True`` (the default) whitespace tokens are ignored.
         ``None`` is returned if there's no previous token.
         """
-        if idx is None:
-            return None
-
-        if not isinstance(idx, int):
-            idx = self.token_index(idx)
-
-        while idx:
-            idx -= 1
-            if self.tokens[idx].is_whitespace() and skip_ws:
-                continue
-            return self.tokens[idx]
+        if isinstance(idx, int):
+            idx += 1  # alot of code usage current pre-compensates for this
+        funcs = lambda tk: not (tk.is_whitespace() and skip_ws)
+        return self._token_matching(funcs, idx, reverse=True)
 
     def token_next(self, idx, skip_ws=True):
         """Returns the next token relative to *idx*.
@@ -341,43 +309,24 @@ class TokenList(Token):
         If *skip_ws* is ``True`` (the default) whitespace tokens are ignored.
         ``None`` is returned if there's no next token.
         """
-        if idx is None:
-            return None
-
-        if not isinstance(idx, int):
-            idx = self.token_index(idx)
-
-        while idx < len(self.tokens) - 1:
-            idx += 1
-            if self.tokens[idx].is_whitespace() and skip_ws:
-                continue
-            return self.tokens[idx]
+        if isinstance(idx, int):
+            idx += 1  # alot of code usage current pre-compensates for this
+        funcs = lambda tk: not (tk.is_whitespace() and skip_ws)
+        return self._token_matching(funcs, idx)
 
     def token_index(self, token, start=0):
         """Return list index of token."""
-        if start > 0:
-            # Performing `index` manually is much faster when starting
-            # in the middle of the list of tokens and expecting to find
-            # the token near to the starting index.
-            for i in range(start, len(self.tokens)):
-                if self.tokens[i] == token:
-                    return i
-            return -1
-        return self.tokens.index(token)
+        start = self.token_index(start) if not isinstance(start, int) else start
+        return start + self.tokens[start:].index(token)
 
-    def tokens_between(self, start, end, exclude_end=False):
+    def tokens_between(self, start, end, include_end=True):
         """Return all tokens between (and including) start and end.
 
-        If *exclude_end* is ``True`` (default is ``False``) the end token
-        is included too.
+        If *include_end* is ``False`` (default is ``True``) the end token
+        is excluded.
         """
-        # FIXME(andi): rename exclude_end to inlcude_end
-        if exclude_end:
-            offset = 0
-        else:
-            offset = 1
-        end_idx = self.token_index(end) + offset
         start_idx = self.token_index(start)
+        end_idx = include_end + self.token_index(end)
         return self.tokens[start_idx:end_idx]
 
     def group_tokens(self, grp_cls, tokens, ignore_ws=False, extend=False):
@@ -431,13 +380,12 @@ class TokenList(Token):
         """Returns the alias for this identifier or ``None``."""
 
         # "name AS alias"
-        kw = self.token_next_match(0, T.Keyword, 'AS')
+        kw = self.token_next_by(m=(T.Keyword, 'AS'))
         if kw is not None:
             return self._get_first_name(kw, keywords=True)
 
         # "name alias" or "complicated column expression alias"
-        if len(self.tokens) > 2 \
-            and self.token_next_by_type(0, T.Whitespace) is not None:
+        if len(self.tokens) > 2 and self.token_next_by(t=T.Whitespace):
             return self._get_first_name(reverse=True)
 
         return None
