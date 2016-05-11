@@ -166,7 +166,7 @@ def imt(token, i=None, m=None, t=None):
 def find_matching(tlist, token, M1, M2):
     idx = tlist.token_index(token)
     depth = 0
-    for token in tlist[idx:]:
+    for token in tlist.tokens[idx:]:
         if token.match(*M1):
             depth += 1
         elif token.match(*M2):

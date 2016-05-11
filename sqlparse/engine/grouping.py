@@ -4,7 +4,7 @@ import itertools
 
 from sqlparse import sql
 from sqlparse import tokens as T
-from sqlparse.utils import recurse
+from sqlparse.utils import recurse, imt, find_matching
 
 
 def _group_left_right(tlist, ttype, value, cls,
@@ -47,68 +47,36 @@ def _group_left_right(tlist, ttype, value, cls,
                                            ttype, value)
 
 
-def _find_matching(idx, tlist, start_ttype, start_value, end_ttype, end_value):
-    depth = 1
-    for tok in tlist.tokens[idx:]:
-        if tok.match(start_ttype, start_value):
-            depth += 1
-        elif tok.match(end_ttype, end_value):
-            depth -= 1
-            if depth == 1:
-                return tok
-    return None
+def _group_matching(tlist, cls):
+    """Groups Tokens that have beginning and end. ie. parenthesis, brackets.."""
+    idx = 1 if imt(tlist, i=cls) else 0
 
-
-def _group_matching(tlist, start_ttype, start_value, end_ttype, end_value,
-                    cls, include_semicolon=False, recurse=False):
-
-    [_group_matching(sgroup, start_ttype, start_value, end_ttype, end_value,
-                     cls, include_semicolon) for sgroup in tlist.get_sublists()
-     if recurse]
-    if isinstance(tlist, cls):
-        idx = 1
-    else:
-        idx = 0
-    token = tlist.token_next_match(idx, start_ttype, start_value)
+    token = tlist.token_next_by(m=cls.M_OPEN, idx=idx)
     while token:
-        tidx = tlist.token_index(token)
-        end = _find_matching(tidx, tlist, start_ttype, start_value,
-                             end_ttype, end_value)
-        if end is None:
-            idx = tidx + 1
-        else:
-            if include_semicolon:
-                next_ = tlist.token_next(tlist.token_index(end))
-                if next_ and next_.match(T.Punctuation, ';'):
-                    end = next_
-            group = tlist.group_tokens(cls, tlist.tokens_between(token, end))
-            _group_matching(group, start_ttype, start_value,
-                            end_ttype, end_value, cls, include_semicolon)
-            idx = tlist.token_index(group) + 1
-        token = tlist.token_next_match(idx, start_ttype, start_value)
+        end = find_matching(tlist, token, cls.M_OPEN, cls.M_CLOSE)
+        if end is not None:
+            token = tlist.group_tokens(cls, tlist.tokens_between(token, end))
+            _group_matching(token, cls)
+        token = tlist.token_next_by(m=cls.M_OPEN, idx=token)
 
 
 def group_if(tlist):
-    _group_matching(tlist, T.Keyword, 'IF', T.Keyword, 'END IF', sql.If, True)
+    _group_matching(tlist, sql.If)
 
 
 def group_for(tlist):
-    _group_matching(tlist, T.Keyword, 'FOR', T.Keyword, 'END LOOP',
-                    sql.For, True)
+    _group_matching(tlist, sql.For)
 
 
 def group_foreach(tlist):
-    _group_matching(tlist, T.Keyword, 'FOREACH', T.Keyword, 'END LOOP',
-                    sql.For, True)
+    _group_matching(tlist, sql.For)
 
 
 def group_begin(tlist):
-    _group_matching(tlist, T.Keyword, 'BEGIN', T.Keyword, 'END',
-                    sql.Begin, True)
+    _group_matching(tlist, sql.Begin)
 
 
 def group_as(tlist):
-
     def _right_valid(token):
         # Currently limited to DML/DDL. Maybe additional more non SQL reserved
         # keywords should appear here (see issue8).
@@ -130,7 +98,6 @@ def group_assignment(tlist):
 
 
 def group_comparison(tlist):
-
     def _parts_valid(token):
         return (token.ttype in (T.String.Symbol, T.String.Single,
                                 T.Name, T.Number, T.Number.Float,
@@ -140,13 +107,13 @@ def group_comparison(tlist):
                                       sql.Function))
                 or (token.ttype is T.Keyword
                     and token.value.upper() in ['NULL', ]))
+
     _group_left_right(tlist, T.Operator.Comparison, None, sql.Comparison,
                       check_left=_parts_valid, check_right=_parts_valid)
 
 
 def group_case(tlist):
-    _group_matching(tlist, T.Keyword, 'CASE', T.Keyword, 'END', sql.Case,
-                    include_semicolon=True, recurse=True)
+    _group_matching(tlist, sql.Case)
 
 
 def group_identifier(tlist):
@@ -222,7 +189,7 @@ def group_identifier(tlist):
                 and (isinstance(identifier_tokens[0], (sql.Function,
                                                        sql.Parenthesis))
                      or identifier_tokens[0].ttype in (
-                     T.Literal.Number.Integer, T.Literal.Number.Float))):
+                    T.Literal.Number.Integer, T.Literal.Number.Float))):
             group = tlist.group_tokens(sql.Identifier, identifier_tokens)
             idx = tlist.token_index(group, start=idx) + 1
         else:
@@ -284,47 +251,11 @@ def group_identifier_list(tlist):
 
 
 def group_brackets(tlist):
-    """Group parentheses () or square brackets []
+    _group_matching(tlist, sql.SquareBrackets)
 
-        This is just like _group_matching, but complicated by the fact that
-        round brackets can contain square bracket groups and vice versa
-    """
 
-    if isinstance(tlist, (sql.Parenthesis, sql.SquareBrackets)):
-        idx = 1
-    else:
-        idx = 0
-
-    # Find the first opening bracket
-    token = tlist.token_next_match(idx, T.Punctuation, ['(', '['])
-
-    while token:
-        start_val = token.value  # either '(' or '['
-        if start_val == '(':
-            end_val = ')'
-            group_class = sql.Parenthesis
-        else:
-            end_val = ']'
-            group_class = sql.SquareBrackets
-
-        tidx = tlist.token_index(token)
-
-        # Find the corresponding closing bracket
-        end = _find_matching(tidx, tlist, T.Punctuation, start_val,
-                             T.Punctuation, end_val)
-
-        if end is None:
-            idx = tidx + 1
-        else:
-            group = tlist.group_tokens(group_class,
-                                       tlist.tokens_between(token, end))
-
-            # Check for nested bracket groups within this group
-            group_brackets(group)
-            idx = tlist.token_index(group) + 1
-
-        # Find the next opening bracket
-        token = tlist.token_next_match(idx, T.Punctuation, ['(', '['])
+def group_parenthesis(tlist):
+    _group_matching(tlist, sql.Parenthesis)
 
 
 @recurse(sql.Comment)
@@ -431,6 +362,7 @@ def group(tlist):
     for func in [
         group_comments,
         group_brackets,
+        group_parenthesis,
         group_functions,
         group_where,
         group_case,

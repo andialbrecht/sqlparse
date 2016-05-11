@@ -552,8 +552,6 @@ class Identifier(TokenList):
     Identifiers may have aliases or typecasts.
     """
 
-    __slots__ = ('value', 'ttype', 'tokens')
-
     def is_wildcard(self):
         """Return ``True`` if this identifier contains a wildcard."""
         token = self.token_next_by_type(0, T.Wildcard)
@@ -588,8 +586,6 @@ class Identifier(TokenList):
 class IdentifierList(TokenList):
     """A list of :class:`~sqlparse.sql.Identifier`\'s."""
 
-    __slots__ = ('value', 'ttype', 'tokens')
-
     def get_identifiers(self):
         """Returns the identifiers.
 
@@ -602,7 +598,8 @@ class IdentifierList(TokenList):
 
 class Parenthesis(TokenList):
     """Tokens between parenthesis."""
-    __slots__ = ('value', 'ttype', 'tokens')
+    M_OPEN = (T.Punctuation, '(')
+    M_CLOSE = (T.Punctuation, ')')
 
     @property
     def _groupable_tokens(self):
@@ -611,8 +608,8 @@ class Parenthesis(TokenList):
 
 class SquareBrackets(TokenList):
     """Tokens between square brackets"""
-
-    __slots__ = ('value', 'ttype', 'tokens')
+    M_OPEN = (T.Punctuation, '[')
+    M_CLOSE = (T.Punctuation, ']')
 
     @property
     def _groupable_tokens(self):
@@ -621,22 +618,22 @@ class SquareBrackets(TokenList):
 
 class Assignment(TokenList):
     """An assignment like 'var := val;'"""
-    __slots__ = ('value', 'ttype', 'tokens')
 
 
 class If(TokenList):
     """An 'if' clause with possible 'else if' or 'else' parts."""
-    __slots__ = ('value', 'ttype', 'tokens')
+    M_OPEN = (T.Keyword, 'IF')
+    M_CLOSE = (T.Keyword, 'END IF')
 
 
 class For(TokenList):
     """A 'FOR' loop."""
-    __slots__ = ('value', 'ttype', 'tokens')
+    M_OPEN = (T.Keyword, ('FOR', 'FOREACH'))
+    M_CLOSE = (T.Keyword, 'END LOOP')
 
 
 class Comparison(TokenList):
     """A comparison used for example in WHERE clauses."""
-    __slots__ = ('value', 'ttype', 'tokens')
 
     @property
     def left(self):
@@ -649,7 +646,6 @@ class Comparison(TokenList):
 
 class Comment(TokenList):
     """A comment."""
-    __slots__ = ('value', 'ttype', 'tokens')
 
     def is_multiline(self):
         return self.tokens and self.tokens[0].ttype == T.Comment.Multiline
@@ -657,13 +653,15 @@ class Comment(TokenList):
 
 class Where(TokenList):
     """A WHERE clause."""
-    __slots__ = ('value', 'ttype', 'tokens')
+    M_OPEN = (T.Keyword, 'WHERE')
+    M_CLOSE = (T.Keyword,
+               ('ORDER', 'GROUP', 'LIMIT', 'UNION', 'EXCEPT', 'HAVING'))
 
 
 class Case(TokenList):
     """A CASE statement with one or more WHEN and possibly an ELSE part."""
-
-    __slots__ = ('value', 'ttype', 'tokens')
+    M_OPEN = (T.Keyword, 'CASE')
+    M_CLOSE = (T.Keyword, 'END')
 
     def get_cases(self):
         """Returns a list of 2-tuples (condition, value).
@@ -713,8 +711,6 @@ class Case(TokenList):
 class Function(TokenList):
     """A function or procedure call."""
 
-    __slots__ = ('value', 'ttype', 'tokens')
-
     def get_parameters(self):
         """Return a list of parameters."""
         parenthesis = self.tokens[-1]
@@ -728,5 +724,5 @@ class Function(TokenList):
 
 class Begin(TokenList):
     """A BEGIN/END block."""
-
-    __slots__ = ('value', 'ttype', 'tokens')
+    M_OPEN = (T.Keyword, 'BEGIN')
+    M_CLOSE = (T.Keyword, 'END')
