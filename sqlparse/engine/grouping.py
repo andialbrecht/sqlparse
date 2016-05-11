@@ -8,6 +8,7 @@ from sqlparse.utils import recurse, imt, find_matching
 
 M_ROLE = (T.Keyword, ('null', 'role'))
 M_SEMICOLON = (T.Punctuation, ';')
+M_COMMA = (T.Punctuation, ',')
 
 T_NUMERICAL = (T.Number, T.Number.Integer, T.Number.Float)
 T_STRING = (T.String, T.String.Single, T.String.Symbol)
@@ -174,55 +175,21 @@ def group_identifier(tlist):
 
 @recurse(sql.IdentifierList)
 def group_identifier_list(tlist):
-    # Allowed list items
-    fend1_funcs = [lambda t: isinstance(t, (sql.Identifier, sql.Function,
-                                            sql.Case)),
-                   lambda t: t.is_whitespace(),
-                   lambda t: t.ttype == T.Name,
-                   lambda t: t.ttype == T.Wildcard,
-                   lambda t: t.match(T.Keyword, 'null'),
-                   lambda t: t.match(T.Keyword, 'role'),
-                   lambda t: t.ttype == T.Number.Integer,
-                   lambda t: t.ttype == T.String.Single,
-                   lambda t: t.ttype == T.Name.Placeholder,
-                   lambda t: t.ttype == T.Keyword,
-                   lambda t: isinstance(t, sql.Comparison),
-                   lambda t: isinstance(t, sql.Comment),
-                   lambda t: t.ttype == T.Comment.Multiline,
-                   ]
-    tcomma = tlist.token_next_match(0, T.Punctuation, ',')
-    start = None
-    while tcomma is not None:
-        # Go back one idx to make sure to find the correct tcomma
-        idx = tlist.token_index(tcomma)
-        before = tlist.token_prev(idx)
-        after = tlist.token_next(idx)
-        # Check if the tokens around tcomma belong to a list
-        bpassed = apassed = False
-        for func in fend1_funcs:
-            if before is not None and func(before):
-                bpassed = True
-            if after is not None and func(after):
-                apassed = True
-        if not bpassed or not apassed:
-            # Something's wrong here, skip ahead to next ","
-            start = None
-            tcomma = tlist.token_next_match(idx + 1,
-                                            T.Punctuation, ',')
-        else:
-            if start is None:
-                start = before
-            after_idx = tlist.token_index(after, start=idx)
-            next_ = tlist.token_next(after_idx)
-            if next_ is None or not next_.match(T.Punctuation, ','):
-                # Reached the end of the list
-                tokens = tlist.tokens_between(start, after)
-                group = tlist.group_tokens(sql.IdentifierList, tokens)
-                start = None
-                tcomma = tlist.token_next_match(tlist.token_index(group) + 1,
-                                                T.Punctuation, ',')
-            else:
-                tcomma = next_
+    I_IDENT_LIST = (sql.Function, sql.Case, sql.Identifier, sql.Comparison,
+                    sql.IdentifierList)  # sql.Operation
+    T_IDENT_LIST = (T_NUMERICAL + T_STRING + T_NAME +
+                    (T.Keyword, T.Comment, T.Wildcard))
+
+    func = lambda t: imt(t, i=I_IDENT_LIST, m=M_ROLE, t=T_IDENT_LIST)
+    token = tlist.token_next_by(m=M_COMMA)
+
+    while token:
+        before, after = tlist.token_prev(token), tlist.token_next(token)
+
+        if func(before) and func(after):
+            tokens = tlist.tokens_between(before, after)
+            token = tlist.group_tokens(sql.IdentifierList, tokens, extend=True)
+        token = tlist.token_next_by(m=M_COMMA, idx=token)
 
 
 def group_brackets(tlist):
@@ -269,21 +236,18 @@ def group_where(tlist):
         token = tlist.token_next_by(m=sql.Where.M_OPEN, idx=token)
 
 
-@recurse(sql.Identifier, sql.Function, sql.Case)
+@recurse()
 def group_aliased(tlist):
-    clss = (sql.Identifier, sql.Function, sql.Case)
-    idx = 0
-    token = tlist.token_next_by_instance(idx, clss)
+    I_ALIAS = (sql.Parenthesis, sql.Function, sql.Case, sql.Identifier,
+               )  # sql.Operation)
+
+    token = tlist.token_next_by(i=I_ALIAS, t=T.Number)
     while token:
-        next_ = tlist.token_next(tlist.token_index(token))
-        if next_ is not None and isinstance(next_, clss):
-            if not next_.value.upper().startswith('VARCHAR'):
-                grp = tlist.tokens_between(token, next_)[1:]
-                token.tokens.extend(grp)
-                for t in grp:
-                    tlist.tokens.remove(t)
-        idx = tlist.token_index(token) + 1
-        token = tlist.token_next_by_instance(idx, clss)
+        next_ = tlist.token_next(token)
+        if imt(next_, i=sql.Identifier):
+            tokens = tlist.tokens_between(token, next_)
+            token = tlist.group_tokens(sql.Identifier, tokens, extend=True)
+        token = tlist.token_next_by(i=I_ALIAS, t=T.Number, idx=token)
 
 
 def group_typecasts(tlist):
