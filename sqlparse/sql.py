@@ -77,7 +77,7 @@ class Token(object):
 
         if regex:
             if isinstance(values, string_types):
-                values = set([values])
+                values = {values}
 
             if self.ttype is T.Keyword:
                 values = set(re.compile(v, re.IGNORECASE) for v in values)
@@ -150,7 +150,7 @@ class TokenList(Token):
         if tokens is None:
             tokens = []
         self.tokens = tokens
-        Token.__init__(self, None, self._to_string())
+        super(TokenList, self).__init__(None, self.__str__())
 
     def __unicode__(self):
         return self._to_string()
@@ -213,12 +213,12 @@ class TokenList(Token):
             else:
                 yield token
 
-#    def __iter__(self):
-#        return self
-#
-#    def next(self):
-#        for token in self.tokens:
-#            yield token
+    # def __iter__(self):
+    #     return self
+    #
+    # def next(self):
+    #     for token in self.tokens:
+    #         yield token
 
     def is_group(self):
         return True
