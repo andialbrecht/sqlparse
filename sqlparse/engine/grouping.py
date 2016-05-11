@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import itertools
-
 from sqlparse import sql
 from sqlparse import tokens as T
 from sqlparse.utils import recurse, imt, find_matching
@@ -92,85 +90,57 @@ def group_case(tlist):
     _group_matching(tlist, sql.Case)
 
 
+@recurse(sql.Identifier)
 def group_identifier(tlist):
-    def _consume_cycle(tl, i):
-        # TODO: Usage of Wildcard token is ambivalent here.
-        x = itertools.cycle((
-            lambda y: (y.match(T.Punctuation, '.')
-                       or y.ttype in (T.Operator,
-                                      T.Wildcard,
-                                      T.Name)
-                       or isinstance(y, sql.SquareBrackets)),
-            lambda y: (y.ttype in (T.String.Symbol,
-                                   T.Name,
-                                   T.Wildcard,
-                                   T.Literal.String.Single,
-                                   T.Literal.Number.Integer,
-                                   T.Literal.Number.Float)
-                       or isinstance(y, (sql.Parenthesis,
-                                         sql.SquareBrackets,
-                                         sql.Function)))))
-        for t in tl.tokens[i:]:
-            # Don't take whitespaces into account.
-            if t.ttype is T.Whitespace:
-                yield t
-                continue
-            if next(x)(t):
-                yield t
-            else:
-                if isinstance(t, sql.Comment) and t.is_multiline():
-                    yield t
-                if t.ttype is T.Keyword.Order:
-                    yield t
-                return
+    T_IDENT = (T.String.Symbol, T.Name)
 
-    def _next_token(tl, i):
-        # chooses the next token. if two tokens are found then the
-        # first is returned.
-        t1 = tl.token_next_by_type(
-            i, (T.String.Symbol, T.Name, T.Literal.Number.Integer,
-                T.Literal.Number.Float))
-
-        i1 = tl.token_index(t1, start=i) if t1 else None
-        t2_end = None if i1 is None else i1 + 1
-        t2 = tl.token_next_by_instance(i, (sql.Function, sql.Parenthesis),
-                                       end=t2_end)
-
-        if t1 and t2:
-            i2 = tl.token_index(t2, start=i)
-            if i1 > i2:
-                return t2
-            else:
-                return t1
-        elif t1:
-            return t1
-        else:
-            return t2
-
-    # bottom up approach: group subgroups first
-    [group_identifier(sgroup) for sgroup in tlist.get_sublists()
-     if not isinstance(sgroup, sql.Identifier)]
-
-    # real processing
-    idx = 0
-    token = _next_token(tlist, idx)
+    token = tlist.token_next_by(t=T_IDENT)
     while token:
-        identifier_tokens = [token] + list(
-            _consume_cycle(tlist,
-                           tlist.token_index(token, start=idx) + 1))
-        # remove trailing whitespace
-        if identifier_tokens and identifier_tokens[-1].ttype is T.Whitespace:
-            identifier_tokens = identifier_tokens[:-1]
-        if not (len(identifier_tokens) == 1
-                and (isinstance(identifier_tokens[0], (sql.Function,
-                                                       sql.Parenthesis))
-                     or identifier_tokens[0].ttype in (
-                    T.Literal.Number.Integer, T.Literal.Number.Float))):
-            group = tlist.group_tokens(sql.Identifier, identifier_tokens)
-            idx = tlist.token_index(group, start=idx) + 1
-        else:
-            idx += 1
-        token = _next_token(tlist, idx)
+        token = tlist.group_tokens(sql.Identifier, [token, ])
+        token = tlist.token_next_by(t=T_IDENT, idx=token)
+
+
+def group_period(tlist):
+    lfunc = lambda tk: imt(tk, i=(sql.SquareBrackets, sql.Identifier),
+                           t=(T.Name, T.String.Symbol,))
+
+    rfunc = lambda tk: imt(tk, i=(sql.SquareBrackets, sql.Function),
+                           t=(T.Name, T.String.Symbol, T.Wildcard))
+
+    _group_left_right(tlist, (T.Punctuation, '.'), sql.Identifier,
+                      valid_left=lfunc, valid_right=rfunc)
+
+
+def group_arrays(tlist):
+    token = tlist.token_next_by(i=sql.SquareBrackets)
+    while token:
+        prev = tlist.token_prev(idx=token)
+        if imt(prev, i=(sql.SquareBrackets, sql.Identifier, sql.Function),
+               t=(T.Name, T.String.Symbol,)):
+            tokens = tlist.tokens_between(prev, token)
+            token = tlist.group_tokens(sql.Identifier, tokens, extend=True)
+        token = tlist.token_next_by(i=sql.SquareBrackets, idx=token)
+
+
+@recurse(sql.Identifier)
+def group_operator(tlist):
+    I_CYCLE = (sql.SquareBrackets, sql.Parenthesis, sql.Function,
+               sql.Identifier,)  # sql.Operation)
+    # wilcards wouldn't have operations next to them
+    T_CYCLE = T_NUMERICAL + T_STRING + T_NAME  # + T.Wildcard
+    func = lambda tk: imt(tk, i=I_CYCLE, t=T_CYCLE)
+
+    token = tlist.token_next_by(t=(T.Operator, T.Wildcard))
+    while token:
+        left, right = tlist.token_prev(token), tlist.token_next(token)
+
+        if func(left) and func(right):
+            token.ttype = T.Operator
+            tokens = tlist.tokens_between(left, right)
+            # token = tlist.group_tokens(sql.Operation, tokens)
+            token = tlist.group_tokens(sql.Identifier, tokens)
+
+        token = tlist.token_next_by(t=(T.Operator, T.Wildcard), idx=token)
 
 
 @recurse(sql.IdentifierList)
@@ -295,7 +265,10 @@ def group(tlist):
         group_functions,
         group_where,
         group_case,
+        group_period,
+        group_arrays,
         group_identifier,
+        group_operator,
         group_order,
         group_typecasts,
         group_as,
