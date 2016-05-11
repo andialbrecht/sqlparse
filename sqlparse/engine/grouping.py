@@ -280,21 +280,18 @@ def group_comments(tlist):
 
 @recurse(sql.Where)
 def group_where(tlist):
-    idx = 0
-    token = tlist.token_next_match(idx, T.Keyword, 'WHERE')
-    stopwords = ('ORDER', 'GROUP', 'LIMIT', 'UNION', 'EXCEPT', 'HAVING')
+    token = tlist.token_next_by(m=sql.Where.M_OPEN)
     while token:
-        tidx = tlist.token_index(token)
-        end = tlist.token_next_match(tidx + 1, T.Keyword, stopwords)
+        end = tlist.token_next_by(m=sql.Where.M_CLOSE, idx=token)
+
         if end is None:
-            end = tlist._groupable_tokens[-1]
+            tokens = tlist.tokens_between(token, tlist._groupable_tokens[-1])
         else:
-            end = tlist.tokens[tlist.token_index(end) - 1]
-        group = tlist.group_tokens(sql.Where,
-                                   tlist.tokens_between(token, end),
-                                   ignore_ws=True)
-        idx = tlist.token_index(group)
-        token = tlist.token_next_match(idx, T.Keyword, 'WHERE')
+            tokens = tlist.tokens_between(
+                token, tlist.tokens[tlist.token_index(end) - 1])
+
+        token = tlist.group_tokens(sql.Where, tokens)
+        token = tlist.token_next_by(m=sql.Where.M_OPEN, idx=token)
 
 
 @recurse(sql.Identifier, sql.Function, sql.Case)
@@ -320,38 +317,31 @@ def group_typecasts(tlist):
 
 @recurse(sql.Function)
 def group_functions(tlist):
-    idx = 0
-    token = tlist.token_next_by_type(idx, T.Name)
+    token = tlist.token_next_by(t=T.Name)
     while token:
         next_ = tlist.token_next(token)
-        if not isinstance(next_, sql.Parenthesis):
-            idx = tlist.token_index(token) + 1
-        else:
-            func = tlist.group_tokens(sql.Function,
-                                      tlist.tokens_between(token, next_))
-            idx = tlist.token_index(func) + 1
-        token = tlist.token_next_by_type(idx, T.Name)
+        if imt(next_, i=sql.Parenthesis):
+            tokens = tlist.tokens_between(token, next_)
+            token = tlist.group_tokens(sql.Function, tokens)
+        token = tlist.token_next_by(t=T.Name, idx=token)
 
 
 def group_order(tlist):
-    idx = 0
-    token = tlist.token_next_by_type(idx, T.Keyword.Order)
+    """Group together Identifier and Asc/Desc token"""
+    token = tlist.token_next_by(t=T.Keyword.Order)
     while token:
         prev = tlist.token_prev(token)
-        if isinstance(prev, sql.Identifier):
-            ido = tlist.group_tokens(sql.Identifier,
-                                     tlist.tokens_between(prev, token))
-            idx = tlist.token_index(ido) + 1
-        else:
-            idx = tlist.token_index(token) + 1
-        token = tlist.token_next_by_type(idx, T.Keyword.Order)
+        if imt(prev, i=sql.Identifier, t=T.Number):
+            tokens = tlist.tokens_between(prev, token)
+            token = tlist.group_tokens(sql.Identifier, tokens)
+        token = tlist.token_next_by(t=T.Keyword.Order, idx=token)
 
 
 @recurse()
 def align_comments(tlist):
     token = tlist.token_next_by(i=sql.Comment)
     while token:
-        before = tlist.token_prev(tlist.token_index(token))
+        before = tlist.token_prev(token)
         if isinstance(before, sql.TokenList):
             tokens = tlist.tokens_between(before, token)
             token = tlist.group_tokens(sql.TokenList, tokens, extend=True)
