@@ -122,6 +122,11 @@ def remove_quotes(val):
 
 
 def recurse(*cls):
+    """Function decorator to help with recursion
+
+    :param cls: Classes to not recurse over
+    :return: function
+    """
     def wrap(f):
         def wrapped_f(tlist):
             for sgroup in tlist.get_sublists():

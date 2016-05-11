@@ -4,6 +4,7 @@ import itertools
 
 from sqlparse import sql
 from sqlparse import tokens as T
+from sqlparse.utils import recurse
 
 
 def _group_left_right(tlist, ttype, value, cls,
@@ -229,9 +230,8 @@ def group_identifier(tlist):
         token = _next_token(tlist, idx)
 
 
+@recurse(sql.IdentifierList)
 def group_identifier_list(tlist):
-    [group_identifier_list(sgroup) for sgroup in tlist.get_sublists()
-     if not isinstance(sgroup, sql.IdentifierList)]
     # Allowed list items
     fend1_funcs = [lambda t: isinstance(t, (sql.Identifier, sql.Function,
                                             sql.Case)),
@@ -327,9 +327,8 @@ def group_brackets(tlist):
         token = tlist.token_next_match(idx, T.Punctuation, ['(', '['])
 
 
+@recurse(sql.Comment)
 def group_comments(tlist):
-    [group_comments(sgroup) for sgroup in tlist.get_sublists()
-     if not isinstance(sgroup, sql.Comment)]
     idx = 0
     token = tlist.token_next_by_type(idx, T.Comment)
     while token:
@@ -348,9 +347,8 @@ def group_comments(tlist):
         token = tlist.token_next_by_type(idx, T.Comment)
 
 
+@recurse(sql.Where)
 def group_where(tlist):
-    [group_where(sgroup) for sgroup in tlist.get_sublists()
-     if not isinstance(sgroup, sql.Where)]
     idx = 0
     token = tlist.token_next_match(idx, T.Keyword, 'WHERE')
     stopwords = ('ORDER', 'GROUP', 'LIMIT', 'UNION', 'EXCEPT', 'HAVING')
@@ -368,10 +366,9 @@ def group_where(tlist):
         token = tlist.token_next_match(idx, T.Keyword, 'WHERE')
 
 
+@recurse(sql.Identifier, sql.Function, sql.Case)
 def group_aliased(tlist):
     clss = (sql.Identifier, sql.Function, sql.Case)
-    [group_aliased(sgroup) for sgroup in tlist.get_sublists()
-     if not isinstance(sgroup, clss)]
     idx = 0
     token = tlist.token_next_by_instance(idx, clss)
     while token:
@@ -390,9 +387,8 @@ def group_typecasts(tlist):
     _group_left_right(tlist, T.Punctuation, '::', sql.Identifier)
 
 
+@recurse(sql.Function)
 def group_functions(tlist):
-    [group_functions(sgroup) for sgroup in tlist.get_sublists()
-     if not isinstance(sgroup, sql.Function)]
     idx = 0
     token = tlist.token_next_by_type(idx, T.Name)
     while token:
@@ -420,8 +416,8 @@ def group_order(tlist):
         token = tlist.token_next_by_type(idx, T.Keyword.Order)
 
 
+@recurse()
 def align_comments(tlist):
-    [align_comments(sgroup) for sgroup in tlist.get_sublists()]
     token = tlist.token_next_by(i=sql.Comment)
     while token:
         before = tlist.token_prev(tlist.token_index(token))
