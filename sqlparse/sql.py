@@ -588,3 +588,7 @@ class Begin(TokenList):
     """A BEGIN/END block."""
     M_OPEN = T.Keyword, 'BEGIN'
     M_CLOSE = T.Keyword, 'END'
+
+
+class Operation(TokenList):
+    """Grouping of operations"""
