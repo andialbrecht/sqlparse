@@ -172,22 +172,16 @@ def group_parenthesis(tlist):
 
 @recurse(sql.Comment)
 def group_comments(tlist):
-    idx = 0
-    token = tlist.token_next_by_type(idx, T.Comment)
+    token = tlist.token_next_by(t=T.Comment)
     while token:
-        tidx = tlist.token_index(token)
-        end = tlist.token_not_matching(tidx + 1,
-                                       [lambda t: t.ttype in T.Comment,
-                                        lambda t: t.is_whitespace()])
-        if end is None:
-            idx = tidx + 1
-        else:
-            eidx = tlist.token_index(end)
-            grp_tokens = tlist.tokens_between(token,
-                                              tlist.token_prev(eidx, False))
-            group = tlist.group_tokens(sql.Comment, grp_tokens)
-            idx = tlist.token_index(group)
-        token = tlist.token_next_by_type(idx, T.Comment)
+        end = tlist.token_not_matching(
+            token, lambda tk: imt(tk, t=T.Comment) or tk.is_whitespace())
+        if end is not None:
+            end = tlist.token_prev(end, False)
+            tokens = tlist.tokens_between(token, end)
+            token = tlist.group_tokens(sql.Comment, tokens)
+
+        token = tlist.token_next_by(t=T.Comment, idx=token)
 
 
 @recurse(sql.Where)
