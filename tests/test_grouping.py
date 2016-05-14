@@ -380,6 +380,13 @@ def test_begin():
     assert isinstance(p.tokens[0], sql.Begin)
 
 
+def test_keyword_followed_by_parenthesis():
+    p = sqlparse.parse('USING(somecol')[0]
+    assert len(p.tokens) == 3
+    assert p.tokens[0].ttype == T.Keyword
+    assert p.tokens[1].ttype == T.Punctuation
+
+
 def test_nested_begin():
     p = sqlparse.parse('BEGIN foo BEGIN bar END END')[0]
     assert len(p.tokens) == 1
