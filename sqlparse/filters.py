@@ -200,9 +200,7 @@ class StripCommentsFilter:
 
     def _get_next_comment(self, tlist):
         # TODO(andi) Comment types should be unified, see related issue38
-        token = tlist.token_next_by_instance(0, sql.Comment)
-        if token is None:
-            token = tlist.token_next_by_type(0, T.Comment)
+        token = tlist.token_next_by(i=sql.Comment, t=T.Comment)
         return token
 
     def _process(self, tlist):

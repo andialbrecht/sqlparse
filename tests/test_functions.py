@@ -13,6 +13,7 @@ sys.path.insert(0, '..')
 
 from sqlparse.filters import compact
 from sqlparse.functions import getcolumns, getlimit, IsType
+from tests.utils import FILES_DIR
 
 
 class Test_IncludeStatement(TestCase):
@@ -27,7 +28,7 @@ class Test_IncludeStatement(TestCase):
 
     def test_includeStatement(self):
         stream = tokenize(self.sql)
-        includeStatement = IncludeStatement('tests/files',
+        includeStatement = IncludeStatement(FILES_DIR,
                                             raiseexceptions=True)
         stream = includeStatement.process(None, stream)
         stream = compact(stream)
