@@ -15,7 +15,7 @@ Base Classes
 All returned objects inherit from these base classes.
 The :class:`~sqlparse.sql.Token` class represents a single token and
 :class:`~sqlparse.sql.TokenList` class is a group of tokens.
-The latter provides methods for inspecting it's child tokens.
+The latter provides methods for inspecting its child tokens.
 
 .. autoclass:: sqlparse.sql.Token
    :members:
