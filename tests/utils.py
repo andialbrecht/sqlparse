@@ -17,7 +17,7 @@ FILES_DIR = os.path.join(DIR_PATH, 'files')
 
 
 def load_file(filename, encoding='utf-8'):
-    """Opens filename with encoding and return it's contents."""
+    """Opens filename with encoding and return its contents."""
     f = codecs.open(os.path.join(FILES_DIR, filename), 'r', encoding)
     data = f.read()
     f.close()
