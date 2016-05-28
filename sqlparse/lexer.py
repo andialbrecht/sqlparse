@@ -100,23 +100,15 @@ class LexerMeta(type):
 class _Lexer(object):
 
     encoding = 'utf-8'
-    stripall = False
-    stripnl = False
-    tabsize = 0
     flags = re.IGNORECASE | re.UNICODE
 
     def __init__(self):
         self.filters = []
 
-    def _expandtabs(self, text):
-        if self.tabsize > 0:
-            text = text.expandtabs(self.tabsize)
-        return text
-
     def _decode(self, text):
         if sys.version_info[0] == 3:
             if isinstance(text, str):
-                return self._expandtabs(text)
+                return text
         if self.encoding == 'guess':
             try:
                 text = text.decode('utf-8')
@@ -129,7 +121,7 @@ class _Lexer(object):
                 text = text.decode(self.encoding)
             except UnicodeDecodeError:
                 text = text.decode('unicode-escape')
-        return self._expandtabs(text)
+        return text
 
     def get_tokens(self, text):
         """
@@ -141,11 +133,6 @@ class _Lexer(object):
         wanted and applies registered filters.
         """
         if isinstance(text, string_types):
-            if self.stripall:
-                text = text.strip()
-            elif self.stripnl:
-                text = text.strip('\n')
-
             if sys.version_info[0] < 3 and isinstance(text, text_type):
                 text = StringIO(text.encode('utf-8'))
                 self.encoding = 'utf-8'
