@@ -59,25 +59,15 @@ class LexerMeta(type):
             tokenlist.append((rex, tdef[1], new_state))
         return tokenlist
 
-    def process_tokendef(cls):
-        cls._all_tokens = {}
-        cls._tmpname = 0
-        processed = cls._all_tokens[cls.__name__] = {}
-        for state in SQL_REGEX:
-            cls._process_state(SQL_REGEX, processed, state)
-        return processed
-
-    def __call__(cls, *args, **kwds):
+    def __call__(cls, *args):
         if not hasattr(cls, '_tokens'):
             cls._all_tokens = {}
-            cls._tmpname = 0
-            if hasattr(cls, 'token_variants') and cls.token_variants:
-                # don't process yet
-                pass
-            else:
-                cls._tokens = cls.process_tokendef()
+            processed = cls._all_tokens[cls.__name__] = {}
 
-        return type.__call__(cls, *args, **kwds)
+            for state in SQL_REGEX:
+                cls._process_state(SQL_REGEX, processed, state)
+            cls._tokens = processed
+        return type.__call__(cls, *args)
 
 
 class _Lexer(object):
