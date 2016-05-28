@@ -26,46 +26,28 @@ class LexerMeta(type):
     self.tokens on the first instantiation.
     """
 
-    def _process_state(cls, unprocessed, processed, state):
-        if state in processed:
-            return processed[state]
-        tokenlist = processed[state] = []
-        rflags = cls.flags
-        for tdef in unprocessed[state]:
-            try:
-                rex = re.compile(tdef[0], rflags).match
-            except Exception as err:
-                raise ValueError(("uncompilable regex %r in state"
-                                  " %r of %r: %s"
-                                  % (tdef[0], state, cls, err)))
-
-            if len(tdef) == 2:
-                new_state = None
-            else:
-                tdef2 = tdef[2]
-                if isinstance(tdef2, str):
-                    # an existing state
-                    if tdef2 == '#pop':
-                        new_state = -1
-                    elif tdef2 in unprocessed:
-                        new_state = (tdef2,)
-                    elif tdef2 == '#push':
-                        new_state = tdef2
-                    elif tdef2[:5] == '#pop:':
-                        new_state = -int(tdef2[5:])
-                elif isinstance(tdef2, tuple):
-                    # push more than one state
-                    new_state = tdef2
-            tokenlist.append((rex, tdef[1], new_state))
-        return tokenlist
-
     def __call__(cls, *args):
         if not hasattr(cls, '_tokens'):
             cls._all_tokens = {}
             processed = cls._all_tokens[cls.__name__] = {}
 
             for state in SQL_REGEX:
-                cls._process_state(SQL_REGEX, processed, state)
+                processed[state] = []
+
+                for tdef in SQL_REGEX[state]:
+                    rex = re.compile(tdef[0], cls.flags).match
+
+                    if len(tdef) == 2:
+                        new_state = None
+                    else:
+                        # Only Multiline comments
+                        tdef2 = tdef[2]
+                        # an existing state
+                        if tdef2 == '#pop':
+                            new_state = -1
+                        elif tdef2 in SQL_REGEX:
+                            new_state = (tdef2,)
+                    processed[state].append((rex, tdef[1], new_state))
             cls._tokens = processed
         return type.__call__(cls, *args)
 
