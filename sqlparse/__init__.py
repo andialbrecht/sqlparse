@@ -20,7 +20,7 @@ from sqlparse.compat import u  # noqa
 def parse(sql, encoding=None):
     """Parse sql and return a list of statements.
 
-    :param sql: A string containting one or more SQL statements.
+    :param sql: A string containing one or more SQL statements.
     :param encoding: The encoding of the statement (optional).
     :returns: A tuple of :class:`~sqlparse.sql.Statement` instances.
     """
@@ -60,7 +60,7 @@ def format(sql, **options):
 def split(sql, encoding=None):
     """Split *sql* into single statements.
 
-    :param sql: A string containting one or more SQL statements.
+    :param sql: A string containing one or more SQL statements.
     :param encoding: The encoding of the statement (optional).
     :returns: A list of strings.
     """
