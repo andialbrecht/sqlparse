@@ -16,10 +16,8 @@ import re
 import sys
 
 from sqlparse import tokens
-from sqlparse.keywords import KEYWORDS, KEYWORDS_COMMON
+from sqlparse.keywords import SQL_REGEX
 from sqlparse.compat import StringIO, string_types, with_metaclass, text_type
-
-
 class include(str):
     pass
 
@@ -35,9 +33,6 @@ class combined(tuple):
         pass
 
 
-def is_keyword(value):
-    test = value.upper()
-    return KEYWORDS_COMMON.get(test, KEYWORDS.get(test, tokens.Name)), value
 
 
 def apply_filters(stream, filters, lexer=None):
@@ -134,9 +129,8 @@ class LexerMeta(type):
         cls._all_tokens = {}
         cls._tmpname = 0
         processed = cls._all_tokens[cls.__name__] = {}
-        # tokendefs = tokendefs or cls.tokens[name]
-        for state in cls.tokens.keys():
-            cls._process_state(cls.tokens, processed, state)
+        for state in SQL_REGEX:
+            cls._process_state(SQL_REGEX, processed, state)
         return processed
 
     def __call__(cls, *args, **kwds):
@@ -159,65 +153,6 @@ class _Lexer(object):
     stripnl = False
     tabsize = 0
     flags = re.IGNORECASE | re.UNICODE
-
-    tokens = {
-        'root': [
-            (r'(--|# ).*?(\r\n|\r|\n)', tokens.Comment.Single),
-            # $ matches *before* newline, therefore we have two patterns
-            # to match Comment.Single
-            (r'(--|# ).*?$', tokens.Comment.Single),
-            (r'(\r\n|\r|\n)', tokens.Newline),
-            (r'\s+', tokens.Whitespace),
-            (r'/\*', tokens.Comment.Multiline, 'multiline-comments'),
-            (r':=', tokens.Assignment),
-            (r'::', tokens.Punctuation),
-            (r'[*]', tokens.Wildcard),
-            (r'CASE\b', tokens.Keyword),  # extended CASE(foo)
-            (r"`(``|[^`])*`", tokens.Name),
-            (r"´(´´|[^´])*´", tokens.Name),
-            (r'\$([^\W\d]\w*)?\$', tokens.Name.Builtin),
-            (r'\?{1}', tokens.Name.Placeholder),
-            (r'%\(\w+\)s', tokens.Name.Placeholder),
-            (r'%s', tokens.Name.Placeholder),
-            (r'[$:?]\w+', tokens.Name.Placeholder),
-            # FIXME(andi): VALUES shouldn't be listed here
-            # see https://github.com/andialbrecht/sqlparse/pull/64
-            (r'VALUES', tokens.Keyword),
-            (r'(@|##|#)[^\W\d_]\w+', tokens.Name),
-            # IN is special, it may be followed by a parenthesis, but
-            # is never a functino, see issue183
-            (r'in\b(?=[ (])?', tokens.Keyword),
-            (r'USING(?=\()', tokens.Keyword),
-            (r'[^\W\d_]\w*(?=[.(])', tokens.Name),  # see issue39
-            (r'[-]?0x[0-9a-fA-F]+', tokens.Number.Hexadecimal),
-            (r'[-]?[0-9]*(\.[0-9]+)?[eE][-]?[0-9]+', tokens.Number.Float),
-            (r'[-]?[0-9]*\.[0-9]+', tokens.Number.Float),
-            (r'[-]?[0-9]+', tokens.Number.Integer),
-            (r"'(''|\\\\|\\'|[^'])*'", tokens.String.Single),
-            # not a real string literal in ANSI SQL:
-            (r'(""|".*?[^\\]")', tokens.String.Symbol),
-            # sqlite names can be escaped with [square brackets]. left bracket
-            # cannot be preceded by word character or a right bracket --
-            # otherwise it's probably an array index
-            (r'(?<![\w\])])(\[[^\]]+\])', tokens.Name),
-            (r'((LEFT\s+|RIGHT\s+|FULL\s+)?(INNER\s+|OUTER\s+|STRAIGHT\s+)?'
-             r'|(CROSS\s+|NATURAL\s+)?)?JOIN\b', tokens.Keyword),
-            (r'END(\s+IF|\s+LOOP|\s+WHILE)?\b', tokens.Keyword),
-            (r'NOT NULL\b', tokens.Keyword),
-            (r'CREATE(\s+OR\s+REPLACE)?\b', tokens.Keyword.DDL),
-            (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
-            (r'(?<=\.)[^\W\d_]\w*', tokens.Name),
-            (r'[^\W\d]\w*', is_keyword),
-            (r'[;:()\[\],\.]', tokens.Punctuation),
-            (r'[<>=~!]+', tokens.Operator.Comparison),
-            (r'[+/@#%^&|`?^-]+', tokens.Operator),
-        ],
-        'multiline-comments': [
-            (r'/\*', tokens.Comment.Multiline, 'multiline-comments'),
-            (r'\*/', tokens.Comment.Multiline, '#pop'),
-            (r'[^/\*]+', tokens.Comment.Multiline),
-            (r'[/*]', tokens.Comment.Multiline),
-        ]}
 
     def __init__(self):
         self.filters = []
