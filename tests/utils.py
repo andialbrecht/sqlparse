@@ -2,26 +2,22 @@
 
 """Helpers for testing."""
 
-import codecs
 import difflib
+import io
 import os
 import unittest
 
-import sqlparse.utils
+from sqlparse.utils import split_unquoted_newlines
 from sqlparse.compat import u, StringIO
 
-NL = '\n'
-DIR_PATH = os.path.abspath(os.path.dirname(__file__))
-PARENT_DIR = os.path.dirname(DIR_PATH)
+DIR_PATH = os.path.dirname(__file__)
 FILES_DIR = os.path.join(DIR_PATH, 'files')
 
 
 def load_file(filename, encoding='utf-8'):
     """Opens filename with encoding and return its contents."""
-    f = codecs.open(os.path.join(FILES_DIR, filename), 'r', encoding)
-    data = f.read()
-    f.close()
-    return data
+    with io.open(os.path.join(FILES_DIR, filename), encoding=encoding) as f:
+        return f.read()
 
 
 class TestCaseBase(unittest.TestCase):
@@ -31,16 +27,15 @@ class TestCaseBase(unittest.TestCase):
     def ndiffAssertEqual(self, first, second):
         """Like failUnlessEqual except use ndiff for readable output."""
         if first != second:
-            sfirst = u(first)
-            ssecond = u(second)
             # Using the built-in .splitlines() method here will cause incorrect
             # results when splitting statements that have quoted CR/CR+LF
             # characters.
-            sfirst = sqlparse.utils.split_unquoted_newlines(sfirst)
-            ssecond = sqlparse.utils.split_unquoted_newlines(ssecond)
+            sfirst = split_unquoted_newlines(u(first))
+            ssecond = split_unquoted_newlines(u(second))
             diff = difflib.ndiff(sfirst, ssecond)
+
             fp = StringIO()
-            fp.write(NL)
-            fp.write(NL.join(diff))
-            # print(fp.getvalue())
+            fp.write('\n')
+            fp.write('\n'.join(diff))
+
             raise self.failureException(fp.getvalue())
