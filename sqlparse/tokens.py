@@ -33,9 +33,6 @@ class _TokenType(tuple):
         new.parent = self
         return new
 
-    def __hash__(self):
-        return hash(tuple(self))
-
     def __repr__(self):
         return 'Token' + (self and '.' or '') + '.'.join(self)
 
