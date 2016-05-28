@@ -13,6 +13,7 @@ Enhancements
 * Support WHILE loops (issue215, by shenlongxing).
 * Better support for CTEs (issue217, by Andrew Tipton).
 * Recognize USING as a keyword more consistently (issue236, by koljonen).
+* Improve alignment of columns (issue207, issue235, by vmuriat).
 
 Bug Fixes
 * Leading whitespaces are now removed when format() is called with
