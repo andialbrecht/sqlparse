@@ -27,26 +27,17 @@ class LexerMeta(type):
     """
 
     def _process_state(cls, unprocessed, processed, state):
-        assert type(state) is str, "wrong state name %r" % state
-        assert state[0] != '#', "invalid state name %r" % state
         if state in processed:
             return processed[state]
         tokenlist = processed[state] = []
         rflags = cls.flags
         for tdef in unprocessed[state]:
-
-            assert type(tdef) is tuple, "wrong rule def %r" % tdef
-
             try:
                 rex = re.compile(tdef[0], rflags).match
             except Exception as err:
                 raise ValueError(("uncompilable regex %r in state"
                                   " %r of %r: %s"
                                   % (tdef[0], state, cls, err)))
-
-            assert type(tdef[1]) is tokens._TokenType or callable(tdef[1]), \
-                ('token type must be simple type or callable, not %r'
-                 % (tdef[1],))
 
             if len(tdef) == 2:
                 new_state = None
@@ -62,17 +53,9 @@ class LexerMeta(type):
                         new_state = tdef2
                     elif tdef2[:5] == '#pop:':
                         new_state = -int(tdef2[5:])
-                    else:
-                        assert False, 'unknown new state %r' % tdef2
                 elif isinstance(tdef2, tuple):
                     # push more than one state
-                    for state in tdef2:
-                        assert (state in unprocessed or
-                                state in ('#pop', '#push')), \
-                            'unknown new state ' + state
                     new_state = tdef2
-                else:
-                    assert False, 'unknown new state def %r' % tdef2
             tokenlist.append((rex, tdef[1], new_state))
         return tokenlist
 
@@ -198,8 +181,6 @@ class _Lexer(object):
                             del statestack[new_state:]
                         elif new_state == '#push':
                             statestack.append(statestack[-1])
-                        else:
-                            assert False, "wrong state def: %r" % new_state
                         statetokens = tokendefs[statestack[-1]]
                     break
             else:
