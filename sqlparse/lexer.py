@@ -18,37 +18,6 @@ import sys
 from sqlparse import tokens
 from sqlparse.keywords import SQL_REGEX
 from sqlparse.compat import StringIO, string_types, with_metaclass, text_type
-class include(str):
-    pass
-
-
-class combined(tuple):
-    """Indicates a state combined from multiple states."""
-
-    def __new__(cls, *args):
-        return tuple.__new__(cls, args)
-
-    def __init__(self, *args):
-        # tuple.__init__ doesn't do anything
-        pass
-
-
-
-
-def apply_filters(stream, filters, lexer=None):
-    """
-    Use this method to apply an iterable of filters to
-    a stream. If lexer is given it's forwarded to the
-    filter, otherwise the filter receives `None`.
-    """
-
-    def _apply(filter_, stream):
-        for token in filter_.filter(lexer, stream):
-            yield token
-
-    for filter_ in filters:
-        stream = _apply(filter_, stream)
-    return stream
 
 
 class LexerMeta(type):
@@ -65,12 +34,6 @@ class LexerMeta(type):
         tokenlist = processed[state] = []
         rflags = cls.flags
         for tdef in unprocessed[state]:
-            if isinstance(tdef, include):
-                # it's a state reference
-                assert tdef != state, "circular state reference %r" % state
-                tokenlist.extend(cls._process_state(
-                    unprocessed, processed, str(tdef)))
-                continue
 
             assert type(tdef) is tuple, "wrong rule def %r" % tdef
 
@@ -101,18 +64,6 @@ class LexerMeta(type):
                         new_state = -int(tdef2[5:])
                     else:
                         assert False, 'unknown new state %r' % tdef2
-                elif isinstance(tdef2, combined):
-                    # combine a new state from existing ones
-                    new_state = '_tmp_%d' % cls._tmpname
-                    cls._tmpname += 1
-                    itokens = []
-                    for istate in tdef2:
-                        assert istate != state, \
-                            'circular state ref %r' % istate
-                        itokens.extend(cls._process_state(unprocessed,
-                                                          processed, istate))
-                    processed[new_state] = itokens
-                    new_state = (new_state,)
                 elif isinstance(tdef2, tuple):
                     # push more than one state
                     for state in tdef2:
@@ -157,12 +108,6 @@ class _Lexer(object):
     def __init__(self):
         self.filters = []
 
-    def add_filter(self, filter_, **options):
-        from sqlparse.filters import Filter
-        if not isinstance(filter_, Filter):
-            filter_ = filter_(**options)
-        self.filters.append(filter_)
-
     def _expandtabs(self, text):
         if self.tabsize > 0:
             text = text.expandtabs(self.tabsize)
@@ -186,7 +131,7 @@ class _Lexer(object):
                 text = text.decode('unicode-escape')
         return self._expandtabs(text)
 
-    def get_tokens(self, text, unfiltered=False):
+    def get_tokens(self, text):
         """
         Return an iterable of (tokentype, value) pairs generated from
         `text`. If `unfiltered` is set to `True`, the filtering mechanism
@@ -211,11 +156,9 @@ class _Lexer(object):
             for i, t, v in self.get_tokens_unprocessed(text):
                 yield t, v
         stream = streamer()
-        if not unfiltered:
-            stream = apply_filters(stream, self.filters, self)
         return stream
 
-    def get_tokens_unprocessed(self, stream, stack=('root',)):
+    def get_tokens_unprocessed(self, stream):
         """
         Split ``text`` into (tokentype, text) pairs.
 
@@ -223,7 +166,7 @@ class _Lexer(object):
         """
         pos = 0
         tokendefs = self._tokens  # see __call__, pylint:disable=E1101
-        statestack = list(stack)
+        statestack = ['root', ]
         statetokens = tokendefs[statestack[-1]]
         known_names = {}
 
