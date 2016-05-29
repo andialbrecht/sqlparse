@@ -17,7 +17,8 @@ import sys
 
 from sqlparse import tokens
 from sqlparse.keywords import SQL_REGEX
-from sqlparse.compat import StringIO, string_types, text_type
+from sqlparse.compat import StringIO, string_types, text_type, range
+from sqlparse.utils import consume
 
 
 class Lexer(object):
@@ -75,11 +76,7 @@ class Lexer(object):
             else:
                 text = StringIO(text)
 
-        def streamer():
-            for i, t, v in self.get_tokens_unprocessed(text):
-                yield t, v
-        stream = streamer()
-        return stream
+        return self.get_tokens_unprocessed(text)
 
     def get_tokens_unprocessed(self, stream):
         """
@@ -87,68 +84,38 @@ class Lexer(object):
 
         ``stack`` is the inital stack (default: ``['root']``)
         """
-        pos = 0
-        tokendefs = self._tokens  # see __call__, pylint:disable=E1101
         statestack = ['root', ]
-        statetokens = tokendefs[statestack[-1]]
-        known_names = {}
+        statetokens = self._tokens['root']
 
         text = stream.read()
         text = self._decode(text)
+        iterable = iter(range(len(text)))
 
-        while 1:
+        for pos in iterable:
             for rexmatch, action, new_state in statetokens:
                 m = rexmatch(text, pos)
-                if m:
-                    value = m.group()
-                    if value in known_names:
-                        yield pos, known_names[value], value
-                    elif type(action) is tokens._TokenType:
-                        yield pos, action, value
-                    elif hasattr(action, '__call__'):
-                        ttype, value = action(value)
-                        known_names[value] = ttype
-                        yield pos, ttype, value
-                    else:
-                        for item in action(self, m):
-                            yield item
-                    pos = m.end()
-                    if new_state is not None:
-                        # state transition
-                        if isinstance(new_state, tuple):
-                            for state in new_state:
-                                if state == '#pop':
-                                    statestack.pop()
-                                elif state == '#push':
-                                    statestack.append(statestack[-1])
-                                elif (
-                                    # Ugly hack - multiline-comments
-                                    # are not stackable
-                                    state != 'multiline-comments'
-                                    or not statestack
-                                    or statestack[-1] != 'multiline-comments'
-                                ):
-                                    statestack.append(state)
-                        elif isinstance(new_state, int):
-                            # pop
-                            del statestack[new_state:]
-                        elif new_state == '#push':
-                            statestack.append(statestack[-1])
-                        statetokens = tokendefs[statestack[-1]]
-                    break
+
+                if not m:
+                    continue
+                elif isinstance(action, tokens._TokenType):
+                    yield action, m.group()
+                elif callable(action):
+                    yield action(m.group())
+
+                if isinstance(new_state, tuple):
+                    for state in new_state:
+                        # fixme: multiline-comments not stackable
+                        if not (state == 'multiline-comments'
+                                and statestack[-1] == 'multiline-comments'):
+                            statestack.append(state)
+                elif isinstance(new_state, int):
+                    del statestack[new_state:]
+                statetokens = self._tokens[statestack[-1]]
+
+                consume(iterable, m.end() - pos - 1)
+                break
             else:
-                try:
-                    if text[pos] == '\n':
-                        # at EOL, reset state to "root"
-                        pos += 1
-                        statestack = ['root']
-                        statetokens = tokendefs['root']
-                        yield pos, tokens.Text, u'\n'
-                        continue
-                    yield pos, tokens.Error, text[pos]
-                    pos += 1
-                except IndexError:
-                    break
+                yield tokens.Error, text[pos]
 
 
 def tokenize(sql, encoding=None):
