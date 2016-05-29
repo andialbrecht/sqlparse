@@ -220,6 +220,15 @@ def group_typecasts(tlist):
 
 @recurse(sql.Function)
 def group_functions(tlist):
+    has_create = False
+    has_table = False
+    for tmp_token in tlist.tokens:
+        if tmp_token.value == u'CREATE':
+            has_create = True
+        if tmp_token.value == u'TABLE':
+            has_table = True
+    if has_create and has_table:
+        return
     token = tlist.token_next_by(t=T.Name)
     while token:
         next_ = tlist.token_next(token)
