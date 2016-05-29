@@ -13,7 +13,6 @@
 # and to allow some customizations.
 
 import re
-import sys
 
 from sqlparse import tokens
 from sqlparse.keywords import SQL_REGEX
@@ -42,14 +41,6 @@ class Lexer(object):
                         new_state = (tdef[2],)
                 self._tokens[state].append((rex, tdef[1], new_state))
 
-    def _decode(self, text):
-        if not isinstance(text, text_type):
-            try:
-                text = text.decode(self.encoding)
-            except UnicodeDecodeError:
-                text = text.decode('unicode-escape')
-        return text
-
     def get_tokens(self, text):
         """
         Return an iterable of (tokentype, value) pairs generated from
@@ -58,18 +49,7 @@ class Lexer(object):
 
         Also preprocess the text, i.e. expand tabs and strip it if
         wanted and applies registered filters.
-        """
-        if isinstance(text, string_types):
-            if sys.version_info[0] < 3 and isinstance(text, text_type):
-                text = StringIO(text.encode('utf-8'))
-                self.encoding = 'utf-8'
-            else:
-                text = StringIO(text)
 
-        return self.get_tokens_unprocessed(text)
-
-    def get_tokens_unprocessed(self, stream):
-        """
         Split ``text`` into (tokentype, text) pairs.
 
         ``stack`` is the inital stack (default: ``['root']``)
@@ -77,8 +57,16 @@ class Lexer(object):
         statestack = ['root', ]
         statetokens = self._tokens['root']
 
-        text = stream.read()
-        text = self._decode(text)
+        if isinstance(text, string_types):
+            text = StringIO(text)
+
+        text = text.read()
+        if not isinstance(text, text_type):
+            try:
+                text = text.decode(self.encoding)
+            except UnicodeDecodeError:
+                text = text.decode('unicode-escape')
+
         iterable = iter(range(len(text)))
 
         for pos in iterable:
