@@ -21,6 +21,7 @@ Bug Fixes
 * Fix typo in keywords list (issue229, by cbeloni).
 * Fix parsing of functions in comparisons (issue230, by saaj).
 * Fix grouping of identifiers (issue233).
+* Fix parsing of CREATE TABLE statements (issue242, by Tenghuan).
 * Minor bug fixes (issue101).
 
 
