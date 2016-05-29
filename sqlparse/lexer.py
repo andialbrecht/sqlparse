@@ -17,48 +17,29 @@ import sys
 
 from sqlparse import tokens
 from sqlparse.keywords import SQL_REGEX
-from sqlparse.compat import StringIO, string_types, with_metaclass, text_type
+from sqlparse.compat import StringIO, string_types, text_type
 
 
-class LexerMeta(type):
-    """
-    Metaclass for Lexer, creates the self._tokens attribute from
-    self.tokens on the first instantiation.
-    """
-
-    def __call__(cls, *args):
-        if not hasattr(cls, '_tokens'):
-            cls._all_tokens = {}
-            processed = cls._all_tokens[cls.__name__] = {}
-
-            for state in SQL_REGEX:
-                processed[state] = []
-
-                for tdef in SQL_REGEX[state]:
-                    rex = re.compile(tdef[0], cls.flags).match
-
-                    if len(tdef) == 2:
-                        new_state = None
-                    else:
-                        # Only Multiline comments
-                        tdef2 = tdef[2]
-                        # an existing state
-                        if tdef2 == '#pop':
-                            new_state = -1
-                        elif tdef2 in SQL_REGEX:
-                            new_state = (tdef2,)
-                    processed[state].append((rex, tdef[1], new_state))
-            cls._tokens = processed
-        return type.__call__(cls, *args)
-
-
-class _Lexer(object):
-
+class Lexer(object):
     encoding = 'utf-8'
     flags = re.IGNORECASE | re.UNICODE
 
     def __init__(self):
-        self.filters = []
+        self._tokens = {}
+
+        for state in SQL_REGEX:
+            self._tokens[state] = []
+
+            for tdef in SQL_REGEX[state]:
+                rex = re.compile(tdef[0], self.flags).match
+                new_state = None
+                if len(tdef) > 2:
+                    # Only Multiline comments
+                    if tdef[2] == '#pop':
+                        new_state = -1
+                    elif tdef[2] in SQL_REGEX:
+                        new_state = (tdef[2],)
+                self._tokens[state].append((rex, tdef[1], new_state))
 
     def _decode(self, text):
         if sys.version_info[0] == 3:
@@ -168,10 +149,6 @@ class _Lexer(object):
                     pos += 1
                 except IndexError:
                     break
-
-
-class Lexer(with_metaclass(LexerMeta, _Lexer)):
-    pass
 
 
 def tokenize(sql, encoding=None):
