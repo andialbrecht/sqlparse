@@ -1,23 +1,30 @@
 language: python
+python: 3.5
 
-python:
-  - "3.5"
-  - "3.4"
-  - "3.3"
-  - "2.7"
-  - "pypy"
-  - "pypy3"
-  - "nightly"
+env:
+    - TOXENV=flake8
+    - TOXENV=py27
+    - TOXENV=py33
+    - TOXENV=py34
+    - TOXENV=py35
+    - TOXENV=pypy
+    - TOXENV=pypy3
 
 matrix:
-  allow_failures:
-    - python: "nightly"
+    fast_finish: true
+
+    include:
+        - python: "nightly"
+          env: TOXENV=py36
+
+    allow_failures:
+        - python: "nightly"
 
 install:
-  - pip install pytest pytest-cov coveralls
-  - pip install -e .
+    - pip install tox coveralls
 
-script: py.test --cov=sqlparse
+script:
+    - tox
 
 after_success:
-  coveralls
+    - coveralls
