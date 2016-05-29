@@ -8,13 +8,13 @@
 """This module contains classes representing syntactical elements of SQL."""
 
 import re
-import sys
 
 from sqlparse import tokens as T
-from sqlparse.compat import string_types, u
+from sqlparse.compat import u, string_types, unicode_compatible
 from sqlparse.utils import imt, remove_quotes
 
 
+@unicode_compatible
 class Token(object):
     """Base class for all other classes in this module.
 
@@ -26,6 +26,7 @@ class Token(object):
     __slots__ = ('value', 'ttype', 'parent', 'normalized', 'is_keyword')
 
     def __init__(self, ttype, value):
+        value = u(value)
         self.value = value
         if ttype in T.Keyword:
             self.normalized = value.upper()
@@ -36,30 +37,21 @@ class Token(object):
         self.parent = None
 
     def __str__(self):
-        if sys.version_info[0] == 3:
-            return self.value
-        else:
-            return u(self).encode('utf-8')
+        return self.value
 
     def __repr__(self):
         short = self._get_repr_value()
-        if sys.version_info[0] < 3:
-            short = short.encode('utf-8')
         return '<%s \'%s\' at 0x%07x>' % (self._get_repr_name(),
                                           short, id(self))
-
-    def __unicode__(self):
-        """Returns a unicode representation of this object."""
-        return self.value or ''
 
     def _get_repr_name(self):
         return str(self.ttype).split('.')[-1]
 
     def _get_repr_value(self):
-        raw = u(self)
+        raw = self.value
         if len(raw) > 7:
-            raw = raw[:6] + u'...'
-        return re.sub('\s+', ' ', raw)
+            raw = raw[:6] + '...'
+        return re.sub(r'\s+', ' ', raw)
 
     def flatten(self):
         """Resolve subgroups."""
@@ -143,6 +135,7 @@ class Token(object):
         return False
 
 
+@unicode_compatible
 class TokenList(Token):
     """A group of tokens.
 
@@ -158,20 +151,8 @@ class TokenList(Token):
         self.tokens = tokens
         super(TokenList, self).__init__(None, self.__str__())
 
-    def __unicode__(self):
-        return self._to_string()
-
     def __str__(self):
-        str_ = self._to_string()
-        if sys.version_info[0] <= 2:
-            str_ = str_.encode('utf-8')
-        return str_
-
-    def _to_string(self):
-        if sys.version_info[0] == 3:
-            return ''.join(x.value for x in self.flatten())
-        else:
-            return ''.join(u(x) for x in self.flatten())
+        return ''.join(token.value for token in self.flatten())
 
     def _get_repr_name(self):
         return self.__class__.__name__

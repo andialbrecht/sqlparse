@@ -25,6 +25,10 @@ if PY3:
         return str(s)
 
 
+    def unicode_compatible(cls):
+        return cls
+
+
     text_type = str
     string_types = (str,)
     from io import StringIO
@@ -37,6 +41,12 @@ elif PY2:
             return unicode(s)
         except UnicodeDecodeError:
             return unicode(s, encoding)
+
+
+    def unicode_compatible(cls):
+        cls.__unicode__ = cls.__str__
+        cls.__str__ = lambda x: x.__unicode__().encode('utf-8')
+        return cls
 
 
     text_type = unicode
