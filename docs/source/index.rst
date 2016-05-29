@@ -58,4 +58,4 @@ Bug tracker
    https://github.com/andialbrecht/sqlparse/issues
 
 Documentation
-   http://sqlparse.readthedocs.org/
+   https://sqlparse.readthedocs.io/
