@@ -7,7 +7,6 @@ from tests.utils import TestCaseBase, load_file
 import sqlparse
 from sqlparse import sql
 from sqlparse import tokens as T
-from sqlparse.compat import u
 
 
 class RegressionTests(TestCaseBase):
@@ -296,7 +295,8 @@ def test_issue213_leadingws():
 def test_issue227_gettype_cte():
     select_stmt = sqlparse.parse('SELECT 1, 2, 3 FROM foo;')
     assert select_stmt[0].get_type() == 'SELECT'
-    with_stmt = sqlparse.parse('WITH foo AS (SELECT 1, 2, 3) SELECT * FROM foo;')
+    with_stmt = sqlparse.parse('WITH foo AS (SELECT 1, 2, 3)'
+                               'SELECT * FROM foo;')
     assert with_stmt[0].get_type() == 'SELECT'
     with2_stmt = sqlparse.parse('''
         WITH foo AS (SELECT 1 AS abc, 2 AS def),

@@ -27,15 +27,16 @@ def _group_left_right(tlist, m, cls,
 
         if valid_left(left) and valid_right(right):
             if semicolon:
+                # only overwrite if a semicolon present.
                 sright = tlist.token_next_by(m=M_SEMICOLON, idx=right)
-                right = sright or right  # only overwrite if a semicolon present.
+                right = sright or right
             tokens = tlist.tokens_between(left, right)
             token = tlist.group_tokens(cls, tokens, extend=True)
         token = tlist.token_next_by(m=m, idx=token)
 
 
 def _group_matching(tlist, cls):
-    """Groups Tokens that have beginning and end. ie. parenthesis, brackets.."""
+    """Groups Tokens that have beginning and end."""
     idx = 1 if imt(tlist, i=cls) else 0
 
     token = tlist.token_next_by(m=cls.M_OPEN, idx=idx)
