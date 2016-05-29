@@ -43,17 +43,7 @@ class Lexer(object):
                 self._tokens[state].append((rex, tdef[1], new_state))
 
     def _decode(self, text):
-        if sys.version_info[0] == 3:
-            if isinstance(text, str):
-                return text
-        if self.encoding == 'guess':
-            try:
-                text = text.decode('utf-8')
-                if text.startswith(u'\ufeff'):
-                    text = text[len(u'\ufeff'):]
-            except UnicodeDecodeError:
-                text = text.decode('latin1')
-        else:
+        if not isinstance(text, text_type):
             try:
                 text = text.decode(self.encoding)
             except UnicodeDecodeError:
