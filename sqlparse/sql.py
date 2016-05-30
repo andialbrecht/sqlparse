@@ -104,7 +104,7 @@ class Token(object):
 
     def is_whitespace(self):
         """Return ``True`` if this token is a whitespace token."""
-        return self.ttype and self.ttype in T.Whitespace
+        return self.ttype in T.Whitespace
 
     def within(self, group_cls):
         """Returns ``True`` if this token is within *group_cls*.
@@ -141,17 +141,17 @@ class TokenList(Token):
     list of child-tokens.
     """
 
-    __slots__ = ('value', 'ttype', 'tokens')
+    __slots__ = 'tokens'
 
     def __init__(self, tokens=None):
         self.tokens = tokens or []
-        super(TokenList, self).__init__(None, self.__str__())
+        super(TokenList, self).__init__(None, str(self))
 
     def __str__(self):
         return ''.join(token.value for token in self.flatten())
 
     def _get_repr_name(self):
-        return self.__class__.__name__
+        return type(self).__name__
 
     def _pprint_tree(self, max_depth=None, depth=0, f=None):
         """Pretty-print the object tree."""
@@ -180,7 +180,7 @@ class TokenList(Token):
         This method is recursively called for all child tokens.
         """
         for token in self.tokens:
-            if isinstance(token, TokenList):
+            if token.is_group():
                 for item in token.flatten():
                     yield item
             else:
@@ -198,7 +198,7 @@ class TokenList(Token):
 
     def get_sublists(self):
         for token in self.tokens:
-            if isinstance(token, TokenList):
+            if token.is_group():
                 yield token
 
     @property
@@ -217,7 +217,7 @@ class TokenList(Token):
             funcs = (funcs,)
 
         if reverse:
-            iterable = iter(reversed(self.tokens[end:start - 1]))
+            iterable = reversed(self.tokens[end:start - 1])
         else:
             iterable = self.tokens[start:end]
 
@@ -327,7 +327,7 @@ class TokenList(Token):
                 left.parent = self
             tokens = tokens[1:]
             left.tokens.extend(tokens)
-            left.value = left.__str__()
+            left.value = str(left)
 
         else:
             left = grp_cls(tokens)
@@ -415,8 +415,6 @@ class TokenList(Token):
 class Statement(TokenList):
     """Represents a SQL statement."""
 
-    __slots__ = ('value', 'ttype', 'tokens')
-
     def get_type(self):
         """Returns the type of a statement.
 
@@ -440,16 +438,14 @@ class Statement(TokenList):
             # The WITH keyword should be followed by either an Identifier or
             # an IdentifierList containing the CTE definitions;  the actual
             # DML keyword (e.g. SELECT, INSERT) will follow next.
-            idents = self.token_next(
-                self.token_index(first_token), skip_ws=True)
-            if isinstance(idents, (Identifier, IdentifierList)):
-                dml_keyword = self.token_next(
-                    self.token_index(idents), skip_ws=True)
+            token = self.token_next(first_token, skip_ws=True)
+            if isinstance(token, (Identifier, IdentifierList)):
+                dml_keyword = self.token_next(token, skip_ws=True)
+
                 if dml_keyword.ttype == T.Keyword.DML:
                     return dml_keyword.normalized
-            # Hmm, probably invalid syntax, so return unknown.
-            return 'UNKNOWN'
 
+        # Hmm, probably invalid syntax, so return unknown.
         return 'UNKNOWN'
 
 
@@ -505,8 +501,8 @@ class IdentifierList(TokenList):
 
 class Parenthesis(TokenList):
     """Tokens between parenthesis."""
-    M_OPEN = (T.Punctuation, '(')
-    M_CLOSE = (T.Punctuation, ')')
+    M_OPEN = T.Punctuation, '('
+    M_CLOSE = T.Punctuation, ')'
 
     @property
     def _groupable_tokens(self):
@@ -515,8 +511,8 @@ class Parenthesis(TokenList):
 
 class SquareBrackets(TokenList):
     """Tokens between square brackets"""
-    M_OPEN = (T.Punctuation, '[')
-    M_CLOSE = (T.Punctuation, ']')
+    M_OPEN = T.Punctuation, '['
+    M_CLOSE = T.Punctuation, ']'
 
     @property
     def _groupable_tokens(self):
@@ -529,14 +525,14 @@ class Assignment(TokenList):
 
 class If(TokenList):
     """An 'if' clause with possible 'else if' or 'else' parts."""
-    M_OPEN = (T.Keyword, 'IF')
-    M_CLOSE = (T.Keyword, 'END IF')
+    M_OPEN = T.Keyword, 'IF'
+    M_CLOSE = T.Keyword, 'END IF'
 
 
 class For(TokenList):
     """A 'FOR' loop."""
-    M_OPEN = (T.Keyword, ('FOR', 'FOREACH'))
-    M_CLOSE = (T.Keyword, 'END LOOP')
+    M_OPEN = T.Keyword, ('FOR', 'FOREACH')
+    M_CLOSE = T.Keyword, 'END LOOP'
 
 
 class Comparison(TokenList):
@@ -560,15 +556,15 @@ class Comment(TokenList):
 
 class Where(TokenList):
     """A WHERE clause."""
-    M_OPEN = (T.Keyword, 'WHERE')
-    M_CLOSE = (T.Keyword,
-               ('ORDER', 'GROUP', 'LIMIT', 'UNION', 'EXCEPT', 'HAVING'))
+    M_OPEN = T.Keyword, 'WHERE'
+    M_CLOSE = T.Keyword, ('ORDER', 'GROUP', 'LIMIT', 'UNION', 'EXCEPT',
+                          'HAVING')
 
 
 class Case(TokenList):
     """A CASE statement with one or more WHEN and possibly an ELSE part."""
-    M_OPEN = (T.Keyword, 'CASE')
-    M_CLOSE = (T.Keyword, 'END')
+    M_OPEN = T.Keyword, 'CASE'
+    M_CLOSE = T.Keyword, 'END'
 
     def get_cases(self):
         """Returns a list of 2-tuples (condition, value).
@@ -631,5 +627,5 @@ class Function(TokenList):
 
 class Begin(TokenList):
     """A BEGIN/END block."""
-    M_OPEN = (T.Keyword, 'BEGIN')
-    M_CLOSE = (T.Keyword, 'END')
+    M_OPEN = T.Keyword, 'BEGIN'
+    M_CLOSE = T.Keyword, 'END'
