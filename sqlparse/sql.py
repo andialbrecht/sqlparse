@@ -202,9 +202,9 @@ class TokenList(Token):
         return True
 
     def get_sublists(self):
-        for x in self.tokens:
-            if isinstance(x, TokenList):
-                yield x
+        for token in self.tokens:
+            if isinstance(token, TokenList):
+                yield token
 
     @property
     def _groupable_tokens(self):
@@ -410,11 +410,11 @@ class TokenList(Token):
         if keywords:
             types.append(T.Keyword)
 
-        for tok in tokens:
-            if tok.ttype in types:
-                return remove_quotes(tok.value)
-            elif isinstance(tok, Identifier) or isinstance(tok, Function):
-                return tok.get_name()
+        for token in tokens:
+            if token.ttype in types:
+                return remove_quotes(token.value)
+            elif isinstance(token, (Identifier, Function)):
+                return token.get_name()
 
 
 class Statement(TokenList):
@@ -489,10 +489,10 @@ class Identifier(TokenList):
     def get_array_indices(self):
         """Returns an iterator of index token lists"""
 
-        for tok in self.tokens:
-            if isinstance(tok, SquareBrackets):
+        for token in self.tokens:
+            if isinstance(token, SquareBrackets):
                 # Use [1:-1] index to discard the square brackets
-                yield tok.tokens[1:-1]
+                yield token.tokens[1:-1]
 
 
 class IdentifierList(TokenList):
@@ -503,9 +503,9 @@ class IdentifierList(TokenList):
 
         Whitespaces and punctuations are not included in this generator.
         """
-        for x in self.tokens:
-            if not x.is_whitespace() and not x.match(T.Punctuation, ','):
-                yield x
+        for token in self.tokens:
+            if not (token.is_whitespace() or token.match(T.Punctuation, ',')):
+                yield token
 
 
 class Parenthesis(TokenList):
@@ -626,11 +626,11 @@ class Function(TokenList):
     def get_parameters(self):
         """Return a list of parameters."""
         parenthesis = self.tokens[-1]
-        for t in parenthesis.tokens:
-            if imt(t, i=IdentifierList):
-                return t.get_identifiers()
-            elif imt(t, i=(Function, Identifier), t=T.Literal):
-                return [t, ]
+        for token in parenthesis.tokens:
+            if imt(token, i=IdentifierList):
+                return token.get_identifiers()
+            elif imt(token, i=(Function, Identifier), t=T.Literal):
+                return [token, ]
         return []
 
 
