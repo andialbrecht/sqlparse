@@ -29,13 +29,10 @@ class Token(object):
     def __init__(self, ttype, value):
         value = u(value)
         self.value = value
-        if ttype in T.Keyword:
-            self.normalized = value.upper()
-        else:
-            self.normalized = value
         self.ttype = ttype
-        self.is_keyword = ttype in T.Keyword
         self.parent = None
+        self.is_keyword = ttype in T.Keyword
+        self.normalized = value.upper() if self.is_keyword else value
 
     def __str__(self):
         return self.value
@@ -147,9 +144,7 @@ class TokenList(Token):
     __slots__ = ('value', 'ttype', 'tokens')
 
     def __init__(self, tokens=None):
-        if tokens is None:
-            tokens = []
-        self.tokens = tokens
+        self.tokens = tokens or []
         super(TokenList, self).__init__(None, self.__str__())
 
     def __str__(self):
