@@ -150,12 +150,12 @@ class TestGrouping(TestCaseBase):
         s = 'select * from foo where bar = 1 order by id desc'
         p = sqlparse.parse(s)[0]
         self.ndiffAssertEqual(s, u(p))
-        self.assertTrue(len(p.tokens), 16)
+        self.assert_(len(p.tokens) == 14)
+
         s = 'select x from (select y from foo where bar = 1) z'
         p = sqlparse.parse(s)[0]
         self.ndiffAssertEqual(s, u(p))
-        self.assertTrue(isinstance(p.tokens[-1].tokens[0].tokens[-2],
-                        sql.Where))
+        self.assert_(isinstance(p.tokens[-1].tokens[0].tokens[-2], sql.Where))
 
     def test_typecast(self):
         s = 'select foo::integer from bar'
