@@ -244,27 +244,6 @@ class TokenList(Token):
         funcs = lambda tk: imt(tk, i, m, t)
         return self._token_matching(funcs, idx, end)
 
-    def token_next_by_instance(self, idx, clss, end=None):
-        """Returns the next token matching a class.
-
-        *idx* is where to start searching in the list of child tokens.
-        *clss* is a list of classes the token should be an instance of.
-
-        If no matching token can be found ``None`` is returned.
-        """
-        funcs = lambda tk: imt(tk, i=clss)
-        return self._token_matching(funcs, idx, end)
-
-    def token_next_by_type(self, idx, ttypes):
-        """Returns next matching token by it's token type."""
-        funcs = lambda tk: imt(tk, t=ttypes)
-        return self._token_matching(funcs, idx)
-
-    def token_next_match(self, idx, ttype, value, regex=False):
-        """Returns next token where it's ``match`` method returns ``True``."""
-        funcs = lambda tk: imt(tk, m=(ttype, value, regex))
-        return self._token_matching(funcs, idx)
-
     def token_not_matching(self, idx, funcs):
         funcs = (funcs,) if not isinstance(funcs, (list, tuple)) else funcs
         funcs = [lambda tk: not func(tk) for func in funcs]
@@ -460,12 +439,12 @@ class Identifier(TokenList):
 
     def is_wildcard(self):
         """Return ``True`` if this identifier contains a wildcard."""
-        token = self.token_next_by_type(0, T.Wildcard)
+        token = self.token_next_by(t=T.Wildcard)
         return token is not None
 
     def get_typecast(self):
         """Returns the typecast or ``None`` of this object as a string."""
-        marker = self.token_next_match(0, T.Punctuation, '::')
+        marker = self.token_next_by(m=(T.Punctuation, '::'))
         if marker is None:
             return None
         next_ = self.token_next(self.token_index(marker), False)
@@ -475,7 +454,7 @@ class Identifier(TokenList):
 
     def get_ordering(self):
         """Returns the ordering or ``None`` as uppercase string."""
-        ordering = self.token_next_by_type(0, T.Keyword.Order)
+        ordering = self.token_next_by(t=T.Keyword.Order)
         if ordering is None:
             return None
         return ordering.value.upper()
