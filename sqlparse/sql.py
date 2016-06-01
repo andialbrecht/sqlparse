@@ -71,32 +71,23 @@ class Token(object):
         if not type_matched or values is None:
             return type_matched
 
-        if regex:
-            if isinstance(values, string_types):
-                values = {values}
+        if isinstance(values, string_types):
+            values = (values,)
 
-            if self.ttype is T.Keyword:
-                values = set(re.compile(v, re.IGNORECASE) for v in values)
-            else:
-                values = set(re.compile(v) for v in values)
+        if regex:
+            # TODO: Add test for regex with is_keyboard = false
+            flag = re.IGNORECASE if self.is_keyword else 0
+            values = (re.compile(v, flag) for v in values)
 
             for pattern in values:
-                if pattern.search(self.value):
+                if pattern.search(self.normalized):
                     return True
             return False
-
-        if isinstance(values, string_types):
-            if self.is_keyword:
-                return values.upper() == self.normalized
-            return values == self.value
 
         if self.is_keyword:
-            for v in values:
-                if v.upper() == self.normalized:
-                    return True
-            return False
+            values = (v.upper() for v in values)
 
-        return self.value in values
+        return self.normalized in values
 
     def is_group(self):
         """Returns ``True`` if this object has children."""
