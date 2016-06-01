@@ -150,6 +150,12 @@ class TokenList(Token):
     def __str__(self):
         return ''.join(token.value for token in self.flatten())
 
+    def __iter__(self):
+        return iter(self.tokens)
+
+    def __getitem__(self, item):
+        return self.tokens[item]
+
     def _get_repr_name(self):
         return type(self).__name__
 
@@ -185,13 +191,6 @@ class TokenList(Token):
                     yield item
             else:
                 yield token
-
-    # def __iter__(self):
-    #     return self
-    #
-    # def next(self):
-    #     for token in self.tokens:
-    #         yield token
 
     def is_group(self):
         return True
@@ -447,17 +446,17 @@ class Identifier(TokenList):
         marker = self.token_next_by(m=(T.Punctuation, '::'))
         if marker is None:
             return None
-        next_ = self.token_next(self.token_index(marker), False)
+        next_ = self.token_next(marker, False)
         if next_ is None:
             return None
-        return u(next_)
+        return next_.value
 
     def get_ordering(self):
         """Returns the ordering or ``None`` as uppercase string."""
         ordering = self.token_next_by(t=T.Keyword.Order)
         if ordering is None:
             return None
-        return ordering.value.upper()
+        return ordering.normalized
 
     def get_array_indices(self):
         """Returns an iterator of index token lists"""
