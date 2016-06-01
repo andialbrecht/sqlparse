@@ -340,7 +340,7 @@ class ReindentFilter:
                 offset += 1
             uprev = u(prev)
             if (prev and (uprev.endswith('\n') or uprev.endswith('\r'))):
-                nl = tlist.token_next(token)
+                nl = tlist.token_next(tlist.token_index(token))
             else:
                 nl = self.nl()
                 added.add(nl)
