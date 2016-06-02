@@ -7,15 +7,8 @@
 
 import re
 
-from os.path import abspath, join
-
 from sqlparse import sql, tokens as T
 from sqlparse.compat import u, text_type
-from sqlparse.engine import FilterStack
-from sqlparse.pipeline import Pipeline
-from sqlparse.tokens import (Comment, Comparison, Keyword, Name, Punctuation,
-                             String, Whitespace)
-from sqlparse.utils import memoize_generator
 from sqlparse.utils import split_unquoted_newlines
 
 
@@ -72,130 +65,6 @@ class TruncateStringFilter(object):
                     value = u''.join((quote, inner[:self.width], self.char,
                                       quote))
             yield ttype, value
-
-
-class GetComments(object):
-    """Get the comments from a stack"""
-    def process(self, stack, stream):
-        for token_type, value in stream:
-            if token_type in Comment:
-                yield token_type, value
-
-
-class StripComments(object):
-    """Strip the comments from a stack"""
-    def process(self, stack, stream):
-        for token_type, value in stream:
-            if token_type not in Comment:
-                yield token_type, value
-
-
-def StripWhitespace(stream):
-    "Strip the useless whitespaces from a stream leaving only the minimal ones"
-    last_type = None
-    has_space = False
-    ignore_group = frozenset((Comparison, Punctuation))
-
-    for token_type, value in stream:
-        # We got a previous token (not empty first ones)
-        if last_type:
-            if token_type in Whitespace:
-                has_space = True
-                continue
-
-        # Ignore first empty spaces and dot-commas
-        elif token_type in (Whitespace, Whitespace.Newline, ignore_group):
-            continue
-
-        # Yield a whitespace if it can't be ignored
-        if has_space:
-            if not ignore_group.intersection((last_type, token_type)):
-                yield Whitespace, ' '
-            has_space = False
-
-        # Yield the token and set its type for checking with the next one
-        yield token_type, value
-        last_type = token_type
-
-
-class IncludeStatement(object):
-    """Filter that enable a INCLUDE statement"""
-
-    def __init__(self, dirpath=".", maxrecursive=10, raiseexceptions=False):
-        if maxrecursive <= 0:
-            raise ValueError('Max recursion limit reached')
-
-        self.dirpath = abspath(dirpath)
-        self.maxRecursive = maxrecursive
-        self.raiseexceptions = raiseexceptions
-
-        self.detected = False
-
-    @memoize_generator
-    def process(self, stack, stream):
-        # Run over all tokens in the stream
-        for token_type, value in stream:
-            # INCLUDE statement found, set detected mode
-            if token_type in Name and value.upper() == 'INCLUDE':
-                self.detected = True
-                continue
-
-            # INCLUDE statement was found, parse it
-            elif self.detected:
-                # Omit whitespaces
-                if token_type in Whitespace:
-                    continue
-
-                # Found file path to include
-                if token_type in String.Symbol:
-                    # Get path of file to include
-                    path = join(self.dirpath, value[1:-1])
-
-                    try:
-                        f = open(path)
-                        raw_sql = f.read()
-                        f.close()
-
-                    # There was a problem loading the include file
-                    except IOError as err:
-                        # Raise the exception to the interpreter
-                        if self.raiseexceptions:
-                            raise
-
-                        # Put the exception as a comment on the SQL code
-                        yield Comment, u'-- IOError: %s\n' % err
-
-                    else:
-                        # Create new FilterStack to parse readed file
-                        # and add all its tokens to the main stack recursively
-                        try:
-                            filtr = IncludeStatement(self.dirpath,
-                                                     self.maxRecursive - 1,
-                                                     self.raiseexceptions)
-
-                        # Max recursion limit reached
-                        except ValueError as err:
-                            # Raise the exception to the interpreter
-                            if self.raiseexceptions:
-                                raise
-
-                            # Put the exception as a comment on the SQL code
-                            yield Comment, u'-- ValueError: %s\n' % err
-
-                        stack = FilterStack()
-                        stack.preprocess.append(filtr)
-
-                        for tv in stack.run(raw_sql):
-                            yield tv
-
-                    # Set normal mode
-                    self.detected = False
-
-                # Don't include any token while in detected mode
-                continue
-
-            # Normal token
-            yield token_type, value
 
 
 # ----------------------
@@ -520,57 +389,6 @@ class RightMarginFilter(object):
         group.tokens = self._process(stack, group, group.tokens)
 
 
-class ColumnsSelect(object):
-    """Get the columns names of a SELECT query"""
-    def process(self, stack, stream):
-        mode = 0
-        oldValue = ""
-        parenthesis = 0
-
-        for token_type, value in stream:
-            # Ignore comments
-            if token_type in Comment:
-                continue
-
-            # We have not detected a SELECT statement
-            if mode == 0:
-                if token_type in Keyword and value == 'SELECT':
-                    mode = 1
-
-            # We have detected a SELECT statement
-            elif mode == 1:
-                if value == 'FROM':
-                    if oldValue:
-                        yield oldValue
-
-                    mode = 3    # Columns have been checked
-
-                elif value == 'AS':
-                    oldValue = ""
-                    mode = 2
-
-                elif (token_type == Punctuation
-                      and value == ',' and not parenthesis):
-                    if oldValue:
-                        yield oldValue
-                    oldValue = ""
-
-                elif token_type not in Whitespace:
-                    if value == '(':
-                        parenthesis += 1
-                    elif value == ')':
-                        parenthesis -= 1
-
-                    oldValue += value
-
-            # We are processing an AS keyword
-            elif mode == 2:
-                # We check also for Keywords because a bug in SQLParse
-                if token_type == Name or token_type == Keyword:
-                    yield value
-                    mode = 1
-
-
 # ---------------------------
 # postprocess
 
@@ -581,15 +399,6 @@ class SerializerUnicode(object):
         lines = split_unquoted_newlines(raw)
         res = '\n'.join(line.rstrip() for line in lines)
         return res
-
-
-def Tokens2Unicode(stream):
-    result = ""
-
-    for _, value in stream:
-        result += u(value)
-
-    return result
 
 
 class OutputFilter(object):
@@ -704,34 +513,3 @@ class OutputPHPFilter(OutputFilter):
         # Close quote
         yield sql.Token(T.Text, '"')
         yield sql.Token(T.Punctuation, ';')
-
-
-class Limit(object):
-    """Get the LIMIT of a query.
-
-    If not defined, return -1 (SQL specification for no LIMIT query)
-    """
-    def process(self, stack, stream):
-        index = 7
-        stream = list(stream)
-        stream.reverse()
-
-        # Run over all tokens in the stream from the end
-        for token_type, value in stream:
-            index -= 1
-
-#            if index and token_type in Keyword:
-            if index and token_type in Keyword and value == 'LIMIT':
-                return stream[4 - index][1]
-
-        return -1
-
-
-def compact(stream):
-    """Function that return a compacted version of the stream"""
-    pipe = Pipeline()
-
-    pipe.append(StripComments())
-    pipe.append(StripWhitespace)
-
-    return pipe(stream)

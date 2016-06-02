@@ -68,9 +68,3 @@ def split(sql, encoding=None):
     stack = engine.FilterStack()
     stack.split_statements = True
     return [u(stmt).strip() for stmt in stack.run(sql, encoding)]
-
-
-def split2(stream):
-    from sqlparse.engine.filter import StatementFilter
-    splitter = StatementFilter()
-    return list(splitter.process(None, stream))
