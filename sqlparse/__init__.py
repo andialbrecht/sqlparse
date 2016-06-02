@@ -39,7 +39,7 @@ def parsestream(stream, encoding=None):
     return stack.run(stream, encoding)
 
 
-def format(sql, **options):
+def format(sql, encoding=None, **options):
     """Format *sql* according to *options*.
 
     Available options are documented in :ref:`formatting`.
@@ -49,7 +49,6 @@ def format(sql, **options):
 
     :returns: The formatted SQL statement as string.
     """
-    encoding = options.pop('encoding', None)
     stack = engine.FilterStack()
     options = formatter.validate_options(options)
     stack = formatter.build_filter_stack(stack, options)
