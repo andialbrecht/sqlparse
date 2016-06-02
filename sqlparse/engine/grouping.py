@@ -166,10 +166,11 @@ def group_identifier_list(tlist):
 
     tidx, token = tlist.token_idx_next_by(m=M_COMMA)
     while token:
-        before, after = tlist.token_prev(tidx), tlist.token_next(tidx)
+        before_idx, before = tlist.token_idx_prev(tidx)
+        after = tlist.token_next(tidx)
 
         if func(before) and func(after):
-            tidx = tlist.token_index(before)
+            tidx = before_idx
             token = tlist.group_tokens_between(sql.IdentifierList, tidx, after, extend=True)
 
         tidx, token = tlist.token_idx_next_by(m=M_COMMA, idx=tidx + 1)

@@ -233,12 +233,18 @@ class TokenList(Token):
         if not isinstance(funcs, (list, tuple)):
             funcs = (funcs,)
 
-        iterable = enumerate(self.tokens[start:end], start=start)
-
-        for idx, token in iterable:
-            for func in funcs:
-                if func(token):
-                    return idx, token
+        if reverse:
+            assert end is None
+            for idx in range(start - 2, -1, -1):
+                token = self.tokens[idx]
+                for func in funcs:
+                    if func(token):
+                        return idx, token
+        else:
+            for idx, token in enumerate(self.tokens[start:end], start=start):
+                for func in funcs:
+                    if func(token):
+                        return idx, token
         return None, None
 
     def _token_matching(self, funcs, start=0, end=None, reverse=False):
@@ -311,6 +317,16 @@ class TokenList(Token):
 
     def token_matching(self, idx, funcs):
         return self._token_matching(funcs, idx)
+
+    def token_idx_prev(self, idx, skip_ws=True):
+        """Returns the previous token relative to *idx*.
+
+        If *skip_ws* is ``True`` (the default) whitespace tokens are ignored.
+        ``None`` is returned if there's no previous token.
+        """
+        idx += 1  # alot of code usage current pre-compensates for this
+        funcs = lambda tk: not (tk.is_whitespace() and skip_ws)
+        return self._token_idx_matching(funcs, idx, reverse=True)
 
     def token_prev(self, idx, skip_ws=True):
         """Returns the previous token relative to *idx*.
