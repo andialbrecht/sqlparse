@@ -21,7 +21,6 @@ from sqlparse.utils import consume
 
 
 class Lexer(object):
-    encoding = 'utf-8'
     flags = re.IGNORECASE | re.UNICODE
 
     def __init__(self):
@@ -41,7 +40,7 @@ class Lexer(object):
                         new_state = (tdef[2],)
                 self._tokens[state].append((rex, tdef[1], new_state))
 
-    def get_tokens(self, text):
+    def get_tokens(self, text, encoding=None):
         """
         Return an iterable of (tokentype, value) pairs generated from
         `text`. If `unfiltered` is set to `True`, the filtering mechanism
@@ -54,6 +53,7 @@ class Lexer(object):
 
         ``stack`` is the inital stack (default: ``['root']``)
         """
+        encoding = encoding or 'utf-8'
         statestack = ['root', ]
         statetokens = self._tokens['root']
 
@@ -63,7 +63,7 @@ class Lexer(object):
         text = text.read()
         if not isinstance(text, text_type):
             try:
-                text = text.decode(self.encoding)
+                text = text.decode(encoding)
             except UnicodeDecodeError:
                 text = text.decode('unicode-escape')
 
@@ -102,7 +102,4 @@ def tokenize(sql, encoding=None):
     Tokenize *sql* using the :class:`Lexer` and return a 2-tuple stream
     of ``(token type, value)`` items.
     """
-    lexer = Lexer()
-    if encoding is not None:
-        lexer.encoding = encoding
-    return lexer.get_tokens(sql)
+    return Lexer().get_tokens(sql, encoding)
