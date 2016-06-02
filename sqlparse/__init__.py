@@ -35,7 +35,7 @@ def parsestream(stream, encoding=None):
     :returns: A generator of :class:`~sqlparse.sql.Statement` instances.
     """
     stack = engine.FilterStack()
-    stack.full_analyze()
+    stack.enable_grouping()
     return stack.run(stream, encoding)
 
 
