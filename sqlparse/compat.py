@@ -18,7 +18,6 @@ if PY3:
         return str(s)
 
 
-    range = range
     text_type = str
     string_types = (str,)
     from io import StringIO
@@ -33,7 +32,6 @@ elif PY2:
             return unicode(s, encoding)
 
 
-    range = xrange
     text_type = unicode
     string_types = (basestring,)
     from StringIO import StringIO

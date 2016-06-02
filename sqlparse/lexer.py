@@ -16,7 +16,7 @@ import re
 
 from sqlparse import tokens
 from sqlparse.keywords import SQL_REGEX
-from sqlparse.compat import StringIO, string_types, text_type, range
+from sqlparse.compat import StringIO, string_types, text_type
 from sqlparse.utils import consume
 
 
@@ -67,9 +67,8 @@ class Lexer(object):
             except UnicodeDecodeError:
                 text = text.decode('unicode-escape')
 
-        iterable = iter(range(len(text)))
-
-        for pos in iterable:
+        iterable = enumerate(text)
+        for pos, char in iterable:
             for rexmatch, action, new_state in statetokens:
                 m = rexmatch(text, pos)
 
@@ -93,7 +92,7 @@ class Lexer(object):
                 consume(iterable, m.end() - pos - 1)
                 break
             else:
-                yield tokens.Error, text[pos]
+                yield tokens.Error, char
 
 
 def tokenize(sql, encoding=None):
