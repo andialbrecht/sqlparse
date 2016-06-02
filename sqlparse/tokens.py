@@ -13,19 +13,18 @@
 class _TokenType(tuple):
     parent = None
 
-    def __contains__(self, val):
-        return val is not None and (self is val or val[:len(self)] == self)
+    def __contains__(self, item):
+        return item is not None and (self is item or item[:len(self)] == self)
 
-    def __getattr__(self, val):
-        if not val or not val[0].isupper():
-            return tuple.__getattribute__(self, val)
-        new = _TokenType(self + (val,))
-        setattr(self, val, new)
+    def __getattr__(self, name):
+        new = _TokenType(self + (name,))
+        setattr(self, name, new)
         new.parent = self
         return new
 
     def __repr__(self):
-        return 'Token' + (self and '.' or '') + '.'.join(self)
+        # self can be False only if its the `root` ie. Token itself
+        return 'Token' + ('.' if self else '') + '.'.join(self)
 
 
 Token = _TokenType()
