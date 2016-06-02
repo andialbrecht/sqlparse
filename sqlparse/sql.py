@@ -350,6 +350,26 @@ class TokenList(Token):
         funcs = lambda tk: not (tk.is_whitespace() and skip_ws)
         return self._token_matching(funcs, idx)
 
+    def token_idx_next(self, idx, skip_ws=True):
+        """Returns the next token relative to *idx*.
+
+        If *skip_ws* is ``True`` (the default) whitespace tokens are ignored.
+        ``None`` is returned if there's no next token.
+        """
+        if isinstance(idx, int):
+            idx += 1  # alot of code usage current pre-compensates for this
+        try:
+            if not skip_ws:
+                return idx, self.tokens[idx]
+            else:
+                while True:
+                    token = self.tokens[idx]
+                    if not token.is_whitespace():
+                        return idx, token
+                    idx += 1
+        except IndexError:
+            return None, None
+
     def token_index(self, token, start=0):
         """Return list index of token."""
         start = self.token_index(start) if not isinstance(start, int) else start

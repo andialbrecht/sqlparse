@@ -167,11 +167,11 @@ def group_identifier_list(tlist):
     tidx, token = tlist.token_idx_next_by(m=M_COMMA)
     while token:
         before_idx, before = tlist.token_idx_prev(tidx)
-        after = tlist.token_next(tidx)
+        after_idx, after = tlist.token_idx_next(tidx)
 
         if func(before) and func(after):
             tidx = before_idx
-            token = tlist.group_tokens_between(sql.IdentifierList, tidx, after, extend=True)
+            token = tlist.group_tokens_between(sql.IdentifierList, tidx, after_idx, extend=True)
 
         tidx, token = tlist.token_idx_next_by(m=M_COMMA, idx=tidx + 1)
 
@@ -219,9 +219,9 @@ def group_aliased(tlist):
 
     tidx, token = tlist.token_idx_next_by(i=I_ALIAS, t=T.Number)
     while token:
-        next_ = tlist.token_next(tidx)
+        next_index_, next_ = tlist.token_idx_next(tidx)
         if imt(next_, i=sql.Identifier):
-            token = tlist.group_tokens_between(sql.Identifier, tidx, next_, extend=True)
+            token = tlist.group_tokens_between(sql.Identifier, tidx, next_index_, extend=True)
         tidx, token = tlist.token_idx_next_by(i=I_ALIAS, t=T.Number, idx=tidx + 1)
 
 
