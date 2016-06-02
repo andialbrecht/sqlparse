@@ -225,6 +225,22 @@ class TokenList(Token):
     def _groupable_tokens(self):
         return self.tokens
 
+    def _token_idx_matching(self, funcs, start=0, end=None, reverse=False):
+        """next token that match functions"""
+        if start is None:
+            return None
+
+        if not isinstance(funcs, (list, tuple)):
+            funcs = (funcs,)
+
+        iterable = enumerate(self.tokens[start:end], start=start)
+
+        for idx, token in iterable:
+            for func in funcs:
+                if func(token):
+                    return idx, token
+        return None, None
+
     def _token_matching(self, funcs, start=0, end=None, reverse=False):
         """next token that match functions"""
         if start is None:
@@ -258,6 +274,10 @@ class TokenList(Token):
         funcs = lambda tk: not ((ignore_whitespace and tk.is_whitespace()) or
                                 (ignore_comments and imt(tk, i=Comment)))
         return self._token_matching(funcs)
+
+    def token_idx_next_by(self, i=None, m=None, t=None, idx=0, end=None):
+        funcs = lambda tk: imt(tk, i, m, t)
+        return self._token_idx_matching(funcs, idx, end)
 
     def token_next_by(self, i=None, m=None, t=None, idx=0, end=None):
         funcs = lambda tk: imt(tk, i, m, t)
