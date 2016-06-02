@@ -109,8 +109,9 @@ def group_identifier(tlist):
 
     token = tlist.token_next_by(t=T_IDENT)
     while token:
-        token = tlist.group_tokens(sql.Identifier, [token, ])
-        token = tlist.token_next_by(t=T_IDENT, idx=tlist.token_index(token) + 1)
+        tidx = tlist.token_index(token)
+        token = tlist.group_tokens_between(sql.Identifier, tidx, tidx)
+        token = tlist.token_next_by(t=T_IDENT, idx=tidx + 1)
 
 
 def group_period(tlist):
@@ -165,11 +166,14 @@ def group_identifier_list(tlist):
     token = tlist.token_next_by(m=M_COMMA)
 
     while token:
-        before, after = tlist.token_prev(tlist.token_index(token)), tlist.token_next(tlist.token_index(token))
+        tidx = tlist.token_index(token)
+        before, after = tlist.token_prev(tidx), tlist.token_next(tidx)
 
         if func(before) and func(after):
-            token = tlist.group_tokens_between(sql.IdentifierList, before, after, extend=True)
-        token = tlist.token_next_by(m=M_COMMA, idx=tlist.token_index(token) + 1)
+            tidx = tlist.token_index(before)
+            token = tlist.group_tokens_between(sql.IdentifierList, tidx, after, extend=True)
+
+        token = tlist.token_next_by(m=M_COMMA, idx=tidx + 1)
 
 
 def group_brackets(tlist):
@@ -215,10 +219,11 @@ def group_aliased(tlist):
 
     token = tlist.token_next_by(i=I_ALIAS, t=T.Number)
     while token:
-        next_ = tlist.token_next(tlist.token_index(token))
+        tidx = tlist.token_index(token)
+        next_ = tlist.token_next(tidx)
         if imt(next_, i=sql.Identifier):
-            token = tlist.group_tokens_between(sql.Identifier, token, next_, extend=True)
-        token = tlist.token_next_by(i=I_ALIAS, t=T.Number, idx=tlist.token_index(token) + 1)
+            token = tlist.group_tokens_between(sql.Identifier, tidx, next_, extend=True)
+        token = tlist.token_next_by(i=I_ALIAS, t=T.Number, idx=tidx + 1)
 
 
 def group_typecasts(tlist):
