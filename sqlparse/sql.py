@@ -329,6 +329,29 @@ class TokenList(Token):
         end_idx = include_end + self.token_index(end)
         return self.tokens[start_idx:end_idx]
 
+    def group_tokens_between(self, grp_cls, start, end, include_end=True, extend=False):
+        """Replace tokens by an instance of *grp_cls*."""
+        start_idx = self.token_index(start)
+        end_idx = self.token_index(end) + include_end
+        tokens = self.tokens[start_idx:end_idx]
+
+        if extend and isinstance(start, grp_cls):
+            subtokens = self.tokens[start_idx+1:end_idx]
+
+            grp = start
+            grp.tokens.extend(subtokens)
+            del self.tokens[start_idx+1:end_idx]
+            grp.value = start.__str__()
+        else:
+            subtokens = self.tokens[start_idx:end_idx]
+            grp = grp_cls(tokens)
+            self.tokens[start_idx:end_idx] = [grp]
+            grp.parent = self
+
+        for token in subtokens:
+            token.parent = grp
+
+        return grp
     def group_tokens(self, grp_cls, tokens, ignore_ws=False, extend=False):
         """Replace tokens by an instance of *grp_cls*."""
         if ignore_ws:
