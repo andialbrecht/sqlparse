@@ -44,6 +44,8 @@ group.add_option('-r', '--reindent', dest='reindent',
                  help='reindent statements')
 group.add_option('--indent_width', dest='indent_width', default=2,
                  help='indentation width (defaults to 2 spaces)')
+group.add_option('--wrap_after', dest='wrap_after', default=0,
+                 help='Column after which lists should be wrapped')
 
 _FORMATTING_GROUP = group
 

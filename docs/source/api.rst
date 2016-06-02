@@ -52,6 +52,10 @@ The :meth:`~sqlparse.format` function accepts the following keyword arguments.
 ``indent_width``
   The width of the indentation, defaults to 2.
 
+``wrap_after``
+  The column limit for wrapping comma-separated lists. If unspecified, it
+  puts every item in the list on its own line.
+
 ``output_format``
   If given the output is additionally formatted to be used as a variable
   in a programming language. Allowed values are "python" and "php".
