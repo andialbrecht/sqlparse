@@ -331,9 +331,14 @@ class TokenList(Token):
 
     def group_tokens_between(self, grp_cls, start, end, include_end=True, extend=False):
         """Replace tokens by an instance of *grp_cls*."""
-        start_idx = self.token_index(start)
-        end_idx = self.token_index(end) + include_end
-        tokens = self.tokens[start_idx:end_idx]
+        if isinstance(start, int):
+            start_idx = start
+            start = self.tokens[start_idx]
+        else:
+            start_idx = self.token_index(start)
+
+        end_idx = self.token_index(end) if not isinstance(end, int) else end
+        end_idx += include_end
 
         if extend and isinstance(start, grp_cls):
             subtokens = self.tokens[start_idx+1:end_idx]
@@ -344,7 +349,7 @@ class TokenList(Token):
             grp.value = start.__str__()
         else:
             subtokens = self.tokens[start_idx:end_idx]
-            grp = grp_cls(tokens)
+            grp = grp_cls(subtokens)
             self.tokens[start_idx:end_idx] = [grp]
             grp.parent = self
 

@@ -2,7 +2,7 @@
 
 from sqlparse import sql
 from sqlparse import tokens as T
-from sqlparse.utils import recurse, imt, find_matching
+from sqlparse.utils import recurse, imt
 
 M_ROLE = (T.Keyword, ('null', 'role'))
 M_SEMICOLON = (T.Punctuation, ';')
@@ -39,13 +39,25 @@ def _group_matching(tlist, cls):
     """Groups Tokens that have beginning and end. ie. parenthesis, brackets.."""
     idx = 1 if imt(tlist, i=cls) else 0
 
-    token = tlist.token_next_by(m=cls.M_OPEN, idx=idx)
-    while token:
-        end = find_matching(tlist, token, cls.M_OPEN, cls.M_CLOSE)
-        if end is not None:
-            token = tlist.group_tokens_between(cls, token, end)
-            _group_matching(token, cls)
-        token = tlist.token_next_by(m=cls.M_OPEN, idx=tlist.token_index(token) + 1)
+    opens = []
+
+    while True:
+        try:
+            token = tlist.tokens[idx]
+        except IndexError:
+            break
+
+        if token.match(*cls.M_OPEN):
+            opens.append(idx)
+        elif token.match(*cls.M_CLOSE):
+            try:
+                open_idx = opens.pop()
+            except IndexError:
+                break
+            tlist.group_tokens_between(cls, open_idx, idx)
+            idx = open_idx
+
+        idx += 1
 
 
 def group_if(tlist):
