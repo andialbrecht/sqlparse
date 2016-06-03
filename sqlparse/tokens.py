@@ -50,7 +50,7 @@ Operator = Token.Operator
 Comparison = Operator.Comparison
 Wildcard = Token.Wildcard
 Comment = Token.Comment
-Assignment = Token.Assignement
+Assignment = Token.Assignment
 
 # Generic types for non-source code
 Generic = Token.Generic
