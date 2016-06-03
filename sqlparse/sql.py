@@ -6,6 +6,7 @@
 # the BSD License: http://www.opensource.org/licenses/bsd-license.php
 
 """This module contains classes representing syntactical elements of SQL."""
+from __future__ import print_function
 
 import re
 
@@ -40,9 +41,9 @@ class Token(object):
         return self.value
 
     def __repr__(self):
-        short = self._get_repr_value()
-        return '<%s \'%s\' at 0x%07x>' % (self._get_repr_name(),
-                                          short, id(self))
+        cls = self._get_repr_name()
+        value = self._get_repr_value()
+        return "<{cls} '{value}' at 0x{id:2X}>".format(id=id(self), **locals())
 
     def _get_repr_name(self):
         return str(self.ttype).split('.')[-1]
@@ -157,19 +158,17 @@ class TokenList(Token):
     def _get_repr_name(self):
         return self.__class__.__name__
 
-    def _pprint_tree(self, max_depth=None, depth=0):
+    def _pprint_tree(self, max_depth=None, depth=0, f=None):
         """Pretty-print the object tree."""
-        indent = ' ' * (depth * 2)
+        ind = ' ' * (depth * 2)
         for idx, token in enumerate(self.tokens):
-            if token.is_group():
-                pre = ' +-'
-            else:
-                pre = ' | '
-            print('%s%s%d %s \'%s\'' % (indent, pre, idx,
-                                        token._get_repr_name(),
-                                        token._get_repr_value()))
-            if (token.is_group() and (max_depth is None or depth < max_depth)):
-                token._pprint_tree(max_depth, depth + 1)
+            pre = ' +-' if token.is_group() else ' | '
+            cls = token._get_repr_name()
+            value = token._get_repr_value()
+            print("{ind}{pre}{idx} {cls} '{value}'".format(**locals()), file=f)
+
+            if token.is_group() and (max_depth is None or depth < max_depth):
+                token._pprint_tree(max_depth, depth + 1, f)
 
     def get_token_at_offset(self, offset):
         """Returns the token that is on position offset."""
