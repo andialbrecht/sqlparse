@@ -52,6 +52,7 @@ def validate_options(options):
                             % reindent)
     elif reindent:
         options['strip_whitespace'] = True
+
     indent_tabs = options.get('indent_tabs', False)
     if indent_tabs not in [True, False]:
         raise SQLParseError('Invalid value for indent_tabs: %r' % indent_tabs)
@@ -59,14 +60,24 @@ def validate_options(options):
         options['indent_char'] = '\t'
     else:
         options['indent_char'] = ' '
+
     indent_width = options.get('indent_width', 2)
     try:
         indent_width = int(indent_width)
     except (TypeError, ValueError):
         raise SQLParseError('indent_width requires an integer')
     if indent_width < 1:
-        raise SQLParseError('indent_width requires an positive integer')
+        raise SQLParseError('indent_width requires a positive integer')
     options['indent_width'] = indent_width
+
+    wrap_after = options.get('wrap_after', 0)
+    try:
+        wrap_after = int(wrap_after)
+    except (TypeError, ValueError):
+        raise SQLParseError('wrap_after requires an integer')
+    if wrap_after < 0:
+        raise SQLParseError('wrap_after requires a positive integer')
+    options['wrap_after'] = wrap_after
 
     right_margin = options.get('right_margin', None)
     if right_margin is not None:
@@ -115,7 +126,8 @@ def build_filter_stack(stack, options):
         stack.enable_grouping()
         stack.stmtprocess.append(
             filters.ReindentFilter(char=options['indent_char'],
-                                   width=options['indent_width']))
+                                   width=options['indent_width'],
+                                   wrap_after=options['wrap_after']))
 
     if options.get('right_margin', False):
         stack.enable_grouping()

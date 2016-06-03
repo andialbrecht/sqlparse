@@ -117,6 +117,10 @@ class TestFormatReindent(TestCaseBase):
                           reindent=True, indent_width='foo')
         self.assertRaises(SQLParseError, sqlparse.format, 'foo',
                           reindent=True, indent_width=-12)
+        self.assertRaises(SQLParseError, sqlparse.format, 'foo',
+                          reindent=True, wrap_after='foo')
+        self.assertRaises(SQLParseError, sqlparse.format, 'foo',
+                          reindent=True, wrap_after=-12)
 
     def test_stmts(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)
@@ -203,6 +207,14 @@ class TestFormatReindent(TestCaseBase):
                                                '       b.id',
                                                'from a,',
                                                '     b']))
+
+    def test_identifier_list_with_wrap_after(self):
+        f = lambda sql: sqlparse.format(sql, reindent=True, wrap_after=14)
+        s = 'select foo, bar, baz from table1, table2 where 1 = 2'
+        self.ndiffAssertEqual(f(s), '\n'.join(['select foo, bar,',
+                                               '       baz',
+                                               'from table1, table2',
+                                               'where 1 = 2']))
 
     def test_identifier_list_with_functions(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)

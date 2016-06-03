@@ -279,12 +279,13 @@ class StripWhitespaceFilter(object):
 
 class ReindentFilter(object):
 
-    def __init__(self, width=2, char=' ', line_width=None):
+    def __init__(self, width=2, char=' ', line_width=None, wrap_after=0):
         self.width = width
         self.char = char
         self.indent = 0
         self.offset = 0
         self.line_width = line_width
+        self.wrap_after = wrap_after
         self._curr_stmt = None
         self._last_stmt = None
 
@@ -413,8 +414,12 @@ class ReindentFilter(object):
             else:
                 num_offset = self._get_offset(first) - len(first.value)
             self.offset += num_offset
+            position = self.offset
             for token in identifiers[1:]:
-                tlist.insert_before(token, self.nl())
+                position += len(token.value) + 1   # Add 1 for the "," separator
+                if position > self.wrap_after:
+                    tlist.insert_before(token, self.nl())
+                    position = self.offset
             self.offset -= num_offset
         self._process_default(tlist)
 
