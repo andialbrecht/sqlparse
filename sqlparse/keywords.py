@@ -50,10 +50,12 @@ SQL_REGEX = {
         (r'(?<=\.)[A-Z]\w*', tokens.Name),  # .'Name'
         (r'[A-Z]\w*(?=\()', tokens.Name),  # side effect: change kw to func
 
-        (r'[-]?0x[0-9a-fA-F]+', tokens.Number.Hexadecimal),
-        (r'[-]?[0-9]*(\.[0-9]+)?[eE][-]?[0-9]+', tokens.Number.Float),
-        (r'[-]?[0-9]*\.[0-9]+', tokens.Number.Float),
-        (r'[-]?[0-9]+', tokens.Number.Integer),
+        # TODO: `1.` and `.1` are valid numbers
+        (r'-?0x[\dA-F]+', tokens.Number.Hexadecimal),
+        (r'-?\d*(\.\d+)?E-?\d+', tokens.Number.Float),
+        (r'-?\d*\.\d+', tokens.Number.Float),
+        (r'-?\d+', tokens.Number.Integer),
+
         (r"'(''|\\\\|\\'|[^'])*'", tokens.String.Single),
         # not a real string literal in ANSI SQL:
         (r'(""|".*?[^\\]")', tokens.String.Symbol),
