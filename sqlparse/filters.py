@@ -416,7 +416,8 @@ class ReindentFilter(object):
             self.offset += num_offset
             position = self.offset
             for token in identifiers[1:]:
-                position += len(token.value) + 1   # Add 1 for the "," separator
+                # Add 1 for the "," separator
+                position += len(token.value) + 1
                 if position > self.wrap_after:
                     tlist.insert_before(token, self.nl())
                     position = self.offset
