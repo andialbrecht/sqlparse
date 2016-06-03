@@ -29,12 +29,12 @@ class FilterStack(object):
         # Process token stream
         if self.preprocess:
             for filter_ in self.preprocess:
-                stream = filter_.process(self, stream)
+                stream = filter_.process(stream)
 
         if (self.stmtprocess or self.postprocess or
                 self.split_statements or self._grouping):
             splitter = StatementFilter()
-            stream = splitter.process(self, stream)
+            stream = splitter.process(stream)
 
         if self._grouping:
 
@@ -50,7 +50,7 @@ class FilterStack(object):
                 ret = []
                 for stmt in stream:
                     for filter_ in self.stmtprocess:
-                        filter_.process(self, stmt)
+                        filter_.process(stmt)
                     ret.append(stmt)
                 return ret
             stream = _run1(stream)
@@ -61,7 +61,7 @@ class FilterStack(object):
                 for stmt in stream:
                     stmt.tokens = list(stmt.flatten())
                     for filter_ in self.postprocess:
-                        stmt = filter_.process(self, stmt)
+                        stmt = filter_.process(stmt)
                     yield stmt
             stream = _run2(stream)
 

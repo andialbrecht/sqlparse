@@ -25,7 +25,7 @@ class _CaseFilter(object):
         assert case in ['lower', 'upper', 'capitalize']
         self.convert = getattr(text_type, case)
 
-    def process(self, stack, stream):
+    def process(self, stream):
         for ttype, value in stream:
             if ttype in self.ttype:
                 value = self.convert(value)
@@ -39,7 +39,7 @@ class KeywordCaseFilter(_CaseFilter):
 class IdentifierCaseFilter(_CaseFilter):
     ttype = (T.Name, T.String.Symbol)
 
-    def process(self, stack, stream):
+    def process(self, stream):
         for ttype, value in stream:
             if ttype in self.ttype and not value.strip()[0] == '"':
                 value = self.convert(value)
@@ -52,7 +52,7 @@ class TruncateStringFilter(object):
         self.width = max(width, 1)
         self.char = u(char)
 
-    def process(self, stack, stream):
+    def process(self, stream):
         for ttype, value in stream:
             if ttype is T.Literal.String.Single:
                 if value[:2] == '\'\'':
@@ -94,8 +94,8 @@ class StripCommentsFilter(object):
                 tlist.tokens.pop(tidx)
             token = self._get_next_comment(tlist)
 
-    def process(self, stack, stmt):
-        [self.process(stack, sgroup) for sgroup in stmt.get_sublists()]
+    def process(self, stmt):
+        [self.process(sgroup) for sgroup in stmt.get_sublists()]
         self._process(stmt)
 
 
@@ -139,8 +139,8 @@ class StripWhitespaceFilter(object):
             tlist.tokens.pop(-2)
         self._stripws_default(tlist)
 
-    def process(self, stack, stmt, depth=0):
-        [self.process(stack, sgroup, depth + 1)
+    def process(self, stmt, depth=0):
+        [self.process(sgroup, depth + 1)
          for sgroup in stmt.get_sublists()]
         self._stripws(stmt)
         if (
@@ -334,7 +334,7 @@ class ReindentFilter(object):
             self._split_kwds(tlist)
         [self._process(sgroup) for sgroup in tlist.get_sublists()]
 
-    def process(self, stack, stmt):
+    def process(self, stmt):
         if isinstance(stmt, sql.Statement):
             self._curr_stmt = stmt
         self._process(stmt)
@@ -350,7 +350,7 @@ class ReindentFilter(object):
                 self._last_stmt = stmt
 
 
-# FIXME: Doesn't work ;)
+# FIXME: Doesn't work
 class RightMarginFilter(object):
 
     keep_together = (
@@ -361,7 +361,7 @@ class RightMarginFilter(object):
         self.width = width
         self.line = ''
 
-    def _process(self, stack, group, stream):
+    def _process(self, group, stream):
         for token in stream:
             if token.is_whitespace() and '\n' in token.value:
                 if token.value.endswith('\n'):
@@ -370,7 +370,7 @@ class RightMarginFilter(object):
                     self.line = token.value.splitlines()[-1]
             elif (token.is_group()
                   and token.__class__ not in self.keep_together):
-                token.tokens = self._process(stack, token, token.tokens)
+                token.tokens = self._process(token, token.tokens)
             else:
                 val = u(token)
                 if len(self.line) + len(val) > self.width:
@@ -384,17 +384,17 @@ class RightMarginFilter(object):
                 self.line += val
             yield token
 
-    def process(self, stack, group):
-        return
-        group.tokens = self._process(stack, group, group.tokens)
-
+    def process(self, group):
+        # return
+        # group.tokens = self._process(group, group.tokens)
+        raise NotImplementedError
 
 # ---------------------------
 # postprocess
 
 class SerializerUnicode(object):
 
-    def process(self, stack, stmt):
+    def process(self, stmt):
         raw = u(stmt)
         lines = split_unquoted_newlines(raw)
         res = '\n'.join(line.rstrip() for line in lines)
@@ -411,7 +411,7 @@ class OutputFilter(object):
     def _process(self, stream, varname, has_nl):
         raise NotImplementedError
 
-    def process(self, stack, stmt):
+    def process(self, stmt):
         self.count += 1
         if self.count > 1:
             varname = '%s%d' % (self.varname, self.count)

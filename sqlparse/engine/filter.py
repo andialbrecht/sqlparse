@@ -76,7 +76,7 @@ class StatementFilter(object):
         # Default
         return 0
 
-    def process(self, stack, stream):
+    def process(self, stream):
         "Process the stream"
         consume_ws = False
         splitlevel = 0
