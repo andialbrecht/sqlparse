@@ -8,6 +8,7 @@ Internal Changes
 * sqlparse.SQLParseError was removed from top-level module and moved to
   sqlparse.exceptions.
 * sqlparse.sql.Token.to_unicode was removed.
+* Lots of code cleanups and modernization (thanks esp. to vmuriart!).
 
 Enhancements
 * Support WHILE loops (issue215, by shenlongxing).
