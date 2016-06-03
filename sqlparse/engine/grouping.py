@@ -266,7 +266,7 @@ def align_comments(tlist):
         token = tlist.token_next_by(i=sql.Comment, idx=token)
 
 
-def group(tlist):
+def group(stmt):
     for func in [
         group_comments,
         group_brackets,
@@ -291,4 +291,5 @@ def group(tlist):
         group_foreach,
         group_begin,
     ]:
-        func(tlist)
+        func(stmt)
+    return stmt
