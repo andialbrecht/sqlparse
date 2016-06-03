@@ -72,13 +72,6 @@ class TestTokenize(unittest.TestCase):
         self.assertEqual(tokens[2][0], T.Number.Integer)
         self.assertEqual(tokens[2][1], '-1')
 
-    def test_tab_expansion(self):
-        s = "\t"
-        lex = lexer.Lexer()
-        lex.tabsize = 5
-        tokens = list(lex.get_tokens(s))
-        self.assertEqual(tokens[0][1], " " * 5)
-
 
 class TestToken(unittest.TestCase):
 
