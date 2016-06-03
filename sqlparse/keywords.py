@@ -19,9 +19,11 @@ SQL_REGEX = {
         # $ matches *before* newline, therefore we have two patterns
         # to match Comment.Single
         (r'(--|# ).*?$', tokens.Comment.Single),
+        (r'/\*[\s\S]*?\*/', tokens.Comment.Multiline),
+
         (r'(\r\n|\r|\n)', tokens.Newline),
         (r'\s+', tokens.Whitespace),
-        (r'/\*', tokens.Comment.Multiline, 'multiline-comments'),
+
         (r':=', tokens.Assignment),
         (r'::', tokens.Punctuation),
         (r'[*]', tokens.Wildcard),
@@ -64,12 +66,6 @@ SQL_REGEX = {
         (r'[;:()\[\],\.]', tokens.Punctuation),
         (r'[<>=~!]+', tokens.Operator.Comparison),
         (r'[+/@#%^&|`?^-]+', tokens.Operator),
-    ],
-    'multiline-comments': [
-        (r'/\*', tokens.Comment.Multiline, 'multiline-comments'),
-        (r'\*/', tokens.Comment.Multiline, '#pop'),
-        (r'[^/\*]+', tokens.Comment.Multiline),
-        (r'[/*]', tokens.Comment.Multiline),
     ]}
 
 KEYWORDS = {
@@ -599,7 +595,6 @@ KEYWORDS = {
     'VARCHAR2': tokens.Name.Builtin,
     'VARYING': tokens.Name.Builtin,
 }
-
 
 KEYWORDS_COMMON = {
     'SELECT': tokens.Keyword.DML,
