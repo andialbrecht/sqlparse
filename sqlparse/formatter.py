@@ -13,15 +13,15 @@ from sqlparse.exceptions import SQLParseError
 
 def validate_options(options):
     """Validates options."""
-    kwcase = options.get('keyword_case', None)
+    kwcase = options.get('keyword_case')
     if kwcase not in [None, 'upper', 'lower', 'capitalize']:
         raise SQLParseError('Invalid value for keyword_case: %r' % kwcase)
 
-    idcase = options.get('identifier_case', None)
+    idcase = options.get('identifier_case')
     if idcase not in [None, 'upper', 'lower', 'capitalize']:
         raise SQLParseError('Invalid value for identifier_case: %r' % idcase)
 
-    ofrmt = options.get('output_format', None)
+    ofrmt = options.get('output_format')
     if ofrmt not in [None, 'sql', 'python', 'php']:
         raise SQLParseError('Unknown output format: %r' % ofrmt)
 
@@ -35,7 +35,7 @@ def validate_options(options):
         raise SQLParseError('Invalid value for strip_whitespace: %r'
                             % strip_ws)
 
-    truncate_strings = options.get('truncate_strings', None)
+    truncate_strings = options.get('truncate_strings')
     if truncate_strings is not None:
         try:
             truncate_strings = int(truncate_strings)
@@ -81,7 +81,7 @@ def validate_options(options):
         raise SQLParseError('wrap_after requires a positive integer')
     options['wrap_after'] = wrap_after
 
-    right_margin = options.get('right_margin', None)
+    right_margin = options.get('right_margin')
     if right_margin is not None:
         try:
             right_margin = int(right_margin)
@@ -102,36 +102,35 @@ def build_filter_stack(stack, options):
       options: Dictionary with options validated by validate_options.
     """
     # Token filter
-    if options.get('keyword_case', None):
+    if options.get('keyword_case'):
         stack.preprocess.append(
             filters.KeywordCaseFilter(options['keyword_case']))
 
-    if options.get('identifier_case', None):
+    if options.get('identifier_case'):
         stack.preprocess.append(
             filters.IdentifierCaseFilter(options['identifier_case']))
 
-    if options.get('truncate_strings', None) is not None:
+    if options.get('truncate_strings'):
         stack.preprocess.append(filters.TruncateStringFilter(
             width=options['truncate_strings'], char=options['truncate_char']))
 
     # After grouping
-    if options.get('strip_comments', False):
+    if options.get('strip_comments'):
         stack.enable_grouping()
         stack.stmtprocess.append(filters.StripCommentsFilter())
 
-    if options.get('strip_whitespace', False) \
-       or options.get('reindent', False):
+    if options.get('strip_whitespace') or options.get('reindent'):
         stack.enable_grouping()
         stack.stmtprocess.append(filters.StripWhitespaceFilter())
 
-    if options.get('reindent', False):
+    if options.get('reindent'):
         stack.enable_grouping()
         stack.stmtprocess.append(
             filters.ReindentFilter(char=options['indent_char'],
                                    width=options['indent_width'],
                                    wrap_after=options['wrap_after']))
 
-    if options.get('right_margin', False):
+    if options.get('right_margin'):
         stack.enable_grouping()
         stack.stmtprocess.append(
             filters.RightMarginFilter(width=options['right_margin']))
