@@ -46,7 +46,11 @@ SQL_REGEX = {
         (r'(CASE|IN|VALUES|USING)\b', tokens.Keyword),
 
         (r'(@|##|#)[A-Z]\w+', tokens.Name),
-        (r'[A-Z]\w*(?=\.)', tokens.Name),  # see issue39
+
+        # see issue #39
+        # Spaces around period `schema . name` are valid identifier
+        # TODO: Spaces before period not implemented
+        (r'[A-Z]\w*(?=\s*\.)', tokens.Name),  # 'Name'   .
         (r'(?<=\.)[A-Z]\w*', tokens.Name),  # .'Name'
         (r'[A-Z]\w*(?=\()', tokens.Name),  # side effect: change kw to func
 
