@@ -126,27 +126,22 @@ class TestTokenList(unittest.TestCase):
 class TestStream(unittest.TestCase):
     def test_simple(self):
         stream = StringIO("SELECT 1; SELECT 2;")
-        lex = lexer.Lexer()
 
-        tokens = lex.get_tokens(stream)
+        tokens = lexer.tokenize(stream)
         self.assertEqual(len(list(tokens)), 9)
 
         stream.seek(0)
-        lex.bufsize = 4
-        tokens = list(lex.get_tokens(stream))
+        tokens = list(lexer.tokenize(stream))
         self.assertEqual(len(tokens), 9)
 
         stream.seek(0)
-        lex.bufsize = len(stream.getvalue())
-        tokens = list(lex.get_tokens(stream))
+        tokens = list(lexer.tokenize(stream))
         self.assertEqual(len(tokens), 9)
 
     def test_error(self):
         stream = StringIO("FOOBAR{")
 
-        lex = lexer.Lexer()
-        lex.bufsize = 4
-        tokens = list(lex.get_tokens(stream))
+        tokens = list(lexer.tokenize(stream))
         self.assertEqual(len(tokens), 2)
         self.assertEqual(tokens[1][0], T.Error)
 
