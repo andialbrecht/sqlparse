@@ -8,9 +8,6 @@ from unittest import main, TestCase
 from sqlparse.filters import IncludeStatement, Tokens2Unicode
 from sqlparse.lexer import tokenize
 
-import sys
-sys.path.insert(0, '..')
-
 from sqlparse.filters import compact
 from sqlparse.functions import getcolumns, getlimit, IsType
 from tests.utils import FILES_DIR

@@ -9,9 +9,6 @@ from sqlparse import lexer
 from sqlparse.engine import grouping
 from sqlparse.engine.filter import StatementFilter
 
-# XXX remove this when cleanup is complete
-Filter = object
-
 
 class FilterStack(object):
 
@@ -22,19 +19,8 @@ class FilterStack(object):
         self.split_statements = False
         self._grouping = False
 
-    def _flatten(self, stream):
-        for token in stream:
-            if token.is_group():
-                for t in self._flatten(token.tokens):
-                    yield t
-            else:
-                yield token
-
     def enable_grouping(self):
         self._grouping = True
-
-    def full_analyze(self):
-        self.enable_grouping()
 
     def run(self, sql, encoding=None):
         stream = lexer.tokenize(sql, encoding)
@@ -43,8 +29,8 @@ class FilterStack(object):
             for filter_ in self.preprocess:
                 stream = filter_.process(self, stream)
 
-        if self.stmtprocess or self.postprocess or self.split_statements \
-           or self._grouping:
+        if (self.stmtprocess or self.postprocess or
+                self.split_statements or self._grouping):
             splitter = StatementFilter()
             stream = splitter.process(self, stream)
 
@@ -71,7 +57,7 @@ class FilterStack(object):
 
             def _run2(stream):
                 for stmt in stream:
-                    stmt.tokens = list(self._flatten(stmt.tokens))
+                    stmt.tokens = list(stmt.flatten())
                     for filter_ in self.postprocess:
                         stmt = filter_.process(self, stmt)
                     yield stmt

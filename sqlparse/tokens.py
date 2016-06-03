@@ -13,31 +13,18 @@
 class _TokenType(tuple):
     parent = None
 
-    def split(self):
-        buf = []
-        node = self
-        while node is not None:
-            buf.append(node)
-            node = node.parent
-        buf.reverse()
-        return buf
+    def __contains__(self, item):
+        return item is not None and (self is item or item[:len(self)] == self)
 
-    def __contains__(self, val):
-        return val is not None and (self is val or val[:len(self)] == self)
-
-    def __getattr__(self, val):
-        if not val or not val[0].isupper():
-            return tuple.__getattribute__(self, val)
-        new = _TokenType(self + (val,))
-        setattr(self, val, new)
+    def __getattr__(self, name):
+        new = _TokenType(self + (name,))
+        setattr(self, name, new)
         new.parent = self
         return new
 
-    def __hash__(self):
-        return hash(tuple(self))
-
     def __repr__(self):
-        return 'Token' + (self and '.' or '') + '.'.join(self)
+        # self can be False only if its the `root` ie. Token itself
+        return 'Token' + ('.' if self else '') + '.'.join(self)
 
 
 Token = _TokenType()
@@ -77,8 +64,3 @@ DML = Keyword.DML
 DDL = Keyword.DDL
 CTE = Keyword.CTE
 Command = Keyword.Command
-
-Group = Token.Group
-Group.Parenthesis = Token.Group.Parenthesis
-Group.Comment = Token.Group.Comment
-Group.Where = Token.Group.Where

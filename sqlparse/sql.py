@@ -316,7 +316,7 @@ class TokenList(Token):
 
     def token_index(self, token, start=0):
         """Return list index of token."""
-        start = self.token_index(start) if not isinstance(start, int) else start
+        start = start if isinstance(start, int) else self.token_index(start)
         return start + self.tokens[start:].index(token)
 
     def tokens_between(self, start, end, include_end=True):
