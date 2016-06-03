@@ -33,7 +33,7 @@ SQL_REGEX = {
 
         (r"`(``|[^`])*`", tokens.Name),
         (r"´(´´|[^´])*´", tokens.Name),
-        (r'\$([^\W\d]\w*)?\$', tokens.Name.Builtin),
+        (r'\$([_A-Z]\w*)?\$', tokens.Name.Builtin),
 
         (r'\?', tokens.Name.Placeholder),
         (r'%(\(\w+\))?s', tokens.Name.Placeholder),
@@ -45,8 +45,11 @@ SQL_REGEX = {
         # is never a functino, see issue183
         (r'(CASE|IN|VALUES|USING)\b', tokens.Keyword),
 
-        (r'(@|##|#)[^\W\d_]\w+', tokens.Name),
-        (r'[^\W\d_]\w*(?=[.(])', tokens.Name),  # see issue39
+        (r'(@|##|#)[A-Z]\w+', tokens.Name),
+        (r'[A-Z]\w*(?=\.)', tokens.Name),  # see issue39
+        (r'(?<=\.)[A-Z]\w*', tokens.Name),  # .'Name'
+        (r'[A-Z]\w*(?=\()', tokens.Name),  # side effect: change kw to func
+
         (r'[-]?0x[0-9a-fA-F]+', tokens.Number.Hexadecimal),
         (r'[-]?[0-9]*(\.[0-9]+)?[eE][-]?[0-9]+', tokens.Number.Float),
         (r'[-]?[0-9]*\.[0-9]+', tokens.Number.Float),
@@ -61,11 +64,12 @@ SQL_REGEX = {
         (r'((LEFT\s+|RIGHT\s+|FULL\s+)?(INNER\s+|OUTER\s+|STRAIGHT\s+)?'
          r'|(CROSS\s+|NATURAL\s+)?)?JOIN\b', tokens.Keyword),
         (r'END(\s+IF|\s+LOOP|\s+WHILE)?\b', tokens.Keyword),
-        (r'NOT NULL\b', tokens.Keyword),
+        (r'NOT\s+NULL\b', tokens.Keyword),
         (r'CREATE(\s+OR\s+REPLACE)?\b', tokens.Keyword.DDL),
         (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
-        (r'(?<=\.)[^\W\d_]\w*', tokens.Name),
-        (r'[^\W\d]\w*', is_keyword),
+
+        (r'[_A-Z]\w*', is_keyword),
+
         (r'[;:()\[\],\.]', tokens.Punctuation),
         (r'[<>=~!]+', tokens.Operator.Comparison),
         (r'[+/@#%^&|`?^-]+', tokens.Operator),
