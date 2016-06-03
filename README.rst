@@ -36,7 +36,7 @@ Project Page
   https://github.com/andialbrecht/sqlparse
 
 Documentation
-  http://readthedocs.org/docs/sqlparse/en/latest/
+  https://sqlparse.readthedocs.io/en/latest/
 
 Discussions
   http://groups.google.com/group/sqlparse
