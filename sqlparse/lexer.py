@@ -12,8 +12,6 @@
 # It's separated from the rest of pygments to increase performance
 # and to allow some customizations.
 
-import re
-
 from sqlparse import tokens
 from sqlparse.keywords import SQL_REGEX
 from sqlparse.compat import StringIO, string_types, text_type
@@ -21,16 +19,12 @@ from sqlparse.utils import consume
 
 
 class Lexer(object):
-    flags = re.IGNORECASE | re.UNICODE
+    """Lexer
+    Empty class. Leaving for back-support
+    """
 
-    def __init__(self):
-        self._tokens = []
-
-        for tdef in SQL_REGEX['root']:
-            rex = re.compile(tdef[0], self.flags).match
-            self._tokens.append((rex, tdef[1]))
-
-    def get_tokens(self, text, encoding=None):
+    @staticmethod
+    def get_tokens(text, encoding=None):
         """
         Return an iterable of (tokentype, value) pairs generated from
         `text`. If `unfiltered` is set to `True`, the filtering mechanism
@@ -57,7 +51,7 @@ class Lexer(object):
 
         iterable = enumerate(text)
         for pos, char in iterable:
-            for rexmatch, action in self._tokens:
+            for rexmatch, action in SQL_REGEX:
                 m = rexmatch(text, pos)
 
                 if not m:

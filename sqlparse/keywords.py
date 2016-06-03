@@ -5,6 +5,8 @@
 # This module is part of python-sqlparse and is released under
 # the BSD License: http://www.opensource.org/licenses/bsd-license.php
 
+import re
+
 from sqlparse import tokens
 
 
@@ -67,6 +69,9 @@ SQL_REGEX = {
         (r'[<>=~!]+', tokens.Operator.Comparison),
         (r'[+/@#%^&|`?^-]+', tokens.Operator),
     ]}
+
+FLAGS = re.IGNORECASE | re.UNICODE
+SQL_REGEX = [(re.compile(rx, FLAGS).match, tt) for rx, tt in SQL_REGEX['root']]
 
 KEYWORDS = {
     'ABORT': tokens.Keyword,
