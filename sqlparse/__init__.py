@@ -66,11 +66,4 @@ def split(sql, encoding=None):
     :returns: A list of strings.
     """
     stack = engine.FilterStack()
-    stack.split_statements = True
     return [u(stmt).strip() for stmt in stack.run(sql, encoding)]
-
-
-def split2(stream):
-    from sqlparse.engine.filter import StatementFilter
-    splitter = StatementFilter()
-    return list(splitter.process(None, stream))

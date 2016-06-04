@@ -12,8 +12,6 @@
 # It's separated from the rest of pygments to increase performance
 # and to allow some customizations.
 
-import re
-
 from sqlparse import tokens
 from sqlparse.keywords import SQL_REGEX
 from sqlparse.compat import StringIO, string_types, text_type
@@ -21,26 +19,12 @@ from sqlparse.utils import consume
 
 
 class Lexer(object):
-    flags = re.IGNORECASE | re.UNICODE
+    """Lexer
+    Empty class. Leaving for back-support
+    """
 
-    def __init__(self):
-        self._tokens = {}
-
-        for state in SQL_REGEX:
-            self._tokens[state] = []
-
-            for tdef in SQL_REGEX[state]:
-                rex = re.compile(tdef[0], self.flags).match
-                new_state = None
-                if len(tdef) > 2:
-                    # Only Multiline comments
-                    if tdef[2] == '#pop':
-                        new_state = -1
-                    elif tdef[2] in SQL_REGEX:
-                        new_state = (tdef[2],)
-                self._tokens[state].append((rex, tdef[1], new_state))
-
-    def get_tokens(self, text, encoding=None):
+    @staticmethod
+    def get_tokens(text, encoding=None):
         """
         Return an iterable of (tokentype, value) pairs generated from
         `text`. If `unfiltered` is set to `True`, the filtering mechanism
@@ -54,8 +38,6 @@ class Lexer(object):
         ``stack`` is the inital stack (default: ``['root']``)
         """
         encoding = encoding or 'utf-8'
-        statestack = ['root', ]
-        statetokens = self._tokens['root']
 
         if isinstance(text, string_types):
             text = StringIO(text)
@@ -69,7 +51,7 @@ class Lexer(object):
 
         iterable = enumerate(text)
         for pos, char in iterable:
-            for rexmatch, action, new_state in statetokens:
+            for rexmatch, action in SQL_REGEX:
                 m = rexmatch(text, pos)
 
                 if not m:
@@ -78,16 +60,6 @@ class Lexer(object):
                     yield action, m.group()
                 elif callable(action):
                     yield action(m.group())
-
-                if isinstance(new_state, tuple):
-                    for state in new_state:
-                        # fixme: multiline-comments not stackable
-                        if not (state == 'multiline-comments'
-                                and statestack[-1] == 'multiline-comments'):
-                            statestack.append(state)
-                elif isinstance(new_state, int):
-                    del statestack[new_state:]
-                statetokens = self._tokens[statestack[-1]]
 
                 consume(iterable, m.end() - pos - 1)
                 break
