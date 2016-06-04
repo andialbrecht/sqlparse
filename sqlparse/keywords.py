@@ -5,6 +5,8 @@
 # This module is part of python-sqlparse and is released under
 # the BSD License: http://www.opensource.org/licenses/bsd-license.php
 
+import re
+
 from sqlparse import tokens
 
 
@@ -15,37 +17,49 @@ def is_keyword(value):
 
 SQL_REGEX = {
     'root': [
-        (r'(--|# ).*?(\r\n|\r|\n)', tokens.Comment.Single),
-        # $ matches *before* newline, therefore we have two patterns
-        # to match Comment.Single
-        (r'(--|# ).*?$', tokens.Comment.Single),
+        (r'(--|# )\+.*?(\r\n|\r|\n|$)', tokens.Comment.Single.Hint),
+        (r'/\*\+[\s\S]*?\*/', tokens.Comment.Multiline.Hint),
+
+        (r'(--|# ).*?(\r\n|\r|\n|$)', tokens.Comment.Single),
+        (r'/\*[\s\S]*?\*/', tokens.Comment.Multiline),
+
         (r'(\r\n|\r|\n)', tokens.Newline),
         (r'\s+', tokens.Whitespace),
-        (r'/\*', tokens.Comment.Multiline, 'multiline-comments'),
+
         (r':=', tokens.Assignment),
         (r'::', tokens.Punctuation),
-        (r'[*]', tokens.Wildcard),
-        (r'CASE\b', tokens.Keyword),  # extended CASE(foo)
+
+        (r'\*', tokens.Wildcard),
+
         (r"`(``|[^`])*`", tokens.Name),
         (r"´(´´|[^´])*´", tokens.Name),
-        (r'\$([^\W\d]\w*)?\$', tokens.Name.Builtin),
-        (r'\?{1}', tokens.Name.Placeholder),
-        (r'%\(\w+\)s', tokens.Name.Placeholder),
-        (r'%s', tokens.Name.Placeholder),
+        (r'\$([_A-Z]\w*)?\$', tokens.Name.Builtin),
+
+        (r'\?', tokens.Name.Placeholder),
+        (r'%(\(\w+\))?s', tokens.Name.Placeholder),
         (r'[$:?]\w+', tokens.Name.Placeholder),
+
         # FIXME(andi): VALUES shouldn't be listed here
         # see https://github.com/andialbrecht/sqlparse/pull/64
-        (r'VALUES', tokens.Keyword),
-        (r'(@|##|#)[^\W\d_]\w+', tokens.Name),
         # IN is special, it may be followed by a parenthesis, but
         # is never a functino, see issue183
-        (r'in\b(?=[ (])?', tokens.Keyword),
-        (r'USING(?=\()', tokens.Keyword),
-        (r'[^\W\d_]\w*(?=[.(])', tokens.Name),  # see issue39
-        (r'[-]?0x[0-9a-fA-F]+', tokens.Number.Hexadecimal),
-        (r'[-]?[0-9]*(\.[0-9]+)?[eE][-]?[0-9]+', tokens.Number.Float),
-        (r'[-]?[0-9]*\.[0-9]+', tokens.Number.Float),
-        (r'[-]?[0-9]+', tokens.Number.Integer),
+        (r'(CASE|IN|VALUES|USING)\b', tokens.Keyword),
+
+        (r'(@|##|#)[A-Z]\w+', tokens.Name),
+
+        # see issue #39
+        # Spaces around period `schema . name` are valid identifier
+        # TODO: Spaces before period not implemented
+        (r'[A-Z]\w*(?=\s*\.)', tokens.Name),  # 'Name'   .
+        (r'(?<=\.)[A-Z]\w*', tokens.Name),  # .'Name'
+        (r'[A-Z]\w*(?=\()', tokens.Name),  # side effect: change kw to func
+
+        # TODO: `1.` and `.1` are valid numbers
+        (r'-?0x[\dA-F]+', tokens.Number.Hexadecimal),
+        (r'-?\d*(\.\d+)?E-?\d+', tokens.Number.Float),
+        (r'-?\d*\.\d+', tokens.Number.Float),
+        (r'-?\d+', tokens.Number.Integer),
+
         (r"'(''|\\\\|\\'|[^'])*'", tokens.String.Single),
         # not a real string literal in ANSI SQL:
         (r'(""|".*?[^\\]")', tokens.String.Symbol),
@@ -56,21 +70,19 @@ SQL_REGEX = {
         (r'((LEFT\s+|RIGHT\s+|FULL\s+)?(INNER\s+|OUTER\s+|STRAIGHT\s+)?'
          r'|(CROSS\s+|NATURAL\s+)?)?JOIN\b', tokens.Keyword),
         (r'END(\s+IF|\s+LOOP|\s+WHILE)?\b', tokens.Keyword),
-        (r'NOT NULL\b', tokens.Keyword),
+        (r'NOT\s+NULL\b', tokens.Keyword),
         (r'CREATE(\s+OR\s+REPLACE)?\b', tokens.Keyword.DDL),
         (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
-        (r'(?<=\.)[^\W\d_]\w*', tokens.Name),
-        (r'[^\W\d]\w*', is_keyword),
+
+        (r'[_A-Z]\w*', is_keyword),
+
         (r'[;:()\[\],\.]', tokens.Punctuation),
         (r'[<>=~!]+', tokens.Operator.Comparison),
         (r'[+/@#%^&|`?^-]+', tokens.Operator),
-    ],
-    'multiline-comments': [
-        (r'/\*', tokens.Comment.Multiline, 'multiline-comments'),
-        (r'\*/', tokens.Comment.Multiline, '#pop'),
-        (r'[^/\*]+', tokens.Comment.Multiline),
-        (r'[/*]', tokens.Comment.Multiline),
     ]}
+
+FLAGS = re.IGNORECASE | re.UNICODE
+SQL_REGEX = [(re.compile(rx, FLAGS).match, tt) for rx, tt in SQL_REGEX['root']]
 
 KEYWORDS = {
     'ABORT': tokens.Keyword,
@@ -599,7 +611,6 @@ KEYWORDS = {
     'VARCHAR2': tokens.Name.Builtin,
     'VARYING': tokens.Name.Builtin,
 }
-
 
 KEYWORDS_COMMON = {
     'SELECT': tokens.Keyword.DML,
