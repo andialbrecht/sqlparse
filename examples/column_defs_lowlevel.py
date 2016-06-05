@@ -1,5 +1,11 @@
 #!/usr/bin/env python
-
+# -*- coding: utf-8 -*-
+#
+# Copyright (C) 2016 Andi Albrecht, albrecht.andi@gmail.com
+#
+# This example is part of python-sqlparse and is released under
+# the BSD License: http://www.opensource.org/licenses/bsd-license.php
+#
 # Example for retrieving column definitions from a CREATE statement
 # using low-level functions.
 
@@ -21,17 +27,16 @@ par = parsed.token_next_by(i=sqlparse.sql.Parenthesis)
 def extract_definitions(token_list):
     # assumes that token_list is a parenthesis
     definitions = []
+    tmp = []
     # grab the first token, ignoring whitespace
     token = token_list.token_next(0)
-    tmp = []
     while token and not token.match(sqlparse.tokens.Punctuation, ')'):
         tmp.append(token)
         idx = token_list.token_index(token)
         # grab the next token, this times including whitespace
         token = token_list.token_next(idx, skip_ws=False)
         # split on ",", except when on end of statement
-        if token is not None \
-           and token.match(sqlparse.tokens.Punctuation, ','):
+        if token and token.match(sqlparse.tokens.Punctuation, ','):
             definitions.append(tmp)
             tmp = []
             idx = token_list.token_index(token)

@@ -1,6 +1,14 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Copyright (C) 2016 Andi Albrecht, albrecht.andi@gmail.com
+#
+# This example is part of python-sqlparse and is released under
+# the BSD License: http://www.opensource.org/licenses/bsd-license.php
+#
 # This example illustrates how to extract table names from nested
 # SELECT statements.
-
+#
 # See:
 # http://groups.google.com/group/sqlparse/browse_thread/thread/b0bd9a022e9d4895
 

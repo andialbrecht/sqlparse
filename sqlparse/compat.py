@@ -50,5 +50,5 @@ elif PY2:
 
 
     text_type = unicode
-    string_types = (basestring,)
+    string_types = (str, unicode,)
     from StringIO import StringIO
