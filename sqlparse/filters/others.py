@@ -11,31 +11,32 @@ from sqlparse.utils import split_unquoted_newlines
 
 
 class StripCommentsFilter(object):
-    def _get_next_comment(self, tlist):
-        # TODO(andi) Comment types should be unified, see related issue38
-        token = tlist.token_next_by(i=sql.Comment, t=T.Comment)
-        return token
+    @staticmethod
+    def _process(tlist):
+        def get_next_comment():
+            # TODO(andi) Comment types should be unified, see related issue38
+            return tlist.token_next_by(i=sql.Comment, t=T.Comment)
 
-    def _process(self, tlist):
-        token = self._get_next_comment(tlist)
+        token = get_next_comment()
         while token:
-            tidx = tlist.token_index(token)
-            prev = tlist.token_prev(tidx, skip_ws=False)
-            next_ = tlist.token_next(tidx, skip_ws=False)
+            prev = tlist.token_prev(token, skip_ws=False)
+            next_ = tlist.token_next(token, skip_ws=False)
             # Replace by whitespace if prev and next exist and if they're not
             # whitespaces. This doesn't apply if prev or next is a paranthesis.
-            if (prev is not None and next_ is not None
-                and not prev.is_whitespace() and not next_.is_whitespace()
-                and not (prev.match(T.Punctuation, '(')
-                         or next_.match(T.Punctuation, ')'))):
-                tlist.tokens[tidx] = sql.Token(T.Whitespace, ' ')
+            if (prev is None or next_ is None or
+                    prev.is_whitespace() or prev.match(T.Punctuation, '(') or
+                    next_.is_whitespace() or next_.match(T.Punctuation, ')')):
+                tlist.tokens.remove(token)
             else:
-                tlist.tokens.pop(tidx)
-            token = self._get_next_comment(tlist)
+                tidx = tlist.token_index(token)
+                tlist.tokens[tidx] = sql.Token(T.Whitespace, ' ')
+
+            token = get_next_comment()
 
     def process(self, stmt):
         [self.process(sgroup) for sgroup in stmt.get_sublists()]
-        self._process(stmt)
+        StripCommentsFilter._process(stmt)
+        return stmt
 
 
 class StripWhitespaceFilter(object):
