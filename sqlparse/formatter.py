@@ -30,10 +30,10 @@ def validate_options(options):
         raise SQLParseError('Invalid value for strip_comments: %r'
                             % strip_comments)
 
-    use_space_around_operators = options.get('use_space_around_operators', False)
-    if use_space_around_operators not in [True, False]:
+    space_around_operators = options.get('use_space_around_operators', False)
+    if space_around_operators not in [True, False]:
         raise SQLParseError('Invalid value for use_space_around_operators: %r'
-                            % use_space_around_operators)
+                            % space_around_operators)
 
     strip_ws = options.get('strip_whitespace', False)
     if strip_ws not in [True, False]:
