@@ -41,30 +41,32 @@ class StripCommentsFilter(object):
 
 class StripWhitespaceFilter(object):
     def _stripws(self, tlist):
-        func_name = '_stripws_%s' % tlist.__class__.__name__.lower()
-        func = getattr(self, func_name, self._stripws_default)
+        func_name = '_stripws_{cls}'.format(cls=type(tlist).__name__)
+        func = getattr(self, func_name.lower(), self._stripws_default)
         func(tlist)
 
-    def _stripws_default(self, tlist):
+    @staticmethod
+    def _stripws_default(tlist):
         last_was_ws = False
         is_first_char = True
         for token in tlist.tokens:
             if token.is_whitespace():
-                if last_was_ws or is_first_char:
-                    token.value = ''
-                else:
-                    token.value = ' '
+                token.value = '' if last_was_ws or is_first_char else ' '
             last_was_ws = token.is_whitespace()
             is_first_char = False
 
     def _stripws_identifierlist(self, tlist):
         # Removes newlines before commas, see issue140
         last_nl = None
-        for token in tlist.tokens[:]:
+        for token in list(tlist.tokens):
             if last_nl and token.ttype is T.Punctuation and token.value == ',':
                 tlist.tokens.remove(last_nl)
-
             last_nl = token if token.is_whitespace() else None
+
+            # next_ = tlist.token_next(token, skip_ws=False)
+            # if (next_ and not next_.is_whitespace() and
+            #             token.ttype is T.Punctuation and token.value == ','):
+            #     tlist.insert_after(token, sql.Token(T.Whitespace, ' '))
         return self._stripws_default(tlist)
 
     def _stripws_parenthesis(self, tlist):
@@ -79,6 +81,7 @@ class StripWhitespaceFilter(object):
         self._stripws(stmt)
         if depth == 0 and stmt.tokens and stmt.tokens[-1].is_whitespace():
             stmt.tokens.pop(-1)
+        return stmt
 
 
 class SpacesAroundOperatorsFilter(object):
