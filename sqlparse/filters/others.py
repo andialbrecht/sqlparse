@@ -82,32 +82,27 @@ class StripWhitespaceFilter(object):
 
 
 class SpacesAroundOperatorsFilter(object):
-    whitelist = (sql.Identifier, sql.Comparison, sql.Where)
-
-    def _process(self, tlist):
-        def next_token(idx):
+    @staticmethod
+    def _process(tlist):
+        def next_token(idx=0):
             return tlist.token_next_by(t=(T.Operator, T.Comparison), idx=idx)
 
-        idx = 0
-        token = next_token(idx)
+        token = next_token()
         while token:
-            idx = tlist.token_index(token)
-            if idx > 0 and tlist.tokens[idx - 1].ttype != T.Whitespace:
-                # insert before
-                tlist.tokens.insert(idx, sql.Token(T.Whitespace, ' '))
-                idx += 1
-            if idx < len(tlist.tokens) - 1:
-                if tlist.tokens[idx + 1].ttype != T.Whitespace:
-                    tlist.tokens.insert(idx + 1, sql.Token(T.Whitespace, ' '))
+            prev_ = tlist.token_prev(token, skip_ws=False)
+            if prev_ and prev_.ttype != T.Whitespace:
+                tlist.insert_before(token, sql.Token(T.Whitespace, ' '))
 
-            idx += 1
-            token = next_token(idx)
+            next_ = tlist.token_next(token, skip_ws=False)
+            if next_ and next_.ttype != T.Whitespace:
+                tlist.insert_after(token, sql.Token(T.Whitespace, ' '))
 
-        for sgroup in tlist.get_sublists():
-            self._process(sgroup)
+            token = next_token(idx=token)
 
     def process(self, stmt):
-        self._process(stmt)
+        [self.process(sgroup) for sgroup in stmt.get_sublists()]
+        SpacesAroundOperatorsFilter._process(stmt)
+        return stmt
 
 
 # ---------------------------
