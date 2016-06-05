@@ -113,8 +113,8 @@ class SpacesAroundOperatorsFilter(object):
 # postprocess
 
 class SerializerUnicode(object):
-    def process(self, stmt):
+    @staticmethod
+    def process(stmt):
         raw = text_type(stmt)
         lines = split_unquoted_newlines(raw)
-        res = '\n'.join(line.rstrip() for line in lines)
-        return res
+        return '\n'.join(line.rstrip() for line in lines)
