@@ -8,7 +8,7 @@
 from sqlparse import sql, tokens as T
 
 
-class StatementFilter(object):
+class StatementSplitter(object):
     """Filter that split stream at individual statements"""
 
     def __init__(self):
