@@ -279,34 +279,26 @@ class TokenList(Token):
 
     def group_tokens(self, grp_cls, tokens, skip_ws=False, extend=False):
         """Replace tokens by an instance of *grp_cls*."""
-        if skip_ws:
-            while tokens and tokens[-1].is_whitespace():
-                tokens = tokens[:-1]
+
+        while skip_ws and tokens and tokens[-1].is_whitespace():
+            tokens = tokens[:-1]
 
         left = tokens[0]
         idx = self.token_index(left)
 
-        if extend:
-            if not isinstance(left, grp_cls):
-                grp = grp_cls([left])
-                self.tokens.remove(left)
-                self.tokens.insert(idx, grp)
-                left = grp
-                left.parent = self
-            tokens = tokens[1:]
-            left.tokens.extend(tokens)
-            left.value = str(left)
-
+        if extend and isinstance(left, grp_cls):
+            grp = left
+            grp.tokens.extend(tokens[1:])
         else:
-            left = grp_cls(tokens)
-            left.parent = self
-            self.tokens.insert(idx, left)
+            grp = grp_cls(tokens)
 
         for token in tokens:
-            token.parent = left
+            token.parent = grp
             self.tokens.remove(token)
 
-        return left
+        self.tokens.insert(idx, grp)
+        grp.parent = self
+        return grp
 
     def insert_before(self, where, token):
         """Inserts *token* before *where*."""
