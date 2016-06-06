@@ -7,15 +7,16 @@
 
 from sqlparse import sql, tokens as T
 from sqlparse.compat import text_type
+from sqlparse.utils import offset, indent
 
 
 class ReindentFilter(object):
-    def __init__(self, width=2, char=' ', line_width=None, wrap_after=0):
+    def __init__(self, width=2, char=' ', wrap_after=0, n='\n'):
+        self.n = n
         self.width = width
         self.char = char
         self.indent = 0
         self.offset = 0
-        self.line_width = line_width
         self.wrap_after = wrap_after
         self._curr_stmt = None
         self._last_stmt = None
@@ -37,14 +38,7 @@ class ReindentFilter(object):
         return full_offset - self.offset
 
     def nl(self):
-        # TODO: newline character should be configurable
-        space = (self.char * ((self.indent * self.width) + self.offset))
-        # Detect runaway indenting due to parsing errors
-        if len(space) > 200:
-            # something seems to be wrong, flip back
-            self.indent = self.offset = 0
-            space = (self.char * ((self.indent * self.width) + self.offset))
-        ws = '\n' + space
+        ws = self.n + self.char * (self.indent * self.width + self.offset)
         return sql.Token(T.Whitespace, ws)
 
     def _split_kwds(self, tlist):
@@ -67,7 +61,7 @@ class ReindentFilter(object):
             prev = tlist.token_prev(token, skip_ws=False)
             offset = 1
             if prev and prev.is_whitespace() and prev not in added:
-                tlist.tokens.pop(tlist.token_index(prev))
+                tlist.tokens.remove(prev)
                 offset += 1
             uprev = text_type(prev)
             if prev and (uprev.endswith('\n') or uprev.endswith('\r')):
@@ -84,38 +78,26 @@ class ReindentFilter(object):
         while token:
             prev = tlist.token_prev(token, skip_ws=False)
             if prev and prev.is_whitespace():
-                tlist.tokens.pop(tlist.token_index(prev))
+                tlist.tokens.remove(prev)
             # only break if it's not the first token
-            if prev:
-                nl = self.nl()
-                tlist.insert_before(token, nl)
+            tlist.insert_before(token, self.nl()) if prev else None
+
             token = tlist.token_next_by(t=(T.Keyword.DDL, T.Keyword.DML),
                                         idx=token)
 
     def _process(self, tlist):
-        func_name = '_process_%s' % tlist.__class__.__name__.lower()
-        func = getattr(self, func_name, self._process_default)
+        func_name = '_process_{cls}'.format(cls=type(tlist).__name__)
+        func = getattr(self, func_name.lower(), self._process_default)
         func(tlist)
 
     def _process_where(self, tlist):
         token = tlist.token_next_by(m=(T.Keyword, 'WHERE'))
-        try:
-            tlist.insert_before(token, self.nl())
-        except ValueError:  # issue121, errors in statement
-            pass
-        self.indent += 1
-        self._process_default(tlist)
-        self.indent -= 1
+        # issue121, errors in statement fixed??
+        tlist.insert_before(token, self.nl())
 
-    def _process_having(self, tlist):
-        token = tlist.token_next_by(m=(T.Keyword, 'HAVING'))
-        try:
-            tlist.insert_before(token, self.nl())
-        except ValueError:  # issue121, errors in statement
-            pass
-        self.indent += 1
-        self._process_default(tlist)
-        self.indent -= 1
+        with indent(self):
+            self._process_default(tlist)
+
 
     def _process_parenthesis(self, tlist):
         first = tlist.token_next(0)
@@ -173,33 +155,27 @@ class ReindentFilter(object):
             tlist.insert_before(token, self.nl())
         # Line breaks on group level are done. Now let's add an offset of
         # 5 (=length of "when", "then", "else") and process subgroups.
-        self.offset += 5
-        self._process_default(tlist)
-        self.offset -= 5
+        with offset(self, 5):
+            self._process_default(tlist)
+
         if num_offset is not None:
             self.offset -= num_offset
         end = tlist.token_next_by(m=(T.Keyword, 'END'))
         tlist.insert_before(end, self.nl())
         self.offset -= outer_offset
 
-    def _process_default(self, tlist, stmts=True, kwds=True):
-        if stmts:
-            self._split_statements(tlist)
-        if kwds:
-            self._split_kwds(tlist)
+    def _process_default(self, tlist, stmts=True):
+        self._split_statements(tlist) if stmts else None
+        self._split_kwds(tlist)
         [self._process(sgroup) for sgroup in tlist.get_sublists()]
 
     def process(self, stmt):
-        if isinstance(stmt, sql.Statement):
-            self._curr_stmt = stmt
+        self._curr_stmt = stmt
         self._process(stmt)
-        if isinstance(stmt, sql.Statement):
-            if self._last_stmt is not None:
-                if text_type(self._last_stmt).endswith('\n'):
-                    nl = '\n'
-                else:
-                    nl = '\n\n'
-                stmt.tokens.insert(
-                    0, sql.Token(T.Whitespace, nl))
-            if self._last_stmt != stmt:
-                self._last_stmt = stmt
+
+        if self._last_stmt is not None:
+            nl = '\n' if text_type(self._last_stmt).endswith('\n') else '\n\n'
+            stmt.tokens.insert(0, sql.Token(T.Whitespace, nl))
+
+        self._last_stmt = stmt
+        return stmt
