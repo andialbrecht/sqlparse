@@ -106,6 +106,234 @@ class TestFormat(TestCaseBase):
                           output_format='foo')
 
 
+class TestFormatReindentAligned(TestCaseBase):
+    @staticmethod
+    def formatter(sql):
+        return sqlparse.format(sql, reindent_aligned=True)
+
+    def test_basic(self):
+        sql = """
+            select a, b as bb,c from table
+            join (select a * 2 as a from new_table) other
+            on table.a = other.a
+            where c is true
+            and b between 3 and 4
+            or d is 'blue'
+            limit 10
+            """
+        self.ndiffAssertEqual(
+            self.formatter(sql),
+            '\n'.join([
+                'select a,',
+                '       b as bb,',
+                '       c',
+                '  from table',
+                '  join (',
+                '        select a * 2 as a',
+                '          from new_table',
+                '       ) other',
+                '    on table.a = other.a',
+                ' where c is true',
+                '   and b between 3 and 4',
+                "    or d is 'blue'",
+                ' limit 10',
+            ]))
+
+    def test_joins(self):
+        sql = """
+            select * from a
+            join b on a.one = b.one
+            left join c on c.two = a.two and c.three = a.three
+            full outer join d on d.three = a.three
+            cross join e on e.four = a.four
+            join f using (one, two, three)
+            """
+        self.ndiffAssertEqual(
+            self.formatter(sql),
+            '\n'.join([
+                'select *',
+                '  from a',
+                '  join b',
+                '    on a.one = b.one',
+                '  left join c',
+                '    on c.two = a.two',
+                '   and c.three = a.three',
+                '  full outer join d',
+                '    on d.three = a.three',
+                ' cross join e',
+                '    on e.four = a.four',
+                '  join f using (one, two, three)',
+            ]))
+
+    def test_case_statement(self):
+        sql = """
+            select a,
+            case when a = 0
+            then 1
+            when bb = 1 then 1
+            when c = 2 then 2
+            else 0 end as d,
+            extra_col
+            from table
+            where c is true
+            and b between 3 and 4
+            """
+        self.ndiffAssertEqual(
+            self.formatter(sql),
+            '\n'.join([
+                'select a,',
+                '       case when a = 0  then 1',
+                '            when bb = 1 then 1',
+                '            when c = 2  then 2',
+                '            else 0',
+                '             end as d,',
+                '       extra_col',
+                '  from table',
+                ' where c is true',
+                '   and b between 3 and 4'
+            ]))
+
+    def test_case_statement_with_between(self):
+        sql = """
+            select a,
+            case when a = 0
+            then 1
+            when bb = 1 then 1
+            when c = 2 then 2
+            when d between 3 and 5 then 3
+            else 0 end as d,
+            extra_col
+            from table
+            where c is true
+            and b between 3 and 4
+            """
+        self.ndiffAssertEqual(
+            self.formatter(sql),
+            '\n'.join([
+                'select a,',
+                '       case when a = 0             then 1',
+                '            when bb = 1            then 1',
+                '            when c = 2             then 2',
+                '            when d between 3 and 5 then 3',
+                '            else 0',
+                '             end as d,',
+                '       extra_col',
+                '  from table',
+                ' where c is true',
+                '   and b between 3 and 4'
+            ]))
+
+    def test_group_by(self):
+        sql = """
+            select a, b, c, sum(x) as sum_x, count(y) as cnt_y
+            from table
+            group by a,b,c
+            having sum(x) > 1
+            and count(y) > 5
+            order by 3,2,1
+            """
+        self.ndiffAssertEqual(
+            self.formatter(sql),
+            '\n'.join([
+                'select a,',
+                '       b,',
+                '       c,',
+                '       sum(x) as sum_x,',
+                '       count(y) as cnt_y',
+                '  from table',
+                ' group by a,',
+                '          b,',
+                '          c',
+                'having sum(x) > 1',
+                '   and count(y) > 5',
+                ' order by 3,',
+                '          2,',
+                '          1',
+            ]))
+
+    def test_group_by_subquery(self):
+        # TODO: add subquery alias when test_identifier_list_subquery fixed
+        sql = """
+            select *, sum_b + 2 as mod_sum
+            from (
+              select a, sum(b) as sum_b
+              from table
+              group by a,z)
+            order by 1,2
+            """
+        self.ndiffAssertEqual(
+            self.formatter(sql),
+            '\n'.join([
+                'select *,',
+                '       sum_b + 2 as mod_sum',
+                '  from (',
+                '        select a,',
+                '               sum(b) as sum_b',
+                '          from table',
+                '         group by a,',
+                '                  z',
+                '       )',
+                ' order by 1,',
+                '          2',
+            ]))
+
+    def test_window_functions(self):
+        sql = """
+            select a,
+            SUM(a) OVER (PARTITION BY b ORDER BY c ROWS
+            BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as sum_a,
+            ROW_NUMBER() OVER
+            (PARTITION BY b, c ORDER BY d DESC) as row_num
+            from table
+            """
+        self.ndiffAssertEqual(
+            self.formatter(sql),
+            '\n'.join([
+                'select a,',
+                ('       SUM(a) OVER (PARTITION BY b ORDER BY c ROWS '
+                 'BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as sum_a,'),
+                ('       ROW_NUMBER() OVER '
+                 '(PARTITION BY b, c ORDER BY d DESC) as row_num'),
+                '  from table',
+            ]))
+
+
+class TestSpacesAroundOperators(TestCaseBase):
+    @staticmethod
+    def formatter(sql):
+        return sqlparse.format(sql, use_space_around_operators=True)
+
+    def test_basic(self):
+        sql = ('select a+b as d from table '
+               'where (c-d)%2= 1 and e> 3.0/4 and z^2 <100')
+        self.ndiffAssertEqual(
+            self.formatter(sql), (
+                'select a + b as d from table '
+                'where (c - d) % 2 = 1 and e > 3.0 / 4 and z ^ 2 < 100')
+        )
+
+    def test_bools(self):
+        sql = 'select * from table where a &&b or c||d'
+        self.ndiffAssertEqual(
+            self.formatter(sql),
+            'select * from table where a && b or c || d'
+        )
+
+    def test_nested(self):
+        sql = 'select *, case when a-b then c end from table'
+        self.ndiffAssertEqual(
+            self.formatter(sql),
+            'select *, case when a - b then c end from table'
+        )
+
+    def test_wildcard_vs_mult(self):
+        sql = 'select a*b-c from table'
+        self.ndiffAssertEqual(
+            self.formatter(sql),
+            'select a * b - c from table'
+        )
+
+
 class TestFormatReindent(TestCaseBase):
 
     def test_option(self):

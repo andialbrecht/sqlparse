@@ -30,6 +30,11 @@ def validate_options(options):
         raise SQLParseError('Invalid value for strip_comments: %r'
                             % strip_comments)
 
+    space_around_operators = options.get('use_space_around_operators', False)
+    if space_around_operators not in [True, False]:
+        raise SQLParseError('Invalid value for use_space_around_operators: %r'
+                            % space_around_operators)
+
     strip_ws = options.get('strip_whitespace', False)
     if strip_ws not in [True, False]:
         raise SQLParseError('Invalid value for strip_whitespace: %r'
@@ -53,6 +58,13 @@ def validate_options(options):
         raise SQLParseError('Invalid value for reindent: %r'
                             % reindent)
     elif reindent:
+        options['strip_whitespace'] = True
+
+    reindent_aligned = options.get('reindent_aligned', False)
+    if reindent_aligned not in [True, False]:
+        raise SQLParseError('Invalid value for reindent_aligned: %r'
+                            % reindent)
+    elif reindent_aligned:
         options['strip_whitespace'] = True
 
     indent_tabs = options.get('indent_tabs', False)
@@ -114,6 +126,10 @@ def build_filter_stack(stack, options):
         stack.preprocess.append(filters.TruncateStringFilter(
             width=options['truncate_strings'], char=options['truncate_char']))
 
+    if options.get('use_space_around_operators', False):
+        stack.enable_grouping()
+        stack.stmtprocess.append(filters.SpacesAroundOperatorsFilter())
+
     # After grouping
     if options.get('strip_comments'):
         stack.enable_grouping()
@@ -129,6 +145,11 @@ def build_filter_stack(stack, options):
             filters.ReindentFilter(char=options['indent_char'],
                                    width=options['indent_width'],
                                    wrap_after=options['wrap_after']))
+
+    if options.get('reindent_aligned', False):
+        stack.enable_grouping()
+        stack.stmtprocess.append(
+            filters.AlignedIndentFilter(char=options['indent_char']))
 
     if options.get('right_margin'):
         stack.enable_grouping()

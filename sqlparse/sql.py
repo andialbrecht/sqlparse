@@ -538,7 +538,7 @@ class Case(TokenList):
     M_OPEN = T.Keyword, 'CASE'
     M_CLOSE = T.Keyword, 'END'
 
-    def get_cases(self):
+    def get_cases(self, skip_ws=False):
         """Returns a list of 2-tuples (condition, value).
 
         If an ELSE exists condition is None.
@@ -552,6 +552,9 @@ class Case(TokenList):
         for token in self.tokens:
             # Set mode from the current statement
             if token.match(T.Keyword, 'CASE'):
+                continue
+
+            elif skip_ws and token.ttype in T.Whitespace:
                 continue
 
             elif token.match(T.Keyword, 'WHEN'):

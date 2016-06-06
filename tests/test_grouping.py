@@ -122,6 +122,17 @@ class TestGrouping(TestCaseBase):
         p = sqlparse.parse('(a, b, c)')[0]
         self.assert_(isinstance(p.tokens[0].tokens[1], sql.IdentifierList))
 
+    def test_identifier_list_subquery(self):
+        """identifier lists should still work in subqueries with aliases"""
+        p = sqlparse.parse("select * from ("
+                           "select a, b + c as d from table) sub")[0]
+        subquery = p.tokens[-1].tokens[0]
+        iden_list = subquery.token_next_by(i=sql.IdentifierList)
+        self.assert_(iden_list is not None)
+        # all the identifiers should be within the IdentifierList
+        self.assert_(subquery.token_next_by(i=sql.Identifier,
+                                            idx=iden_list) is None)
+
     def test_identifier_list_case(self):
         p = sqlparse.parse('a, case when 1 then 2 else 3 end as b, c')[0]
         self.assert_(isinstance(p.tokens[0], sql.IdentifierList))
@@ -139,6 +150,11 @@ class TestGrouping(TestCaseBase):
         self.assert_(isinstance(p.tokens[0], sql.IdentifierList))
         self.assert_(isinstance(p.tokens[0].tokens[0], sql.Identifier))
         self.assert_(isinstance(p.tokens[0].tokens[3], sql.Identifier))
+
+    def test_identifiers_with_operators(self):
+        p = sqlparse.parse('a+b as c from table where (d-e)%2= 1')[0]
+        self.assertEqual(len([x for x in p.flatten()
+                              if x.ttype == sqlparse.tokens.Name]), 5)
 
     def test_identifier_list_with_order(self):  # issue101
         p = sqlparse.parse('1, 2 desc, 3')[0]
