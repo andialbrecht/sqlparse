@@ -13,12 +13,10 @@ from sqlparse.engine.filter import StatementFilter
 
 
 class FilterStack(object):
-
     def __init__(self):
         self.preprocess = []
         self.stmtprocess = []
         self.postprocess = []
-        self.split_statements = False
         self._grouping = False
 
     def enable_grouping(self):
@@ -27,42 +25,20 @@ class FilterStack(object):
     def run(self, sql, encoding=None):
         stream = lexer.tokenize(sql, encoding)
         # Process token stream
-        if self.preprocess:
-            for filter_ in self.preprocess:
-                stream = filter_.process(self, stream)
+        for filter_ in self.preprocess:
+            stream = filter_.process(stream)
 
-        if (self.stmtprocess or self.postprocess or
-                self.split_statements or self._grouping):
-            splitter = StatementFilter()
-            stream = splitter.process(self, stream)
+        stream = StatementFilter().process(stream)
 
-        if self._grouping:
+        # Output: Stream processed Statements
+        for stmt in stream:
+            if self._grouping:
+                stmt = grouping.group(stmt)
 
-            def _group(stream):
-                for stmt in stream:
-                    grouping.group(stmt)
-                    yield stmt
-            stream = _group(stream)
+            for filter_ in self.stmtprocess:
+                filter_.process(stmt)
 
-        if self.stmtprocess:
+            for filter_ in self.postprocess:
+                stmt = filter_.process(stmt)
 
-            def _run1(stream):
-                ret = []
-                for stmt in stream:
-                    for filter_ in self.stmtprocess:
-                        filter_.process(self, stmt)
-                    ret.append(stmt)
-                return ret
-            stream = _run1(stream)
-
-        if self.postprocess:
-
-            def _run2(stream):
-                for stmt in stream:
-                    stmt.tokens = list(stmt.flatten())
-                    for filter_ in self.postprocess:
-                        stmt = filter_.process(self, stmt)
-                    yield stmt
-            stream = _run2(stream)
-
-        return stream
+            yield stmt
