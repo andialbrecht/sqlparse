@@ -20,6 +20,7 @@ class AlignedIndentFilter(object):
                    'SET', 'BETWEEN', 'EXCEPT')
 
     def __init__(self, char=' ', line_width=None):
+        self.indent = 0
         self.char = char
         self._max_kwd_len = len('select')
 
@@ -30,21 +31,20 @@ class AlignedIndentFilter(object):
         return sql.Token(T.Whitespace, ('\n' if newline_before else '') +
                          self.char * chars + ('\n' if newline_after else ''))
 
-    def _process_statement(self, tlist, base_indent=0):
-        if tlist.tokens[0].is_whitespace() and base_indent == 0:
+    def _process_statement(self, tlist):
+        if tlist.tokens[0].is_whitespace() and self.indent == 0:
             tlist.tokens.pop(0)
 
         # process the main query body
-        return self._process(sql.TokenList(tlist.tokens),
-                             base_indent=base_indent)
+        return self._process(sql.TokenList(tlist.tokens))
 
-    def _process_parenthesis(self, tlist, base_indent=0):
+    def _process_parenthesis(self, tlist):
         if not tlist.token_next_by(m=(T.DML, 'SELECT')):
             # if this isn't a subquery, don't re-indent
             return tlist
 
         # add two for the space and parens
-        sub_indent = base_indent + self._max_kwd_len + 2
+        sub_indent = self.indent + self._max_kwd_len + 2
         tlist.insert_after(tlist.tokens[0],
                            self.whitespace(sub_indent, newline_before=True))
         # de-indent the last parenthesis
@@ -52,16 +52,17 @@ class AlignedIndentFilter(object):
                             self.whitespace(sub_indent - 1,
                                             newline_before=True))
 
+        self.indent += sub_indent
         # process the inside of the parantheses
         tlist.tokens = (
             [tlist.tokens[0]] +
-            self._process(sql.TokenList(tlist._groupable_tokens),
-                          base_indent=sub_indent).tokens +
+            self._process(sql.TokenList(tlist._groupable_tokens)).tokens +
             [tlist.tokens[-1]]
         )
+        self.indent -= sub_indent
         return tlist
 
-    def _process_identifierlist(self, tlist, base_indent=0):
+    def _process_identifierlist(self, tlist):
         # columns being selected
         new_tokens = []
         identifiers = list(filter(
@@ -71,7 +72,7 @@ class AlignedIndentFilter(object):
             if i > 0:
                 new_tokens.append(self.newline())
                 new_tokens.append(
-                    self.whitespace(self._max_kwd_len + base_indent + 1))
+                    self.whitespace(self._max_kwd_len + self.indent + 1))
             new_tokens.append(token)
             if i < len(identifiers) - 1:
                 # if not last column in select, add a comma seperator
@@ -80,11 +81,11 @@ class AlignedIndentFilter(object):
 
         # process any sub-sub statements (like case statements)
         for sgroup in tlist.get_sublists():
-            self._process(sgroup, base_indent=base_indent)
+            self._process(sgroup)
         return tlist
 
-    def _process_case(self, tlist, base_indent=0):
-        base_offset = base_indent + self._max_kwd_len + len('case ')
+    def _process_case(self, tlist):
+        base_offset = self.indent + self._max_kwd_len + len('case ')
         case_offset = len('when ')
         cases = tlist.get_cases(skip_ws=True)
         # align the end as well
@@ -121,7 +122,7 @@ class AlignedIndentFilter(object):
                 token = self._next_token(tlist, token)
         return token
 
-    def _split_kwds(self, tlist, base_indent=0):
+    def _split_kwds(self, tlist):
         token = self._next_token(tlist)
         while token:
             # joins are special case. only consider the first word as aligner
@@ -130,13 +131,13 @@ class AlignedIndentFilter(object):
             else:
                 token_indent = len(str(token))
             tlist.insert_before(token, self.whitespace(
-                self._max_kwd_len - token_indent + base_indent,
+                self._max_kwd_len - token_indent + self.indent,
                 newline_before=True))
             next_idx = tlist.token_index(token) + 1
             token = self._next_token(tlist, next_idx)
 
-    def _process_default(self, tlist, base_indent=0):
-        self._split_kwds(tlist, base_indent)
+    def _process_default(self, tlist):
+        self._split_kwds(tlist)
         # process any sub-sub statements
         for sgroup in tlist.get_sublists():
             prev_token = tlist.token_prev(tlist.token_index(sgroup))
@@ -145,13 +146,15 @@ class AlignedIndentFilter(object):
             if prev_token and prev_token.match(T.Keyword, 'BY'):
                 # TODO: generalize this
                 indent_offset = 3
-            self._process(sgroup, base_indent=base_indent + indent_offset)
+            self.indent += indent_offset
+            self._process(sgroup)
+            self.indent -= indent_offset
         return tlist
 
-    def _process(self, tlist, base_indent=0):
+    def _process(self, tlist):
         func_name = '_process_{cls}'.format(cls=type(tlist).__name__)
         func = getattr(self, func_name.lower(), self._process_default)
-        return func(tlist, base_indent=base_indent)
+        return func(tlist)
 
     def process(self, stmt):
         self._process(stmt)
