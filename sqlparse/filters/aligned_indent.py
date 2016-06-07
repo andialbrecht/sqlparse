@@ -62,29 +62,26 @@ class AlignedIndentFilter(object):
         self._process_default(tlist)
 
     def _process_case(self, tlist):
-        base_offset = len('case ')
-        case_offset = len('when ')
+        offset_ = len('case ') + len('when ')
         cases = tlist.get_cases(skip_ws=True)
         # align the end as well
         end_token = tlist.token_next_by(m=(T.Keyword, 'END'))
         cases.append((None, [end_token]))
 
-        condition_width = max(
-            len(' '.join(map(str, cond))) for cond, value in cases if cond)
+        condition_width = [len(' '.join(map(text_type, cond))) if cond else 0
+                           for cond, _ in cases]
+        max_cond_width = max(condition_width)
+
         for i, (cond, value) in enumerate(cases):
-            if cond is None:  # else or end
-                stmt = value[0]
-                line = value
-            else:
-                stmt = cond[0]
-                line = cond + value
+            # cond is None when 'else or end'
+            stmt = cond[0] if cond else value[0]
 
             if i > 0:
                 tlist.insert_before(stmt, self.nl(
-                    base_offset + case_offset - len(str(stmt))))
+                    offset_ - len(text_type(stmt))))
             if cond:
                 ws = sql.Token(T.Whitespace, self.char * (
-                    condition_width - len(' '.join(map(text_type, cond)))))
+                    max_cond_width - condition_width[i]))
                 tlist.insert_after(cond[-1], ws)
 
     def _next_token(self, tlist, idx=0):
