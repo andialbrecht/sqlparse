@@ -21,7 +21,8 @@ class AlignedIndentFilter(object):
                    'ORDER', 'UNION', 'VALUES',
                    'SET', 'BETWEEN', 'EXCEPT')
 
-    def __init__(self, char=' ', line_width=None):
+    def __init__(self, char=' ', n='\n'):
+        self.n = n
         self.offset = 0
         self.indent = 0
         self.char = char
@@ -33,7 +34,7 @@ class AlignedIndentFilter(object):
         # add two for the space and parens
         indent = self.indent * (2 + self._max_kwd_len)
 
-        return sql.Token(T.Whitespace, '\n' + self.char * (
+        return sql.Token(T.Whitespace, self.n + self.char * (
             self._max_kwd_len + offset + indent + self.offset))
 
     def _process_statement(self, tlist):
