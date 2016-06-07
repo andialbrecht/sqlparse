@@ -36,7 +36,7 @@ class AlignedIndentFilter(object):
             tlist.tokens.pop(0)
 
         # process the main query body
-        return self._process(sql.TokenList(tlist.tokens))
+        self._process(sql.TokenList(tlist.tokens))
 
     def _process_parenthesis(self, tlist):
         if not tlist.token_next_by(m=(T.DML, 'SELECT')):
@@ -54,13 +54,8 @@ class AlignedIndentFilter(object):
 
         self.indent += sub_indent
         # process the inside of the parantheses
-        tlist.tokens = (
-            [tlist.tokens[0]] +
-            self._process(sql.TokenList(tlist._groupable_tokens)).tokens +
-            [tlist.tokens[-1]]
-        )
+        self._process_default(tlist)
         self.indent -= sub_indent
-        return tlist
 
     def _process_identifierlist(self, tlist):
         # columns being selected
@@ -149,12 +144,11 @@ class AlignedIndentFilter(object):
             self.indent += indent_offset
             self._process(sgroup)
             self.indent -= indent_offset
-        return tlist
 
     def _process(self, tlist):
         func_name = '_process_{cls}'.format(cls=type(tlist).__name__)
         func = getattr(self, func_name.lower(), self._process_default)
-        return func(tlist)
+        func(tlist)
 
     def process(self, stmt):
         self._process(stmt)
