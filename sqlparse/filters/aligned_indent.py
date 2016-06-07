@@ -111,19 +111,18 @@ class AlignedIndentFilter(object):
                 # if not the END add a newline
                 tlist.insert_after(line[-1], self.newline())
 
-    def _process_substatement(self, tlist, base_indent=0):
-        def _next_token(i):
-            t = tlist.token_next_by(m=(T.Keyword, self.split_words, True),
-                                    idx=i)
-            # treat "BETWEEN x and y" as a single statement
-            if t and t.value.upper() == 'BETWEEN':
-                t = _next_token(tlist.token_index(t) + 1)
-                if t and t.value.upper() == 'AND':
-                    t = _next_token(tlist.token_index(t) + 1)
-            return t
+    def _next_token(self, tlist, idx=0):
+        split_words = T.Keyword, self.split_words, True
+        token = tlist.token_next_by(m=split_words, idx=idx)
+        # treat "BETWEEN x and y" as a single statement
+        if token and token.value.upper() == 'BETWEEN':
+            token = self._next_token(tlist, token)
+            if token and token.value.upper() == 'AND':
+                token = self._next_token(tlist, token)
+        return token
 
-        idx = 0
-        token = _next_token(idx)
+    def _split_kwds(self, tlist, base_indent=0):
+        token = self._next_token(tlist)
         while token:
             # joins are special case. only consider the first word as aligner
             if token.match(T.Keyword, self.join_words, regex=True):
@@ -134,8 +133,10 @@ class AlignedIndentFilter(object):
                 self._max_kwd_len - token_indent + base_indent,
                 newline_before=True))
             next_idx = tlist.token_index(token) + 1
-            token = _next_token(next_idx)
+            token = self._next_token(tlist, next_idx)
 
+    def _process_default(self, tlist, base_indent=0):
+        self._split_kwds(tlist, base_indent)
         # process any sub-sub statements
         for sgroup in tlist.get_sublists():
             prev_token = tlist.token_prev(tlist.token_index(sgroup))
@@ -148,10 +149,10 @@ class AlignedIndentFilter(object):
         return tlist
 
     def _process(self, tlist, base_indent=0):
-        token_name = tlist.__class__.__name__.lower()
-        func_name = '_process_%s' % token_name
-        func = getattr(self, func_name, self._process_substatement)
+        func_name = '_process_{cls}'.format(cls=type(tlist).__name__)
+        func = getattr(self, func_name.lower(), self._process_default)
         return func(tlist, base_indent=base_indent)
 
     def process(self, stmt):
         self._process(stmt)
+        return stmt
