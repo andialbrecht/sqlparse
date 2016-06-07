@@ -41,7 +41,7 @@ class AlignedIndentFilter(object):
     def _process_parenthesis(self, tlist):
         if not tlist.token_next_by(m=(T.DML, 'SELECT')):
             # if this isn't a subquery, don't re-indent
-            return tlist
+            return
 
         # add two for the space and parens
         sub_indent = self.indent + self._max_kwd_len + 2
@@ -77,7 +77,6 @@ class AlignedIndentFilter(object):
         # process any sub-sub statements (like case statements)
         for sgroup in tlist.get_sublists():
             self._process(sgroup)
-        return tlist
 
     def _process_case(self, tlist):
         base_offset = self.indent + self._max_kwd_len + len('case ')
