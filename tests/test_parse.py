@@ -83,6 +83,7 @@ class SQLParseTest(TestCaseBase):
     def test_placeholder(self):
         def _get_tokens(sql):
             return sqlparse.parse(sql)[0].tokens[-1].tokens
+
         t = _get_tokens('select * from foo where user = ?')
         self.assert_(t[-1].ttype is sqlparse.tokens.Name.Placeholder)
         self.assertEqual(t[-1].value, '?')
@@ -218,7 +219,7 @@ def test_single_quotes_with_linebreaks():  # issue118
 def test_sqlite_identifiers():
     # Make sure we still parse sqlite style escapes
     p = sqlparse.parse('[col1],[col2]')[0].tokens
-    id_names = [id.get_name() for id in p[0].get_identifiers()]
+    id_names = [id_.get_name() for id_ in p[0].get_identifiers()]
     assert len(p) == 1
     assert isinstance(p[0], sqlparse.sql.IdentifierList)
     assert id_names == ['[col1]', '[col2]']
@@ -318,21 +319,65 @@ def test_get_token_at_offset():
 
 
 def test_pprint():
-    p = sqlparse.parse('select * from dual')[0]
+    p = sqlparse.parse('select a0, b0, c0, d0, e0 from '
+                       '(select * from dual) q0 where 1=1 and 2=2')[0]
     output = StringIO()
 
     p._pprint_tree(f=output)
-    pprint = u'\n'.join([
-        " | 0 DML 'select'",
-        " | 1 Whitespace ' '",
-        " | 2 Wildcard '*'",
-        " | 3 Whitespace ' '",
-        " | 4 Keyword 'from'",
-        " | 5 Whitespace ' '",
-        " +-6 Identifier 'dual'",
-        "   | 0 Name 'dual'",
-        "",
-    ])
+    pprint = u'\n'.join([" 0 DML 'select'",
+                         " 1 Whitespace ' '",
+                         " 2 IdentifierList 'a0, b0...'",
+                         " |  0 Identifier 'a0'",
+                         " |  |  0 Name 'a0'",
+                         " |  1 Punctuation ','",
+                         " |  2 Whitespace ' '",
+                         " |  3 Identifier 'b0'",
+                         " |  |  0 Name 'b0'",
+                         " |  4 Punctuation ','",
+                         " |  5 Whitespace ' '",
+                         " |  6 Identifier 'c0'",
+                         " |  |  0 Name 'c0'",
+                         " |  7 Punctuation ','",
+                         " |  8 Whitespace ' '",
+                         " |  9 Identifier 'd0'",
+                         " |  |  0 Name 'd0'",
+                         " | 10 Punctuation ','",
+                         " | 11 Whitespace ' '",
+                         " | 12 Float 'e0'",
+                         " 3 Whitespace ' '",
+                         " 4 Keyword 'from'",
+                         " 5 Whitespace ' '",
+                         " 6 Identifier '(selec...'",
+                         " |  0 Parenthesis '(selec...'",
+                         " |  |  0 Punctuation '('",
+                         " |  |  1 DML 'select'",
+                         " |  |  2 Whitespace ' '",
+                         " |  |  3 Wildcard '*'",
+                         " |  |  4 Whitespace ' '",
+                         " |  |  5 Keyword 'from'",
+                         " |  |  6 Whitespace ' '",
+                         " |  |  7 Identifier 'dual'",
+                         " |  |  |  0 Name 'dual'",
+                         " |  |  8 Punctuation ')'",
+                         " |  1 Whitespace ' '",
+                         " |  2 Identifier 'q0'",
+                         " |  |  0 Name 'q0'",
+                         " 7 Whitespace ' '",
+                         " 8 Where 'where ...'",
+                         " |  0 Keyword 'where'",
+                         " |  1 Whitespace ' '",
+                         " |  2 Comparison '1=1'",
+                         " |  |  0 Integer '1'",
+                         " |  |  1 Comparison '='",
+                         " |  |  2 Integer '1'",
+                         " |  3 Whitespace ' '",
+                         " |  4 Keyword 'and'",
+                         " |  5 Whitespace ' '",
+                         " |  6 Comparison '2=2'",
+                         " |  |  0 Integer '2'",
+                         " |  |  1 Comparison '='",
+                         " |  |  2 Integer '2'",
+                         "", ])
     assert output.getvalue() == pprint
 
 

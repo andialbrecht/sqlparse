@@ -37,6 +37,10 @@ class Token(object):
     def __str__(self):
         return self.value
 
+    # Pending tokenlist __len__ bug fix
+    # def __len__(self):
+    #     return len(self.value)
+
     def __repr__(self):
         cls = self._get_repr_name()
         value = self._get_repr_value()
@@ -141,6 +145,10 @@ class TokenList(Token):
     def __str__(self):
         return ''.join(token.value for token in self.flatten())
 
+    # weird bug
+    # def __len__(self):
+    #     return len(self.tokens)
+
     def __iter__(self):
         return iter(self.tokens)
 
@@ -152,12 +160,12 @@ class TokenList(Token):
 
     def _pprint_tree(self, max_depth=None, depth=0, f=None):
         """Pretty-print the object tree."""
-        ind = ' ' * (depth * 2)
+        indent = ' | ' * depth
         for idx, token in enumerate(self.tokens):
-            pre = ' +-' if token.is_group() else ' | '
             cls = token._get_repr_name()
             value = token._get_repr_value()
-            print("{ind}{pre}{idx} {cls} '{value}'".format(**locals()), file=f)
+            print("{indent}{idx:2d} {cls} '{value}'"
+                  .format(**locals()), file=f)
 
             if token.is_group() and (max_depth is None or depth < max_depth):
                 token._pprint_tree(max_depth, depth + 1, f)
