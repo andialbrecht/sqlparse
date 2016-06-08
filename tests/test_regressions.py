@@ -311,3 +311,10 @@ def test_issue207_runaway_format():
                            "          2 as two,",
                            "          3",
                            "   from dual) t0"])
+
+
+def test_case_within_parenthesis():
+    # see issue #164
+    s = '(case when 1=1 then 2 else 5 end)'
+    p = sqlparse.parse(s)[0]
+    assert isinstance(p[0][1], sql.Case)

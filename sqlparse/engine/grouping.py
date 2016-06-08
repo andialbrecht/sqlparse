@@ -42,6 +42,8 @@ def _group_left_right(tlist, m, cls,
 
 def _group_matching(tlist, cls):
     """Groups Tokens that have beginning and end."""
+    [_group_matching(sgroup, cls) for sgroup in tlist.get_sublists()
+     if not isinstance(sgroup, cls)]
     idx = 1 if isinstance(tlist, cls) else 0
 
     token = tlist.token_next_by(m=cls.M_OPEN, idx=idx)
