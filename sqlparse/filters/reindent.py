@@ -22,19 +22,20 @@ class ReindentFilter(object):
         self._last_stmt = None
 
     def _flatten_up_to_token(self, token):
-        """Yields all tokens up to token plus the next one."""
-        # helper for _get_offset
-        iterator = self._curr_stmt.flatten()
-        for t in iterator:
+        """Yields all tokens up to token but excluding current."""
+        if token.is_group():
+            token = next(token.flatten())
+
+        for t in self._curr_stmt.flatten():
             yield t
             if t == token:
                 raise StopIteration
 
     def _get_offset(self, token):
         raw = ''.join(map(text_type, self._flatten_up_to_token(token)))
-        line = raw.splitlines()[-1]
+        line = (raw or '\n').splitlines()[-1]
         # Now take current offset into account and return relative offset.
-        full_offset = len(line) - len(self.char * (self.width * self.indent))
+        full_offset = len(line) - len(self.char * self.width * self.indent)
         return full_offset - self.offset
 
     def nl(self):
