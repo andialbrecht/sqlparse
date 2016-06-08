@@ -78,36 +78,36 @@ def recurse(*cls):
 
 
 def imt(token, i=None, m=None, t=None):
-    """Aid function to refactor comparisons for Instance, Match and TokenType
-    Aid fun
+    """Helper function to simplify comparisons Instance, Match and TokenType
     :param token:
     :param i: Class or Tuple/List of Classes
     :param m: Tuple of TokenType & Value. Can be list of Tuple for multiple
     :param t: TokenType or Tuple/List of TokenTypes
     :return:  bool
     """
-    t = (t,) if t and not isinstance(t, (list, tuple)) else t
-    m = (m,) if m and not isinstance(m, (list,)) else m
+    clss = i
+    types = [t, ] if t and not isinstance(t, list) else t
+    mpatterns = [m, ] if m and not isinstance(m, list) else m
 
     if token is None:
         return False
-    elif i is not None and isinstance(token, i):
+    elif clss and isinstance(token, clss):
         return True
-    elif m is not None and any((token.match(*x) for x in m)):
+    elif mpatterns and any((token.match(*pattern) for pattern in mpatterns)):
         return True
-    elif t is not None and token.ttype in t:
+    elif types and any([token.ttype in ttype for ttype in types]):
         return True
     else:
         return False
 
 
-def find_matching(tlist, token, M1, M2):
+def find_matching(tlist, token, open_pattern, close_pattern):
     idx = tlist.token_index(token)
     depth = 0
     for token in tlist.tokens[idx:]:
-        if token.match(*M1):
+        if token.match(*open_pattern):
             depth += 1
-        elif token.match(*M2):
+        elif token.match(*close_pattern):
             depth -= 1
             if depth == 0:
                 return token
