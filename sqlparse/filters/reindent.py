@@ -27,9 +27,9 @@ class ReindentFilter(object):
             token = next(token.flatten())
 
         for t in self._curr_stmt.flatten():
-            yield t
             if t == token:
                 raise StopIteration
+            yield t
 
     def _get_offset(self, token):
         raw = ''.join(map(text_type, self._flatten_up_to_token(token)))
@@ -100,14 +100,13 @@ class ReindentFilter(object):
 
         with indent(self, 1 if is_DML_DLL else 0):
             tlist.tokens.insert(0, self.nl()) if is_DML_DLL else None
-            with offset(self, self._get_offset(first)):  # +1 from ( removed
+            with offset(self, self._get_offset(first) + 1):
                 self._process_default(tlist, not is_DML_DLL)
 
     def _process_identifierlist(self, tlist):
         identifiers = list(tlist.get_identifiers())
         first = next(identifiers.pop(0).flatten())
-        num_offset = 1 if self.char == '\t' else (self._get_offset(first) -
-                                                  len(first.value))
+        num_offset = 1 if self.char == '\t' else self._get_offset(first)
         if not tlist.within(sql.Function):
             with offset(self, num_offset):
                 position = 0
@@ -124,8 +123,8 @@ class ReindentFilter(object):
         cond, _ = next(iterable)
         first = next(cond[0].flatten())
 
-        with offset(self, self._get_offset(tlist[0]) - len(tlist[0].value)):
-            with offset(self, self._get_offset(first) - len(first.value)):
+        with offset(self, self._get_offset(tlist[0])):
+            with offset(self, self._get_offset(first)):
                 for cond, value in iterable:
                     token = value[0] if cond is None else cond[0]
                     tlist.insert_before(token, self.nl())
