@@ -31,16 +31,18 @@ class ReindentFilter(object):
                 raise StopIteration
             yield t
 
+    @property
+    def leading_ws(self):
+        return self.offset + self.indent * self.width
+
     def _get_offset(self, token):
         raw = ''.join(map(text_type, self._flatten_up_to_token(token)))
         line = (raw or '\n').splitlines()[-1]
         # Now take current offset into account and return relative offset.
-        full_offset = len(line) - len(self.char * self.width * self.indent)
-        return full_offset - self.offset
+        return len(line) - len(self.char * self.leading_ws)
 
     def nl(self):
-        ws = self.n + self.char * (self.indent * self.width + self.offset)
-        return sql.Token(T.Whitespace, ws)
+        return sql.Token(T.Whitespace, self.n + self.char * self.leading_ws)
 
     def _next_token(self, tlist, idx=0):
         split_words = ('FROM', 'STRAIGHT_JOIN$', 'JOIN$', 'AND', 'OR',
