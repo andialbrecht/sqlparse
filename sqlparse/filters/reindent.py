@@ -77,7 +77,6 @@ class ReindentFilter(object):
                 tlist.tokens.remove(prev)
             # only break if it's not the first token
             tlist.insert_before(token, self.nl()) if prev else None
-
             token = tlist.token_next_by(t=(T.Keyword.DDL, T.Keyword.DML),
                                         idx=token)
 
@@ -94,71 +93,48 @@ class ReindentFilter(object):
         with indent(self):
             self._process_default(tlist)
 
-
     def _process_parenthesis(self, tlist):
-        first = tlist.token_next(0)
-        indented = False
-        if first and first.ttype in (T.Keyword.DML, T.Keyword.DDL):
-            self.indent += 1
-            tlist.tokens.insert(0, self.nl())
-            indented = True
-        num_offset = self._get_offset(
-            tlist.token_next_by(m=(T.Punctuation, '(')))
-        self.offset += num_offset
-        self._process_default(tlist, stmts=not indented)
-        if indented:
-            self.indent -= 1
-        self.offset -= num_offset
+        is_DML_DLL = tlist.token_next_by(t=(T.Keyword.DML, T.Keyword.DDL))
+        first = tlist.token_next_by(m=sql.Parenthesis.M_OPEN)
+
+        with indent(self, 1 if is_DML_DLL else 0):
+            tlist.tokens.insert(0, self.nl()) if is_DML_DLL else None
+            with offset(self, self._get_offset(first)):  # +1 from ( removed
+                self._process_default(tlist, not is_DML_DLL)
 
     def _process_identifierlist(self, tlist):
         identifiers = list(tlist.get_identifiers())
-        if len(identifiers) > 1 and not tlist.within(sql.Function):
-            first = list(identifiers[0].flatten())[0]
-            if self.char == '\t':
-                # when using tabs we don't count the actual word length
-                # in spaces.
-                num_offset = 1
-            else:
-                num_offset = self._get_offset(first) - len(first.value)
-            self.offset += num_offset
-            position = self.offset
-            for token in identifiers[1:]:
-                # Add 1 for the "," separator
-                position += len(token.value) + 1
-                if position > self.wrap_after:
-                    tlist.insert_before(token, self.nl())
-                    position = self.offset
-            self.offset -= num_offset
+        first = next(identifiers.pop(0).flatten())
+        num_offset = 1 if self.char == '\t' else (self._get_offset(first) -
+                                                  len(first.value))
+        if not tlist.within(sql.Function):
+            with offset(self, num_offset):
+                position = 0
+                for token in identifiers:
+                    # Add 1 for the "," separator
+                    position += len(token.value) + 1
+                    if position > (self.wrap_after - self.offset):
+                        tlist.insert_before(token, self.nl())
+                        position = 0
         self._process_default(tlist)
 
     def _process_case(self, tlist):
-        is_first = True
-        num_offset = None
-        case = tlist.tokens[0]
-        outer_offset = self._get_offset(case) - len(case.value)
-        self.offset += outer_offset
-        for cond, value in tlist.get_cases():
-            if is_first:
-                tcond = list(cond[0].flatten())[0]
-                is_first = False
-                num_offset = self._get_offset(tcond) - len(tcond.value)
-                self.offset += num_offset
-                continue
-            if cond is None:
-                token = value[0]
-            else:
-                token = cond[0]
-            tlist.insert_before(token, self.nl())
-        # Line breaks on group level are done. Now let's add an offset of
-        # 5 (=length of "when", "then", "else") and process subgroups.
-        with offset(self, 5):
-            self._process_default(tlist)
+        iterable = iter(tlist.get_cases())
+        cond, _ = next(iterable)
+        first = next(cond[0].flatten())
 
-        if num_offset is not None:
-            self.offset -= num_offset
-        end = tlist.token_next_by(m=(T.Keyword, 'END'))
-        tlist.insert_before(end, self.nl())
-        self.offset -= outer_offset
+        with offset(self, self._get_offset(tlist[0]) - len(tlist[0].value)):
+            with offset(self, self._get_offset(first) - len(first.value)):
+                for cond, value in iterable:
+                    token = value[0] if cond is None else cond[0]
+                    tlist.insert_before(token, self.nl())
+
+                # Line breaks on group level are done. let's add an offset of
+                # len "when ", "then ", "else "
+                with offset(self, len("WHEN ")):
+                    self._process_default(tlist)
+            end = tlist.token_next_by(m=sql.Case.M_CLOSE)
+            tlist.insert_before(end, self.nl())
 
     def _process_default(self, tlist, stmts=True):
         self._split_statements(tlist) if stmts else None
