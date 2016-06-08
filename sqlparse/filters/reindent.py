@@ -41,37 +41,33 @@ class ReindentFilter(object):
         ws = self.n + self.char * (self.indent * self.width + self.offset)
         return sql.Token(T.Whitespace, ws)
 
-    def _split_kwds(self, tlist):
+    def _next_token(self, tlist, idx=0):
         split_words = ('FROM', 'STRAIGHT_JOIN$', 'JOIN$', 'AND', 'OR',
                        'GROUP', 'ORDER', 'UNION', 'VALUES',
                        'SET', 'BETWEEN', 'EXCEPT', 'HAVING')
+        token = tlist.token_next_by(m=(T.Keyword, split_words, True), idx=idx)
 
-        def _next_token(i):
-            t = tlist.token_next_by(m=(T.Keyword, split_words, True), idx=i)
-            if t and t.value.upper() == 'BETWEEN':
-                t = _next_token(tlist.token_index(t) + 1)
-                if t and t.value.upper() == 'AND':
-                    t = _next_token(tlist.token_index(t) + 1)
-            return t
+        if token and token.value.upper() == 'BETWEEN':
+            token = self._next_token(tlist, token)
 
-        idx = 0
-        token = _next_token(idx)
-        added = set()
+            if token and token.value.upper() == 'AND':
+                token = self._next_token(tlist, token)
+
+        return token
+
+    def _split_kwds(self, tlist):
+        token = self._next_token(tlist)
         while token:
             prev = tlist.token_prev(token, skip_ws=False)
-            offset = 1
-            if prev and prev.is_whitespace() and prev not in added:
-                tlist.tokens.remove(prev)
-                offset += 1
             uprev = text_type(prev)
-            if prev and (uprev.endswith('\n') or uprev.endswith('\r')):
-                nl = tlist.token_next(token)
-            else:
-                nl = self.nl()
-                added.add(nl)
-                tlist.insert_before(token, nl)
-                offset += 1
-            token = _next_token(tlist.token_index(nl) + offset)
+
+            if prev and prev.is_whitespace():
+                tlist.tokens.remove(prev)
+
+            if not (uprev.endswith('\n') or uprev.endswith('\r')):
+                tlist.insert_before(token, self.nl())
+
+            token = self._next_token(tlist, token)
 
     def _split_statements(self, tlist):
         token = tlist.token_next_by(t=(T.Keyword.DDL, T.Keyword.DML))
