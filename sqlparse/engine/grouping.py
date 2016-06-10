@@ -23,11 +23,15 @@ def _group_left_right(tlist, m, cls,
                       valid_right=lambda t: t is not None,
                       semicolon=False):
     """Groups together tokens that are joined by a middle token. ie. x < y"""
-    [_group_left_right(sgroup, m, cls, valid_left, valid_right, semicolon)
-     for sgroup in tlist.get_sublists() if not isinstance(sgroup, cls)]
 
-    token = tlist.token_next_by(m=m)
-    while token:
+    for token in list(tlist):
+        if token.is_group() and not isinstance(token, cls):
+            _group_left_right(token, m, cls, valid_left, valid_right,
+                              semicolon)
+
+        if not token.match(*m):
+            continue
+
         left, right = tlist.token_prev(token), tlist.token_next(token)
 
         if valid_left(left) and valid_right(right):
@@ -36,8 +40,7 @@ def _group_left_right(tlist, m, cls,
                 sright = tlist.token_next_by(m=M_SEMICOLON, idx=right)
                 right = sright or right
             tokens = tlist.tokens_between(left, right)
-            token = tlist.group_tokens(cls, tokens, extend=True)
-        token = tlist.token_next_by(m=m, idx=token)
+            tlist.group_tokens(cls, tokens, extend=True)
 
 
 def _group_matching(tlist, cls):
@@ -89,8 +92,8 @@ def group_comparison(tlist):
                     sql.Operation)
     T_COMPERABLE = T_NUMERICAL + T_STRING + T_NAME
 
-    func = lambda tk: imt(tk, t=T_COMPERABLE, i=I_COMPERABLE) or (
-        imt(tk, t=T.Keyword) and tk.value.upper() == 'NULL')
+    func = lambda tk: (imt(tk, t=T_COMPERABLE, i=I_COMPERABLE) or
+                       (tk and tk.is_keyword and tk.normalized == 'NULL'))
 
     _group_left_right(tlist, (T.Operator.Comparison, None), sql.Comparison,
                       valid_left=func, valid_right=func)
