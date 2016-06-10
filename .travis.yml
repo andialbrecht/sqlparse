@@ -31,3 +31,6 @@ script:
 after_success:
     - coveralls
     - codecov
+
+notifications:
+    email: false
