@@ -248,8 +248,6 @@ class TokenList(Token):
         If *skip_ws* is ``True`` (the default) whitespace tokens are ignored.
         ``None`` is returned if there's no previous token.
         """
-        if isinstance(idx, int):
-            idx += 1  # alot of code usage current pre-compensates for this
         funcs = lambda tk: not ((skip_ws and tk.is_whitespace()) or
                                 (skip_cm and imt(tk, t=T.Comment)))
         return self._token_matching(funcs, idx, reverse=True)
@@ -260,8 +258,6 @@ class TokenList(Token):
         If *skip_ws* is ``True`` (the default) whitespace tokens are ignored.
         ``None`` is returned if there's no next token.
         """
-        if isinstance(idx, int):
-            idx += 1  # alot of code usage current pre-compensates for this
         funcs = lambda tk: not ((skip_ws and tk.is_whitespace()) or
                                 (skip_cm and imt(tk, t=T.Comment)))
         return self._token_matching(funcs, idx)
@@ -435,19 +431,13 @@ class Identifier(TokenList):
     def get_typecast(self):
         """Returns the typecast or ``None`` of this object as a string."""
         marker = self.token_next_by(m=(T.Punctuation, '::'))
-        if marker is None:
-            return None
         next_ = self.token_next(marker, False)
-        if next_ is None:
-            return None
-        return next_.value
+        return next_.value if next_ else None
 
     def get_ordering(self):
         """Returns the ordering or ``None`` as uppercase string."""
         ordering = self.token_next_by(t=T.Keyword.Order)
-        if ordering is None:
-            return None
-        return ordering.normalized
+        return ordering.normalized if ordering else None
 
     def get_array_indices(self):
         """Returns an iterator of index token lists"""
