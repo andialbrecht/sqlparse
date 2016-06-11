@@ -21,14 +21,13 @@ except ImportError:
 def get_version():
     """Parse __init__.py for version number instead of importing the file."""
     VERSIONFILE = 'sqlparse/__init__.py'
-    verstrline = open(VERSIONFILE, "rt").read()
     VSRE = r'^__version__ = [\'"]([^\'"]*)[\'"]'
+    with open(VERSIONFILE) as f:
+        verstrline = f.read()
     mo = re.search(VSRE, verstrline, re.M)
     if mo:
         return mo.group(1)
-    else:
-        raise RuntimeError('Unable to find version string in %s.'
-                           % (VERSIONFILE,))
+    raise RuntimeError('Unable to find version in {fn}'.format(fn=VERSIONFILE))
 
 
 LONG_DESCRIPTION = """

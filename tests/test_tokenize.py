@@ -151,7 +151,7 @@ class TestStream(unittest.TestCase):
                                   'CROSS JOIN', 'STRAIGHT JOIN',
                                   'INNER JOIN', 'LEFT INNER JOIN'])
 def test_parse_join(expr):
-    p = sqlparse.parse('%s foo' % expr)[0]
+    p = sqlparse.parse('{0} foo'.format(expr))[0]
     assert len(p.tokens) == 3
     assert p.tokens[0].ttype is T.Keyword
 
