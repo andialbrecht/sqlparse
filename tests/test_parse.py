@@ -178,9 +178,9 @@ def test_psql_quotation_marks():  # issue83
 def test_double_precision_is_builtin():
     sql = 'DOUBLE PRECISION'
     t = sqlparse.parse(sql)[0].tokens
-    assert (len(t) == 1
-            and t[0].ttype == sqlparse.tokens.Name.Builtin
-            and t[0].value == 'DOUBLE PRECISION')
+    assert len(t) == 1
+    assert t[0].ttype == sqlparse.tokens.Name.Builtin
+    assert t[0].value == 'DOUBLE PRECISION'
 
 
 @pytest.mark.parametrize('ph', ['?', ':1', ':foo', '%s', '%(foo)s'])
@@ -218,10 +218,10 @@ def test_single_quotes_with_linebreaks():  # issue118
 def test_sqlite_identifiers():
     # Make sure we still parse sqlite style escapes
     p = sqlparse.parse('[col1],[col2]')[0].tokens
-    assert (len(p) == 1
-            and isinstance(p[0], sqlparse.sql.IdentifierList)
-            and [id.get_name() for id in p[0].get_identifiers()]
-            == ['[col1]', '[col2]'])
+    id_names = [id.get_name() for id in p[0].get_identifiers()]
+    assert len(p) == 1
+    assert isinstance(p[0], sqlparse.sql.IdentifierList)
+    assert id_names == ['[col1]', '[col2]']
 
     p = sqlparse.parse('[col1]+[col2]')[0]
     types = [tok.ttype for tok in p.flatten()]
@@ -233,9 +233,9 @@ def test_simple_1d_array_index():
     assert len(p) == 1
     assert p[0].get_name() == 'col'
     indices = list(p[0].get_array_indices())
-    assert (len(indices) == 1  # 1-dimensional index
-            and len(indices[0]) == 1  # index is single token
-            and indices[0][0].value == '1')
+    assert len(indices) == 1  # 1-dimensional index
+    assert len(indices[0]) == 1  # index is single token
+    assert indices[0][0].value == '1'
 
 
 def test_2d_array_index():
