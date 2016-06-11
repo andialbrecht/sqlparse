@@ -300,3 +300,14 @@ def test_issue227_gettype_cte():
         INSERT INTO elsewhere SELECT * FROM foo JOIN bar;
     ''')
     assert with2_stmt[0].get_type() == 'INSERT'
+
+
+def test_issue207_runaway_format():
+    sql = 'select 1 from (select 1 as one, 2 as two, 3 from dual) t0'
+    p = sqlparse.format(sql, reindent=True)
+    assert p == '\n'.join(["select 1",
+                           "from",
+                           "  (select 1 as one,",
+                           "          2 as two,",
+                           "          3",
+                           "   from dual) t0"])
