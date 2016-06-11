@@ -294,7 +294,9 @@ class TokenList(Token):
 
         for token in tokens:
             token.parent = grp
-            self.tokens.remove(token)
+
+        # Improve performance. LOOP(list.remove()) is O(n**2) operation
+        self.tokens = [token for token in self.tokens if token not in tokens]
 
         self.tokens.insert(idx, grp)
         grp.parent = self
