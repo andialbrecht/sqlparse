@@ -224,20 +224,6 @@ class TokenList(Token):
                 if func(token):
                     return token
 
-    def token_first(self, skip_ws=True, skip_cm=False):
-        """Returns the first child token.
-
-        If *ignore_whitespace* is ``True`` (the default), whitespace
-        tokens are ignored.
-
-        if *ignore_comments* is ``True`` (default: ``False``), comments are
-        ignored too.
-        """
-        # this on is inconsistent, using Comment instead of T.Comment...
-        funcs = lambda tk: not ((skip_ws and tk.is_whitespace()) or
-                                (skip_cm and imt(tk, i=Comment)))
-        return self._token_matching(funcs)
-
     def token_next_by(self, i=None, m=None, t=None, idx=0, end=None):
         funcs = lambda tk: imt(tk, i, m, t)
         return self._token_matching(funcs, idx, end)
@@ -250,24 +236,26 @@ class TokenList(Token):
     def token_matching(self, idx, funcs):
         return self._token_matching(funcs, idx)
 
-    def token_prev(self, idx, skip_ws=True, skip_cm=False):
+    def token_prev(self, idx=0, skip_ws=True, skip_cm=False):
         """Returns the previous token relative to *idx*.
 
         If *skip_ws* is ``True`` (the default) whitespace tokens are ignored.
         ``None`` is returned if there's no previous token.
         """
         funcs = lambda tk: not ((skip_ws and tk.is_whitespace()) or
-                                (skip_cm and imt(tk, t=T.Comment)))
+                                (skip_cm and imt(tk, t=T.Comment, i=Comment)))
         return self._token_matching(funcs, idx, reverse=True)
 
-    def token_next(self, idx, skip_ws=True, skip_cm=False):
+    def token_next(self, idx=0, skip_ws=True, skip_cm=False):
         """Returns the next token relative to *idx*.
 
+        If called with idx = 0. Returns the first child token.
         If *skip_ws* is ``True`` (the default) whitespace tokens are ignored.
+        If *skip_cm* is ``True`` (default: ``False``), comments are ignored.
         ``None`` is returned if there's no next token.
         """
         funcs = lambda tk: not ((skip_ws and tk.is_whitespace()) or
-                                (skip_cm and imt(tk, t=T.Comment)))
+                                (skip_cm and imt(tk, t=T.Comment, i=Comment)))
         return self._token_matching(funcs, idx)
 
     def token_index(self, token, start=0):
@@ -395,7 +383,7 @@ class Statement(TokenList):
         Whitespaces and comments at the beginning of the statement
         are ignored.
         """
-        first_token = self.token_first(skip_cm=True)
+        first_token = self.token_next(skip_cm=True)
         if first_token is None:
             # An "empty" statement that either has not tokens at all
             # or only whitespace tokens.
@@ -433,7 +421,7 @@ class Identifier(TokenList):
     def get_typecast(self):
         """Returns the typecast or ``None`` of this object as a string."""
         marker = self.token_next_by(m=(T.Punctuation, '::'))
-        next_ = self.token_next(marker, False)
+        next_ = self.token_next(marker, skip_ws=False)
         return next_.value if next_ else None
 
     def get_ordering(self):
