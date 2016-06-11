@@ -15,61 +15,65 @@ def validate_options(options):
     """Validates options."""
     kwcase = options.get('keyword_case')
     if kwcase not in [None, 'upper', 'lower', 'capitalize']:
-        raise SQLParseError('Invalid value for keyword_case: %r' % kwcase)
+        raise SQLParseError('Invalid value for keyword_case: '
+                            '{0!r}'.format(kwcase))
 
     idcase = options.get('identifier_case')
     if idcase not in [None, 'upper', 'lower', 'capitalize']:
-        raise SQLParseError('Invalid value for identifier_case: %r' % idcase)
+        raise SQLParseError('Invalid value for identifier_case: '
+                            '{0!r}'.format(idcase))
 
     ofrmt = options.get('output_format')
     if ofrmt not in [None, 'sql', 'python', 'php']:
-        raise SQLParseError('Unknown output format: %r' % ofrmt)
+        raise SQLParseError('Unknown output format: '
+                            '{0!r}'.format(ofrmt))
 
     strip_comments = options.get('strip_comments', False)
     if strip_comments not in [True, False]:
-        raise SQLParseError('Invalid value for strip_comments: %r'
-                            % strip_comments)
+        raise SQLParseError('Invalid value for strip_comments: '
+                            '{0!r}'.format(strip_comments))
 
     space_around_operators = options.get('use_space_around_operators', False)
     if space_around_operators not in [True, False]:
-        raise SQLParseError('Invalid value for use_space_around_operators: %r'
-                            % space_around_operators)
+        raise SQLParseError('Invalid value for use_space_around_operators: '
+                            '{0!r}'.format(space_around_operators))
 
     strip_ws = options.get('strip_whitespace', False)
     if strip_ws not in [True, False]:
-        raise SQLParseError('Invalid value for strip_whitespace: %r'
-                            % strip_ws)
+        raise SQLParseError('Invalid value for strip_whitespace: '
+                            '{0!r}'.format(strip_ws))
 
     truncate_strings = options.get('truncate_strings')
     if truncate_strings is not None:
         try:
             truncate_strings = int(truncate_strings)
         except (ValueError, TypeError):
-            raise SQLParseError('Invalid value for truncate_strings: %r'
-                                % truncate_strings)
+            raise SQLParseError('Invalid value for truncate_strings: '
+                                '{0!r}'.format(truncate_strings))
         if truncate_strings <= 1:
-            raise SQLParseError('Invalid value for truncate_strings: %r'
-                                % truncate_strings)
+            raise SQLParseError('Invalid value for truncate_strings: '
+                                '{0!r}'.format(truncate_strings))
         options['truncate_strings'] = truncate_strings
         options['truncate_char'] = options.get('truncate_char', '[...]')
 
     reindent = options.get('reindent', False)
     if reindent not in [True, False]:
-        raise SQLParseError('Invalid value for reindent: %r'
-                            % reindent)
+        raise SQLParseError('Invalid value for reindent: '
+                            '{0!r}'.format(reindent))
     elif reindent:
         options['strip_whitespace'] = True
 
     reindent_aligned = options.get('reindent_aligned', False)
     if reindent_aligned not in [True, False]:
-        raise SQLParseError('Invalid value for reindent_aligned: %r'
-                            % reindent)
+        raise SQLParseError('Invalid value for reindent_aligned: '
+                            '{0!r}'.format(reindent))
     elif reindent_aligned:
         options['strip_whitespace'] = True
 
     indent_tabs = options.get('indent_tabs', False)
     if indent_tabs not in [True, False]:
-        raise SQLParseError('Invalid value for indent_tabs: %r' % indent_tabs)
+        raise SQLParseError('Invalid value for indent_tabs: '
+                            '{0!r}'.format(indent_tabs))
     elif indent_tabs:
         options['indent_char'] = '\t'
     else:

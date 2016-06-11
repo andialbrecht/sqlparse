@@ -167,7 +167,7 @@ class TokenList(Token):
         idx = 0
         for token in self.flatten():
             end = idx + len(token.value)
-            if idx <= offset <= end:
+            if idx <= offset < end:
                 return token
             idx = end
 
@@ -248,8 +248,6 @@ class TokenList(Token):
         If *skip_ws* is ``True`` (the default) whitespace tokens are ignored.
         ``None`` is returned if there's no previous token.
         """
-        if isinstance(idx, int):
-            idx += 1  # alot of code usage current pre-compensates for this
         funcs = lambda tk: not ((skip_ws and tk.is_whitespace()) or
                                 (skip_cm and imt(tk, t=T.Comment)))
         return self._token_matching(funcs, idx, reverse=True)
@@ -260,8 +258,6 @@ class TokenList(Token):
         If *skip_ws* is ``True`` (the default) whitespace tokens are ignored.
         ``None`` is returned if there's no next token.
         """
-        if isinstance(idx, int):
-            idx += 1  # alot of code usage current pre-compensates for this
         funcs = lambda tk: not ((skip_ws and tk.is_whitespace()) or
                                 (skip_cm and imt(tk, t=T.Comment)))
         return self._token_matching(funcs, idx)
@@ -283,34 +279,26 @@ class TokenList(Token):
 
     def group_tokens(self, grp_cls, tokens, skip_ws=False, extend=False):
         """Replace tokens by an instance of *grp_cls*."""
-        if skip_ws:
-            while tokens and tokens[-1].is_whitespace():
-                tokens = tokens[:-1]
+
+        while skip_ws and tokens and tokens[-1].is_whitespace():
+            tokens = tokens[:-1]
 
         left = tokens[0]
         idx = self.token_index(left)
 
-        if extend:
-            if not isinstance(left, grp_cls):
-                grp = grp_cls([left])
-                self.tokens.remove(left)
-                self.tokens.insert(idx, grp)
-                left = grp
-                left.parent = self
-            tokens = tokens[1:]
-            left.tokens.extend(tokens)
-            left.value = str(left)
-
+        if extend and isinstance(left, grp_cls):
+            grp = left
+            grp.tokens.extend(tokens[1:])
         else:
-            left = grp_cls(tokens)
-            left.parent = self
-            self.tokens.insert(idx, left)
+            grp = grp_cls(tokens)
 
         for token in tokens:
-            token.parent = left
+            token.parent = grp
             self.tokens.remove(token)
 
-        return left
+        self.tokens.insert(idx, grp)
+        grp.parent = self
+        return grp
 
     def insert_before(self, where, token):
         """Inserts *token* before *where*."""
@@ -322,7 +310,7 @@ class TokenList(Token):
         if next_token is None:
             self.tokens.append(token)
         else:
-            self.tokens.insert(self.token_index(next_token), token)
+            self.insert_before(next_token, token)
 
     def has_alias(self):
         """Returns ``True`` if an alias is present."""
@@ -435,19 +423,13 @@ class Identifier(TokenList):
     def get_typecast(self):
         """Returns the typecast or ``None`` of this object as a string."""
         marker = self.token_next_by(m=(T.Punctuation, '::'))
-        if marker is None:
-            return None
         next_ = self.token_next(marker, False)
-        if next_ is None:
-            return None
-        return next_.value
+        return next_.value if next_ else None
 
     def get_ordering(self):
         """Returns the ordering or ``None`` as uppercase string."""
         ordering = self.token_next_by(t=T.Keyword.Order)
-        if ordering is None:
-            return None
-        return ordering.normalized
+        return ordering.normalized if ordering else None
 
     def get_array_indices(self):
         """Returns an iterator of index token lists"""

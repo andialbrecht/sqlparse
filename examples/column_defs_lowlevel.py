@@ -49,5 +49,5 @@ def extract_definitions(token_list):
 columns = extract_definitions(par)
 
 for column in columns:
-    print('NAME: %-12s DEFINITION: %s' % (column[0],
-                                          ''.join(str(t) for t in column[1:])))
+    print('NAME: {name:10} DEFINITION: {definition}'.format(
+        name=column[0], definition=''.join(str(t) for t in column[1:])))

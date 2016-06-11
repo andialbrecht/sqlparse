@@ -97,13 +97,13 @@ class ReindentFilter(object):
             self._process_default(tlist)
 
     def _process_parenthesis(self, tlist):
-        is_DML_DLL = tlist.token_next_by(t=(T.Keyword.DML, T.Keyword.DDL))
+        is_dml_dll = tlist.token_next_by(t=(T.Keyword.DML, T.Keyword.DDL))
         first = tlist.token_next_by(m=sql.Parenthesis.M_OPEN)
 
-        with indent(self, 1 if is_DML_DLL else 0):
-            tlist.tokens.insert(0, self.nl()) if is_DML_DLL else None
+        with indent(self, 1 if is_dml_dll else 0):
+            tlist.tokens.insert(0, self.nl()) if is_dml_dll else None
             with offset(self, self._get_offset(first) + 1):
-                self._process_default(tlist, not is_DML_DLL)
+                self._process_default(tlist, not is_dml_dll)
 
     def _process_identifierlist(self, tlist):
         identifiers = list(tlist.get_identifiers())

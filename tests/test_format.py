@@ -524,6 +524,22 @@ class TestOutputFormat(TestCaseBase):
         self.ndiffAssertEqual(f(sql), ("sql = ('select * '\n"
                                        "       'from foo;')"))
 
+    def test_python_multiple_statements(self):
+        sql = 'select * from foo; select 1 from dual'
+        f = lambda sql: sqlparse.format(sql, output_format='python')
+        self.ndiffAssertEqual(f(sql), ("sql = 'select * from foo; '\n"
+                                       "sql2 = 'select 1 from dual'"))
+
+    @pytest.mark.xfail(reason="Needs fixing")
+    def test_python_multiple_statements_with_formatting(self):
+        sql = 'select * from foo; select 1 from dual'
+        f = lambda sql: sqlparse.format(sql, output_format='python',
+                                        reindent=True)
+        self.ndiffAssertEqual(f(sql), ("sql = ('select * '\n"
+                                       "       'from foo;')\n"
+                                       "sql2 = ('select 1 '\n"
+                                       "        'from dual')"))
+
     def test_php(self):
         sql = 'select * from foo;'
         f = lambda sql: sqlparse.format(sql, output_format='php')
@@ -587,3 +603,17 @@ def test_having_produces_newline():
         'having sum(bar.value) > 100'
     ]
     assert formatted == '\n'.join(expected)
+
+
+def test_format_right_margin_invalid_input():
+    with pytest.raises(SQLParseError):
+        sqlparse.format('foo', right_margin=2)
+
+    with pytest.raises(SQLParseError):
+        sqlparse.format('foo', right_margin="two")
+
+
+@pytest.mark.xfail(reason="Needs fixing")
+def test_format_right_margin():
+    # TODO: Needs better test, only raises exception right now
+    sqlparse.format('foo', right_margin="79")

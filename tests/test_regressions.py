@@ -171,10 +171,11 @@ def test_comment_encoding_when_reindent():
 
 def test_parse_sql_with_binary():
     # See https://github.com/andialbrecht/sqlparse/pull/88
+    # digest = '|ËêplL4¡høN{'
     digest = '\x82|\xcb\x0e\xea\x8aplL4\xa1h\x91\xf8N{'
-    sql = 'select * from foo where bar = \'%s\'' % digest
+    sql = "select * from foo where bar = '{0}'".format(digest)
     formatted = sqlparse.format(sql, reindent=True)
-    tformatted = 'select *\nfrom foo\nwhere bar = \'%s\'' % digest
+    tformatted = "select *\nfrom foo\nwhere bar = '{0}'".format(digest)
     if sys.version_info < (3,):
         tformatted = tformatted.decode('unicode-escape')
     assert formatted == tformatted
@@ -193,10 +194,8 @@ def test_dont_alias_keywords():
 def test_format_accepts_encoding():  # issue20
     sql = load_file('test_cp1251.sql', 'cp1251')
     formatted = sqlparse.format(sql, reindent=True, encoding='cp1251')
-    if sys.version_info < (3,):
-        tformatted = u'insert into foo\nvalues (1); -- Песня про надежду\n'
-    else:
-        tformatted = 'insert into foo\nvalues (1); -- Песня про надежду\n'
+    tformatted = u'insert into foo\nvalues (1); -- Песня про надежду\n'
+
     assert formatted == tformatted
 
 
@@ -278,10 +277,7 @@ def test_issue186_get_type():
 
 
 def test_issue212_py2unicode():
-    if sys.version_info < (3,):
-        t1 = sql.Token(T.String, u"schöner ")
-    else:
-        t1 = sql.Token(T.String, "schöner ")
+    t1 = sql.Token(T.String, u"schöner ")
     t2 = sql.Token(T.String, u"bug")
     l = sql.TokenList([t1, t2])
     assert str(l) == 'schöner bug'
@@ -304,3 +300,14 @@ def test_issue227_gettype_cte():
         INSERT INTO elsewhere SELECT * FROM foo JOIN bar;
     ''')
     assert with2_stmt[0].get_type() == 'INSERT'
+
+
+def test_issue207_runaway_format():
+    sql = 'select 1 from (select 1 as one, 2 as two, 3 from dual) t0'
+    p = sqlparse.format(sql, reindent=True)
+    assert p == '\n'.join(["select 1",
+                           "from",
+                           "  (select 1 as one,",
+                           "          2 as two,",
+                           "          3",
+                           "   from dual) t0"])

@@ -9,7 +9,7 @@ from tests.utils import TestCaseBase
 import sqlparse
 import sqlparse.sql
 from sqlparse import tokens as T
-from sqlparse.compat import u
+from sqlparse.compat import u, StringIO
 
 
 class SQLParseTest(TestCaseBase):
@@ -178,9 +178,9 @@ def test_psql_quotation_marks():  # issue83
 def test_double_precision_is_builtin():
     sql = 'DOUBLE PRECISION'
     t = sqlparse.parse(sql)[0].tokens
-    assert (len(t) == 1
-            and t[0].ttype == sqlparse.tokens.Name.Builtin
-            and t[0].value == 'DOUBLE PRECISION')
+    assert len(t) == 1
+    assert t[0].ttype == sqlparse.tokens.Name.Builtin
+    assert t[0].value == 'DOUBLE PRECISION'
 
 
 @pytest.mark.parametrize('ph', ['?', ':1', ':foo', '%s', '%(foo)s'])
@@ -218,10 +218,10 @@ def test_single_quotes_with_linebreaks():  # issue118
 def test_sqlite_identifiers():
     # Make sure we still parse sqlite style escapes
     p = sqlparse.parse('[col1],[col2]')[0].tokens
-    assert (len(p) == 1
-            and isinstance(p[0], sqlparse.sql.IdentifierList)
-            and [id.get_name() for id in p[0].get_identifiers()]
-            == ['[col1]', '[col2]'])
+    id_names = [id.get_name() for id in p[0].get_identifiers()]
+    assert len(p) == 1
+    assert isinstance(p[0], sqlparse.sql.IdentifierList)
+    assert id_names == ['[col1]', '[col2]']
 
     p = sqlparse.parse('[col1]+[col2]')[0]
     types = [tok.ttype for tok in p.flatten()]
@@ -233,9 +233,9 @@ def test_simple_1d_array_index():
     assert len(p) == 1
     assert p[0].get_name() == 'col'
     indices = list(p[0].get_array_indices())
-    assert (len(indices) == 1  # 1-dimensional index
-            and len(indices[0]) == 1  # index is single token
-            and indices[0][0].value == '1')
+    assert len(indices) == 1  # 1-dimensional index
+    assert len(indices[0]) == 1  # index is single token
+    assert indices[0][0].value == '1'
 
 
 def test_2d_array_index():
@@ -303,3 +303,45 @@ def test_names_and_special_names(sql):
     p = sqlparse.parse(sql)[0]
     assert len(p.tokens) == 1
     assert isinstance(p.tokens[0], sqlparse.sql.Identifier)
+
+
+def test_get_token_at_offset():
+    #                   0123456789
+    p = sqlparse.parse('select * from dual')[0]
+    assert p.get_token_at_offset(0) == p.tokens[0]
+    assert p.get_token_at_offset(1) == p.tokens[0]
+    assert p.get_token_at_offset(6) == p.tokens[1]
+    assert p.get_token_at_offset(7) == p.tokens[2]
+    assert p.get_token_at_offset(8) == p.tokens[3]
+    assert p.get_token_at_offset(9) == p.tokens[4]
+    assert p.get_token_at_offset(10) == p.tokens[4]
+
+
+def test_pprint():
+    p = sqlparse.parse('select * from dual')[0]
+    output = StringIO()
+
+    p._pprint_tree(f=output)
+    pprint = u'\n'.join([
+        " | 0 DML 'select'",
+        " | 1 Whitespace ' '",
+        " | 2 Wildcard '*'",
+        " | 3 Whitespace ' '",
+        " | 4 Keyword 'from'",
+        " | 5 Whitespace ' '",
+        " +-6 Identifier 'dual'",
+        "   | 0 Name 'dual'",
+        "",
+    ])
+    assert output.getvalue() == pprint
+
+
+def test_wildcard_multiplication():
+    p = sqlparse.parse('select * from dual')[0]
+    assert p.tokens[2].ttype == T.Wildcard
+
+    p = sqlparse.parse('select a0.* from dual a0')[0]
+    assert p.tokens[2][2].ttype == T.Wildcard
+
+    p = sqlparse.parse('select 1 * 2 from dual')[0]
+    assert p.tokens[2][2].ttype == T.Operator

@@ -14,7 +14,7 @@
 
 from sqlparse import tokens
 from sqlparse.keywords import SQL_REGEX
-from sqlparse.compat import StringIO, string_types, text_type
+from sqlparse.compat import StringIO, string_types, u
 from sqlparse.utils import consume
 
 
@@ -37,17 +37,10 @@ class Lexer(object):
 
         ``stack`` is the inital stack (default: ``['root']``)
         """
-        encoding = encoding or 'utf-8'
-
         if isinstance(text, string_types):
-            text = StringIO(text)
-
-        text = text.read()
-        if not isinstance(text, text_type):
-            try:
-                text = text.decode(encoding)
-            except UnicodeDecodeError:
-                text = text.decode('unicode-escape')
+            text = u(text, encoding)
+        elif isinstance(text, StringIO):
+            text = u(text.read(), encoding)
 
         iterable = enumerate(text)
         for pos, char in iterable:

@@ -42,13 +42,14 @@ def _group_left_right(tlist, m, cls,
 
 def _group_matching(tlist, cls):
     """Groups Tokens that have beginning and end."""
-    idx = 1 if imt(tlist, i=cls) else 0
+    idx = 1 if isinstance(tlist, cls) else 0
 
     token = tlist.token_next_by(m=cls.M_OPEN, idx=idx)
     while token:
         end = find_matching(tlist, token, cls.M_OPEN, cls.M_CLOSE)
         if end is not None:
-            token = tlist.group_tokens(cls, tlist.tokens_between(token, end))
+            tokens = tlist.tokens_between(token, end)
+            token = tlist.group_tokens(cls, tokens)
             _group_matching(token, cls)
         token = tlist.token_next_by(m=cls.M_OPEN, idx=token)
 
@@ -120,7 +121,7 @@ def group_period(tlist):
 def group_arrays(tlist):
     token = tlist.token_next_by(i=sql.SquareBrackets)
     while token:
-        prev = tlist.token_prev(idx=token)
+        prev = tlist.token_prev(token)
         if imt(prev, i=(sql.SquareBrackets, sql.Identifier, sql.Function),
                t=(T.Name, T.String.Symbol,)):
             tokens = tlist.tokens_between(prev, token)
