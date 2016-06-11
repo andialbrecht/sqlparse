@@ -9,7 +9,7 @@ from tests.utils import TestCaseBase
 import sqlparse
 import sqlparse.sql
 from sqlparse import tokens as T
-from sqlparse.compat import u
+from sqlparse.compat import u, StringIO
 
 
 class SQLParseTest(TestCaseBase):
@@ -315,3 +315,22 @@ def test_get_token_at_offset():
     assert p.get_token_at_offset(8) == p.tokens[3]
     assert p.get_token_at_offset(9) == p.tokens[4]
     assert p.get_token_at_offset(10) == p.tokens[4]
+
+
+def test_pprint():
+    p = sqlparse.parse('select * from dual')[0]
+    output = StringIO()
+
+    p._pprint_tree(f=output)
+    pprint = u'\n'.join([
+        " | 0 DML 'select'",
+        " | 1 Whitespace ' '",
+        " | 2 Wildcard '*'",
+        " | 3 Whitespace ' '",
+        " | 4 Keyword 'from'",
+        " | 5 Whitespace ' '",
+        " +-6 Identifier 'dual'",
+        "   | 0 Name 'dual'",
+        "",
+    ])
+    assert output.getvalue() == pprint
