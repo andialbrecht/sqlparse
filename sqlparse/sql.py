@@ -167,7 +167,7 @@ class TokenList(Token):
         idx = 0
         for token in self.flatten():
             end = idx + len(token.value)
-            if idx <= offset <= end:
+            if idx <= offset < end:
                 return token
             idx = end
 

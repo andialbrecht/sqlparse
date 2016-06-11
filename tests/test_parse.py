@@ -303,3 +303,15 @@ def test_names_and_special_names(sql):
     p = sqlparse.parse(sql)[0]
     assert len(p.tokens) == 1
     assert isinstance(p.tokens[0], sqlparse.sql.Identifier)
+
+
+def test_get_token_at_offset():
+    #                   0123456789
+    p = sqlparse.parse('select * from dual')[0]
+    assert p.get_token_at_offset(0) == p.tokens[0]
+    assert p.get_token_at_offset(1) == p.tokens[0]
+    assert p.get_token_at_offset(6) == p.tokens[1]
+    assert p.get_token_at_offset(7) == p.tokens[2]
+    assert p.get_token_at_offset(8) == p.tokens[3]
+    assert p.get_token_at_offset(9) == p.tokens[4]
+    assert p.get_token_at_offset(10) == p.tokens[4]
