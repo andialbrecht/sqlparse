@@ -334,3 +334,14 @@ def test_pprint():
         "",
     ])
     assert output.getvalue() == pprint
+
+
+def test_wildcard_multiplication():
+    p = sqlparse.parse('select * from dual')[0]
+    assert p.tokens[2].ttype == T.Wildcard
+
+    p = sqlparse.parse('select a0.* from dual a0')[0]
+    assert p.tokens[2][2].ttype == T.Wildcard
+
+    p = sqlparse.parse('select 1 * 2 from dual')[0]
+    assert p.tokens[2][2].ttype == T.Operator
