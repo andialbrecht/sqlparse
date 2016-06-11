@@ -524,6 +524,22 @@ class TestOutputFormat(TestCaseBase):
         self.ndiffAssertEqual(f(sql), ("sql = ('select * '\n"
                                        "       'from foo;')"))
 
+    def test_python_multiple_statements(self):
+        sql = 'select * from foo; select 1 from dual'
+        f = lambda sql: sqlparse.format(sql, output_format='python')
+        self.ndiffAssertEqual(f(sql), ("sql = 'select * from foo; '\n"
+                                       "sql2 = 'select 1 from dual'"))
+
+    @pytest.mark.xfail(reason="Needs fixing")
+    def test_python_multiple_statements_with_formatting(self):
+        sql = 'select * from foo; select 1 from dual'
+        f = lambda sql: sqlparse.format(sql, output_format='python',
+                                        reindent=True)
+        self.ndiffAssertEqual(f(sql), ("sql = ('select * '\n"
+                                       "       'from foo;')\n"
+                                       "sql2 = ('select 1 '\n"
+                                       "        'from dual')"))
+
     def test_php(self):
         sql = 'select * from foo;'
         f = lambda sql: sqlparse.format(sql, output_format='php')
