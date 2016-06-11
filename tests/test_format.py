@@ -587,3 +587,17 @@ def test_having_produces_newline():
         'having sum(bar.value) > 100'
     ]
     assert formatted == '\n'.join(expected)
+
+
+def test_format_right_margin_invalid_input():
+    with pytest.raises(SQLParseError):
+        sqlparse.format('foo', right_margin=2)
+
+    with pytest.raises(SQLParseError):
+        sqlparse.format('foo', right_margin="two")
+
+
+@pytest.mark.xfail(reason="Needs fixing")
+def test_format_right_margin():
+    # TODO: Needs better test, only raises exception right now
+    sqlparse.format('foo', right_margin="79")
