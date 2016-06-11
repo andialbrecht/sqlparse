@@ -6,7 +6,6 @@
 # the BSD License: http://www.opensource.org/licenses/bsd-license.php
 
 from sqlparse import sql, tokens as T
-from sqlparse.compat import text_type
 from sqlparse.utils import split_unquoted_newlines
 
 
@@ -114,6 +113,5 @@ class SpacesAroundOperatorsFilter(object):
 class SerializerUnicode(object):
     @staticmethod
     def process(stmt):
-        raw = text_type(stmt)
-        lines = split_unquoted_newlines(raw)
+        lines = split_unquoted_newlines(stmt)
         return '\n'.join(line.rstrip() for line in lines)
