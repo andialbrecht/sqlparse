@@ -140,6 +140,7 @@ class TokenList(Token):
 
     def __init__(self, tokens=None):
         self.tokens = tokens or []
+        [setattr(token, 'parent', self) for token in tokens]
         super(TokenList, self).__init__(None, text_type(self))
 
     def __str__(self):
@@ -300,11 +301,13 @@ class TokenList(Token):
 
     def insert_before(self, where, token):
         """Inserts *token* before *where*."""
+        token.parent = self
         self.tokens.insert(self.token_index(where), token)
 
     def insert_after(self, where, token, skip_ws=True):
         """Inserts *token* after *where*."""
         next_token = self.token_next(where, skip_ws=skip_ws)
+        token.parent = self
         if next_token is None:
             self.tokens.append(token)
         else:

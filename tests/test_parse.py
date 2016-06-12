@@ -390,3 +390,11 @@ def test_wildcard_multiplication():
 
     p = sqlparse.parse('select 1 * 2 from dual')[0]
     assert p.tokens[2][2].ttype == T.Operator
+
+
+def test_stmt_tokens_parents():
+    # see issue 226
+    sql = "CREATE TABLE test();"
+    stmt = sqlparse.parse(sql)[0]
+    for token in stmt.tokens:
+        assert token.has_ancestor(stmt)
