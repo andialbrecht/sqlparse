@@ -8,7 +8,7 @@ import os
 import unittest
 
 from sqlparse.utils import split_unquoted_newlines
-from sqlparse.compat import u, StringIO
+from sqlparse.compat import StringIO
 
 DIR_PATH = os.path.dirname(__file__)
 FILES_DIR = os.path.join(DIR_PATH, 'files')
@@ -30,8 +30,8 @@ class TestCaseBase(unittest.TestCase):
             # Using the built-in .splitlines() method here will cause incorrect
             # results when splitting statements that have quoted CR/CR+LF
             # characters.
-            sfirst = split_unquoted_newlines(u(first))
-            ssecond = split_unquoted_newlines(u(second))
+            sfirst = split_unquoted_newlines(first)
+            ssecond = split_unquoted_newlines(second)
             diff = difflib.ndiff(sfirst, ssecond)
 
             fp = StringIO()

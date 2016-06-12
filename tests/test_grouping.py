@@ -106,15 +106,16 @@ class TestGrouping(TestCaseBase):
         self.assert_(isinstance(p.tokens[0].tokens[0], sql.Function))
         p = sqlparse.parse('foo()||col2 bar')[0]
         self.assert_(isinstance(p.tokens[0], sql.Identifier))
-        self.assert_(isinstance(p.tokens[0].tokens[0], sql.Function))
+        self.assert_(isinstance(p.tokens[0].tokens[0], sql.Operation))
+        self.assert_(isinstance(p.tokens[0].tokens[0].tokens[0], sql.Function))
 
     def test_identifier_extended(self):  # issue 15
         p = sqlparse.parse('foo+100')[0]
-        self.assert_(isinstance(p.tokens[0], sql.Identifier))
+        self.assert_(isinstance(p.tokens[0], sql.Operation))
         p = sqlparse.parse('foo + 100')[0]
-        self.assert_(isinstance(p.tokens[0], sql.Identifier))
+        self.assert_(isinstance(p.tokens[0], sql.Operation))
         p = sqlparse.parse('foo*100')[0]
-        self.assert_(isinstance(p.tokens[0], sql.Identifier))
+        self.assert_(isinstance(p.tokens[0], sql.Operation))
 
     def test_identifier_list(self):
         p = sqlparse.parse('a, b, c')[0]
@@ -267,25 +268,25 @@ class TestStatement(TestCaseBase):
 def test_identifier_with_operators():  # issue 53
     p = sqlparse.parse('foo||bar')[0]
     assert len(p.tokens) == 1
-    assert isinstance(p.tokens[0], sql.Identifier)
+    assert isinstance(p.tokens[0], sql.Operation)
     # again with whitespaces
     p = sqlparse.parse('foo || bar')[0]
     assert len(p.tokens) == 1
-    assert isinstance(p.tokens[0], sql.Identifier)
+    assert isinstance(p.tokens[0], sql.Operation)
 
 
 def test_identifier_with_op_trailing_ws():
     # make sure trailing whitespace isn't grouped with identifier
     p = sqlparse.parse('foo || bar ')[0]
     assert len(p.tokens) == 2
-    assert isinstance(p.tokens[0], sql.Identifier)
+    assert isinstance(p.tokens[0], sql.Operation)
     assert p.tokens[1].ttype is T.Whitespace
 
 
 def test_identifier_with_string_literals():
     p = sqlparse.parse('foo + \'bar\'')[0]
     assert len(p.tokens) == 1
-    assert isinstance(p.tokens[0], sql.Identifier)
+    assert isinstance(p.tokens[0], sql.Operation)
 
 
 # This test seems to be wrong. It was introduced when fixing #53, but #111

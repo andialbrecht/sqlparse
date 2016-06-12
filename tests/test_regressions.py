@@ -48,7 +48,7 @@ class RegressionTests(TestCaseBase):
         self.assert_(p.tokens[0].ttype is T.Comment.Single)
 
     def test_issue34(self):
-        t = sqlparse.parse("create")[0].token_first()
+        t = sqlparse.parse("create")[0].token_next()
         self.assertEqual(t.match(T.Keyword.DDL, "create"), True)
         self.assertEqual(t.match(T.Keyword.DDL, "CREATE"), True)
 

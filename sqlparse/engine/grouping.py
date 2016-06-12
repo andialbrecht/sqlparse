@@ -23,11 +23,15 @@ def _group_left_right(tlist, m, cls,
                       valid_right=lambda t: t is not None,
                       semicolon=False):
     """Groups together tokens that are joined by a middle token. ie. x < y"""
-    [_group_left_right(sgroup, m, cls, valid_left, valid_right, semicolon)
-     for sgroup in tlist.get_sublists() if not isinstance(sgroup, cls)]
 
-    token = tlist.token_next_by(m=m)
-    while token:
+    for token in list(tlist):
+        if token.is_group() and not isinstance(token, cls):
+            _group_left_right(token, m, cls, valid_left, valid_right,
+                              semicolon)
+
+        if not token.match(*m):
+            continue
+
         left, right = tlist.token_prev(token), tlist.token_next(token)
 
         if valid_left(left) and valid_right(right):
@@ -36,8 +40,7 @@ def _group_left_right(tlist, m, cls,
                 sright = tlist.token_next_by(m=M_SEMICOLON, idx=right)
                 right = sright or right
             tokens = tlist.tokens_between(left, right)
-            token = tlist.group_tokens(cls, tokens, extend=True)
-        token = tlist.token_next_by(m=m, idx=token)
+            tlist.group_tokens(cls, tokens, extend=True)
 
 
 def _group_matching(tlist, cls):
@@ -85,11 +88,12 @@ def group_assignment(tlist):
 
 
 def group_comparison(tlist):
-    I_COMPERABLE = (sql.Parenthesis, sql.Function, sql.Identifier)
+    I_COMPERABLE = (sql.Parenthesis, sql.Function, sql.Identifier,
+                    sql.Operation)
     T_COMPERABLE = T_NUMERICAL + T_STRING + T_NAME
 
-    func = lambda tk: imt(tk, t=T_COMPERABLE, i=I_COMPERABLE) or (
-        imt(tk, t=T.Keyword) and tk.value.upper() == 'NULL')
+    func = lambda tk: (imt(tk, t=T_COMPERABLE, i=I_COMPERABLE) or
+                       (tk and tk.is_keyword and tk.normalized == 'NULL'))
 
     _group_left_right(tlist, (T.Operator.Comparison, None), sql.Comparison,
                       valid_left=func, valid_right=func)
@@ -134,9 +138,9 @@ def group_arrays(tlist):
 @recurse(sql.Identifier)
 def group_operator(tlist):
     I_CYCLE = (sql.SquareBrackets, sql.Parenthesis, sql.Function,
-               sql.Identifier,)  # sql.Operation)
+               sql.Identifier, sql.Operation)
     # wilcards wouldn't have operations next to them
-    T_CYCLE = T_NUMERICAL + T_STRING + T_NAME  # + T.Wildcard
+    T_CYCLE = T_NUMERICAL + T_STRING + T_NAME
     func = lambda tk: imt(tk, i=I_CYCLE, t=T_CYCLE)
 
     token = tlist.token_next_by(t=(T.Operator, T.Wildcard))
@@ -146,8 +150,7 @@ def group_operator(tlist):
         if func(left) and func(right):
             token.ttype = T.Operator
             tokens = tlist.tokens_between(left, right)
-            # token = tlist.group_tokens(sql.Operation, tokens)
-            token = tlist.group_tokens(sql.Identifier, tokens)
+            token = tlist.group_tokens(sql.Operation, tokens)
 
         token = tlist.token_next_by(t=(T.Operator, T.Wildcard), idx=token)
 
@@ -155,7 +158,7 @@ def group_operator(tlist):
 @recurse(sql.IdentifierList)
 def group_identifier_list(tlist):
     I_IDENT_LIST = (sql.Function, sql.Case, sql.Identifier, sql.Comparison,
-                    sql.IdentifierList)  # sql.Operation
+                    sql.IdentifierList, sql.Operation)
     T_IDENT_LIST = (T_NUMERICAL + T_STRING + T_NAME +
                     (T.Keyword, T.Comment, T.Wildcard))
 
@@ -212,7 +215,7 @@ def group_where(tlist):
 @recurse()
 def group_aliased(tlist):
     I_ALIAS = (sql.Parenthesis, sql.Function, sql.Case, sql.Identifier,
-               )  # sql.Operation)
+               sql.Operation)
 
     token = tlist.token_next_by(i=I_ALIAS, t=T.Number)
     while token:

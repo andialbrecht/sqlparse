@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2016 Andi Albrecht, albrecht.andi@gmail.com
@@ -6,16 +7,8 @@
 # the BSD License: http://www.opensource.org/licenses/bsd-license.php
 
 import re
-import sys
 
-try:
-    from setuptools import setup, find_packages
-    packages = find_packages(exclude=('tests',))
-except ImportError:
-    if sys.version_info[0] == 3:
-        raise RuntimeError('distribute is required to install this package.')
-    from distutils.core import setup
-    packages = ['sqlparse', 'sqlparse.engine']
+from setuptools import setup, find_packages
 
 
 def get_version():
@@ -81,19 +74,15 @@ Parsing::
 
 """
 
-VERSION = get_version()
-
-
 setup(
     name='sqlparse',
-    version=VERSION,
-    packages=packages,
-    description='Non-validating SQL parser',
+    version=get_version(),
     author='Andi Albrecht',
     author_email='albrecht.andi@gmail.com',
+    url='https://github.com/andialbrecht/sqlparse',
+    description='Non-validating SQL parser',
     long_description=LONG_DESCRIPTION,
     license='BSD',
-    url='https://github.com/andialbrecht/sqlparse',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
@@ -107,7 +96,12 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Topic :: Database',
-        'Topic :: Software Development'
+        'Topic :: Software Development',
     ],
-    scripts=['bin/sqlformat'],
+    packages=find_packages(exclude=('tests',)),
+    entry_points={
+        'console_scripts': [
+            'sqlparse = sqlparse.__main__:main',
+        ]
+    },
 )
