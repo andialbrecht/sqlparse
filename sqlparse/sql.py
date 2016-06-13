@@ -24,15 +24,18 @@ class Token(object):
     the type of the token.
     """
 
-    __slots__ = ('value', 'ttype', 'parent', 'normalized', 'is_keyword')
+    __slots__ = ('value', 'ttype', 'parent', 'normalized', 'is_keyword',
+                 'row', 'col')
 
-    def __init__(self, ttype, value):
+    def __init__(self, ttype, value, row=None, col=None):
         value = text_type(value)
         self.value = value
         self.ttype = ttype
         self.parent = None
         self.is_keyword = ttype in T.Keyword
         self.normalized = value.upper() if self.is_keyword else value
+        self.row = row
+        self.col = col
 
     def __str__(self):
         return self.value
@@ -141,7 +144,12 @@ class TokenList(Token):
     def __init__(self, tokens=None):
         self.tokens = tokens or []
         [setattr(token, 'parent', self) for token in tokens]
-        super(TokenList, self).__init__(None, text_type(self))
+        if self.tokens:
+            # Assumption: Start of TokenList is start of first token.
+            row, col = self.tokens[0].row, self.tokens[0].col
+        else:
+            row, col = None, None
+        super(TokenList, self).__init__(None, text_type(self), row, col)
 
     def __str__(self):
         return ''.join(token.value for token in self.flatten())
