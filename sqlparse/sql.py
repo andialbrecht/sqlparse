@@ -22,6 +22,11 @@ class Token(object):
     It represents a single token and has two instance attributes:
     ``value`` is the unchange value of the token and ``ttype`` is
     the type of the token.
+
+    Additionally, in case the ``Token`` object has been created by
+    parsing an SQL string, the attributes ``row`` and ``col``
+    correspond to the position of the start of the token in the
+    original data source.
     """
 
     __slots__ = ('value', 'ttype', 'parent', 'normalized', 'is_keyword',
