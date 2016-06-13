@@ -23,11 +23,14 @@ def _group_left_right(tlist, m, cls,
                       valid_right=lambda t: t is not None,
                       semicolon=False):
     """Groups together tokens that are joined by a middle token. ie. x < y"""
-    [_group_left_right(sgroup, m, cls, valid_left, valid_right, semicolon)
-     for sgroup in tlist.get_sublists() if not isinstance(sgroup, cls)]
+    for token in list(tlist):
+        if token.is_group() and not isinstance(token, cls):
+            _group_left_right(token, m, cls, valid_left, valid_right,
+                              semicolon)
+            continue
+        if not token.match(*m):
+            continue
 
-    token = tlist.token_next_by(m=m)
-    while token:
         tidx = tlist.token_index(token)
         left, right = tlist.token_prev(tidx), tlist.token_next(tidx)
 
@@ -37,15 +40,14 @@ def _group_left_right(tlist, m, cls,
                 sright = tlist.token_next_by(m=M_SEMICOLON, idx=tidx + 1)
                 right = sright or right
             # Luckily, this leaves the position of `token` intact.
-            token = tlist.group_tokens_between(cls, left, right, extend=True)
-        token = tlist.token_next_by(m=m, idx=tidx + 1)
+            tlist.group_tokens_between(cls, left, right, extend=True)
 
 
 def _group_matching(tlist, cls):
     """Groups Tokens that have beginning and end."""
     [_group_matching(sgroup, cls) for sgroup in tlist.get_sublists()
      if not isinstance(sgroup, cls)]
-    idx = 1 if isinstance(tlist, cls) else 0
+    idx = 0  #  check no longer needed since not recursing.
 
     opens = []
 
