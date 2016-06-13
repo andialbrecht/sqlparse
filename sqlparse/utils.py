@@ -104,7 +104,7 @@ def imt(token, i=None, m=None, t=None):
 
 
 def find_matching(tlist, token, open_pattern, close_pattern):
-    idx = tlist.token_index(token)
+    idx = tlist.token_index(token) if not isinstance(token, int) else token
     depth = 0
     for token in tlist.tokens[idx:]:
         if token.match(*open_pattern):

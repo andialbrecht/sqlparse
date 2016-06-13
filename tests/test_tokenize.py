@@ -104,10 +104,10 @@ class TestTokenList(unittest.TestCase):
 
     def test_token_first(self):
         p = sqlparse.parse(' select foo')[0]
-        first = p.token_next()
+        first = p.token_first()
         self.assertEqual(first.value, 'select')
-        self.assertEqual(p.token_next(skip_ws=False).value, ' ')
-        self.assertEqual(sql.TokenList([]).token_next(), None)
+        self.assertEqual(p.token_first(skip_ws=False).value, ' ')
+        self.assertEqual(sql.TokenList([]).token_first(), None)
 
     def test_token_matching(self):
         t1 = sql.Token(T.Keyword, 'foo')

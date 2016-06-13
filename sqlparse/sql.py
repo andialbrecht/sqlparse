@@ -204,6 +204,28 @@ class TokenList(Token):
     def _groupable_tokens(self):
         return self.tokens
 
+    def _token_idx_matching(self, funcs, start=0, end=None, reverse=False):
+        """next token that match functions"""
+        if start is None:
+            return None
+
+        if not isinstance(funcs, (list, tuple)):
+            funcs = (funcs,)
+
+        if reverse:
+            assert end is None
+            for idx in range(start - 2, -1, -1):
+                token = self.tokens[idx]
+                for func in funcs:
+                    if func(token):
+                        return idx, token
+        else:
+            for idx, token in enumerate(self.tokens[start:end], start=start):
+                for func in funcs:
+                    if func(token):
+                        return idx, token
+        return None, None
+
     def _token_matching(self, funcs, start=0, end=None, reverse=False):
         """next token that match functions"""
         if start is None:
@@ -225,6 +247,24 @@ class TokenList(Token):
                 if func(token):
                     return token
 
+    def token_first(self, skip_ws=True, skip_cm=False):
+        """Returns the first child token.
+
+        If *skip_ws* is ``True`` (the default), whitespace
+        tokens are ignored.
+
+        if *skip_cm* is ``True`` (default: ``False``), comments are
+        ignored too.
+        """
+        # this on is inconsistent, using Comment instead of T.Comment...
+        funcs = lambda tk: not ((skip_ws and tk.is_whitespace()) or
+                                (skip_cm and imt(tk, t=T.Comment, i=Comment)))
+        return self._token_matching(funcs)
+
+    def token_idx_next_by(self, i=None, m=None, t=None, idx=0, end=None):
+        funcs = lambda tk: imt(tk, i, m, t)
+        return self._token_idx_matching(funcs, idx, end)
+
     def token_next_by(self, i=None, m=None, t=None, idx=0, end=None):
         funcs = lambda tk: imt(tk, i, m, t)
         return self._token_matching(funcs, idx, end)
@@ -237,12 +277,24 @@ class TokenList(Token):
     def token_matching(self, idx, funcs):
         return self._token_matching(funcs, idx)
 
+    def token_idx_prev(self, idx, skip_ws=True):
+        """Returns the previous token relative to *idx*.
+
+        If *skip_ws* is ``True`` (the default) whitespace tokens are ignored.
+        ``None`` is returned if there's no previous token.
+        """
+        idx += 1  # alot of code usage current pre-compensates for this
+        funcs = lambda tk: not (tk.is_whitespace() and skip_ws)
+        return self._token_idx_matching(funcs, idx, reverse=True)
+
     def token_prev(self, idx=0, skip_ws=True, skip_cm=False):
         """Returns the previous token relative to *idx*.
 
         If *skip_ws* is ``True`` (the default) whitespace tokens are ignored.
         ``None`` is returned if there's no previous token.
         """
+        if isinstance(idx, int):
+            idx += 1  # alot of code usage current pre-compensates for this
         funcs = lambda tk: not ((skip_ws and tk.is_whitespace()) or
                                 (skip_cm and imt(tk, t=T.Comment, i=Comment)))
         return self._token_matching(funcs, idx, reverse=True)
@@ -255,9 +307,31 @@ class TokenList(Token):
         If *skip_cm* is ``True`` (default: ``False``), comments are ignored.
         ``None`` is returned if there's no next token.
         """
+        if isinstance(idx, int):
+            idx += 1  # alot of code usage current pre-compensates for this
         funcs = lambda tk: not ((skip_ws and tk.is_whitespace()) or
                                 (skip_cm and imt(tk, t=T.Comment, i=Comment)))
         return self._token_matching(funcs, idx)
+
+    def token_idx_next(self, idx, skip_ws=True):
+        """Returns the next token relative to *idx*.
+
+        If *skip_ws* is ``True`` (the default) whitespace tokens are ignored.
+        ``None`` is returned if there's no next token.
+        """
+        if isinstance(idx, int):
+            idx += 1  # alot of code usage current pre-compensates for this
+        try:
+            if not skip_ws:
+                return idx, self.tokens[idx]
+            else:
+                while True:
+                    token = self.tokens[idx]
+                    if not token.is_whitespace():
+                        return idx, token
+                    idx += 1
+        except IndexError:
+            return None, None
 
     def token_index(self, token, start=0):
         """Return list index of token."""
@@ -273,6 +347,36 @@ class TokenList(Token):
         start_idx = self.token_index(start)
         end_idx = include_end + self.token_index(end)
         return self.tokens[start_idx:end_idx]
+
+    def group_tokens_between(self, grp_cls, start, end, include_end=True,
+                             extend=False):
+        """Replace tokens by an instance of *grp_cls*."""
+        if isinstance(start, int):
+            start_idx = start
+            start = self.tokens[start_idx]
+        else:
+            start_idx = self.token_index(start)
+
+        end_idx = self.token_index(end) if not isinstance(end, int) else end
+        end_idx += include_end
+
+        if extend and isinstance(start, grp_cls):
+            subtokens = self.tokens[start_idx + 1:end_idx]
+
+            grp = start
+            grp.tokens.extend(subtokens)
+            del self.tokens[start_idx + 1:end_idx]
+            grp.value = start.__str__()
+        else:
+            subtokens = self.tokens[start_idx:end_idx]
+            grp = grp_cls(subtokens)
+            self.tokens[start_idx:end_idx] = [grp]
+            grp.parent = self
+
+        for token in subtokens:
+            token.parent = grp
+
+        return grp
 
     def group_tokens(self, grp_cls, tokens, skip_ws=False, extend=False):
         """Replace tokens by an instance of *grp_cls*."""
@@ -386,7 +490,7 @@ class Statement(TokenList):
         Whitespaces and comments at the beginning of the statement
         are ignored.
         """
-        first_token = self.token_next(skip_cm=True)
+        first_token = self.token_first(skip_cm=True)
         if first_token is None:
             # An "empty" statement that either has not tokens at all
             # or only whitespace tokens.
