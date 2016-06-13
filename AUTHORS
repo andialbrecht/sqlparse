@@ -7,6 +7,7 @@ This module contains code (Python 2/3 compatibility) from the six
 project: https://bitbucket.org/gutworth/six.
 
 Alphabetical list of contributors:
+* Adam Greenhall <agreenhall@lyft.com>
 * Alexander Beedie <ayembee@gmail.com>
 * Alexey Malyshev <nostrict@gmail.com>
 * Andrew Tipton <andrew.tipton@compareglobalgroup.com>
