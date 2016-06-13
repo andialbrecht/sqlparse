@@ -338,16 +338,6 @@ class TokenList(Token):
         start = start if isinstance(start, int) else self.token_index(start)
         return start + self.tokens[start:].index(token)
 
-    def tokens_between(self, start, end, include_end=True):
-        """Return all tokens between (and including) start and end.
-
-        If *include_end* is ``False`` (default is ``True``) the end token
-        is excluded.
-        """
-        start_idx = self.token_index(start)
-        end_idx = include_end + self.token_index(end)
-        return self.tokens[start_idx:end_idx]
-
     def group_tokens_between(self, grp_cls, start, end, include_end=True,
                              extend=False):
         """Replace tokens by an instance of *grp_cls*."""
@@ -357,8 +347,12 @@ class TokenList(Token):
         else:
             start_idx = self.token_index(start)
 
-        end_idx = self.token_index(end) if not isinstance(end, int) else end
-        end_idx += include_end
+        end = end if isinstance(end, int) else self.token_index(end, start_idx)
+        end_idx = end + include_end
+
+        # will be needed later for new group_clauses
+        # while skip_ws and tokens and tokens[-1].is_whitespace():
+        #     tokens = tokens[:-1]
 
         if extend and isinstance(start, grp_cls):
             subtokens = self.tokens[start_idx + 1:end_idx]
@@ -366,7 +360,7 @@ class TokenList(Token):
             grp = start
             grp.tokens.extend(subtokens)
             del self.tokens[start_idx + 1:end_idx]
-            grp.value = start.__str__()
+            grp.value = text_type(start)
         else:
             subtokens = self.tokens[start_idx:end_idx]
             grp = grp_cls(subtokens)
@@ -376,31 +370,6 @@ class TokenList(Token):
         for token in subtokens:
             token.parent = grp
 
-        return grp
-
-    def group_tokens(self, grp_cls, tokens, skip_ws=False, extend=False):
-        """Replace tokens by an instance of *grp_cls*."""
-
-        while skip_ws and tokens and tokens[-1].is_whitespace():
-            tokens = tokens[:-1]
-
-        left = tokens[0]
-        idx = self.token_index(left)
-
-        if extend and isinstance(left, grp_cls):
-            grp = left
-            grp.tokens.extend(tokens[1:])
-        else:
-            grp = grp_cls(tokens)
-
-        for token in tokens:
-            token.parent = grp
-
-        # Improve performance. LOOP(list.remove()) is O(n**2) operation
-        self.tokens = [token for token in self.tokens if token not in tokens]
-
-        self.tokens.insert(idx, grp)
-        grp.parent = self
         return grp
 
     def insert_before(self, where, token):
