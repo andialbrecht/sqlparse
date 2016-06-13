@@ -48,40 +48,47 @@ class ReindentFilter(object):
         split_words = ('FROM', 'STRAIGHT_JOIN$', 'JOIN$', 'AND', 'OR',
                        'GROUP', 'ORDER', 'UNION', 'VALUES',
                        'SET', 'BETWEEN', 'EXCEPT', 'HAVING')
-        token = tlist.token_next_by(m=(T.Keyword, split_words, True), idx=idx)
+        m_split = T.Keyword, split_words, True
+        tidx, token = tlist.token_idx_next_by(m=m_split, idx=idx)
 
-        if token and token.value.upper() == 'BETWEEN':
-            token = self._next_token(tlist, token)
+        if token and token.normalized == 'BETWEEN':
+            tidx, token = self._next_token(tlist, tidx + 1)
 
-            if token and token.value.upper() == 'AND':
-                token = self._next_token(tlist, token)
+            if token and token.normalized == 'AND':
+                tidx, token = self._next_token(tlist, tidx + 1)
 
-        return token
+        return tidx, token
 
     def _split_kwds(self, tlist):
-        token = self._next_token(tlist)
+        tidx, token = self._next_token(tlist)
         while token:
-            prev = tlist.token_prev(token, skip_ws=False)
+            tidx = tlist.token_index(token)
+            pidx, prev = tlist.token_idx_prev(tidx, skip_ws=False)
             uprev = text_type(prev)
 
             if prev and prev.is_whitespace():
-                tlist.tokens.remove(prev)
+                del tlist.tokens[pidx]
+                tidx -= 1
 
             if not (uprev.endswith('\n') or uprev.endswith('\r')):
-                tlist.insert_before(token, self.nl())
+                tlist.insert_before(tidx, self.nl())
+                tidx += 1
 
-            token = self._next_token(tlist, token)
+            tidx, token = self._next_token(tlist, tidx + 1)
 
     def _split_statements(self, tlist):
-        token = tlist.token_next_by(t=(T.Keyword.DDL, T.Keyword.DML))
+        tidx, token = tlist.token_idx_next_by(t=(T.Keyword.DDL, T.Keyword.DML))
         while token:
-            prev = tlist.token_prev(token, skip_ws=False)
+            pidx, prev = tlist.token_idx_prev(tidx, skip_ws=False)
             if prev and prev.is_whitespace():
-                tlist.tokens.remove(prev)
+                del tlist.tokens[pidx]
+                tidx -= 1
             # only break if it's not the first token
-            tlist.insert_before(token, self.nl()) if prev else None
-            token = tlist.token_next_by(t=(T.Keyword.DDL, T.Keyword.DML),
-                                        idx=token)
+            if prev:
+                tlist.insert_before(tidx, self.nl())
+                tidx += 1
+            tidx, token = tlist.token_idx_next_by(
+                t=(T.Keyword.DDL, T.Keyword.DML), idx=tidx + 1)
 
     def _process(self, tlist):
         func_name = '_process_{cls}'.format(cls=type(tlist).__name__)
@@ -89,16 +96,17 @@ class ReindentFilter(object):
         func(tlist)
 
     def _process_where(self, tlist):
-        token = tlist.token_next_by(m=(T.Keyword, 'WHERE'))
+        tidx, token = tlist.token_idx_next_by(m=(T.Keyword, 'WHERE'))
         # issue121, errors in statement fixed??
-        tlist.insert_before(token, self.nl())
+        tlist.insert_before(tidx, self.nl())
 
         with indent(self):
             self._process_default(tlist)
 
     def _process_parenthesis(self, tlist):
-        is_dml_dll = tlist.token_next_by(t=(T.Keyword.DML, T.Keyword.DDL))
-        first = tlist.token_next_by(m=sql.Parenthesis.M_OPEN)
+        ttypes = T.Keyword.DML, T.Keyword.DDL
+        _, is_dml_dll = tlist.token_idx_next_by(t=ttypes)
+        fidx, first = tlist.token_idx_next_by(m=sql.Parenthesis.M_OPEN)
 
         with indent(self, 1 if is_dml_dll else 0):
             tlist.tokens.insert(0, self.nl()) if is_dml_dll else None
@@ -135,8 +143,8 @@ class ReindentFilter(object):
                 # len "when ", "then ", "else "
                 with offset(self, len("WHEN ")):
                     self._process_default(tlist)
-            end = tlist.token_next_by(m=sql.Case.M_CLOSE)
-            tlist.insert_before(end, self.nl())
+            end_idx, end = tlist.token_idx_next_by(m=sql.Case.M_CLOSE)
+            tlist.insert_before(end_idx, self.nl())
 
     def _process_default(self, tlist, stmts=True):
         self._split_statements(tlist) if stmts else None

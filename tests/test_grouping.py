@@ -128,11 +128,11 @@ class TestGrouping(TestCaseBase):
         p = sqlparse.parse("select * from ("
                            "select a, b + c as d from table) sub")[0]
         subquery = p.tokens[-1].tokens[0]
-        iden_list = subquery.token_next_by(i=sql.IdentifierList)
+        idx, iden_list = subquery.token_idx_next_by(i=sql.IdentifierList)
         self.assert_(iden_list is not None)
         # all the identifiers should be within the IdentifierList
-        self.assert_(subquery.token_next_by(i=sql.Identifier,
-                                            idx=iden_list) is None)
+        _, ilist = subquery.token_idx_next_by(i=sql.Identifier, idx=idx)
+        self.assert_(ilist is None)
 
     def test_identifier_list_case(self):
         p = sqlparse.parse('a, case when 1 then 2 else 3 end as b, c')[0]

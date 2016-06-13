@@ -32,15 +32,16 @@ def _group_left_right(tlist, m, cls,
             continue
 
         tidx = tlist.token_index(token)
-        left, right = tlist.token_prev(tidx), tlist.token_next(tidx)
+        pidx, prev_ = tlist.token_idx_prev(tidx)
+        nidx, next_ = tlist.token_idx_next(tidx)
 
-        if valid_left(left) and valid_right(right):
+        if valid_left(prev_) and valid_right(next_):
             if semicolon:
                 # only overwrite if a semicolon present.
-                sright = tlist.token_next_by(m=M_SEMICOLON, idx=tidx + 1)
-                right = sright or right
+                snidx, _ = tlist.token_idx_next_by(m=M_SEMICOLON, idx=nidx)
+                nidx = snidx or nidx
             # Luckily, this leaves the position of `token` intact.
-            tlist.group_tokens_between(cls, left, right, extend=True)
+            tlist.group_tokens_between(cls, pidx, nidx, extend=True)
 
 
 def _group_matching(tlist, cls):
@@ -114,11 +115,10 @@ def group_case(tlist):
 def group_identifier(tlist):
     T_IDENT = (T.String.Symbol, T.Name)
 
-    token = tlist.token_next_by(t=T_IDENT)
+    tidx, token = tlist.token_idx_next_by(t=T_IDENT)
     while token:
-        tidx = tlist.token_index(token)
-        token = tlist.group_tokens_between(sql.Identifier, tidx, tidx)
-        token = tlist.token_next_by(t=T_IDENT, idx=tidx + 1)
+        tlist.group_tokens_between(sql.Identifier, tidx, tidx)
+        tidx, token = tlist.token_idx_next_by(t=T_IDENT, idx=tidx + 1)
 
 
 def group_period(tlist):
@@ -133,13 +133,14 @@ def group_period(tlist):
 
 
 def group_arrays(tlist):
-    token = tlist.token_next_by(i=sql.SquareBrackets)
+    tidx, token = tlist.token_idx_next_by(i=sql.SquareBrackets)
     while token:
-        prev = tlist.token_prev(tlist.token_index(token))
+        pidx, prev = tlist.token_idx_prev(tidx)
         if imt(prev, i=(sql.SquareBrackets, sql.Identifier, sql.Function),
                t=(T.Name, T.String.Symbol,)):
-            token = tlist.group_tokens_between(sql.Identifier, prev, token, extend=True)
-        token = tlist.token_next_by(i=sql.SquareBrackets, idx=tlist.token_index(token) + 1)
+            tlist.group_tokens_between(sql.Identifier, pidx, tidx, extend=True)
+            tidx = pidx
+        tidx, token = tlist.token_idx_next_by(i=sql.SquareBrackets, idx=tidx + 1)
 
 
 @recurse(sql.Identifier)
@@ -150,15 +151,18 @@ def group_operator(tlist):
     T_CYCLE = T_NUMERICAL + T_STRING + T_NAME
     func = lambda tk: imt(tk, i=I_CYCLE, t=T_CYCLE)
 
-    token = tlist.token_next_by(t=(T.Operator, T.Wildcard))
+    tidx, token = tlist.token_idx_next_by(t=(T.Operator, T.Wildcard))
     while token:
-        left, right = tlist.token_prev(tlist.token_index(token)), tlist.token_next(tlist.token_index(token))
+        pidx, prev_ = tlist.token_idx_prev(tidx)
+        nidx, next_ = tlist.token_idx_next(tidx)
 
-        if func(left) and func(right):
+        if func(prev_) and func(next_):
             token.ttype = T.Operator
-            token = tlist.group_tokens_between(sql.Operation, left, right)
+            tlist.group_tokens_between(sql.Operation, pidx, nidx)
+            tidx = pidx
 
-        token = tlist.token_next_by(t=(T.Operator, T.Wildcard), idx=tlist.token_index(token) + 1)
+        tidx, token = tlist.token_idx_next_by(t=(T.Operator, T.Wildcard),
+                                              idx=tidx + 1)
 
 
 @recurse(sql.IdentifierList)
@@ -172,13 +176,12 @@ def group_identifier_list(tlist):
 
     tidx, token = tlist.token_idx_next_by(m=M_COMMA)
     while token:
-        before_idx, before = tlist.token_idx_prev(tidx)
-        after_idx, after = tlist.token_idx_next(tidx)
+        pidx, prev_ = tlist.token_idx_prev(tidx)
+        nidx, next_ = tlist.token_idx_next(tidx)
 
-        if func(before) and func(after):
-            tidx = before_idx
-            token = tlist.group_tokens_between(sql.IdentifierList, tidx, after_idx, extend=True)
-
+        if func(prev_) and func(next_):
+            tlist.group_tokens_between(sql.IdentifierList, pidx, nidx, extend=True)
+            tidx = pidx
         tidx, token = tlist.token_idx_next_by(m=M_COMMA, idx=tidx + 1)
 
 
@@ -192,31 +195,32 @@ def group_parenthesis(tlist):
 
 @recurse(sql.Comment)
 def group_comments(tlist):
-    token = tlist.token_next_by(t=T.Comment)
+    tidx, token = tlist.token_idx_next_by(t=T.Comment)
     while token:
         end = tlist.token_not_matching(
-            lambda tk: imt(tk, t=T.Comment) or tk.is_whitespace(),
-            idx=tlist.token_index(token) + 1)
+            lambda tk: imt(tk, t=T.Comment) or tk.is_whitespace(), idx=tidx + 1)
         if end is not None:
-            end = tlist.token_prev(tlist.token_index(end), False)
-            token = tlist.group_tokens_between(sql.Comment, token, end)
+            eidx = tlist.token_index(end)
+            eidx, end = tlist.token_idx_prev(eidx, skip_ws=False)
+            tlist.group_tokens_between(sql.Comment, tidx, eidx)
 
-        token = tlist.token_next_by(t=T.Comment, idx=tlist.token_index(token) + 1)
+        tidx, token = tlist.token_idx_next_by(t=T.Comment, idx=tidx + 1)
 
 
 @recurse(sql.Where)
 def group_where(tlist):
-    token = tlist.token_next_by(m=sql.Where.M_OPEN)
+    tidx, token = tlist.token_idx_next_by(m=sql.Where.M_OPEN)
     while token:
-        end = tlist.token_next_by(m=sql.Where.M_CLOSE, idx=tlist.token_index(token) + 1)
+        eidx, end = tlist.token_idx_next_by(m=sql.Where.M_CLOSE, idx=tidx + 1)
 
         if end is None:
             end = tlist._groupable_tokens[-1]
         else:
-            end = tlist.tokens[tlist.token_index(end) - 1]
-
-        token = tlist.group_tokens_between(sql.Where, token, end)
-        token = tlist.token_next_by(m=sql.Where.M_OPEN, idx=tlist.token_index(token) + 1)
+            end = tlist.tokens[eidx - 1]
+        # TODO: convert this to eidx instead of end token.
+        # i think above values are len(tlist) and eidx-1
+        tlist.group_tokens_between(sql.Where, tidx, end)
+        tidx, token = tlist.token_idx_next_by(m=sql.Where.M_OPEN, idx=tidx + 1)
 
 
 @recurse()
@@ -226,9 +230,9 @@ def group_aliased(tlist):
 
     tidx, token = tlist.token_idx_next_by(i=I_ALIAS, t=T.Number)
     while token:
-        next_index_, next_ = tlist.token_idx_next(tidx)
+        nidx, next_ = tlist.token_idx_next(tidx)
         if imt(next_, i=sql.Identifier):
-            token = tlist.group_tokens_between(sql.Identifier, tidx, next_index_, extend=True)
+            tlist.group_tokens_between(sql.Identifier, tidx, nidx, extend=True)
         tidx, token = tlist.token_idx_next_by(i=I_ALIAS, t=T.Number, idx=tidx + 1)
 
 
@@ -247,32 +251,35 @@ def group_functions(tlist):
             has_table = True
     if has_create and has_table:
         return
-    token = tlist.token_next_by(t=T.Name)
+
+    tidx, token = tlist.token_idx_next_by(t=T.Name)
     while token:
-        next_ = tlist.token_next(tlist.token_index(token))
-        if imt(next_, i=sql.Parenthesis):
-            token = tlist.group_tokens_between(sql.Function, token, next_)
-        token = tlist.token_next_by(t=T.Name, idx=tlist.token_index(token) + 1)
+        nidx, next_ = tlist.token_idx_next(tidx)
+        if isinstance(next_, sql.Parenthesis):
+            tlist.group_tokens_between(sql.Function, tidx, nidx)
+        tidx, token = tlist.token_idx_next_by(t=T.Name, idx=tidx + 1)
 
 
 def group_order(tlist):
     """Group together Identifier and Asc/Desc token"""
-    token = tlist.token_next_by(t=T.Keyword.Order)
+    tidx, token = tlist.token_idx_next_by(t=T.Keyword.Order)
     while token:
-        prev = tlist.token_prev(tlist.token_index(token))
+        pidx, prev = tlist.token_idx_prev(tidx)
         if imt(prev, i=sql.Identifier, t=T.Number):
-            token = tlist.group_tokens_between(sql.Identifier, prev, token)
-        token = tlist.token_next_by(t=T.Keyword.Order, idx=tlist.token_index(token) + 1)
+            tlist.group_tokens_between(sql.Identifier, pidx, tidx)
+            tidx = pidx
+        tidx, token = tlist.token_idx_next_by(t=T.Keyword.Order, idx=tidx + 1)
 
 
 @recurse()
 def align_comments(tlist):
-    token = tlist.token_next_by(i=sql.Comment)
+    tidx, token = tlist.token_idx_next_by(i=sql.Comment)
     while token:
-        before = tlist.token_prev(tlist.token_index(token))
-        if isinstance(before, sql.TokenList):
-            token = tlist.group_tokens_between(sql.TokenList, before, token, extend=True)
-        token = tlist.token_next_by(i=sql.Comment, idx=tlist.token_index(token) + 1)
+        pidx, prev = tlist.token_idx_prev(tidx)
+        if isinstance(prev, sql.TokenList):
+            tlist.group_tokens_between(sql.TokenList, pidx, tidx, extend=True)
+            tidx = pidx
+        tidx, token = tlist.token_idx_next_by(i=sql.Comment, idx=tidx + 1)
 
 
 def group(stmt):
