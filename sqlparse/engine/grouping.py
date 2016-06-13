@@ -45,29 +45,25 @@ def _group_left_right(tlist, m, cls,
 
 def _group_matching(tlist, cls):
     """Groups Tokens that have beginning and end."""
-    [_group_matching(sgroup, cls) for sgroup in tlist.get_sublists()
-     if not isinstance(sgroup, cls)]
-    idx = 0  #  check no longer needed since not recursing.
-
     opens = []
-
-    while True:
-        try:
-            token = tlist.tokens[idx]
-        except IndexError:
-            break
+    for token in list(tlist):
+        if token.is_group() and not isinstance(token, cls):
+            # Check inside previously grouped (ie. parenthesis) if group
+            # of differnt type is inside (ie, case). though ideally  should
+            # should check for all open/close tokens at once to avoid recursion
+            _group_matching(token, cls)
+            continue
 
         if token.match(*cls.M_OPEN):
-            opens.append(idx)
+            opens.append(token)
         elif token.match(*cls.M_CLOSE):
             try:
-                open_idx = opens.pop()
+                open_token = opens.pop()
             except IndexError:
-                break
-            tlist.group_tokens_between(cls, open_idx, idx)
-            idx = open_idx
-
-        idx += 1
+                # this indicates invalid sql and unbalanced tokens.
+                # instead of break, continue in case other "valid" groups exist
+                continue
+            tlist.group_tokens_between(cls, open_token, token)
 
 
 def group_if(tlist):
