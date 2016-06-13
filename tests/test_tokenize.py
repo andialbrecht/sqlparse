@@ -20,15 +20,15 @@ class TestTokenize(unittest.TestCase):
         self.assert_(isinstance(stream, types.GeneratorType))
         tokens = list(stream)
         self.assertEqual(len(tokens), 8)
-        self.assertEqual(len(tokens[0]), 2)
-        self.assertEqual(tokens[0], (T.Keyword.DML, u'select'))
-        self.assertEqual(tokens[-1], (T.Punctuation, u';'))
+        self.assertEqual(len(tokens[0]), 4)
+        self.assertEqual(tokens[0], (T.Keyword.DML, u'select', 1, 0))
+        self.assertEqual(tokens[-1], (T.Punctuation, u';', 1, 17))
 
     def test_backticks(self):
         s = '`foo`.`bar`'
         tokens = list(lexer.tokenize(s))
         self.assertEqual(len(tokens), 3)
-        self.assertEqual(tokens[0], (T.Name, u'`foo`'))
+        self.assertEqual(tokens[0], (T.Name, u'`foo`', 1, 0))
 
     def test_linebreaks(self):  # issue1
         s = 'foo\nbar\n'

@@ -97,7 +97,7 @@ class StatementSplitter(object):
         EOS_TTYPE = T.Whitespace, T.Comment.Single
 
         # Run over all stream tokens
-        for ttype, value in stream:
+        for ttype, value, row, col in stream:
             # Yield token if we finished a statement and there's no whitespaces
             # It will count newline token as a non whitespace. In this context
             # whitespace ignores newlines.

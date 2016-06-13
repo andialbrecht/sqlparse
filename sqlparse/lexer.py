@@ -33,7 +33,7 @@ class Lexer(object):
         Also preprocess the text, i.e. expand tabs and strip it if
         wanted and applies registered filters.
 
-        Split ``text`` into (tokentype, text) pairs.
+        Split ``text`` into (tokentype, text, row, col) pairs.
 
         ``stack`` is the inital stack (default: ``['root']``)
         """
@@ -43,27 +43,44 @@ class Lexer(object):
             text = u(text.read(), encoding)
 
         iterable = enumerate(text)
+        row = 1
+        col = 0
         for pos, char in iterable:
             for rexmatch, action in SQL_REGEX:
                 m = rexmatch(text, pos)
-
                 if not m:
                     continue
-                elif isinstance(action, tokens._TokenType):
-                    yield action, m.group()
+
+                value = m.group()
+
+                if isinstance(action, tokens._TokenType):
+                    yield action, m.group(), row, col
                 elif callable(action):
-                    yield action(m.group())
+                    ttype, val = action(m.group())
+                    yield ttype, val, row, col
+
+                nl_rindex = value.rfind('\n')
+                if nl_rindex >= 0:
+                    row += value.count('\n')
+                    col = len(value) - nl_rindex - 1
+                else:
+                    col += len(value)
 
                 consume(iterable, m.end() - pos - 1)
                 break
             else:
-                yield tokens.Error, char
+                yield tokens.Error, char, row, col
+                if char == '\n':
+                    row += 1
+                    col = 0
+                else:
+                    col += 1
 
 
 def tokenize(sql, encoding=None):
     """Tokenize sql.
 
     Tokenize *sql* using the :class:`Lexer` and return a 2-tuple stream
-    of ``(token type, value)`` items.
+    of ``(token type, value, row, col)`` items.
     """
     return Lexer().get_tokens(sql, encoding)
