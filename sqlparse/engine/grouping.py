@@ -195,7 +195,8 @@ def group_comments(tlist):
     token = tlist.token_next_by(t=T.Comment)
     while token:
         end = tlist.token_not_matching(
-            tlist.token_index(token) + 1, lambda tk: imt(tk, t=T.Comment) or tk.is_whitespace())
+            lambda tk: imt(tk, t=T.Comment) or tk.is_whitespace(),
+            idx=tlist.token_index(token) + 1)
         if end is not None:
             end = tlist.token_prev(tlist.token_index(end), False)
             token = tlist.group_tokens_between(sql.Comment, token, end)
