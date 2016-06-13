@@ -19,6 +19,7 @@ Enhancements
 * Improve alignment of columns (issue207, issue235, by vmuriat).
 * Add wrap_after option for better alignment when formatting
   lists (issue248, by Dennis Taylor).
+* Improved grouping of operations (issue211, by vmuriat).
 
 Bug Fixes
 
