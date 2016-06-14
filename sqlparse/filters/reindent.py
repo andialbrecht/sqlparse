@@ -44,7 +44,7 @@ class ReindentFilter(object):
     def nl(self):
         return sql.Token(T.Whitespace, self.n + self.char * self.leading_ws)
 
-    def _next_token(self, tlist, idx=0):
+    def _next_token(self, tlist, idx=-1):
         split_words = ('FROM', 'STRAIGHT_JOIN$', 'JOIN$', 'AND', 'OR',
                        'GROUP', 'ORDER', 'UNION', 'VALUES',
                        'SET', 'BETWEEN', 'EXCEPT', 'HAVING')
@@ -52,10 +52,10 @@ class ReindentFilter(object):
         tidx, token = tlist.token_next_by(m=m_split, idx=idx)
 
         if token and token.normalized == 'BETWEEN':
-            tidx, token = self._next_token(tlist, tidx + 1)
+            tidx, token = self._next_token(tlist, tidx)
 
             if token and token.normalized == 'AND':
-                tidx, token = self._next_token(tlist, tidx + 1)
+                tidx, token = self._next_token(tlist, tidx)
 
         return tidx, token
 
@@ -74,10 +74,11 @@ class ReindentFilter(object):
                 tlist.insert_before(tidx, self.nl())
                 tidx += 1
 
-            tidx, token = self._next_token(tlist, tidx + 1)
+            tidx, token = self._next_token(tlist, tidx)
 
     def _split_statements(self, tlist):
-        tidx, token = tlist.token_next_by(t=(T.Keyword.DDL, T.Keyword.DML))
+        ttypes = T.Keyword.DML, T.Keyword.DDL
+        tidx, token = tlist.token_next_by(t=ttypes)
         while token:
             pidx, prev_ = tlist.token_prev(tidx, skip_ws=False)
             if prev_ and prev_.is_whitespace():
@@ -87,8 +88,7 @@ class ReindentFilter(object):
             if prev_:
                 tlist.insert_before(tidx, self.nl())
                 tidx += 1
-            tidx, token = tlist.token_next_by(
-                t=(T.Keyword.DDL, T.Keyword.DML), idx=tidx + 1)
+            tidx, token = tlist.token_next_by(t=ttypes, idx=tidx)
 
     def _process(self, tlist):
         func_name = '_process_{cls}'.format(cls=type(tlist).__name__)

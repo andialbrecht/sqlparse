@@ -240,8 +240,9 @@ class TokenList(Token):
                                 (skip_cm and imt(tk, t=T.Comment, i=Comment)))
         return self._token_matching(funcs)[1]
 
-    def token_next_by(self, i=None, m=None, t=None, idx=0, end=None):
+    def token_next_by(self, i=None, m=None, t=None, idx=-1, end=None):
         funcs = lambda tk: imt(tk, i, m, t)
+        idx += 1
         return self._token_matching(funcs, idx, end)
 
     def token_not_matching(self, funcs, idx):

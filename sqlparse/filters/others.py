@@ -99,7 +99,7 @@ class SpacesAroundOperatorsFilter(object):
                 tidx += 1  # has to shift since token inserted before it
 
             # assert tlist.token_index(token) == tidx
-            tidx, token = tlist.token_next_by(t=ttypes, idx=tidx + 1)
+            tidx, token = tlist.token_next_by(t=ttypes, idx=tidx)
 
     def process(self, stmt):
         [self.process(sgroup) for sgroup in stmt.get_sublists()]

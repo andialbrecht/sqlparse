@@ -86,14 +86,14 @@ class AlignedIndentFilter(object):
                     max_cond_width - condition_width[i]))
                 tlist.insert_after(cond[-1], ws)
 
-    def _next_token(self, tlist, idx=0):
+    def _next_token(self, tlist, idx=-1):
         split_words = T.Keyword, self.split_words, True
         tidx, token = tlist.token_next_by(m=split_words, idx=idx)
         # treat "BETWEEN x and y" as a single statement
         if token and token.normalized == 'BETWEEN':
-            tidx, token = self._next_token(tlist, tidx + 1)
+            tidx, token = self._next_token(tlist, tidx)
             if token and token.normalized == 'AND':
-                tidx, token = self._next_token(tlist, tidx + 1)
+                tidx, token = self._next_token(tlist, tidx)
         return tidx, token
 
     def _split_kwds(self, tlist):
@@ -106,7 +106,7 @@ class AlignedIndentFilter(object):
                 token_indent = text_type(token)
             tlist.insert_before(token, self.nl(token_indent))
             tidx += 1
-            tidx, token = self._next_token(tlist, tidx + 1)
+            tidx, token = self._next_token(tlist, tidx)
 
     def _process_default(self, tlist):
         self._split_kwds(tlist)
