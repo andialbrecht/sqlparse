@@ -62,7 +62,6 @@ class ReindentFilter(object):
     def _split_kwds(self, tlist):
         tidx, token = self._next_token(tlist)
         while token:
-            tidx = tlist.token_index(token)
             pidx, prev_ = tlist.token_prev(tidx, skip_ws=False)
             uprev = text_type(prev_)
 

@@ -64,7 +64,9 @@ def _group_matching(tlist, cls):
                 # this indicates invalid sql and unbalanced tokens.
                 # instead of break, continue in case other "valid" groups exist
                 continue
-            tlist.group_tokens(cls, open_token, token)
+            oidx = tlist.token_index(open_token)
+            cidx = tlist.token_index(token)
+            tlist.group_tokens(cls, oidx, cidx)
 
 
 def group_if(tlist):
@@ -196,10 +198,9 @@ def group_parenthesis(tlist):
 def group_comments(tlist):
     tidx, token = tlist.token_next_by(t=T.Comment)
     while token:
-        end = tlist.token_not_matching(
+        eidx, end = tlist.token_not_matching(
             lambda tk: imt(tk, t=T.Comment) or tk.is_whitespace(), idx=tidx)
         if end is not None:
-            eidx = tlist.token_index(end)
             eidx, end = tlist.token_prev(eidx, skip_ws=False)
             tlist.group_tokens(sql.Comment, tidx, eidx)
 
@@ -218,7 +219,8 @@ def group_where(tlist):
             end = tlist.tokens[eidx - 1]
         # TODO: convert this to eidx instead of end token.
         # i think above values are len(tlist) and eidx-1
-        tlist.group_tokens(sql.Where, tidx, end)
+        eidx = tlist.token_index(end)
+        tlist.group_tokens(sql.Where, tidx, eidx)
         tidx, token = tlist.token_next_by(m=sql.Where.M_OPEN, idx=tidx)
 
 

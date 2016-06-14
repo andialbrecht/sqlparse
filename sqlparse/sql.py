@@ -248,7 +248,7 @@ class TokenList(Token):
     def token_not_matching(self, funcs, idx):
         funcs = (funcs,) if not isinstance(funcs, (list, tuple)) else funcs
         funcs = [lambda tk: not func(tk) for func in funcs]
-        return self._token_matching(funcs, idx)[1]
+        return self._token_matching(funcs, idx)
 
     def token_matching(self, funcs, idx):
         return self._token_matching(funcs, idx)[1]
@@ -297,13 +297,9 @@ class TokenList(Token):
     def group_tokens(self, grp_cls, start, end, include_end=True,
                      extend=False):
         """Replace tokens by an instance of *grp_cls*."""
-        if isinstance(start, int):
-            start_idx = start
-            start = self.tokens[start_idx]
-        else:
-            start_idx = self.token_index(start)
+        start_idx = start
+        start = self.tokens[start_idx]
 
-        end = end if isinstance(end, int) else self.token_index(end, start_idx)
         end_idx = end + include_end
 
         # will be needed later for new group_clauses
@@ -389,9 +385,6 @@ class TokenList(Token):
 
     def _get_first_name(self, idx=None, reverse=False, keywords=False):
         """Returns the name of the first token with a name"""
-
-        if idx and not isinstance(idx, int):
-            idx = self.token_index(idx) + 1
 
         tokens = self.tokens[idx:] if idx else self.tokens
         tokens = reversed(tokens) if reverse else tokens
