@@ -103,18 +103,6 @@ def imt(token, i=None, m=None, t=None):
         return False
 
 
-def find_matching(tlist, token, open_pattern, close_pattern):
-    idx = tlist.token_index(token) if not isinstance(token, int) else token
-    depth = 0
-    for token in tlist.tokens[idx:]:
-        if token.match(*open_pattern):
-            depth += 1
-        elif token.match(*close_pattern):
-            depth -= 1
-            if depth == 0:
-                return token
-
-
 def consume(iterator, n):
     """Advance the iterator n-steps ahead. If n is none, consume entirely."""
     deque(itertools.islice(iterator, n), maxlen=0)

@@ -226,27 +226,6 @@ class TokenList(Token):
                         return idx, token
         return None, None
 
-    def _token_matching(self, funcs, start=0, end=None, reverse=False):
-        """next token that match functions"""
-        if start is None:
-            return None
-
-        if not isinstance(start, int):
-            start = self.token_index(start) + 1
-
-        if not isinstance(funcs, (list, tuple)):
-            funcs = (funcs,)
-
-        if reverse:
-            iterable = reversed(self.tokens[end:start - 1])
-        else:
-            iterable = self.tokens[start:end]
-
-        for token in iterable:
-            for func in funcs:
-                if func(token):
-                    return token
-
     def token_first(self, skip_ws=True, skip_cm=False):
         """Returns the first child token.
 
@@ -264,10 +243,6 @@ class TokenList(Token):
     def token_idx_next_by(self, i=None, m=None, t=None, idx=0, end=None):
         funcs = lambda tk: imt(tk, i, m, t)
         return self._token_idx_matching(funcs, idx, end)
-
-    def token_next_by(self, i=None, m=None, t=None, idx=0, end=None):
-        funcs = lambda tk: imt(tk, i, m, t)
-        return self._token_matching(funcs, idx, end)
 
     def token_not_matching(self, funcs, idx):
         funcs = (funcs,) if not isinstance(funcs, (list, tuple)) else funcs
@@ -289,32 +264,6 @@ class TokenList(Token):
         funcs = lambda tk: not ((skip_ws and tk.is_whitespace()) or
                                 (skip_cm and imt(tk, t=T.Comment, i=Comment)))
         return self._token_idx_matching(funcs, idx, reverse=True)
-
-    def token_prev(self, idx=0, skip_ws=True, skip_cm=False):
-        """Returns the previous token relative to *idx*.
-
-        If *skip_ws* is ``True`` (the default) whitespace tokens are ignored.
-        ``None`` is returned if there's no previous token.
-        """
-        if isinstance(idx, int):
-            idx += 1  # alot of code usage current pre-compensates for this
-        funcs = lambda tk: not ((skip_ws and tk.is_whitespace()) or
-                                (skip_cm and imt(tk, t=T.Comment, i=Comment)))
-        return self._token_matching(funcs, idx, reverse=True)
-
-    def token_next(self, idx=0, skip_ws=True, skip_cm=False):
-        """Returns the next token relative to *idx*.
-
-        If called with idx = 0. Returns the first child token.
-        If *skip_ws* is ``True`` (the default) whitespace tokens are ignored.
-        If *skip_cm* is ``True`` (default: ``False``), comments are ignored.
-        ``None`` is returned if there's no next token.
-        """
-        if isinstance(idx, int):
-            idx += 1  # alot of code usage current pre-compensates for this
-        funcs = lambda tk: not ((skip_ws and tk.is_whitespace()) or
-                                (skip_cm and imt(tk, t=T.Comment, i=Comment)))
-        return self._token_matching(funcs, idx)
 
     # TODO: May need to implement skip_cm for upstream changes.
     # TODO: May need to re-add default value to idx
