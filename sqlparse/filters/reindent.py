@@ -49,7 +49,7 @@ class ReindentFilter(object):
                        'GROUP', 'ORDER', 'UNION', 'VALUES',
                        'SET', 'BETWEEN', 'EXCEPT', 'HAVING')
         m_split = T.Keyword, split_words, True
-        tidx, token = tlist.token_idx_next_by(m=m_split, idx=idx)
+        tidx, token = tlist.token_next_by(m=m_split, idx=idx)
 
         if token and token.normalized == 'BETWEEN':
             tidx, token = self._next_token(tlist, tidx + 1)
@@ -63,10 +63,10 @@ class ReindentFilter(object):
         tidx, token = self._next_token(tlist)
         while token:
             tidx = tlist.token_index(token)
-            pidx, prev = tlist.token_idx_prev(tidx, skip_ws=False)
-            uprev = text_type(prev)
+            pidx, prev_ = tlist.token_prev(tidx, skip_ws=False)
+            uprev = text_type(prev_)
 
-            if prev and prev.is_whitespace():
+            if prev_ and prev_.is_whitespace():
                 del tlist.tokens[pidx]
                 tidx -= 1
 
@@ -77,17 +77,17 @@ class ReindentFilter(object):
             tidx, token = self._next_token(tlist, tidx + 1)
 
     def _split_statements(self, tlist):
-        tidx, token = tlist.token_idx_next_by(t=(T.Keyword.DDL, T.Keyword.DML))
+        tidx, token = tlist.token_next_by(t=(T.Keyword.DDL, T.Keyword.DML))
         while token:
-            pidx, prev = tlist.token_idx_prev(tidx, skip_ws=False)
-            if prev and prev.is_whitespace():
+            pidx, prev_ = tlist.token_prev(tidx, skip_ws=False)
+            if prev_ and prev_.is_whitespace():
                 del tlist.tokens[pidx]
                 tidx -= 1
             # only break if it's not the first token
-            if prev:
+            if prev_:
                 tlist.insert_before(tidx, self.nl())
                 tidx += 1
-            tidx, token = tlist.token_idx_next_by(
+            tidx, token = tlist.token_next_by(
                 t=(T.Keyword.DDL, T.Keyword.DML), idx=tidx + 1)
 
     def _process(self, tlist):
@@ -96,7 +96,7 @@ class ReindentFilter(object):
         func(tlist)
 
     def _process_where(self, tlist):
-        tidx, token = tlist.token_idx_next_by(m=(T.Keyword, 'WHERE'))
+        tidx, token = tlist.token_next_by(m=(T.Keyword, 'WHERE'))
         # issue121, errors in statement fixed??
         tlist.insert_before(tidx, self.nl())
 
@@ -105,8 +105,8 @@ class ReindentFilter(object):
 
     def _process_parenthesis(self, tlist):
         ttypes = T.Keyword.DML, T.Keyword.DDL
-        _, is_dml_dll = tlist.token_idx_next_by(t=ttypes)
-        fidx, first = tlist.token_idx_next_by(m=sql.Parenthesis.M_OPEN)
+        _, is_dml_dll = tlist.token_next_by(t=ttypes)
+        fidx, first = tlist.token_next_by(m=sql.Parenthesis.M_OPEN)
 
         with indent(self, 1 if is_dml_dll else 0):
             tlist.tokens.insert(0, self.nl()) if is_dml_dll else None
@@ -143,7 +143,7 @@ class ReindentFilter(object):
                 # len "when ", "then ", "else "
                 with offset(self, len("WHEN ")):
                     self._process_default(tlist)
-            end_idx, end = tlist.token_idx_next_by(m=sql.Case.M_CLOSE)
+            end_idx, end = tlist.token_next_by(m=sql.Case.M_CLOSE)
             tlist.insert_before(end_idx, self.nl())
 
     def _process_default(self, tlist, stmts=True):

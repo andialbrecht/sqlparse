@@ -46,7 +46,7 @@ class AlignedIndentFilter(object):
 
     def _process_parenthesis(self, tlist):
         # if this isn't a subquery, don't re-indent
-        _, token = tlist.token_idx_next_by(m=(T.DML, 'SELECT'))
+        _, token = tlist.token_next_by(m=(T.DML, 'SELECT'))
         if token is not None:
             with indent(self):
                 tlist.insert_after(tlist[0], self.nl('SELECT'))
@@ -67,7 +67,7 @@ class AlignedIndentFilter(object):
         offset_ = len('case ') + len('when ')
         cases = tlist.get_cases(skip_ws=True)
         # align the end as well
-        _, end_token = tlist.token_idx_next_by(m=(T.Keyword, 'END'))
+        _, end_token = tlist.token_next_by(m=(T.Keyword, 'END'))
         cases.append((None, [end_token]))
 
         condition_width = [len(' '.join(map(text_type, cond))) if cond else 0
@@ -88,7 +88,7 @@ class AlignedIndentFilter(object):
 
     def _next_token(self, tlist, idx=0):
         split_words = T.Keyword, self.split_words, True
-        tidx, token = tlist.token_idx_next_by(m=split_words, idx=idx)
+        tidx, token = tlist.token_next_by(m=split_words, idx=idx)
         # treat "BETWEEN x and y" as a single statement
         if token and token.normalized == 'BETWEEN':
             tidx, token = self._next_token(tlist, tidx + 1)
@@ -113,9 +113,9 @@ class AlignedIndentFilter(object):
         # process any sub-sub statements
         for sgroup in tlist.get_sublists():
             idx = tlist.token_index(sgroup)
-            pidx, prev = tlist.token_idx_prev(idx)
+            pidx, prev_ = tlist.token_prev(idx)
             # HACK: make "group/order by" work. Longer than max_len.
-            offset_ = 3 if (prev and prev.match(T.Keyword, 'BY')) else 0
+            offset_ = 3 if (prev_ and prev_.match(T.Keyword, 'BY')) else 0
             with offset(self, offset_):
                 self._process(sgroup)
 

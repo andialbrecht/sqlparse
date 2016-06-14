@@ -14,12 +14,12 @@ class StripCommentsFilter(object):
     def _process(tlist):
         def get_next_comment():
             # TODO(andi) Comment types should be unified, see related issue38
-            return tlist.token_idx_next_by(i=sql.Comment, t=T.Comment)
+            return tlist.token_next_by(i=sql.Comment, t=T.Comment)
 
         tidx, token = get_next_comment()
         while token:
-            pidx, prev_ = tlist.token_idx_prev(tidx, skip_ws=False)
-            nidx, next_ = tlist.token_idx_next(tidx, skip_ws=False)
+            pidx, prev_ = tlist.token_prev(tidx, skip_ws=False)
+            nidx, next_ = tlist.token_next(tidx, skip_ws=False)
             # Replace by whitespace if prev and next exist and if they're not
             # whitespaces. This doesn't apply if prev or next is a paranthesis.
             if (prev_ is None or next_ is None or
@@ -87,19 +87,19 @@ class SpacesAroundOperatorsFilter(object):
     def _process(tlist):
 
         ttypes = (T.Operator, T.Comparison)
-        tidx, token = tlist.token_idx_next_by(t=ttypes)
+        tidx, token = tlist.token_next_by(t=ttypes)
         while token:
-            nidx, next_ = tlist.token_idx_next(tidx, skip_ws=False)
+            nidx, next_ = tlist.token_next(tidx, skip_ws=False)
             if next_ and next_.ttype != T.Whitespace:
                 tlist.insert_after(tidx, sql.Token(T.Whitespace, ' '))
 
-            pidx, prev_ = tlist.token_idx_prev(tidx, skip_ws=False)
+            pidx, prev_ = tlist.token_prev(tidx, skip_ws=False)
             if prev_ and prev_.ttype != T.Whitespace:
                 tlist.insert_before(tidx, sql.Token(T.Whitespace, ' '))
                 tidx += 1  # has to shift since token inserted before it
 
             # assert tlist.token_index(token) == tidx
-            tidx, token = tlist.token_idx_next_by(t=ttypes, idx=tidx + 1)
+            tidx, token = tlist.token_next_by(t=ttypes, idx=tidx + 1)
 
     def process(self, stmt):
         [self.process(sgroup) for sgroup in stmt.get_sublists()]

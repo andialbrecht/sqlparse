@@ -204,7 +204,7 @@ class TokenList(Token):
     def _groupable_tokens(self):
         return self.tokens
 
-    def _token_idx_matching(self, funcs, start=0, end=None, reverse=False):
+    def _token_matching(self, funcs, start=0, end=None, reverse=False):
         """next token that match functions"""
         if start is None:
             return None
@@ -238,21 +238,21 @@ class TokenList(Token):
         # this on is inconsistent, using Comment instead of T.Comment...
         funcs = lambda tk: not ((skip_ws and tk.is_whitespace()) or
                                 (skip_cm and imt(tk, t=T.Comment, i=Comment)))
-        return self._token_idx_matching(funcs)[1]
+        return self._token_matching(funcs)[1]
 
-    def token_idx_next_by(self, i=None, m=None, t=None, idx=0, end=None):
+    def token_next_by(self, i=None, m=None, t=None, idx=0, end=None):
         funcs = lambda tk: imt(tk, i, m, t)
-        return self._token_idx_matching(funcs, idx, end)
+        return self._token_matching(funcs, idx, end)
 
     def token_not_matching(self, funcs, idx):
         funcs = (funcs,) if not isinstance(funcs, (list, tuple)) else funcs
         funcs = [lambda tk: not func(tk) for func in funcs]
-        return self._token_idx_matching(funcs, idx)[1]
+        return self._token_matching(funcs, idx)[1]
 
     def token_matching(self, funcs, idx):
-        return self._token_idx_matching(funcs, idx)[1]
+        return self._token_matching(funcs, idx)[1]
 
-    def token_idx_prev(self, idx, skip_ws=True, skip_cm=False):
+    def token_prev(self, idx, skip_ws=True, skip_cm=False):
         """Returns the previous token relative to *idx*.
 
         If *skip_ws* is ``True`` (the default) whitespace tokens are ignored.
@@ -263,11 +263,11 @@ class TokenList(Token):
         idx += 1  # alot of code usage current pre-compensates for this
         funcs = lambda tk: not ((skip_ws and tk.is_whitespace()) or
                                 (skip_cm and imt(tk, t=T.Comment, i=Comment)))
-        return self._token_idx_matching(funcs, idx, reverse=True)
+        return self._token_matching(funcs, idx, reverse=True)
 
     # TODO: May need to implement skip_cm for upstream changes.
     # TODO: May need to re-add default value to idx
-    def token_idx_next(self, idx, skip_ws=True, skip_cm=False):
+    def token_next(self, idx, skip_ws=True, skip_cm=False):
         """Returns the next token relative to *idx*.
 
         If *skip_ws* is ``True`` (the default) whitespace tokens are ignored.
@@ -293,8 +293,8 @@ class TokenList(Token):
         start = start if isinstance(start, int) else self.token_index(start)
         return start + self.tokens[start:].index(token)
 
-    def group_tokens_between(self, grp_cls, start, end, include_end=True,
-                             extend=False):
+    def group_tokens(self, grp_cls, start, end, include_end=True,
+                     extend=False):
         """Replace tokens by an instance of *grp_cls*."""
         if isinstance(start, int):
             start_idx = start
@@ -338,7 +338,7 @@ class TokenList(Token):
         """Inserts *token* after *where*."""
         if not isinstance(where, int):
             where = self.token_index(where)
-        nidx, next_ = self.token_idx_next(where, skip_ws=skip_ws)
+        nidx, next_ = self.token_next(where, skip_ws=skip_ws)
         token.parent = self
         if next_ is None:
             self.tokens.append(token)
@@ -353,12 +353,12 @@ class TokenList(Token):
         """Returns the alias for this identifier or ``None``."""
 
         # "name AS alias"
-        kw_idx, kw = self.token_idx_next_by(m=(T.Keyword, 'AS'))
+        kw_idx, kw = self.token_next_by(m=(T.Keyword, 'AS'))
         if kw is not None:
             return self._get_first_name(kw_idx + 1, keywords=True)
 
         # "name alias" or "complicated column expression alias"
-        _, ws = self.token_idx_next_by(t=T.Whitespace)
+        _, ws = self.token_next_by(t=T.Whitespace)
         if len(self.tokens) > 2 and ws is not None:
             return self._get_first_name(reverse=True)
 
@@ -374,7 +374,7 @@ class TokenList(Token):
     def get_real_name(self):
         """Returns the real name (object name) of this identifier."""
         # a.b
-        dot_idx, _ = self.token_idx_next_by(m=(T.Punctuation, '.'))
+        dot_idx, _ = self.token_next_by(m=(T.Punctuation, '.'))
         return self._get_first_name(dot_idx)
 
     def get_parent_name(self):
@@ -382,8 +382,8 @@ class TokenList(Token):
 
         A parent object is identified by the first occuring dot.
         """
-        dot_idx, _ = self.token_idx_next_by(m=(T.Punctuation, '.'))
-        _, prev_ = self.token_idx_prev(dot_idx)
+        dot_idx, _ = self.token_next_by(m=(T.Punctuation, '.'))
+        _, prev_ = self.token_prev(dot_idx)
         return remove_quotes(prev_.value) if prev_ is not None else None
 
     def _get_first_name(self, idx=None, reverse=False, keywords=False):
@@ -433,9 +433,9 @@ class Statement(TokenList):
             # an IdentifierList containing the CTE definitions;  the actual
             # DML keyword (e.g. SELECT, INSERT) will follow next.
             fidx = self.token_index(first_token)
-            tidx, token = self.token_idx_next(fidx, skip_ws=True)
+            tidx, token = self.token_next(fidx, skip_ws=True)
             if isinstance(token, (Identifier, IdentifierList)):
-                _, dml_keyword = self.token_idx_next(tidx, skip_ws=True)
+                _, dml_keyword = self.token_next(tidx, skip_ws=True)
 
                 if dml_keyword.ttype == T.Keyword.DML:
                     return dml_keyword.normalized
@@ -452,18 +452,18 @@ class Identifier(TokenList):
 
     def is_wildcard(self):
         """Return ``True`` if this identifier contains a wildcard."""
-        _, token = self.token_idx_next_by(t=T.Wildcard)
+        _, token = self.token_next_by(t=T.Wildcard)
         return token is not None
 
     def get_typecast(self):
         """Returns the typecast or ``None`` of this object as a string."""
-        midx, marker = self.token_idx_next_by(m=(T.Punctuation, '::'))
-        nidx, next_ = self.token_idx_next(midx, skip_ws=False)
+        midx, marker = self.token_next_by(m=(T.Punctuation, '::'))
+        nidx, next_ = self.token_next(midx, skip_ws=False)
         return next_.value if next_ else None
 
     def get_ordering(self):
         """Returns the ordering or ``None`` as uppercase string."""
-        _, ordering = self.token_idx_next_by(t=T.Keyword.Order)
+        _, ordering = self.token_next_by(t=T.Keyword.Order)
         return ordering.normalized if ordering else None
 
     def get_array_indices(self):
