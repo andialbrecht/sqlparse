@@ -63,33 +63,6 @@ def group_begin(tlist):
     _group_matching(tlist, sql.Begin)
 
 
-def _group_left_right(tlist, m, cls,
-                      valid_left=lambda t: t is not None,
-                      valid_right=lambda t: t is not None,
-                      semicolon=False):
-    """Groups together tokens that are joined by a middle token. ie. x < y"""
-    for token in list(tlist):
-        if token.is_group() and not isinstance(token, cls):
-            _group_left_right(token, m, cls, valid_left, valid_right,
-                              semicolon)
-            continue
-        if not token.match(*m):
-            continue
-
-        tidx = tlist.token_index(token)
-        pidx, prev_ = tlist.token_prev(tidx)
-        nidx, next_ = tlist.token_next(tidx)
-
-        if valid_left(prev_) and valid_right(next_):
-            if semicolon:
-                # only overwrite if a semicolon present.
-                m_semicolon = T.Punctuation, ';'
-                snidx, _ = tlist.token_next_by(m=m_semicolon, idx=nidx)
-                nidx = snidx or nidx
-            # Luckily, this leaves the position of `token` intact.
-            tlist.group_tokens(cls, pidx, nidx, extend=True)
-
-
 def group_typecasts(tlist):
     def match(token):
         return token.match(T.Punctuation, '::')
