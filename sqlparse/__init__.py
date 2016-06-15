@@ -9,6 +9,7 @@
 
 # Setup namespace
 from sqlparse import sql
+from sqlparse import cli
 from sqlparse import engine
 from sqlparse import tokens
 from sqlparse import filters
@@ -17,7 +18,7 @@ from sqlparse import formatter
 from sqlparse.compat import text_type
 
 __version__ = '0.2.0.dev0'
-__all__ = ['engine', 'filters', 'formatter', 'sql', 'tokens']
+__all__ = ['engine', 'filters', 'formatter', 'sql', 'tokens', 'cli']
 
 
 def parse(sql, encoding=None):
