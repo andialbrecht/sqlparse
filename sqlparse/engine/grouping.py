@@ -321,20 +321,18 @@ def _group(tlist, cls, match,
 
         if token.is_whitespace():
             continue
+
         if token.is_group() and not isinstance(token, cls):
             _group(token, cls, match, valid_left, valid_right, post, extend)
-            pidx, prev_ = tidx, token
-            continue
-        if not match(token):
-            pidx, prev_ = tidx, token
-            continue
 
-        nidx, next_ = tlist.token_next(tidx)
+        if match(token):
+            nidx, next_ = tlist.token_next(tidx)
+            if valid_left(prev_) and valid_right(next_):
+                from_idx, to_idx = post(tlist, pidx, tidx, nidx)
+                grp = tlist.group_tokens(cls, from_idx, to_idx, extend=extend)
 
-        if valid_left(prev_) and valid_right(next_):
-            from_idx, to_idx = post(tlist, pidx, tidx, nidx)
-            grp = tlist.group_tokens(cls, from_idx, to_idx, extend=extend)
-            tidx_offset += to_idx - from_idx
-            pidx, prev_ = from_idx, grp
-        else:
-            pidx, prev_ = tidx, token
+                tidx_offset += to_idx - from_idx
+                pidx, prev_ = from_idx, grp
+                continue
+
+        pidx, prev_ = tidx, token
