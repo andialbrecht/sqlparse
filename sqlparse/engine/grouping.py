@@ -313,17 +313,28 @@ def _group(tlist, cls, match,
            post=None,
            extend=True):
     """Groups together tokens that are joined by a middle token. ie. x < y"""
-    for token in list(tlist):
+
+    tidx_offset = 0
+    pidx, prev_ = None, None
+    for idx, token in enumerate(list(tlist)):
+        tidx = idx - tidx_offset
+
+        if token.is_whitespace():
+            continue
         if token.is_group() and not isinstance(token, cls):
             _group(token, cls, match, valid_left, valid_right, post, extend)
+            pidx, prev_ = tidx, token
             continue
         if not match(token):
+            pidx, prev_ = tidx, token
             continue
 
-        tidx = tlist.token_index(token)
-        pidx, prev_ = tlist.token_prev(tidx)
         nidx, next_ = tlist.token_next(tidx)
 
         if valid_left(prev_) and valid_right(next_):
             from_idx, to_idx = post(tlist, pidx, tidx, nidx)
-            tlist.group_tokens(cls, from_idx, to_idx, extend=extend)
+            grp = tlist.group_tokens(cls, from_idx, to_idx, extend=extend)
+            tidx_offset += to_idx - from_idx
+            pidx, prev_ = from_idx, grp
+        else:
+            pidx, prev_ = tidx, token
