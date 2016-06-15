@@ -31,6 +31,7 @@ Bug Fixes
 * Fix grouping of identifiers (issue233).
 * Fix parsing of CREATE TABLE statements (issue242, by Tenghuan).
 * Minor bug fixes (issue101).
+* Improve formatting of CASE WHEN constructs (issue164, by vmuriat).
 
 
 Release 0.1.19 (Mar 07, 2015)
