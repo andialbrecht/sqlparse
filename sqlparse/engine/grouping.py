@@ -17,7 +17,16 @@ T_NAME = (T.Name, T.Name.Placeholder)
 def _group_matching(tlist, cls):
     """Groups Tokens that have beginning and end."""
     opens = []
-    for token in list(tlist):
+    tidx_offset = 0
+    for idx, token in enumerate(list(tlist)):
+        tidx = idx - tidx_offset
+
+        if token.is_whitespace():
+            # ~50% of tokens will be whitespace. Will checking early
+            # for them avoid 3 comparisons, but then add 1 more comparison
+            # for the other ~50% of tokens...
+            continue
+
         if token.is_group() and not isinstance(token, cls):
             # Check inside previously grouped (ie. parenthesis) if group
             # of differnt type is inside (ie, case). though ideally  should
@@ -26,17 +35,18 @@ def _group_matching(tlist, cls):
             continue
 
         if token.match(*cls.M_OPEN):
-            opens.append(token)
+            opens.append(tidx)
+
         elif token.match(*cls.M_CLOSE):
             try:
-                open_token = opens.pop()
+                open_idx = opens.pop()
             except IndexError:
                 # this indicates invalid sql and unbalanced tokens.
                 # instead of break, continue in case other "valid" groups exist
                 continue
-            oidx = tlist.token_index(open_token)
-            cidx = tlist.token_index(token)
-            tlist.group_tokens(cls, oidx, cidx)
+            close_idx = tidx
+            tlist.group_tokens(cls, open_idx, close_idx)
+            tidx_offset += close_idx - open_idx
 
 
 def group_brackets(tlist):
