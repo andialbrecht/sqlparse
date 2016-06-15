@@ -91,42 +91,95 @@ def _group_left_right(tlist, m, cls,
 
 
 def group_typecasts(tlist):
-    _group_left_right(tlist, (T.Punctuation, '::'), sql.Identifier)
+    def match(token):
+        return token.match(T.Punctuation, '::')
+
+    def valid(token):
+        return token is not None
+
+    def post(tlist, pidx, tidx, nidx):
+        return pidx, nidx
+
+    valid_prev = valid_next = valid
+    _group(tlist, sql.Identifier, match, valid_prev, valid_next, post)
 
 
 def group_period(tlist):
-    lfunc = lambda tk: imt(tk, i=(sql.SquareBrackets, sql.Identifier),
-                           t=(T.Name, T.String.Symbol,))
+    def match(token):
+        return token.match(T.Punctuation, '.')
 
-    rfunc = lambda tk: imt(tk, i=(sql.SquareBrackets, sql.Function),
-                           t=(T.Name, T.String.Symbol, T.Wildcard))
+    def valid_prev(token):
+        sqlcls = sql.SquareBrackets, sql.Identifier
+        ttypes = T.Name, T.String.Symbol
+        return imt(token, i=sqlcls, t=ttypes)
 
-    _group_left_right(tlist, (T.Punctuation, '.'), sql.Identifier,
-                      valid_left=lfunc, valid_right=rfunc)
+    def valid_next(token):
+        sqlcls = sql.SquareBrackets, sql.Function
+        ttypes = T.Name, T.String.Symbol, T.Wildcard
+        return imt(token, i=sqlcls, t=ttypes)
+
+    def post(tlist, pidx, tidx, nidx):
+        return pidx, nidx
+
+    _group(tlist, sql.Identifier, match, valid_prev, valid_next, post)
 
 
 def group_as(tlist):
-    lfunc = lambda tk: not imt(tk, t=T.Keyword) or tk.normalized == 'NULL'
-    rfunc = lambda tk: not imt(tk, t=(T.DML, T.DDL))
-    _group_left_right(tlist, (T.Keyword, 'AS'), sql.Identifier,
-                      valid_left=lfunc, valid_right=rfunc)
+    def match(token):
+        return token.is_keyword and token.normalized == 'AS'
+
+    def valid_prev(token):
+        return token.normalized == 'NULL' or not token.is_keyword
+
+    def valid_next(token):
+        ttypes = T.DML, T.DDL
+        return not imt(token, t=ttypes)
+
+    def post(tlist, pidx, tidx, nidx):
+        return pidx, nidx
+
+    _group(tlist, sql.Identifier, match, valid_prev, valid_next, post)
 
 
 def group_assignment(tlist):
-    _group_left_right(tlist, (T.Assignment, ':='), sql.Assignment,
-                      semicolon=True)
+    def match(token):
+        return token.match(T.Assignment, ':=')
+
+    def valid(token):
+        return token is not None
+
+    def post(tlist, pidx, tidx, nidx):
+        m_semicolon = T.Punctuation, ';'
+        snidx, _ = tlist.token_next_by(m=m_semicolon, idx=nidx)
+        nidx = snidx or nidx
+        return pidx, nidx
+
+    valid_prev = valid_next = valid
+    _group(tlist, sql.Assignment, match, valid_prev, valid_next, post)
 
 
 def group_comparison(tlist):
     sqlcls = (sql.Parenthesis, sql.Function, sql.Identifier,
-                    sql.Operation)
+              sql.Operation)
     ttypes = T_NUMERICAL + T_STRING + T_NAME
 
-    func = lambda tk: (imt(tk, t=ttypes, i=sqlcls) or
-                       (tk and tk.is_keyword and tk.normalized == 'NULL'))
+    def match(token):
+        return token.ttype == T.Operator.Comparison
 
-    _group_left_right(tlist, (T.Operator.Comparison, None), sql.Comparison,
-                      valid_left=func, valid_right=func)
+    def valid(token):
+        if imt(token, t=ttypes, i=sqlcls):
+            return True
+        elif token and token.is_keyword and token.normalized == 'NULL':
+            return True
+        else:
+            return False
+
+    def post(tlist, pidx, tidx, nidx):
+        return pidx, nidx
+
+    valid_prev = valid_next = valid
+    _group(tlist, sql.Comparison, match,
+           valid_prev, valid_next, post, extend=False)
 
 
 @recurse(sql.Identifier)
