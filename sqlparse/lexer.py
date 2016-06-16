@@ -20,7 +20,7 @@ from sqlparse.utils import consume
 
 class Lexer(object):
     """Lexer
-    Empty class. Leaving for back-support
+    Empty class. Leaving for backwards-compatibility
     """
 
     @staticmethod

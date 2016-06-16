@@ -217,14 +217,13 @@ def group_operator(tlist):
 
 def group_identifier_list(tlist):
     m_role = T.Keyword, ('null', 'role')
-    m_comma = T.Punctuation, ','
     sqlcls = (sql.Function, sql.Case, sql.Identifier, sql.Comparison,
               sql.IdentifierList, sql.Operation)
     ttypes = (T_NUMERICAL + T_STRING + T_NAME +
               (T.Keyword, T.Comment, T.Wildcard))
 
     def match(token):
-        return imt(token, m=m_comma)
+        return token.match(T.Punctuation, ',')
 
     def valid(token):
         return imt(token, i=sqlcls, m=m_role, t=ttypes)
@@ -275,7 +274,7 @@ def group_aliased(tlist):
     tidx, token = tlist.token_next_by(i=I_ALIAS, t=T.Number)
     while token:
         nidx, next_ = tlist.token_next(tidx)
-        if imt(next_, i=sql.Identifier):
+        if isinstance(next_, sql.Identifier):
             tlist.group_tokens(sql.Identifier, tidx, nidx, extend=True)
         tidx, token = tlist.token_next_by(i=I_ALIAS, t=T.Number, idx=tidx)
 

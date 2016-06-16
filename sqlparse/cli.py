@@ -134,6 +134,7 @@ def main(args=None):
         data = sys.stdin.read()
     else:
         try:
+            # TODO: Needs to deal with encoding
             data = ''.join(open(args.filename).readlines())
         except IOError as e:
             _error('Failed to read %s: %s' % (args.filename, e))
