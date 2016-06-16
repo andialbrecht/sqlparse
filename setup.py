@@ -101,7 +101,7 @@ setup(
     packages=find_packages(exclude=('tests',)),
     entry_points={
         'console_scripts': [
-            'sqlparse = sqlparse.__main__:main',
+            'sqlformat = sqlparse.__main__:main',
         ]
     },
 )
