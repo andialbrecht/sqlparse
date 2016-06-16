@@ -17,16 +17,16 @@ def extract_definitions(token_list):
     definitions = []
     tmp = []
     # grab the first token, ignoring whitespace. idx=1 to skip open (
-    token = token_list.token_next(1)
+    tidx, token = token_list.token_next(1)
     while token and not token.match(sqlparse.tokens.Punctuation, ')'):
         tmp.append(token)
         # grab the next token, this times including whitespace
-        token = token_list.token_next(token, skip_ws=False)
+        tidx, token = token_list.token_next(tidx, skip_ws=False)
         # split on ",", except when on end of statement
         if token and token.match(sqlparse.tokens.Punctuation, ','):
             definitions.append(tmp)
             tmp = []
-            token = token_list.token_next(token)
+            tidx, token = token_list.token_next(tidx)
     if tmp and isinstance(tmp[0], sqlparse.sql.Identifier):
         definitions.append(tmp)
     return definitions
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     parsed = sqlparse.parse(SQL)[0]
 
     # extract the parenthesis which holds column definitions
-    par = parsed.token_next_by(i=sqlparse.sql.Parenthesis)
+    _, par = parsed.token_next_by(i=sqlparse.sql.Parenthesis)
     columns = extract_definitions(par)
 
     for column in columns:

@@ -10,6 +10,7 @@ Internal Changes
   sqlparse.exceptions.
 * sqlparse.sql.Token.to_unicode was removed.
 * Lots of code cleanups and modernization (thanks esp. to vmuriart!).
+* Improved grouping performance. (sjoerdjob)
 
 Enhancements
 

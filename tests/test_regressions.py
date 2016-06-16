@@ -2,6 +2,7 @@
 
 import sys
 
+import pytest  # noqa
 from tests.utils import TestCaseBase, load_file
 
 import sqlparse
@@ -48,7 +49,7 @@ class RegressionTests(TestCaseBase):
         self.assert_(p.tokens[0].ttype is T.Comment.Single)
 
     def test_issue34(self):
-        t = sqlparse.parse("create")[0].token_next()
+        t = sqlparse.parse("create")[0].token_first()
         self.assertEqual(t.match(T.Keyword.DDL, "create"), True)
         self.assertEqual(t.match(T.Keyword.DDL, "CREATE"), True)
 
@@ -311,10 +312,3 @@ def test_issue207_runaway_format():
                            "          2 as two,",
                            "          3",
                            "   from dual) t0"])
-
-
-def test_case_within_parenthesis():
-    # see issue #164
-    s = '(case when 1=1 then 2 else 5 end)'
-    p = sqlparse.parse(s)[0]
-    assert isinstance(p[0][1], sql.Case)

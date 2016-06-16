@@ -104,23 +104,21 @@ class TestTokenList(unittest.TestCase):
 
     def test_token_first(self):
         p = sqlparse.parse(' select foo')[0]
-        first = p.token_next()
+        first = p.token_first()
         self.assertEqual(first.value, 'select')
-        self.assertEqual(p.token_next(skip_ws=False).value, ' ')
-        self.assertEqual(sql.TokenList([]).token_next(), None)
+        self.assertEqual(p.token_first(skip_ws=False).value, ' ')
+        self.assertEqual(sql.TokenList([]).token_first(), None)
 
     def test_token_matching(self):
         t1 = sql.Token(T.Keyword, 'foo')
         t2 = sql.Token(T.Punctuation, ',')
         x = sql.TokenList([t1, t2])
-        self.assertEqual(x.token_matching(0, [lambda t: t.ttype is T.Keyword]),
-                         t1)
         self.assertEqual(x.token_matching(
-            0,
-            [lambda t: t.ttype is T.Punctuation]),
-            t2)
-        self.assertEqual(x.token_matching(1, [lambda t: t.ttype is T.Keyword]),
-                         None)
+            [lambda t: t.ttype is T.Keyword], 0), t1)
+        self.assertEqual(x.token_matching(
+            [lambda t: t.ttype is T.Punctuation], 0), t2)
+        self.assertEqual(x.token_matching(
+            [lambda t: t.ttype is T.Keyword], 1), None)
 
 
 class TestStream(unittest.TestCase):

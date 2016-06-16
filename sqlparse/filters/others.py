@@ -16,21 +16,20 @@ class StripCommentsFilter(object):
             # TODO(andi) Comment types should be unified, see related issue38
             return tlist.token_next_by(i=sql.Comment, t=T.Comment)
 
-        token = get_next_comment()
+        tidx, token = get_next_comment()
         while token:
-            prev = tlist.token_prev(token, skip_ws=False)
-            next_ = tlist.token_next(token, skip_ws=False)
+            pidx, prev_ = tlist.token_prev(tidx, skip_ws=False)
+            nidx, next_ = tlist.token_next(tidx, skip_ws=False)
             # Replace by whitespace if prev and next exist and if they're not
             # whitespaces. This doesn't apply if prev or next is a paranthesis.
-            if (prev is None or next_ is None or
-                    prev.is_whitespace() or prev.match(T.Punctuation, '(') or
+            if (prev_ is None or next_ is None or
+                    prev_.is_whitespace() or prev_.match(T.Punctuation, '(') or
                     next_.is_whitespace() or next_.match(T.Punctuation, ')')):
                 tlist.tokens.remove(token)
             else:
-                tidx = tlist.token_index(token)
                 tlist.tokens[tidx] = sql.Token(T.Whitespace, ' ')
 
-            token = get_next_comment()
+            tidx, token = get_next_comment()
 
     def process(self, stmt):
         [self.process(sgroup) for sgroup in stmt.get_sublists()]
@@ -86,20 +85,21 @@ class StripWhitespaceFilter(object):
 class SpacesAroundOperatorsFilter(object):
     @staticmethod
     def _process(tlist):
-        def next_token(idx=0):
-            return tlist.token_next_by(t=(T.Operator, T.Comparison), idx=idx)
 
-        token = next_token()
+        ttypes = (T.Operator, T.Comparison)
+        tidx, token = tlist.token_next_by(t=ttypes)
         while token:
-            prev_ = tlist.token_prev(token, skip_ws=False)
-            if prev_ and prev_.ttype != T.Whitespace:
-                tlist.insert_before(token, sql.Token(T.Whitespace, ' '))
-
-            next_ = tlist.token_next(token, skip_ws=False)
+            nidx, next_ = tlist.token_next(tidx, skip_ws=False)
             if next_ and next_.ttype != T.Whitespace:
-                tlist.insert_after(token, sql.Token(T.Whitespace, ' '))
+                tlist.insert_after(tidx, sql.Token(T.Whitespace, ' '))
 
-            token = next_token(idx=token)
+            pidx, prev_ = tlist.token_prev(tidx, skip_ws=False)
+            if prev_ and prev_.ttype != T.Whitespace:
+                tlist.insert_before(tidx, sql.Token(T.Whitespace, ' '))
+                tidx += 1  # has to shift since token inserted before it
+
+            # assert tlist.token_index(token) == tidx
+            tidx, token = tlist.token_next_by(t=ttypes, idx=tidx)
 
     def process(self, stmt):
         [self.process(sgroup) for sgroup in stmt.get_sublists()]

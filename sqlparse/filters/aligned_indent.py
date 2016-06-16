@@ -46,7 +46,8 @@ class AlignedIndentFilter(object):
 
     def _process_parenthesis(self, tlist):
         # if this isn't a subquery, don't re-indent
-        if tlist.token_next_by(m=(T.DML, 'SELECT')):
+        _, token = tlist.token_next_by(m=(T.DML, 'SELECT'))
+        if token is not None:
             with indent(self):
                 tlist.insert_after(tlist[0], self.nl('SELECT'))
                 # process the inside of the parantheses
@@ -66,7 +67,7 @@ class AlignedIndentFilter(object):
         offset_ = len('case ') + len('when ')
         cases = tlist.get_cases(skip_ws=True)
         # align the end as well
-        end_token = tlist.token_next_by(m=(T.Keyword, 'END'))
+        _, end_token = tlist.token_next_by(m=(T.Keyword, 'END'))
         cases.append((None, [end_token]))
 
         condition_width = [len(' '.join(map(text_type, cond))) if cond else 0
@@ -85,18 +86,18 @@ class AlignedIndentFilter(object):
                     max_cond_width - condition_width[i]))
                 tlist.insert_after(cond[-1], ws)
 
-    def _next_token(self, tlist, idx=0):
+    def _next_token(self, tlist, idx=-1):
         split_words = T.Keyword, self.split_words, True
-        token = tlist.token_next_by(m=split_words, idx=idx)
+        tidx, token = tlist.token_next_by(m=split_words, idx=idx)
         # treat "BETWEEN x and y" as a single statement
-        if token and token.value.upper() == 'BETWEEN':
-            token = self._next_token(tlist, token)
-            if token and token.value.upper() == 'AND':
-                token = self._next_token(tlist, token)
-        return token
+        if token and token.normalized == 'BETWEEN':
+            tidx, token = self._next_token(tlist, tidx)
+            if token and token.normalized == 'AND':
+                tidx, token = self._next_token(tlist, tidx)
+        return tidx, token
 
     def _split_kwds(self, tlist):
-        token = self._next_token(tlist)
+        tidx, token = self._next_token(tlist)
         while token:
             # joins are special case. only consider the first word as aligner
             if token.match(T.Keyword, self.join_words, regex=True):
@@ -104,15 +105,17 @@ class AlignedIndentFilter(object):
             else:
                 token_indent = text_type(token)
             tlist.insert_before(token, self.nl(token_indent))
-            token = self._next_token(tlist, token)
+            tidx += 1
+            tidx, token = self._next_token(tlist, tidx)
 
     def _process_default(self, tlist):
         self._split_kwds(tlist)
         # process any sub-sub statements
         for sgroup in tlist.get_sublists():
-            prev = tlist.token_prev(sgroup)
+            idx = tlist.token_index(sgroup)
+            pidx, prev_ = tlist.token_prev(idx)
             # HACK: make "group/order by" work. Longer than max_len.
-            offset_ = 3 if (prev and prev.match(T.Keyword, 'BY')) else 0
+            offset_ = 3 if (prev_ and prev_.match(T.Keyword, 'BY')) else 0
             with offset(self, offset_):
                 self._process(sgroup)
 
