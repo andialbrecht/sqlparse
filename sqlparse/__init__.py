@@ -14,7 +14,7 @@ from sqlparse import tokens
 from sqlparse import filters
 from sqlparse import formatter
 
-from sqlparse.compat import u
+from sqlparse.compat import text_type
 
 __version__ = '0.2.0.dev0'
 __all__ = ['engine', 'filters', 'formatter', 'sql', 'tokens']
@@ -67,4 +67,4 @@ def split(sql, encoding=None):
     :returns: A list of strings.
     """
     stack = engine.FilterStack()
-    return [u(stmt).strip() for stmt in stack.run(sql, encoding)]
+    return [text_type(stmt).strip() for stmt in stack.run(sql, encoding)]
