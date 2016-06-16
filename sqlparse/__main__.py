@@ -18,11 +18,11 @@ _CASE_CHOICES = ['upper', 'lower', 'capitalize']
 # TODO: Add CLI Tests
 # TODO: Simplify formatter by using argparse `type` arguments
 parser = argparse.ArgumentParser(
-    prog='sqlparse',
+    prog='sqlformat',
     description='Format FILE according to OPTIONS. Use "-" as FILE '
                 'to read from stdin.',
     usage='%(prog)s  [OPTIONS] FILE, ...',
-    version=sqlparse.__version__,)
+)
 
 parser.add_argument('filename')
 
@@ -31,6 +31,11 @@ parser.add_argument(
     dest='outfile',
     metavar='FILE',
     help='write output to FILE (defaults to stdout)')
+
+parser.add_argument(
+    '--version',
+    action='version',
+    version=sqlparse.__version__)
 
 group = parser.add_argument_group('Formatting Options')
 
