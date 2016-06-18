@@ -99,10 +99,10 @@ def group_period(tlist):
     def valid_next(token):
         sqlcls = sql.SquareBrackets, sql.Function
         ttypes = T.Name, T.String.Symbol, T.Wildcard
-        return imt(token, i=sqlcls, t=ttypes)
+        return token is None or imt(token, i=sqlcls, t=ttypes)
 
     def post(tlist, pidx, tidx, nidx):
-        return pidx, nidx
+        return (pidx, nidx) if nidx is not None else (pidx, tidx)
 
     _group(tlist, sql.Identifier, match, valid_prev, valid_next, post)
 
