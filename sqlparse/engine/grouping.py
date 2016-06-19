@@ -97,12 +97,17 @@ def group_period(tlist):
         return imt(token, i=sqlcls, t=ttypes)
 
     def valid_next(token):
-        sqlcls = sql.SquareBrackets, sql.Function
-        ttypes = T.Name, T.String.Symbol, T.Wildcard
-        return token is None or imt(token, i=sqlcls, t=ttypes)
+        # issue261, allow invalid next token
+        return True
 
     def post(tlist, pidx, tidx, nidx):
-        return (pidx, nidx) if nidx is not None else (pidx, tidx)
+        # next_ validation is being performed here. issue261
+        sqlcls = sql.SquareBrackets, sql.Function
+        ttypes = T.Name, T.String.Symbol, T.Wildcard
+        next_ = tlist[nidx] if nidx is not None else None
+        valid_next = imt(next_, i=sqlcls, t=ttypes)
+
+        return (pidx, nidx) if valid_next else (pidx, tidx)
 
     _group(tlist, sql.Identifier, match, valid_prev, valid_next, post)
 
