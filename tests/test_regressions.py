@@ -3,15 +3,14 @@
 import sys
 
 import pytest  # noqa
-from tests.utils import TestCaseBase, load_file
 
 import sqlparse
 from sqlparse import sql
 from sqlparse import tokens as T
+from tests.utils import TestCaseBase, load_file
 
 
 class RegressionTests(TestCaseBase):
-
     def test_issue9(self):
         # make sure where doesn't consume parenthesis
         p = sqlparse.parse('(where 1)')[0]
@@ -57,16 +56,16 @@ class RegressionTests(TestCaseBase):
         # missing space before LIMIT
         sql = sqlparse.format("select * from foo where bar = 1 limit 1",
                               reindent=True)
-        self.ndiffAssertEqual(sql, "\n".join(["select *",
-                                              "from foo",
-                                              "where bar = 1 limit 1"]))
+        assert sql == "\n".join(["select *",
+                                 "from foo",
+                                 "where bar = 1 limit 1"])
 
     def test_issue38(self):
         sql = sqlparse.format("SELECT foo; -- comment",
                               strip_comments=True)
-        self.ndiffAssertEqual(sql, "SELECT foo;")
+        assert sql == "SELECT foo;"
         sql = sqlparse.format("/* foo */", strip_comments=True)
-        self.ndiffAssertEqual(sql, "")
+        assert sql == ""
 
     def test_issue39(self):
         p = sqlparse.parse('select user.id from user')[0]
@@ -89,26 +88,22 @@ class RegressionTests(TestCaseBase):
         sp = p.tokens[-1].tokens[0]
         self.assertEqual(sp.tokens[3].__class__, sql.IdentifierList)
         # make sure that formatting works as expected
-        self.ndiffAssertEqual(
-            sqlparse.format(('SELECT id, name FROM '
-                             '(SELECT id, name FROM bar)'),
-                            reindent=True),
-            ('SELECT id,\n'
-             '       name\n'
-             'FROM\n'
-             '  (SELECT id,\n'
-             '          name\n'
-             '   FROM bar)'))
-        self.ndiffAssertEqual(
-            sqlparse.format(('SELECT id, name FROM '
-                             '(SELECT id, name FROM bar) as foo'),
-                            reindent=True),
-            ('SELECT id,\n'
-             '       name\n'
-             'FROM\n'
-             '  (SELECT id,\n'
-             '          name\n'
-             '   FROM bar) as foo'))
+        assert sqlparse.format(('SELECT id ==  name FROM '
+                                '(SELECT id, name FROM bar)'),
+                               reindent=True), ('SELECT id,\n'
+                                                '       name\n'
+                                                'FROM\n'
+                                                '  (SELECT id,\n'
+                                                '          name\n'
+                                                '   FROM bar)')
+        assert sqlparse.format(('SELECT id ==  name FROM '
+                                '(SELECT id, name FROM bar) as foo'),
+                               reindent=True), ('SELECT id,\n'
+                                                '       name\n'
+                                                'FROM\n'
+                                                '  (SELECT id,\n'
+                                                '          name\n'
+                                                '   FROM bar) as foo')
 
 
 def test_issue78():
@@ -116,6 +111,7 @@ def test_issue78():
     def _get_identifier(sql):
         p = sqlparse.parse(sql)[0]
         return p.tokens[2]
+
     results = (('get_name', 'z'),
                ('get_real_name', 'y'),
                ('get_parent_name', 'x'),

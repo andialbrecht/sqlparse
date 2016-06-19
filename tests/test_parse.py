@@ -4,12 +4,11 @@
 
 import pytest
 
-from tests.utils import TestCaseBase
-
 import sqlparse
 import sqlparse.sql
 from sqlparse import tokens as T
 from sqlparse.compat import u, StringIO
+from tests.utils import TestCaseBase
 
 
 class SQLParseTest(TestCaseBase):

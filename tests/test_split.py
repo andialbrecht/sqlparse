@@ -4,10 +4,11 @@
 
 import types
 
-from tests.utils import load_file, TestCaseBase
+import pytest
 
 import sqlparse
 from sqlparse.compat import StringIO, u, text_type
+from tests.utils import load_file, TestCaseBase
 
 
 class SQLSplitTest(TestCaseBase):
@@ -20,8 +21,8 @@ class SQLSplitTest(TestCaseBase):
         sql2 = 'select * from foo where bar = \'foo;bar\';'
         stmts = sqlparse.parse(''.join([self._sql1, sql2]))
         self.assertEqual(len(stmts), 2)
-        self.ndiffAssertEqual(u(stmts[0]), self._sql1)
-        self.ndiffAssertEqual(u(stmts[1]), sql2)
+        assert u(stmts[0]) == self._sql1
+        assert u(stmts[1]) == sql2
 
     def test_split_backslash(self):
         stmts = sqlparse.parse(r"select '\\'; select '\''; select '\\\'';")
@@ -31,31 +32,31 @@ class SQLSplitTest(TestCaseBase):
         sql = load_file('function.sql')
         stmts = sqlparse.parse(sql)
         self.assertEqual(len(stmts), 1)
-        self.ndiffAssertEqual(u(stmts[0]), sql)
+        assert u(stmts[0]) == sql
 
     def test_create_function_psql(self):
         sql = load_file('function_psql.sql')
         stmts = sqlparse.parse(sql)
         self.assertEqual(len(stmts), 1)
-        self.ndiffAssertEqual(u(stmts[0]), sql)
+        assert u(stmts[0]) == sql
 
     def test_create_function_psql3(self):
         sql = load_file('function_psql3.sql')
         stmts = sqlparse.parse(sql)
         self.assertEqual(len(stmts), 1)
-        self.ndiffAssertEqual(u(stmts[0]), sql)
+        assert u(stmts[0]) == sql
 
     def test_create_function_psql2(self):
         sql = load_file('function_psql2.sql')
         stmts = sqlparse.parse(sql)
         self.assertEqual(len(stmts), 1)
-        self.ndiffAssertEqual(u(stmts[0]), sql)
+        assert u(stmts[0]) == sql
 
     def test_dashcomments(self):
         sql = load_file('dashcomment.sql')
         stmts = sqlparse.parse(sql)
         self.assertEqual(len(stmts), 3)
-        self.ndiffAssertEqual(''.join(u(q) for q in stmts), sql)
+        assert ''.join(u(q) for q in stmts) == sql
 
     def test_dashcomments_eol(self):
         stmts = sqlparse.parse('select foo; -- comment\n')
@@ -71,19 +72,19 @@ class SQLSplitTest(TestCaseBase):
         sql = load_file('begintag.sql')
         stmts = sqlparse.parse(sql)
         self.assertEqual(len(stmts), 3)
-        self.ndiffAssertEqual(''.join(u(q) for q in stmts), sql)
+        assert ''.join(u(q) for q in stmts) == sql
 
     def test_begintag_2(self):
         sql = load_file('begintag_2.sql')
         stmts = sqlparse.parse(sql)
         self.assertEqual(len(stmts), 1)
-        self.ndiffAssertEqual(''.join(u(q) for q in stmts), sql)
+        assert ''.join(u(q) for q in stmts) == sql
 
     def test_dropif(self):
         sql = 'DROP TABLE IF EXISTS FOO;\n\nSELECT * FROM BAR;'
         stmts = sqlparse.parse(sql)
         self.assertEqual(len(stmts), 2)
-        self.ndiffAssertEqual(''.join(u(q) for q in stmts), sql)
+        assert ''.join(u(q) for q in stmts) == sql
 
     def test_comment_with_umlaut(self):
         sql = (u'select * from foo;\n'
@@ -91,16 +92,16 @@ class SQLSplitTest(TestCaseBase):
                u'select * from bar;')
         stmts = sqlparse.parse(sql)
         self.assertEqual(len(stmts), 2)
-        self.ndiffAssertEqual(''.join(u(q) for q in stmts), sql)
+        assert ''.join(u(q) for q in stmts) == sql
 
     def test_comment_end_of_line(self):
         sql = ('select * from foo; -- foo\n'
                'select * from bar;')
         stmts = sqlparse.parse(sql)
         self.assertEqual(len(stmts), 2)
-        self.ndiffAssertEqual(''.join(u(q) for q in stmts), sql)
+        assert ''.join(u(q) for q in stmts) == sql
         # make sure the comment belongs to first query
-        self.ndiffAssertEqual(u(stmts[0]), 'select * from foo; -- foo\n')
+        assert u(stmts[0]) == 'select * from foo; -- foo\n'
 
     def test_casewhen(self):
         sql = ('SELECT case when val = 1 then 2 else null end as foo;\n'

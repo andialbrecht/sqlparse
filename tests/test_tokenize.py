@@ -13,7 +13,6 @@ from sqlparse.compat import StringIO
 
 
 class TestTokenize(unittest.TestCase):
-
     def test_simple(self):
         s = 'select * from foo;'
         stream = lexer.tokenize(s)
@@ -74,7 +73,6 @@ class TestTokenize(unittest.TestCase):
 
 
 class TestToken(unittest.TestCase):
-
     def test_str(self):
         token = sql.Token(None, 'FoO')
         self.assertEqual(str(token), 'FoO')
@@ -96,7 +94,6 @@ class TestToken(unittest.TestCase):
 
 
 class TestTokenList(unittest.TestCase):
-
     def test_repr(self):
         p = sqlparse.parse('foo, bar, baz')[0]
         tst = "<IdentifierList 'foo, b...' at 0x"
