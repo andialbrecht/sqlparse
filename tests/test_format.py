@@ -4,10 +4,9 @@ import pytest
 
 import sqlparse
 from sqlparse.exceptions import SQLParseError
-from tests.utils import TestCaseBase
 
 
-class TestFormat(TestCaseBase):
+class TestFormat(object):
     def test_keywordcase(self):
         sql = 'select * from bar; -- select foo\n'
         res = sqlparse.format(sql, keyword_case='upper')
@@ -16,8 +15,8 @@ class TestFormat(TestCaseBase):
         assert res == 'Select * From bar; -- select foo\n'
         res = sqlparse.format(sql.upper(), keyword_case='lower')
         assert res == 'select * from BAR; -- SELECT FOO\n'
-        self.assertRaises(SQLParseError, sqlparse.format, sql,
-                          keyword_case='foo')
+        with pytest.raises(SQLParseError):
+            sqlparse.format(sql, keyword_case='foo')
 
     def test_identifiercase(self):
         sql = 'select * from bar; -- select foo\n'
@@ -27,8 +26,8 @@ class TestFormat(TestCaseBase):
         assert res == 'select * from Bar; -- select foo\n'
         res = sqlparse.format(sql.upper(), identifier_case='lower')
         assert res == 'SELECT * FROM bar; -- SELECT FOO\n'
-        self.assertRaises(SQLParseError, sqlparse.format, sql,
-                          identifier_case='foo')
+        with pytest.raises(SQLParseError):
+            sqlparse.format(sql, identifier_case='foo')
         sql = 'select * from "foo"."bar"'
         res = sqlparse.format(sql, identifier_case="upper")
         assert res == 'select * from "foo"."bar"'
@@ -43,8 +42,8 @@ class TestFormat(TestCaseBase):
         sql = 'select-- foo\nfrom -- bar\nwhere'
         res = sqlparse.format(sql, strip_comments=True)
         assert res == 'select from where'
-        self.assertRaises(SQLParseError, sqlparse.format, sql,
-                          strip_comments=None)
+        with pytest.raises(SQLParseError):
+            sqlparse.format(sql, strip_comments=None)
 
     def test_strip_comments_multi(self):
         sql = '/* sql starts here */\nselect'
@@ -69,8 +68,8 @@ class TestFormat(TestCaseBase):
         assert f(s) == 'select * from foo where (1 = 2)'
         s = 'select -- foo\nfrom    bar\n'
         assert f(s) == 'select -- foo\nfrom bar'
-        self.assertRaises(SQLParseError, sqlparse.format, s,
-                          strip_whitespace=None)
+        with pytest.raises(SQLParseError):
+            sqlparse.format(s, strip_whitespace=None)
 
     def test_preserve_ws(self):
         # preserve at least one whitespace after subgroups
@@ -93,16 +92,16 @@ class TestFormat(TestCaseBase):
         assert f(s1) == "SELECT some_column LIKE 'value\r'"
         assert f(s2) == "SELECT some_column LIKE 'value\r'\nWHERE id = 1\n"
         assert f(s3) == "SELECT some_column LIKE 'value\\'\r' WHERE id = 1\n"
-        assert f(
-            s4) == "SELECT some_column LIKE 'value\\\\\\'\r' WHERE id = 1\n"
+        assert (f(s4) ==
+                "SELECT some_column LIKE 'value\\\\\\'\r' WHERE id = 1\n")
 
     def test_outputformat(self):
         sql = 'select * from foo;'
-        self.assertRaises(SQLParseError, sqlparse.format, sql,
-                          output_format='foo')
+        with pytest.raises(SQLParseError):
+            sqlparse.format(sql, output_format='foo')
 
 
-class TestFormatReindentAligned(TestCaseBase):
+class TestFormatReindentAligned(object):
     @staticmethod
     def formatter(sql):
         return sqlparse.format(sql, reindent_aligned=True)
@@ -281,7 +280,7 @@ class TestFormatReindentAligned(TestCaseBase):
         ])
 
 
-class TestSpacesAroundOperators(TestCaseBase):
+class TestSpacesAroundOperators(object):
     @staticmethod
     def formatter(sql):
         return sqlparse.format(sql, use_space_around_operators=True)
@@ -309,20 +308,20 @@ class TestSpacesAroundOperators(TestCaseBase):
         assert self.formatter(sql) == 'select a * b - c from table'
 
 
-class TestFormatReindent(TestCaseBase):
+class TestFormatReindent(object):
     def test_option(self):
-        self.assertRaises(SQLParseError, sqlparse.format, 'foo',
-                          reindent=2)
-        self.assertRaises(SQLParseError, sqlparse.format, 'foo',
-                          indent_tabs=2)
-        self.assertRaises(SQLParseError, sqlparse.format, 'foo',
-                          reindent=True, indent_width='foo')
-        self.assertRaises(SQLParseError, sqlparse.format, 'foo',
-                          reindent=True, indent_width=-12)
-        self.assertRaises(SQLParseError, sqlparse.format, 'foo',
-                          reindent=True, wrap_after='foo')
-        self.assertRaises(SQLParseError, sqlparse.format, 'foo',
-                          reindent=True, wrap_after=-12)
+        with pytest.raises(SQLParseError):
+            sqlparse.format('foo', reindent=2)
+        with pytest.raises(SQLParseError):
+            sqlparse.format('foo', indent_tabs=2)
+        with pytest.raises(SQLParseError):
+            sqlparse.format('foo', reindent=True, indent_width='foo')
+        with pytest.raises(SQLParseError):
+            sqlparse.format('foo', reindent=True, indent_width=-12)
+        with pytest.raises(SQLParseError):
+            sqlparse.format('foo', reindent=True, wrap_after='foo')
+        with pytest.raises(SQLParseError):
+            sqlparse.format('foo', reindent=True, wrap_after=-12)
 
     def test_stmts(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)
@@ -357,8 +356,7 @@ class TestFormatReindent(TestCaseBase):
                                   'from',
                                   '  (select *',
                                   '   from foo);',
-                                  ]
-                                 )
+                                  ])
 
     def test_where(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)
@@ -386,13 +384,13 @@ class TestFormatReindent(TestCaseBase):
         s = 'select * from foo left outer join bar on 1 = 2'
         assert f(s) == '\n'.join(['select *',
                                   'from foo',
-                                  'left outer join bar on 1 = 2']
-                                 )
+                                  'left outer join bar on 1 = 2'
+                                  ])
         s = 'select * from foo straight_join bar on 1 = 2'
         assert f(s) == '\n'.join(['select *',
                                   'from foo',
-                                  'straight_join bar on 1 = 2']
-                                 )
+                                  'straight_join bar on 1 = 2'
+                                  ])
 
     def test_identifier_list(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)
@@ -402,12 +400,14 @@ class TestFormatReindent(TestCaseBase):
                                   '       baz',
                                   'from table1,',
                                   '     table2',
-                                  'where 1 = 2'])
+                                  'where 1 = 2'
+                                  ])
         s = 'select a.*, b.id from a, b'
         assert f(s) == '\n'.join(['select a.*,',
                                   '       b.id',
                                   'from a,',
-                                  '     b'])
+                                  '     b'
+                                  ])
 
     def test_identifier_list_with_wrap_after(self):
         f = lambda sql: sqlparse.format(sql, reindent=True, wrap_after=14)
@@ -415,7 +415,8 @@ class TestFormatReindent(TestCaseBase):
         assert f(s) == '\n'.join(['select foo, bar,',
                                   '       baz',
                                   'from table1, table2',
-                                  'where 1 = 2'])
+                                  'where 1 = 2'
+                                  ])
 
     def test_identifier_list_with_functions(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)
@@ -486,7 +487,7 @@ class TestFormatReindent(TestCaseBase):
                                   'from dual'])
 
 
-class TestOutputFormat(TestCaseBase):
+class TestOutputFormat(object):
     def test_python(self):
         sql = 'select * from foo;'
         f = lambda sql: sqlparse.format(sql, output_format='python')
@@ -547,16 +548,17 @@ def test_truncate_strings():
 
 
 def test_truncate_strings_invalid_option():
-    pytest.raises(SQLParseError, sqlparse.format,
-                  'foo', truncate_strings='bar')
-    pytest.raises(SQLParseError, sqlparse.format,
-                  'foo', truncate_strings=-1)
-    pytest.raises(SQLParseError, sqlparse.format,
-                  'foo', truncate_strings=0)
+    pytest.raises(SQLParseError, sqlparse.format, 'foo',
+                  truncate_strings='bar')
+    pytest.raises(SQLParseError, sqlparse.format, 'foo',
+                  truncate_strings=-1)
+    pytest.raises(SQLParseError, sqlparse.format, 'foo',
+                  truncate_strings=0)
 
 
 @pytest.mark.parametrize('sql', ['select verrrylongcolumn from foo',
-                                 'select "verrrylongcolumn" from "foo"'])
+                                 'select "verrrylongcolumn" from "foo"',
+                                 ])
 def test_truncate_strings_doesnt_truncate_identifiers(sql):
     formatted = sqlparse.format(sql, truncate_strings=2)
     assert formatted == sql

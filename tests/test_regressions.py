@@ -5,52 +5,51 @@ import sys
 import pytest  # noqa
 
 import sqlparse
-from sqlparse import sql
-from sqlparse import tokens as T
-from tests.utils import TestCaseBase, load_file
+from sqlparse import sql, tokens as T
+from tests.utils import load_file
 
 
-class RegressionTests(TestCaseBase):
+class RegressionTests(object):
     def test_issue9(self):
         # make sure where doesn't consume parenthesis
         p = sqlparse.parse('(where 1)')[0]
-        self.assert_(isinstance(p, sql.Statement))
-        self.assertEqual(len(p.tokens), 1)
-        self.assert_(isinstance(p.tokens[0], sql.Parenthesis))
+        assert isinstance(p, sql.Statement)
+        assert len(p.tokens) == 1
+        assert isinstance(p.tokens[0], sql.Parenthesis)
         prt = p.tokens[0]
-        self.assertEqual(len(prt.tokens), 3)
-        self.assertEqual(prt.tokens[0].ttype, T.Punctuation)
-        self.assertEqual(prt.tokens[-1].ttype, T.Punctuation)
+        assert len(prt.tokens) == 3
+        assert prt.tokens[0].ttype == T.Punctuation
+        assert prt.tokens[-1].ttype == T.Punctuation
 
     def test_issue13(self):
         parsed = sqlparse.parse(("select 'one';\n"
                                  "select 'two\\'';\n"
                                  "select 'three';"))
-        self.assertEqual(len(parsed), 3)
-        self.assertEqual(str(parsed[1]).strip(), "select 'two\\'';")
+        assert len(parsed) == 3
+        assert str(parsed[1]).strip() == "select 'two\\'';"
 
     def test_issue26(self):
         # parse stand-alone comments
         p = sqlparse.parse('--hello')[0]
-        self.assertEqual(len(p.tokens), 1)
-        self.assert_(p.tokens[0].ttype is T.Comment.Single)
+        assert len(p.tokens) == 1
+        assert p.tokens[0].ttype is T.Comment.Single
         p = sqlparse.parse('-- hello')[0]
-        self.assertEqual(len(p.tokens), 1)
-        self.assert_(p.tokens[0].ttype is T.Comment.Single)
+        assert len(p.tokens) == 1
+        assert p.tokens[0].ttype is T.Comment.Single
         p = sqlparse.parse('--hello\n')[0]
-        self.assertEqual(len(p.tokens), 1)
-        self.assert_(p.tokens[0].ttype is T.Comment.Single)
+        assert len(p.tokens) == 1
+        assert p.tokens[0].ttype is T.Comment.Single
         p = sqlparse.parse('--')[0]
-        self.assertEqual(len(p.tokens), 1)
-        self.assert_(p.tokens[0].ttype is T.Comment.Single)
+        assert len(p.tokens) == 1
+        assert p.tokens[0].ttype is T.Comment.Single
         p = sqlparse.parse('--\n')[0]
-        self.assertEqual(len(p.tokens), 1)
-        self.assert_(p.tokens[0].ttype is T.Comment.Single)
+        assert len(p.tokens) == 1
+        assert p.tokens[0].ttype is T.Comment.Single
 
     def test_issue34(self):
         t = sqlparse.parse("create")[0].token_first()
-        self.assertEqual(t.match(T.Keyword.DDL, "create"), True)
-        self.assertEqual(t.match(T.Keyword.DDL, "CREATE"), True)
+        assert t.match(T.Keyword.DDL, "create") is True
+        assert t.match(T.Keyword.DDL, "CREATE") is True
 
     def test_issue35(self):
         # missing space before LIMIT
@@ -69,24 +68,24 @@ class RegressionTests(TestCaseBase):
 
     def test_issue39(self):
         p = sqlparse.parse('select user.id from user')[0]
-        self.assertEqual(len(p.tokens), 7)
+        assert len(p.tokens) == 7
         idt = p.tokens[2]
-        self.assertEqual(idt.__class__, sql.Identifier)
-        self.assertEqual(len(idt.tokens), 3)
-        self.assertEqual(idt.tokens[0].match(T.Name, 'user'), True)
-        self.assertEqual(idt.tokens[1].match(T.Punctuation, '.'), True)
-        self.assertEqual(idt.tokens[2].match(T.Name, 'id'), True)
+        assert idt.__class__ == sql.Identifier
+        assert len(idt.tokens) == 3
+        assert idt.tokens[0].match(T.Name, 'user') is True
+        assert idt.tokens[1].match(T.Punctuation, '.') is True
+        assert idt.tokens[2].match(T.Name, 'id') is True
 
     def test_issue40(self):
         # make sure identifier lists in subselects are grouped
         p = sqlparse.parse(('SELECT id, name FROM '
                             '(SELECT id, name FROM bar) as foo'))[0]
-        self.assertEqual(len(p.tokens), 7)
-        self.assertEqual(p.tokens[2].__class__, sql.IdentifierList)
-        self.assertEqual(p.tokens[-1].__class__, sql.Identifier)
-        self.assertEqual(p.tokens[-1].get_name(), u'foo')
+        assert len(p.tokens) == 7
+        assert p.tokens[2].__class__ == sql.IdentifierList
+        assert p.tokens[-1].__class__ == sql.Identifier
+        assert p.tokens[-1].get_name() == u'foo'
         sp = p.tokens[-1].tokens[0]
-        self.assertEqual(sp.tokens[3].__class__, sql.IdentifierList)
+        assert sp.tokens[3].__class__ == sql.IdentifierList
         # make sure that formatting works as expected
         assert sqlparse.format(('SELECT id ==  name FROM '
                                 '(SELECT id, name FROM bar)'),
@@ -136,24 +135,23 @@ def test_issue78():
 
 
 def test_issue83():
-    sql = """
-CREATE OR REPLACE FUNCTION func_a(text)
-  RETURNS boolean  LANGUAGE plpgsql STRICT IMMUTABLE AS
-$_$
-BEGIN
- ...
-END;
-$_$;
+    sql = """   CREATE OR REPLACE FUNCTION func_a(text)
+                  RETURNS boolean  LANGUAGE plpgsql STRICT IMMUTABLE AS
+                $_$
+                BEGIN
+                 ...
+                END;
+                $_$;
 
-CREATE OR REPLACE FUNCTION func_b(text)
-  RETURNS boolean  LANGUAGE plpgsql STRICT IMMUTABLE AS
-$_$
-BEGIN
- ...
-END;
-$_$;
+                CREATE OR REPLACE FUNCTION func_b(text)
+                  RETURNS boolean  LANGUAGE plpgsql STRICT IMMUTABLE AS
+                $_$
+                BEGIN
+                 ...
+                END;
+                $_$;
 
-ALTER TABLE..... ;"""
+                ALTER TABLE..... ;"""
     t = sqlparse.split(sql)
     assert len(t) == 3
 
@@ -243,26 +241,26 @@ def test_null_with_as():
 
 
 def test_issue193_splitting_function():
-    sql = """CREATE FUNCTION a(x VARCHAR(20)) RETURNS VARCHAR(20)
-BEGIN
- DECLARE y VARCHAR(20);
- RETURN x;
-END;
-SELECT * FROM a.b;"""
+    sql = """   CREATE FUNCTION a(x VARCHAR(20)) RETURNS VARCHAR(20)
+                BEGIN
+                 DECLARE y VARCHAR(20);
+                 RETURN x;
+                END;
+                SELECT * FROM a.b;"""
     splitted = sqlparse.split(sql)
     assert len(splitted) == 2
 
 
 def test_issue194_splitting_function():
-    sql = """CREATE FUNCTION a(x VARCHAR(20)) RETURNS VARCHAR(20)
-BEGIN
- DECLARE y VARCHAR(20);
- IF (1 = 1) THEN
- SET x = y;
- END IF;
- RETURN x;
-END;
-SELECT * FROM a.b;"""
+    sql = """   CREATE FUNCTION a(x VARCHAR(20)) RETURNS VARCHAR(20)
+                BEGIN
+                 DECLARE y VARCHAR(20);
+                 IF (1 = 1) THEN
+                 SET x = y;
+                 END IF;
+                 RETURN x;
+                END;
+                SELECT * FROM a.b;"""
     splitted = sqlparse.split(sql)
     assert len(splitted) == 2
 
@@ -291,11 +289,11 @@ def test_issue227_gettype_cte():
     with_stmt = sqlparse.parse('WITH foo AS (SELECT 1, 2, 3)'
                                'SELECT * FROM foo;')
     assert with_stmt[0].get_type() == 'SELECT'
-    with2_stmt = sqlparse.parse('''
+    with2_stmt = sqlparse.parse("""
         WITH foo AS (SELECT 1 AS abc, 2 AS def),
              bar AS (SELECT * FROM something WHERE x > 1)
         INSERT INTO elsewhere SELECT * FROM foo JOIN bar;
-    ''')
+    """)
     assert with2_stmt[0].get_type() == 'INSERT'
 
 

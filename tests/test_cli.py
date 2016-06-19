@@ -7,7 +7,6 @@ import sys
 import pytest
 
 import sqlparse
-import sqlparse.__main__
 from tests.utils import FILES_DIR
 
 path = os.path.join(FILES_DIR, 'function.sql')

@@ -3,93 +3,90 @@
 import pytest
 
 import sqlparse
-from sqlparse import sql
-from sqlparse import tokens as T
-from sqlparse.compat import u
-from tests.utils import TestCaseBase
+from sqlparse import sql, tokens as T
 
 
-class TestGrouping(TestCaseBase):
+class TestGrouping(object):
     def test_parenthesis(self):
         s = 'select (select (x3) x2) and (y2) bar'
         parsed = sqlparse.parse(s)[0]
-        assert s == str(parsed)
-        self.assertEqual(len(parsed.tokens), 7)
-        self.assert_(isinstance(parsed.tokens[2], sql.Parenthesis))
-        self.assert_(isinstance(parsed.tokens[-1], sql.Identifier))
-        self.assertEqual(len(parsed.tokens[2].tokens), 5)
-        self.assert_(isinstance(parsed.tokens[2].tokens[3], sql.Identifier))
-        self.assert_(isinstance(parsed.tokens[2].tokens[3].tokens[0],
-                                sql.Parenthesis))
-        self.assertEqual(len(parsed.tokens[2].tokens[3].tokens), 3)
+        assert str(parsed) == s
+        assert len(parsed.tokens) == 7
+        assert isinstance(parsed.tokens[2], sql.Parenthesis)
+        assert isinstance(parsed.tokens[-1], sql.Identifier)
+        assert len(parsed.tokens[2].tokens) == 5
+        assert isinstance(parsed.tokens[2].tokens[3], sql.Identifier)
+        assert isinstance(parsed.tokens[2].tokens[3].tokens[0],
+                          sql.Parenthesis)
+        assert len(parsed.tokens[2].tokens[3].tokens) == 3
 
     def test_comments(self):
         s = '/*\n * foo\n */   \n  bar'
         parsed = sqlparse.parse(s)[0]
-        assert s == u(parsed)
+        assert str(parsed) == s
         self.assertEqual(len(parsed.tokens), 2)
 
     def test_assignment(self):
         s = 'foo := 1;'
         parsed = sqlparse.parse(s)[0]
-        self.assertEqual(len(parsed.tokens), 1)
-        self.assert_(isinstance(parsed.tokens[0], sql.Assignment))
+        assert len(parsed.tokens) == 1
+        assert isinstance(parsed.tokens[0], sql.Assignment)
         s = 'foo := 1'
         parsed = sqlparse.parse(s)[0]
-        self.assertEqual(len(parsed.tokens), 1)
-        self.assert_(isinstance(parsed.tokens[0], sql.Assignment))
+        assert len(parsed.tokens) == 1
+        assert isinstance(parsed.tokens[0], sql.Assignment)
 
     def test_identifiers(self):
         s = 'select foo.bar from "myscheme"."table" where fail. order'
         parsed = sqlparse.parse(s)[0]
-        assert s == u(parsed)
-        self.assert_(isinstance(parsed.tokens[2], sql.Identifier))
-        self.assert_(isinstance(parsed.tokens[6], sql.Identifier))
-        self.assert_(isinstance(parsed.tokens[8], sql.Where))
+        assert str(parsed) == s
+        assert isinstance(parsed.tokens[2], sql.Identifier)
+        assert isinstance(parsed.tokens[6], sql.Identifier)
+        assert isinstance(parsed.tokens[8], sql.Where)
         s = 'select * from foo where foo.id = 1'
         parsed = sqlparse.parse(s)[0]
-        assert s == u(parsed)
-        self.assert_(isinstance(parsed.tokens[-1].tokens[-1].tokens[0],
-                                sql.Identifier))
+        assert str(parsed) == s
+        assert isinstance(parsed.tokens[-1].tokens[-1].tokens[0],
+                          sql.Identifier)
         s = 'select * from (select "foo"."id" from foo)'
         parsed = sqlparse.parse(s)[0]
-        assert s == u(parsed)
-        self.assert_(isinstance(parsed.tokens[-1].tokens[3], sql.Identifier))
+        assert str(parsed) == s
+        assert isinstance(parsed.tokens[-1].tokens[3], sql.Identifier)
 
         s = "INSERT INTO `test` VALUES('foo', 'bar');"
         parsed = sqlparse.parse(s)[0]
         types = [l.ttype for l in parsed.tokens if not l.is_whitespace()]
-        self.assertEquals(types, [T.DML, T.Keyword, None,
-                                  T.Keyword, None, T.Punctuation])
+        assert types == [T.DML, T.Keyword, None,
+                         T.Keyword, None, T.Punctuation]
 
         s = "select 1.0*(a+b) as col, sum(c)/sum(d) from myschema.mytable"
         parsed = sqlparse.parse(s)[0]
-        self.assertEqual(len(parsed.tokens), 7)
-        self.assert_(isinstance(parsed.tokens[2], sql.IdentifierList))
-        self.assertEqual(len(parsed.tokens[2].tokens), 4)
+        assert len(parsed.tokens) == 7
+        assert isinstance(parsed.tokens[2], sql.IdentifierList)
+        assert len(parsed.tokens[2].tokens) == 4
         identifiers = list(parsed.tokens[2].get_identifiers())
-        self.assertEqual(len(identifiers), 2)
-        self.assertEquals(identifiers[0].get_alias(), u"col")
+        assert len(identifiers) == 2
+        assert identifiers[0].get_alias() == "col"
 
     def test_identifier_wildcard(self):
         p = sqlparse.parse('a.*, b.id')[0]
-        self.assert_(isinstance(p.tokens[0], sql.IdentifierList))
-        self.assert_(isinstance(p.tokens[0].tokens[0], sql.Identifier))
-        self.assert_(isinstance(p.tokens[0].tokens[-1], sql.Identifier))
+        assert isinstance(p.tokens[0], sql.IdentifierList)
+        assert isinstance(p.tokens[0].tokens[0], sql.Identifier)
+        assert isinstance(p.tokens[0].tokens[-1], sql.Identifier)
 
     def test_identifier_name_wildcard(self):
         p = sqlparse.parse('a.*')[0]
         t = p.tokens[0]
-        self.assertEqual(t.get_name(), '*')
-        self.assertEqual(t.is_wildcard(), True)
+        assert t.get_name() == '*'
+        assert t.is_wildcard() is True
 
     def test_identifier_invalid(self):
         p = sqlparse.parse('a.')[0]
-        self.assert_(isinstance(p.tokens[0], sql.Identifier))
-        self.assertEqual(p.tokens[0].has_alias(), False)
-        self.assertEqual(p.tokens[0].get_name(), None)
-        self.assertEqual(p.tokens[0].get_real_name(), None)
-        self.assertEqual(p.tokens[0].get_parent_name(), 'a')
+        assert isinstance(p.tokens[0], sql.Identifier)
+        assert p.tokens[0].has_alias() is False
+        assert p.tokens[0].get_name() is None
+        assert p.tokens[0].get_real_name() is None
+        assert p.tokens[0].get_parent_name() == 'a'
 
     def test_identifier_invalid_in_middle(self):
         # issue261
@@ -102,33 +99,33 @@ class TestGrouping(TestCaseBase):
 
     def test_identifier_as_invalid(self):  # issue8
         p = sqlparse.parse('foo as select *')[0]
-        self.assert_(len(p.tokens), 5)
-        self.assert_(isinstance(p.tokens[0], sql.Identifier))
-        self.assertEqual(len(p.tokens[0].tokens), 1)
-        self.assertEqual(p.tokens[2].ttype, T.Keyword)
+        assert len(p.tokens), 5
+        assert isinstance(p.tokens[0], sql.Identifier)
+        assert len(p.tokens[0].tokens) == 1
+        assert p.tokens[2].ttype == T.Keyword
 
     def test_identifier_function(self):
         p = sqlparse.parse('foo() as bar')[0]
-        self.assert_(isinstance(p.tokens[0], sql.Identifier))
-        self.assert_(isinstance(p.tokens[0].tokens[0], sql.Function))
+        assert isinstance(p.tokens[0], sql.Identifier)
+        assert isinstance(p.tokens[0].tokens[0], sql.Function)
         p = sqlparse.parse('foo()||col2 bar')[0]
-        self.assert_(isinstance(p.tokens[0], sql.Identifier))
-        self.assert_(isinstance(p.tokens[0].tokens[0], sql.Operation))
-        self.assert_(isinstance(p.tokens[0].tokens[0].tokens[0], sql.Function))
+        assert isinstance(p.tokens[0], sql.Identifier)
+        assert isinstance(p.tokens[0].tokens[0], sql.Operation)
+        assert isinstance(p.tokens[0].tokens[0].tokens[0], sql.Function)
 
     def test_identifier_extended(self):  # issue 15
         p = sqlparse.parse('foo+100')[0]
-        self.assert_(isinstance(p.tokens[0], sql.Operation))
+        assert isinstance(p.tokens[0], sql.Operation)
         p = sqlparse.parse('foo + 100')[0]
-        self.assert_(isinstance(p.tokens[0], sql.Operation))
+        assert isinstance(p.tokens[0], sql.Operation)
         p = sqlparse.parse('foo*100')[0]
-        self.assert_(isinstance(p.tokens[0], sql.Operation))
+        assert isinstance(p.tokens[0], sql.Operation)
 
     def test_identifier_list(self):
         p = sqlparse.parse('a, b, c')[0]
-        self.assert_(isinstance(p.tokens[0], sql.IdentifierList))
+        assert isinstance(p.tokens[0], sql.IdentifierList)
         p = sqlparse.parse('(a, b, c)')[0]
-        self.assert_(isinstance(p.tokens[0].tokens[1], sql.IdentifierList))
+        assert isinstance(p.tokens[0].tokens[1], sql.IdentifierList)
 
     def test_identifier_list_subquery(self):
         """identifier lists should still work in subqueries with aliases"""
@@ -136,140 +133,140 @@ class TestGrouping(TestCaseBase):
                            "select a, b + c as d from table) sub")[0]
         subquery = p.tokens[-1].tokens[0]
         idx, iden_list = subquery.token_next_by(i=sql.IdentifierList)
-        self.assert_(iden_list is not None)
+        assert iden_list is not None
         # all the identifiers should be within the IdentifierList
         _, ilist = subquery.token_next_by(i=sql.Identifier, idx=idx)
-        self.assert_(ilist is None)
+        assert ilist is None
 
     def test_identifier_list_case(self):
         p = sqlparse.parse('a, case when 1 then 2 else 3 end as b, c')[0]
-        self.assert_(isinstance(p.tokens[0], sql.IdentifierList))
+        assert isinstance(p.tokens[0], sql.IdentifierList)
         p = sqlparse.parse('(a, case when 1 then 2 else 3 end as b, c)')[0]
-        self.assert_(isinstance(p.tokens[0].tokens[1], sql.IdentifierList))
+        assert isinstance(p.tokens[0].tokens[1], sql.IdentifierList)
 
     def test_identifier_list_other(self):  # issue2
         p = sqlparse.parse("select *, null, 1, 'foo', bar from mytable, x")[0]
-        self.assert_(isinstance(p.tokens[2], sql.IdentifierList))
+        assert isinstance(p.tokens[2], sql.IdentifierList)
         l = p.tokens[2]
-        self.assertEqual(len(l.tokens), 13)
+        assert len(l.tokens) == 13
 
     def test_identifier_list_with_inline_comments(self):  # issue163
         p = sqlparse.parse('foo /* a comment */, bar')[0]
-        self.assert_(isinstance(p.tokens[0], sql.IdentifierList))
-        self.assert_(isinstance(p.tokens[0].tokens[0], sql.Identifier))
+        assert isinstance(p.tokens[0], sql.IdentifierList)
+        assert isinstance(p.tokens[0].tokens[0], sql.Identifier)
         self.assert_(isinstance(p.tokens[0].tokens[3], sql.Identifier))
 
     def test_identifiers_with_operators(self):
         p = sqlparse.parse('a+b as c from table where (d-e)%2= 1')[0]
-        self.assertEqual(len([x for x in p.flatten()
-                              if x.ttype == sqlparse.tokens.Name]), 5)
+        assert len([x for x in p.flatten()
+                    if x.ttype == sqlparse.tokens.Name]) == 5
 
     def test_identifier_list_with_order(self):  # issue101
         p = sqlparse.parse('1, 2 desc, 3')[0]
-        self.assert_(isinstance(p.tokens[0], sql.IdentifierList))
-        self.assert_(isinstance(p.tokens[0].tokens[3], sql.Identifier))
-        assert u(p.tokens[0].tokens[3]) == '2 desc'
+        assert isinstance(p.tokens[0], sql.IdentifierList)
+        assert isinstance(p.tokens[0].tokens[3], sql.Identifier)
+        assert str(p.tokens[0].tokens[3]) == '2 desc'
 
     def test_where(self):
         s = 'select * from foo where bar = 1 order by id desc'
         p = sqlparse.parse(s)[0]
-        assert s == u(p)
+        assert str(p) == s
         self.assert_(len(p.tokens) == 14)
 
         s = 'select x from (select y from foo where bar = 1) z'
         p = sqlparse.parse(s)[0]
-        assert s == u(p)
-        self.assert_(isinstance(p.tokens[-1].tokens[0].tokens[-2], sql.Where))
+        assert str(p) == s
+        assert isinstance(p.tokens[-1].tokens[0].tokens[-2], sql.Where)
 
     def test_typecast(self):
         s = 'select foo::integer from bar'
         p = sqlparse.parse(s)[0]
-        assert s == u(p)
-        self.assertEqual(p.tokens[2].get_typecast(), 'integer')
-        self.assertEqual(p.tokens[2].get_name(), 'foo')
+        assert str(p) == s
+        assert p.tokens[2].get_typecast() == 'integer'
+        assert p.tokens[2].get_name() == 'foo'
         s = 'select (current_database())::information_schema.sql_identifier'
         p = sqlparse.parse(s)[0]
-        assert s == u(p)
-        self.assertEqual(p.tokens[2].get_typecast(),
-                         'information_schema.sql_identifier')
+        assert str(p) == s
+        assert (p.tokens[2].get_typecast() ==
+                'information_schema.sql_identifier')
 
     def test_alias(self):
         s = 'select foo as bar from mytable'
         p = sqlparse.parse(s)[0]
-        assert s == u(p)
-        self.assertEqual(p.tokens[2].get_real_name(), 'foo')
-        self.assertEqual(p.tokens[2].get_alias(), 'bar')
+        assert str(p) == s
+        assert p.tokens[2].get_real_name() == 'foo'
+        assert p.tokens[2].get_alias() == 'bar'
         s = 'select foo from mytable t1'
         p = sqlparse.parse(s)[0]
-        assert s == u(p)
-        self.assertEqual(p.tokens[6].get_real_name(), 'mytable')
-        self.assertEqual(p.tokens[6].get_alias(), 't1')
+        assert str(p) == s
+        assert p.tokens[6].get_real_name() == 'mytable'
+        assert p.tokens[6].get_alias() == 't1'
         s = 'select foo::integer as bar from mytable'
         p = sqlparse.parse(s)[0]
-        assert s == u(p)
-        self.assertEqual(p.tokens[2].get_alias(), 'bar')
+        assert str(p) == s
+        assert p.tokens[2].get_alias() == 'bar'
         s = ('SELECT DISTINCT '
              '(current_database())::information_schema.sql_identifier AS view')
         p = sqlparse.parse(s)[0]
-        assert s == u(p)
-        self.assertEqual(p.tokens[4].get_alias(), 'view')
+        assert str(p) == s
+        assert p.tokens[4].get_alias() == 'view'
 
     def test_alias_case(self):  # see issue46
         p = sqlparse.parse('CASE WHEN 1 THEN 2 ELSE 3 END foo')[0]
-        self.assertEqual(len(p.tokens), 1)
-        self.assertEqual(p.tokens[0].get_alias(), 'foo')
+        assert len(p.tokens) == 1
+        assert p.tokens[0].get_alias() == 'foo'
 
     def test_alias_returns_none(self):  # see issue185
         p = sqlparse.parse('foo.bar')[0]
-        self.assertEqual(len(p.tokens), 1)
-        self.assertEqual(p.tokens[0].get_alias(), None)
+        assert len(p.tokens) == 1
+        assert p.tokens[0].get_alias() is None
 
     def test_idlist_function(self):  # see issue10 too
         p = sqlparse.parse('foo(1) x, bar')[0]
-        self.assert_(isinstance(p.tokens[0], sql.IdentifierList))
+        assert isinstance(p.tokens[0], sql.IdentifierList)
 
     def test_comparison_exclude(self):
         # make sure operators are not handled too lazy
         p = sqlparse.parse('(=)')[0]
-        self.assert_(isinstance(p.tokens[0], sql.Parenthesis))
-        self.assert_(not isinstance(p.tokens[0].tokens[1], sql.Comparison))
+        assert isinstance(p.tokens[0], sql.Parenthesis)
+        assert not isinstance(p.tokens[0].tokens[1], sql.Comparison)
         p = sqlparse.parse('(a=1)')[0]
-        self.assert_(isinstance(p.tokens[0].tokens[1], sql.Comparison))
+        assert isinstance(p.tokens[0].tokens[1], sql.Comparison)
         p = sqlparse.parse('(a>=1)')[0]
-        self.assert_(isinstance(p.tokens[0].tokens[1], sql.Comparison))
+        assert isinstance(p.tokens[0].tokens[1], sql.Comparison)
 
     def test_function(self):
         p = sqlparse.parse('foo()')[0]
-        self.assert_(isinstance(p.tokens[0], sql.Function))
+        assert isinstance(p.tokens[0], sql.Function)
         p = sqlparse.parse('foo(null, bar)')[0]
-        self.assert_(isinstance(p.tokens[0], sql.Function))
-        self.assertEqual(len(list(p.tokens[0].get_parameters())), 2)
+        assert isinstance(p.tokens[0], sql.Function)
+        assert len(list(p.tokens[0].get_parameters())) == 2
 
     def test_function_not_in(self):  # issue183
         p = sqlparse.parse('in(1, 2)')[0]
-        self.assertEqual(len(p.tokens), 2)
-        self.assertEqual(p.tokens[0].ttype, T.Keyword)
-        self.assert_(isinstance(p.tokens[1], sql.Parenthesis))
+        assert len(p.tokens) == 2
+        assert p.tokens[0].ttype == T.Keyword
+        assert isinstance(p.tokens[1], sql.Parenthesis)
 
     def test_varchar(self):
         p = sqlparse.parse('"text" Varchar(50) NOT NULL')[0]
-        self.assert_(isinstance(p.tokens[2], sql.Function))
+        assert isinstance(p.tokens[2], sql.Function)
 
 
-class TestStatement(TestCaseBase):
+class TestStatement(object):
     def test_get_type(self):
         def f(sql):
             return sqlparse.parse(sql)[0]
 
-        self.assertEqual(f('select * from foo').get_type(), 'SELECT')
-        self.assertEqual(f('update foo').get_type(), 'UPDATE')
-        self.assertEqual(f(' update foo').get_type(), 'UPDATE')
-        self.assertEqual(f('\nupdate foo').get_type(), 'UPDATE')
-        self.assertEqual(f('foo').get_type(), 'UNKNOWN')
+        assert f('select * from foo').get_type() == 'SELECT'
+        assert f('update foo').get_type() == 'UPDATE'
+        assert f(' update foo').get_type() == 'UPDATE'
+        assert f('\nupdate foo').get_type() == 'UPDATE'
+        assert f('foo').get_type() == 'UNKNOWN'
         # Statements that have a whitespace after the closing semicolon
         # are parsed as two statements where later only consists of the
         # trailing whitespace.
-        self.assertEqual(f('\n').get_type(), 'UNKNOWN')
+        assert f('\n').get_type() == 'UNKNOWN'
 
 
 def test_identifier_with_operators():  # issue 53
@@ -379,7 +376,9 @@ def test_comparison_with_functions():  # issue230
     assert p.tokens[0].right.value == 'bar.baz'
 
 
-@pytest.mark.parametrize('start', ['FOR', 'FOREACH'])
+@pytest.mark.parametrize('start', ['FOR',
+                                   'FOREACH',
+                                   ])
 def test_forloops(start):
     p = sqlparse.parse('{0} foo in bar LOOP foobar END LOOP'.format(start))[0]
     assert (len(p.tokens)) == 1
