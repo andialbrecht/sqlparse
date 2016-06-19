@@ -15,6 +15,9 @@ class TestFormat(object):
         assert res == 'Select * From bar; -- select foo\n'
         res = sqlparse.format(sql.upper(), keyword_case='lower')
         assert res == 'select * from BAR; -- SELECT FOO\n'
+
+    def test_keywordcase_invalid_option(self):
+        sql = 'select * from bar; -- select foo\n'
         with pytest.raises(SQLParseError):
             sqlparse.format(sql, keyword_case='foo')
 
@@ -26,11 +29,16 @@ class TestFormat(object):
         assert res == 'select * from Bar; -- select foo\n'
         res = sqlparse.format(sql.upper(), identifier_case='lower')
         assert res == 'SELECT * FROM bar; -- SELECT FOO\n'
+
+    def test_identifiercase_invalid_option(self):
+        sql = 'select * from bar; -- select foo\n'
+        with pytest.raises(SQLParseError):
+            sqlparse.format(sql, identifier_case='foo')
+
+    def test_identifiercase_quotes(self):
         sql = 'select * from "foo"."bar"'
         res = sqlparse.format(sql, identifier_case="upper")
         assert res == 'select * from "foo"."bar"'
-        with pytest.raises(SQLParseError):
-            sqlparse.format(sql, identifier_case='foo')
 
     def test_strip_comments_single(self):
         sql = 'select *-- statement starts here\nfrom foo'
@@ -42,6 +50,9 @@ class TestFormat(object):
         sql = 'select-- foo\nfrom -- bar\nwhere'
         res = sqlparse.format(sql, strip_comments=True)
         assert res == 'select from where'
+
+    def test_strip_comments_invalid_option(self):
+        sql = 'select-- foo\nfrom -- bar\nwhere'
         with pytest.raises(SQLParseError):
             sqlparse.format(sql, strip_comments=None)
 
@@ -68,6 +79,9 @@ class TestFormat(object):
         assert f(s) == 'select * from foo where (1 = 2)'
         s = 'select -- foo\nfrom    bar\n'
         assert f(s) == 'select -- foo\nfrom bar'
+
+    def test_strip_ws_invalid_option(self):
+        s = 'select -- foo\nfrom    bar\n'
         with pytest.raises(SQLParseError):
             sqlparse.format(s, strip_whitespace=None)
 
@@ -94,11 +108,6 @@ class TestFormat(object):
         assert f(s3) == "SELECT some_column LIKE 'value\\'\r' WHERE id = 1\n"
         assert (f(s4) ==
                 "SELECT some_column LIKE 'value\\\\\\'\r' WHERE id = 1\n")
-
-    def test_outputformat(self):
-        sql = 'select * from foo;'
-        with pytest.raises(SQLParseError):
-            sqlparse.format(sql, output_format='foo')
 
 
 class TestFormatReindentAligned(object):
@@ -546,6 +555,11 @@ class TestOutputFormat(object):
         f = lambda sql: sqlparse.format(sql, output_format='sql')
         assert f(sql) == 'select * from foo;'
 
+    def test_invalid_option(self):
+        sql = 'select * from foo;'
+        with pytest.raises(SQLParseError):
+            sqlparse.format(sql, output_format='foo')
+
 
 def test_format_column_ordering():
     # issue89
@@ -596,7 +610,7 @@ def test_having_produces_newline():
 
 
 @pytest.mark.parametrize('right_margin', ['ten', 2])
-def test_format_right_margin_invalid_input(right_margin):
+def test_format_right_margin_invalid_option(right_margin):
     with pytest.raises(SQLParseError):
         sqlparse.format('foo', right_margin=right_margin)
 
