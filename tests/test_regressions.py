@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import pytest  # noqa
+import pytest
 
 import sqlparse
 from sqlparse import sql, tokens as T
@@ -27,21 +27,11 @@ def test_issue13():
     assert str(parsed[1]).strip() == "select 'two\\'';"
 
 
-def test_issue26():
+@pytest.mark.parametrize('s', ['--hello', '-- hello', '--hello\n',
+                               '--', '--\n'])
+def test_issue26(s):
     # parse stand-alone comments
-    p = sqlparse.parse('--hello')[0]
-    assert len(p.tokens) == 1
-    assert p.tokens[0].ttype is T.Comment.Single
-    p = sqlparse.parse('-- hello')[0]
-    assert len(p.tokens) == 1
-    assert p.tokens[0].ttype is T.Comment.Single
-    p = sqlparse.parse('--hello\n')[0]
-    assert len(p.tokens) == 1
-    assert p.tokens[0].ttype is T.Comment.Single
-    p = sqlparse.parse('--')[0]
-    assert len(p.tokens) == 1
-    assert p.tokens[0].ttype is T.Comment.Single
-    p = sqlparse.parse('--\n')[0]
+    p = sqlparse.parse(s)[0]
     assert len(p.tokens) == 1
     assert p.tokens[0].ttype is T.Comment.Single
 
@@ -110,33 +100,27 @@ def test_issue40():
         '   FROM bar) as foo'])
 
 
-def test_issue78():
+@pytest.mark.parametrize('s', ['select x.y::text as z from foo',
+                               'select x.y::text as "z" from foo',
+                               'select x."y"::text as z from foo',
+                               'select x."y"::text as "z" from foo',
+                               'select "x".y::text as z from foo',
+                               'select "x".y::text as "z" from foo',
+                               'select "x"."y"::text as z from foo',
+                               'select "x"."y"::text as "z" from foo'])
+@pytest.mark.parametrize('func_name, result', [('get_name', 'z'),
+                                               ('get_real_name', 'y'),
+                                               ('get_parent_name', 'x'),
+                                               ('get_alias', 'z'),
+                                               ('get_typecast', 'text')])
+def test_issue78(s, func_name, result):
     # the bug author provided this nice examples, let's use them!
-    def _get_identifier(sql):
-        p = sqlparse.parse(sql)[0]
-        return p.tokens[2]
+    p = sqlparse.parse(s)[0]
+    i = p.tokens[2]
+    assert isinstance(i, sql.Identifier)
 
-    results = (('get_name', 'z'),
-               ('get_real_name', 'y'),
-               ('get_parent_name', 'x'),
-               ('get_alias', 'z'),
-               ('get_typecast', 'text'))
-    variants = (
-        'select x.y::text as z from foo',
-        'select x.y::text as "z" from foo',
-        'select x."y"::text as z from foo',
-        'select x."y"::text as "z" from foo',
-        'select "x".y::text as z from foo',
-        'select "x".y::text as "z" from foo',
-        'select "x"."y"::text as z from foo',
-        'select "x"."y"::text as "z" from foo',
-    )
-    for variant in variants:
-        i = _get_identifier(variant)
-        assert isinstance(i, sql.Identifier)
-        for func_name, result in results:
-            func = getattr(i, func_name)
-            assert func() == result
+    func = getattr(i, func_name)
+    assert func() == result
 
 
 def test_issue83():
@@ -191,7 +175,8 @@ def test_dont_alias_keywords():
     assert p.tokens[2].ttype is T.Keyword
 
 
-def test_format_accepts_encoding(load_file):  # issue20
+def test_format_accepts_encoding(load_file):
+    # issue20
     sql = load_file('test_cp1251.sql', 'cp1251')
     formatted = sqlparse.format(sql, reindent=True, encoding='cp1251')
     tformatted = u'insert into foo\nvalues (1); -- Песня про надежду\n'
@@ -296,8 +281,7 @@ def test_issue227_gettype_cte():
     with2_stmt = sqlparse.parse("""
         WITH foo AS (SELECT 1 AS abc, 2 AS def),
              bar AS (SELECT * FROM something WHERE x > 1)
-        INSERT INTO elsewhere SELECT * FROM foo JOIN bar;
-    """)
+        INSERT INTO elsewhere SELECT * FROM foo JOIN bar;""")
     assert with2_stmt[0].get_type() == 'INSERT'
 
 

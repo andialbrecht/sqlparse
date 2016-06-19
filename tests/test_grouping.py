@@ -26,12 +26,8 @@ def test_grouping_comments():
     assert len(parsed.tokens) == 2
 
 
-def test_grouping_assignment():
-    s = 'foo := 1;'
-    parsed = sqlparse.parse(s)[0]
-    assert len(parsed.tokens) == 1
-    assert isinstance(parsed.tokens[0], sql.Assignment)
-    s = 'foo := 1'
+@pytest.mark.parametrize('s', ['foo := 1;', 'foo := 1'])
+def test_grouping_assignment(s):
     parsed = sqlparse.parse(s)[0]
     assert len(parsed.tokens) == 1
     assert isinstance(parsed.tokens[0], sql.Assignment)
@@ -120,13 +116,9 @@ def test_grouping_identifier_function():
     assert isinstance(p.tokens[0].tokens[0].tokens[0], sql.Function)
 
 
-def test_grouping_identifier_extended():
-    # issue 15
-    p = sqlparse.parse('foo+100')[0]
-    assert isinstance(p.tokens[0], sql.Operation)
-    p = sqlparse.parse('foo + 100')[0]
-    assert isinstance(p.tokens[0], sql.Operation)
-    p = sqlparse.parse('foo*100')[0]
+@pytest.mark.parametrize('s', ['foo+100', 'foo + 100', 'foo*100'])
+def test_grouping_operation(s):
+    p = sqlparse.parse(s)[0]
     assert isinstance(p.tokens[0], sql.Operation)
 
 

@@ -25,17 +25,11 @@ def test_parse_multistatement():
     assert str(stmts[1]) == sql2
 
 
-def test_parse_newlines():
-    s = 'select\n*from foo;'
-    p = sqlparse.parse(s)[0]
-    assert str(p) == s
-    s = 'select\r\n*from foo'
-    p = sqlparse.parse(s)[0]
-    assert str(p) == s
-    s = 'select\r*from foo'
-    p = sqlparse.parse(s)[0]
-    assert str(p) == s
-    s = 'select\r\n*from foo\n'
+@pytest.mark.parametrize('s', ['select\n*from foo;',
+                               'select\r\n*from foo',
+                               'select\r*from foo',
+                               'select\r\n*from foo\n'])
+def test_parse_newlines(s):
     p = sqlparse.parse(s)[0]
     assert str(p) == s
 
@@ -66,40 +60,23 @@ def test_parse_has_ancestor():
     assert baz.has_ancestor(p)
 
 
-def test_parse_float():
-    t = sqlparse.parse('.5')[0].tokens
-    assert len(t) == 1
-    assert t[0].ttype is sqlparse.tokens.Number.Float
-    t = sqlparse.parse('.51')[0].tokens
-    assert len(t) == 1
-    assert t[0].ttype is sqlparse.tokens.Number.Float
-    t = sqlparse.parse('1.5')[0].tokens
-    assert len(t) == 1
-    assert t[0].ttype is sqlparse.tokens.Number.Float
-    t = sqlparse.parse('12.5')[0].tokens
+@pytest.mark.parametrize('s', ['.5', '.51', '1.5', '12.5'])
+def test_parse_float(s):
+    t = sqlparse.parse(s)[0].tokens
     assert len(t) == 1
     assert t[0].ttype is sqlparse.tokens.Number.Float
 
 
-def test_parse_placeholder():
-    def _get_tokens(s):
-        return sqlparse.parse(s)[0].tokens[-1].tokens
-
-    t = _get_tokens('select * from foo where user = ?')
+@pytest.mark.parametrize('s, holder', [
+    ('select * from foo where user = ?', '?'),
+    ('select * from foo where user = :1', ':1'),
+    ('select * from foo where user = :name', ':name'),
+    ('select * from foo where user = %s', '%s'),
+    ('select * from foo where user = $a', '$a')])
+def test_parse_placeholder(s, holder):
+    t = sqlparse.parse(s)[0].tokens[-1].tokens
     assert t[-1].ttype is sqlparse.tokens.Name.Placeholder
-    assert t[-1].value == '?'
-    t = _get_tokens('select * from foo where user = :1')
-    assert t[-1].ttype is sqlparse.tokens.Name.Placeholder
-    assert t[-1].value == ':1'
-    t = _get_tokens('select * from foo where user = :name')
-    assert t[-1].ttype is sqlparse.tokens.Name.Placeholder
-    assert t[-1].value == ':name'
-    t = _get_tokens('select * from foo where user = %s')
-    assert t[-1].ttype is sqlparse.tokens.Name.Placeholder
-    assert t[-1].value == '%s'
-    t = _get_tokens('select * from foo where user = $a')
-    assert t[-1].ttype is sqlparse.tokens.Name.Placeholder
-    assert t[-1].value == '$a'
+    assert t[-1].value == holder
 
 
 def test_parse_modulo_not_placeholder():

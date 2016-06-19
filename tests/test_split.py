@@ -4,7 +4,7 @@
 
 import types
 
-import pytest  # noqa
+import pytest
 
 import sqlparse
 from sqlparse.compat import StringIO, text_type
@@ -24,32 +24,15 @@ def test_split_backslash():
     assert len(stmts) == 3
 
 
-def test_split_create_function(load_file):
-    sql = load_file('function.sql')
-    stmts = sqlparse.parse(sql)
-    assert len(stmts) == 1
-    assert str(stmts[0]) == sql
-
-
-def test_split_create_function_psql(load_file):
-    sql = load_file('function_psql.sql')
+@pytest.mark.parametrize('fn', ['function.sql',
+                                'function_psql.sql',
+                                'function_psql2.sql',
+                                'function_psql3.sql'])
+def test_split_create_function(load_file, fn):
+    sql = load_file(fn)
     stmts = sqlparse.parse(sql)
     assert len(stmts) == 1
     assert text_type(stmts[0]) == sql
-
-
-def test_split_create_function_psql3(load_file):
-    sql = load_file('function_psql3.sql')
-    stmts = sqlparse.parse(sql)
-    assert len(stmts) == 1
-    assert str(stmts[0]) == sql
-
-
-def test_split_create_function_psql2(load_file):
-    sql = load_file('function_psql2.sql')
-    stmts = sqlparse.parse(sql)
-    assert len(stmts) == 1
-    assert str(stmts[0]) == sql
 
 
 def test_split_dashcomments(load_file):
@@ -59,14 +42,12 @@ def test_split_dashcomments(load_file):
     assert ''.join(str(q) for q in stmts) == sql
 
 
-def test_split_dashcomments_eol():
-    stmts = sqlparse.parse('select foo; -- comment\n')
-    assert len(stmts) == 1
-    stmts = sqlparse.parse('select foo; -- comment\r')
-    assert len(stmts) == 1
-    stmts = sqlparse.parse('select foo; -- comment\r\n')
-    assert len(stmts) == 1
-    stmts = sqlparse.parse('select foo; -- comment')
+@pytest.mark.parametrize('s', ['select foo; -- comment\n',
+                               'select foo; -- comment\r',
+                               'select foo; -- comment\r\n',
+                               'select foo; -- comment'])
+def test_split_dashcomments_eol(s):
+    stmts = sqlparse.parse(s)
     assert len(stmts) == 1
 
 

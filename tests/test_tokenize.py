@@ -28,18 +28,10 @@ def test_tokenize_backticks():
     assert tokens[0] == (T.Name, '`foo`')
 
 
-def test_tokenize_linebreaks():
+@pytest.mark.parametrize('s', ['foo\nbar\n', 'foo\rbar\r',
+                               'foo\r\nbar\r\n', 'foo\r\nbar\n'])
+def test_tokenize_linebreaks(s):
     # issue1
-    s = 'foo\nbar\n'
-    tokens = lexer.tokenize(s)
-    assert ''.join(str(x[1]) for x in tokens) == s
-    s = 'foo\rbar\r'
-    tokens = lexer.tokenize(s)
-    assert ''.join(str(x[1]) for x in tokens) == s
-    s = 'foo\r\nbar\r\n'
-    tokens = lexer.tokenize(s)
-    assert ''.join(str(x[1]) for x in tokens) == s
-    s = 'foo\r\nbar\n'
     tokens = lexer.tokenize(s)
     assert ''.join(str(x[1]) for x in tokens) == s
 
@@ -159,18 +151,9 @@ def test_parse_join(expr):
     assert p.tokens[0].ttype is T.Keyword
 
 
-def test_parse_endifloop():
-    p = sqlparse.parse('END IF')[0]
-    assert len(p.tokens) == 1
-    assert p.tokens[0].ttype is T.Keyword
-    p = sqlparse.parse('END   IF')[0]
-    assert len(p.tokens) == 1
-    p = sqlparse.parse('END\t\nIF')[0]
-    assert len(p.tokens) == 1
-    assert p.tokens[0].ttype is T.Keyword
-    p = sqlparse.parse('END LOOP')[0]
-    assert len(p.tokens) == 1
-    assert p.tokens[0].ttype is T.Keyword
-    p = sqlparse.parse('END  LOOP')[0]
+@pytest.mark.parametrize('s', ['END IF', 'END   IF', 'END\t\nIF',
+                               'END LOOP', 'END   LOOP', 'END\t\nLOOP'])
+def test_parse_endifloop(s):
+    p = sqlparse.parse(s)[0]
     assert len(p.tokens) == 1
     assert p.tokens[0].ttype is T.Keyword
