@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Tests sqlparse function."""
+"""Tests sqlparse.parse()."""
 
 import pytest
 
@@ -9,131 +9,146 @@ from sqlparse import sql, tokens as T
 from sqlparse.compat import StringIO
 
 
-class SQLParseTest(object):
-    """Tests sqlparse.parse()."""
+def test_parse_tokenize():
+    s = 'select * from foo;'
+    stmts = sqlparse.parse(s)
+    assert len(stmts) == 1
+    assert str(stmts[0]) == s
 
-    def test_tokenize(self):
-        s = 'select * from foo;'
-        stmts = sqlparse.parse(s)
-        assert len(stmts) == 1
-        assert str(stmts[0]) == s
 
-    def test_multistatement(self):
-        sql1 = 'select * from foo;'
-        sql2 = 'select * from bar;'
-        stmts = sqlparse.parse(sql1 + sql2)
-        assert len(stmts) == 2
-        assert str(stmts[0]) == sql1
-        assert str(stmts[1]) == sql2
+def test_parse_multistatement():
+    sql1 = 'select * from foo;'
+    sql2 = 'select * from bar;'
+    stmts = sqlparse.parse(sql1 + sql2)
+    assert len(stmts) == 2
+    assert str(stmts[0]) == sql1
+    assert str(stmts[1]) == sql2
 
-    def test_newlines(self):
-        s = 'select\n*from foo;'
-        p = sqlparse.parse(s)[0]
-        assert str(p) == s
-        s = 'select\r\n*from foo'
-        p = sqlparse.parse(s)[0]
-        assert str(p) == s
-        s = 'select\r*from foo'
-        p = sqlparse.parse(s)[0]
-        assert str(p) == s
-        s = 'select\r\n*from foo\n'
-        p = sqlparse.parse(s)[0]
-        assert str(p) == s
 
-    def test_within(self):
-        s = 'foo(col1, col2)'
-        p = sqlparse.parse(s)[0]
-        col1 = p.tokens[0].tokens[1].tokens[1].tokens[0]
-        assert col1.within(sql.Function)
+def test_parse_newlines():
+    s = 'select\n*from foo;'
+    p = sqlparse.parse(s)[0]
+    assert str(p) == s
+    s = 'select\r\n*from foo'
+    p = sqlparse.parse(s)[0]
+    assert str(p) == s
+    s = 'select\r*from foo'
+    p = sqlparse.parse(s)[0]
+    assert str(p) == s
+    s = 'select\r\n*from foo\n'
+    p = sqlparse.parse(s)[0]
+    assert str(p) == s
 
-    def test_child_of(self):
-        s = '(col1, col2)'
-        p = sqlparse.parse(s)[0]
-        assert p.tokens[0].tokens[1].is_child_of(p.tokens[0])
-        s = 'select foo'
-        p = sqlparse.parse(s)[0]
-        assert not p.tokens[2].is_child_of(p.tokens[0])
-        assert p.tokens[2].is_child_of(p)
 
-    def test_has_ancestor(self):
-        s = 'foo or (bar, baz)'
-        p = sqlparse.parse(s)[0]
-        baz = p.tokens[-1].tokens[1].tokens[-1]
-        assert baz.has_ancestor(p.tokens[-1].tokens[1])
-        assert baz.has_ancestor(p.tokens[-1])
-        assert baz.has_ancestor(p)
+def test_parse_within():
+    s = 'foo(col1, col2)'
+    p = sqlparse.parse(s)[0]
+    col1 = p.tokens[0].tokens[1].tokens[1].tokens[0]
+    assert col1.within(sql.Function)
 
-    def test_float(self):
-        t = sqlparse.parse('.5')[0].tokens
-        assert len(t) == 1
-        assert t[0].ttype is sqlparse.tokens.Number.Float
-        t = sqlparse.parse('.51')[0].tokens
-        assert len(t) == 1
-        assert t[0].ttype is sqlparse.tokens.Number.Float
-        t = sqlparse.parse('1.5')[0].tokens
-        assert len(t) == 1
-        assert t[0].ttype is sqlparse.tokens.Number.Float
-        t = sqlparse.parse('12.5')[0].tokens
-        assert len(t) == 1
-        assert t[0].ttype is sqlparse.tokens.Number.Float
 
-    def test_placeholder(self):
-        def _get_tokens(s):
-            return sqlparse.parse(s)[0].tokens[-1].tokens
+def test_parse_child_of():
+    s = '(col1, col2)'
+    p = sqlparse.parse(s)[0]
+    assert p.tokens[0].tokens[1].is_child_of(p.tokens[0])
+    s = 'select foo'
+    p = sqlparse.parse(s)[0]
+    assert not p.tokens[2].is_child_of(p.tokens[0])
+    assert p.tokens[2].is_child_of(p)
 
-        t = _get_tokens('select * from foo where user = ?')
-        assert t[-1].ttype is sqlparse.tokens.Name.Placeholder
-        assert t[-1].value == '?'
-        t = _get_tokens('select * from foo where user = :1')
-        assert t[-1].ttype is sqlparse.tokens.Name.Placeholder
-        assert t[-1].value == ':1'
-        t = _get_tokens('select * from foo where user = :name')
-        assert t[-1].ttype is sqlparse.tokens.Name.Placeholder
-        assert t[-1].value == ':name'
-        t = _get_tokens('select * from foo where user = %s')
-        assert t[-1].ttype is sqlparse.tokens.Name.Placeholder
-        assert t[-1].value == '%s'
-        t = _get_tokens('select * from foo where user = $a')
-        assert t[-1].ttype is sqlparse.tokens.Name.Placeholder
-        assert t[-1].value == '$a'
 
-    def test_modulo_not_placeholder(self):
-        tokens = list(sqlparse.lexer.tokenize('x %3'))
-        assert tokens[2][0] == sqlparse.tokens.Operator
+def test_parse_has_ancestor():
+    s = 'foo or (bar, baz)'
+    p = sqlparse.parse(s)[0]
+    baz = p.tokens[-1].tokens[1].tokens[-1]
+    assert baz.has_ancestor(p.tokens[-1].tokens[1])
+    assert baz.has_ancestor(p.tokens[-1])
+    assert baz.has_ancestor(p)
 
-    def test_access_symbol(self):  # see issue27
-        t = sqlparse.parse('select a.[foo bar] as foo')[0].tokens
-        assert isinstance(t[-1], sql.Identifier)
-        assert t[-1].get_name() == 'foo'
-        assert t[-1].get_real_name() == '[foo bar]'
-        assert t[-1].get_parent_name() == 'a'
 
-    def test_square_brackets_notation_isnt_too_greedy(self):  # see issue153
-        t = sqlparse.parse('[foo], [bar]')[0].tokens
-        assert isinstance(t[0], sql.IdentifierList)
-        assert len(t[0].tokens) == 4
-        assert t[0].tokens[0].get_real_name() == '[foo]'
-        assert t[0].tokens[-1].get_real_name() == '[bar]'
+def test_parse_float():
+    t = sqlparse.parse('.5')[0].tokens
+    assert len(t) == 1
+    assert t[0].ttype is sqlparse.tokens.Number.Float
+    t = sqlparse.parse('.51')[0].tokens
+    assert len(t) == 1
+    assert t[0].ttype is sqlparse.tokens.Number.Float
+    t = sqlparse.parse('1.5')[0].tokens
+    assert len(t) == 1
+    assert t[0].ttype is sqlparse.tokens.Number.Float
+    t = sqlparse.parse('12.5')[0].tokens
+    assert len(t) == 1
+    assert t[0].ttype is sqlparse.tokens.Number.Float
 
-    def test_keyword_like_identifier(self):  # see issue47
-        t = sqlparse.parse('foo.key')[0].tokens
-        assert len(t) == 1
-        assert isinstance(t[0], sql.Identifier)
 
-    def test_function_parameter(self):  # see issue94
-        t = sqlparse.parse('abs(some_col)')[0].tokens[0].get_parameters()
-        assert len(t) == 1
-        assert isinstance(t[0], sql.Identifier)
+def test_parse_placeholder():
+    def _get_tokens(s):
+        return sqlparse.parse(s)[0].tokens[-1].tokens
 
-    def test_function_param_single_literal(self):
-        t = sqlparse.parse('foo(5)')[0].tokens[0].get_parameters()
-        assert len(t) == 1
-        assert t[0].ttype is T.Number.Integer
+    t = _get_tokens('select * from foo where user = ?')
+    assert t[-1].ttype is sqlparse.tokens.Name.Placeholder
+    assert t[-1].value == '?'
+    t = _get_tokens('select * from foo where user = :1')
+    assert t[-1].ttype is sqlparse.tokens.Name.Placeholder
+    assert t[-1].value == ':1'
+    t = _get_tokens('select * from foo where user = :name')
+    assert t[-1].ttype is sqlparse.tokens.Name.Placeholder
+    assert t[-1].value == ':name'
+    t = _get_tokens('select * from foo where user = %s')
+    assert t[-1].ttype is sqlparse.tokens.Name.Placeholder
+    assert t[-1].value == '%s'
+    t = _get_tokens('select * from foo where user = $a')
+    assert t[-1].ttype is sqlparse.tokens.Name.Placeholder
+    assert t[-1].value == '$a'
 
-    def test_nested_function(self):
-        t = sqlparse.parse('foo(bar(5))')[0].tokens[0].get_parameters()
-        assert len(t) == 1
-        assert type(t[0]) is sql.Function
+
+def test_parse_modulo_not_placeholder():
+    tokens = list(sqlparse.lexer.tokenize('x %3'))
+    assert tokens[2][0] == sqlparse.tokens.Operator
+
+
+def test_parse_access_symbol():
+    # see issue27
+    t = sqlparse.parse('select a.[foo bar] as foo')[0].tokens
+    assert isinstance(t[-1], sql.Identifier)
+    assert t[-1].get_name() == 'foo'
+    assert t[-1].get_real_name() == '[foo bar]'
+    assert t[-1].get_parent_name() == 'a'
+
+
+def test_parse_square_brackets_notation_isnt_too_greedy():
+    # see issue153
+    t = sqlparse.parse('[foo], [bar]')[0].tokens
+    assert isinstance(t[0], sql.IdentifierList)
+    assert len(t[0].tokens) == 4
+    assert t[0].tokens[0].get_real_name() == '[foo]'
+    assert t[0].tokens[-1].get_real_name() == '[bar]'
+
+
+def test_parse_keyword_like_identifier():
+    # see issue47
+    t = sqlparse.parse('foo.key')[0].tokens
+    assert len(t) == 1
+    assert isinstance(t[0], sql.Identifier)
+
+
+def test_parse_function_parameter():
+    # see issue94
+    t = sqlparse.parse('abs(some_col)')[0].tokens[0].get_parameters()
+    assert len(t) == 1
+    assert isinstance(t[0], sql.Identifier)
+
+
+def test_parse_function_param_single_literal():
+    t = sqlparse.parse('foo(5)')[0].tokens[0].get_parameters()
+    assert len(t) == 1
+    assert t[0].ttype is T.Number.Integer
+
+
+def test_parse_nested_function():
+    t = sqlparse.parse('foo(bar(5))')[0].tokens[0].get_parameters()
+    assert len(t) == 1
+    assert type(t[0]) is sql.Function
 
 
 def test_quoted_identifier():
@@ -143,15 +158,16 @@ def test_quoted_identifier():
     assert t[2].get_real_name() == 'y'
 
 
-@pytest.mark.parametrize('name', ['foo',
-                                  '_foo',
-                                  ])
-def test_valid_identifier_names(name):  # issue175
+@pytest.mark.parametrize('name', ['foo', '_foo'])
+def test_valid_identifier_names(name):
+    # issue175
     t = sqlparse.parse(name)[0].tokens
     assert isinstance(t[0], sql.Identifier)
 
 
-def test_psql_quotation_marks():  # issue83
+def test_psql_quotation_marks():
+    # issue83
+
     # regression: make sure plain $$ work
     t = sqlparse.split("""
     CREATE OR REPLACE FUNCTION testfunc1(integer) RETURNS integer AS $$
@@ -161,6 +177,7 @@ def test_psql_quotation_marks():  # issue83
           ....
     $$ LANGUAGE plpgsql;""")
     assert len(t) == 2
+
     # make sure $SOMETHING$ works too
     t = sqlparse.split("""
     CREATE OR REPLACE FUNCTION testfunc1(integer) RETURNS integer AS $PROC_1$
@@ -180,22 +197,14 @@ def test_double_precision_is_builtin():
     assert t[0].value == 'DOUBLE PRECISION'
 
 
-@pytest.mark.parametrize('ph', ['?',
-                                ':1',
-                                ':foo',
-                                '%s',
-                                '%(foo)s',
-                                ])
+@pytest.mark.parametrize('ph', ['?', ':1', ':foo', '%s', '%(foo)s'])
 def test_placeholder(ph):
     p = sqlparse.parse(ph)[0].tokens
     assert len(p) == 1
     assert p[0].ttype is T.Name.Placeholder
 
 
-@pytest.mark.parametrize('num', ['6.67428E-8',
-                                 '1.988e33',
-                                 '1e-12',
-                                 ])
+@pytest.mark.parametrize('num', ['6.67428E-8', '1.988e33', '1e-12'])
 def test_scientific_numbers(num):
     p = sqlparse.parse(num)[0].tokens
     assert len(p) == 1
@@ -214,7 +223,8 @@ def test_double_quotes_are_identifiers():
     assert isinstance(p[0], sql.Identifier)
 
 
-def test_single_quotes_with_linebreaks():  # issue118
+def test_single_quotes_with_linebreaks():
+    # issue118
     p = sqlparse.parse("'f\nf'")[0].tokens
     assert len(p) == 1
     assert p[0].ttype is T.String.Single
@@ -288,29 +298,25 @@ def test_typed_array_definition():
     assert names == ['x', 'y', 'z']
 
 
-@pytest.mark.parametrize('s', ['select 1 -- foo',
-                               'select 1 # foo',  # see issue178
-                               ])
+@pytest.mark.parametrize('s', ['select 1 -- foo', 'select 1 # foo'])
 def test_single_line_comments(s):
+    # see issue178
     p = sqlparse.parse(s)[0]
     assert len(p.tokens) == 5
     assert p.tokens[-1].ttype == T.Comment.Single
 
 
-@pytest.mark.parametrize('s', ['foo',
-                               '@foo',
-                               '#foo',  # see issue192
-                               '##foo',
-                               ])
+@pytest.mark.parametrize('s', ['foo', '@foo', '#foo', '##foo'])
 def test_names_and_special_names(s):
+    # see issue192
     p = sqlparse.parse(s)[0]
     assert len(p.tokens) == 1
     assert isinstance(p.tokens[0], sql.Identifier)
 
 
 def test_get_token_at_offset():
-    #                   0123456789
     p = sqlparse.parse('select * from dual')[0]
+    #                   0123456789
     assert p.get_token_at_offset(0) == p.tokens[0]
     assert p.get_token_at_offset(1) == p.tokens[0]
     assert p.get_token_at_offset(6) == p.tokens[1]
@@ -326,60 +332,61 @@ def test_pprint():
     output = StringIO()
 
     p._pprint_tree(f=output)
-    pprint = u'\n'.join([" 0 DML 'select'",
-                         " 1 Whitespace ' '",
-                         " 2 IdentifierList 'a0, b0...'",
-                         " |  0 Identifier 'a0'",
-                         " |  |  0 Name 'a0'",
-                         " |  1 Punctuation ','",
-                         " |  2 Whitespace ' '",
-                         " |  3 Identifier 'b0'",
-                         " |  |  0 Name 'b0'",
-                         " |  4 Punctuation ','",
-                         " |  5 Whitespace ' '",
-                         " |  6 Identifier 'c0'",
-                         " |  |  0 Name 'c0'",
-                         " |  7 Punctuation ','",
-                         " |  8 Whitespace ' '",
-                         " |  9 Identifier 'd0'",
-                         " |  |  0 Name 'd0'",
-                         " | 10 Punctuation ','",
-                         " | 11 Whitespace ' '",
-                         " | 12 Float 'e0'",
-                         " 3 Whitespace ' '",
-                         " 4 Keyword 'from'",
-                         " 5 Whitespace ' '",
-                         " 6 Identifier '(selec...'",
-                         " |  0 Parenthesis '(selec...'",
-                         " |  |  0 Punctuation '('",
-                         " |  |  1 DML 'select'",
-                         " |  |  2 Whitespace ' '",
-                         " |  |  3 Wildcard '*'",
-                         " |  |  4 Whitespace ' '",
-                         " |  |  5 Keyword 'from'",
-                         " |  |  6 Whitespace ' '",
-                         " |  |  7 Identifier 'dual'",
-                         " |  |  |  0 Name 'dual'",
-                         " |  |  8 Punctuation ')'",
-                         " |  1 Whitespace ' '",
-                         " |  2 Identifier 'q0'",
-                         " |  |  0 Name 'q0'",
-                         " 7 Whitespace ' '",
-                         " 8 Where 'where ...'",
-                         " |  0 Keyword 'where'",
-                         " |  1 Whitespace ' '",
-                         " |  2 Comparison '1=1'",
-                         " |  |  0 Integer '1'",
-                         " |  |  1 Comparison '='",
-                         " |  |  2 Integer '1'",
-                         " |  3 Whitespace ' '",
-                         " |  4 Keyword 'and'",
-                         " |  5 Whitespace ' '",
-                         " |  6 Comparison '2=2'",
-                         " |  |  0 Integer '2'",
-                         " |  |  1 Comparison '='",
-                         " |  |  2 Integer '2'",
-                         "", ])
+    pprint = '\n'.join([
+        " 0 DML 'select'",
+        " 1 Whitespace ' '",
+        " 2 IdentifierList 'a0, b0...'",
+        " |  0 Identifier 'a0'",
+        " |  |  0 Name 'a0'",
+        " |  1 Punctuation ','",
+        " |  2 Whitespace ' '",
+        " |  3 Identifier 'b0'",
+        " |  |  0 Name 'b0'",
+        " |  4 Punctuation ','",
+        " |  5 Whitespace ' '",
+        " |  6 Identifier 'c0'",
+        " |  |  0 Name 'c0'",
+        " |  7 Punctuation ','",
+        " |  8 Whitespace ' '",
+        " |  9 Identifier 'd0'",
+        " |  |  0 Name 'd0'",
+        " | 10 Punctuation ','",
+        " | 11 Whitespace ' '",
+        " | 12 Float 'e0'",
+        " 3 Whitespace ' '",
+        " 4 Keyword 'from'",
+        " 5 Whitespace ' '",
+        " 6 Identifier '(selec...'",
+        " |  0 Parenthesis '(selec...'",
+        " |  |  0 Punctuation '('",
+        " |  |  1 DML 'select'",
+        " |  |  2 Whitespace ' '",
+        " |  |  3 Wildcard '*'",
+        " |  |  4 Whitespace ' '",
+        " |  |  5 Keyword 'from'",
+        " |  |  6 Whitespace ' '",
+        " |  |  7 Identifier 'dual'",
+        " |  |  |  0 Name 'dual'",
+        " |  |  8 Punctuation ')'",
+        " |  1 Whitespace ' '",
+        " |  2 Identifier 'q0'",
+        " |  |  0 Name 'q0'",
+        " 7 Whitespace ' '",
+        " 8 Where 'where ...'",
+        " |  0 Keyword 'where'",
+        " |  1 Whitespace ' '",
+        " |  2 Comparison '1=1'",
+        " |  |  0 Integer '1'",
+        " |  |  1 Comparison '='",
+        " |  |  2 Integer '1'",
+        " |  3 Whitespace ' '",
+        " |  4 Keyword 'and'",
+        " |  5 Whitespace ' '",
+        " |  6 Comparison '2=2'",
+        " |  |  0 Integer '2'",
+        " |  |  1 Comparison '='",
+        " |  |  2 Integer '2'",
+        ""])
     assert output.getvalue() == pprint
 
 

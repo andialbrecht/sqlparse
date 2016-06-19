@@ -7,100 +7,107 @@ from sqlparse import sql, tokens as T
 from sqlparse.compat import PY2
 
 
-class RegressionTests(object):
-    def test_issue9(self):
-        # make sure where doesn't consume parenthesis
-        p = sqlparse.parse('(where 1)')[0]
-        assert isinstance(p, sql.Statement)
-        assert len(p.tokens) == 1
-        assert isinstance(p.tokens[0], sql.Parenthesis)
-        prt = p.tokens[0]
-        assert len(prt.tokens) == 3
-        assert prt.tokens[0].ttype == T.Punctuation
-        assert prt.tokens[-1].ttype == T.Punctuation
+def test_issue9():
+    # make sure where doesn't consume parenthesis
+    p = sqlparse.parse('(where 1)')[0]
+    assert isinstance(p, sql.Statement)
+    assert len(p.tokens) == 1
+    assert isinstance(p.tokens[0], sql.Parenthesis)
+    prt = p.tokens[0]
+    assert len(prt.tokens) == 3
+    assert prt.tokens[0].ttype == T.Punctuation
+    assert prt.tokens[-1].ttype == T.Punctuation
 
-    def test_issue13(self):
-        parsed = sqlparse.parse(("select 'one';\n"
-                                 "select 'two\\'';\n"
-                                 "select 'three';"))
-        assert len(parsed) == 3
-        assert str(parsed[1]).strip() == "select 'two\\'';"
 
-    def test_issue26(self):
-        # parse stand-alone comments
-        p = sqlparse.parse('--hello')[0]
-        assert len(p.tokens) == 1
-        assert p.tokens[0].ttype is T.Comment.Single
-        p = sqlparse.parse('-- hello')[0]
-        assert len(p.tokens) == 1
-        assert p.tokens[0].ttype is T.Comment.Single
-        p = sqlparse.parse('--hello\n')[0]
-        assert len(p.tokens) == 1
-        assert p.tokens[0].ttype is T.Comment.Single
-        p = sqlparse.parse('--')[0]
-        assert len(p.tokens) == 1
-        assert p.tokens[0].ttype is T.Comment.Single
-        p = sqlparse.parse('--\n')[0]
-        assert len(p.tokens) == 1
-        assert p.tokens[0].ttype is T.Comment.Single
+def test_issue13():
+    parsed = sqlparse.parse(("select 'one';\n"
+                             "select 'two\\'';\n"
+                             "select 'three';"))
+    assert len(parsed) == 3
+    assert str(parsed[1]).strip() == "select 'two\\'';"
 
-    def test_issue34(self):
-        t = sqlparse.parse("create")[0].token_first()
-        assert t.match(T.Keyword.DDL, "create") is True
-        assert t.match(T.Keyword.DDL, "CREATE") is True
 
-    def test_issue35(self):
-        # missing space before LIMIT
-        sql = sqlparse.format("select * from foo where bar = 1 limit 1",
-                              reindent=True)
-        assert sql == "\n".join(["select *",
-                                 "from foo",
-                                 "where bar = 1 limit 1"])
+def test_issue26():
+    # parse stand-alone comments
+    p = sqlparse.parse('--hello')[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype is T.Comment.Single
+    p = sqlparse.parse('-- hello')[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype is T.Comment.Single
+    p = sqlparse.parse('--hello\n')[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype is T.Comment.Single
+    p = sqlparse.parse('--')[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype is T.Comment.Single
+    p = sqlparse.parse('--\n')[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype is T.Comment.Single
 
-    def test_issue38(self):
-        sql = sqlparse.format("SELECT foo; -- comment",
-                              strip_comments=True)
-        assert sql == "SELECT foo;"
-        sql = sqlparse.format("/* foo */", strip_comments=True)
-        assert sql == ""
 
-    def test_issue39(self):
-        p = sqlparse.parse('select user.id from user')[0]
-        assert len(p.tokens) == 7
-        idt = p.tokens[2]
-        assert idt.__class__ == sql.Identifier
-        assert len(idt.tokens) == 3
-        assert idt.tokens[0].match(T.Name, 'user') is True
-        assert idt.tokens[1].match(T.Punctuation, '.') is True
-        assert idt.tokens[2].match(T.Name, 'id') is True
+@pytest.mark.parametrize('value', ['create', 'CREATE'])
+def test_issue34(value):
+    t = sqlparse.parse("create")[0].token_first()
+    assert t.match(T.Keyword.DDL, value) is True
 
-    def test_issue40(self):
-        # make sure identifier lists in subselects are grouped
-        p = sqlparse.parse(('SELECT id, name FROM '
-                            '(SELECT id, name FROM bar) as foo'))[0]
-        assert len(p.tokens) == 7
-        assert p.tokens[2].__class__ == sql.IdentifierList
-        assert p.tokens[-1].__class__ == sql.Identifier
-        assert p.tokens[-1].get_name() == u'foo'
-        sp = p.tokens[-1].tokens[0]
-        assert sp.tokens[3].__class__ == sql.IdentifierList
-        # make sure that formatting works as expected
-        assert sqlparse.format(('SELECT id ==  name FROM '
-                                '(SELECT id, name FROM bar)'),
-                               reindent=True), ('SELECT id,\n'
-                                                '       name\n'
-                                                'FROM\n'
-                                                '  (SELECT id,\n'
-                                                '          name\n'
-                                                '   FROM bar)')
-        assert sqlparse.format(('SELECT id ==  name FROM '
-                                '(SELECT id, name FROM bar) as foo'),
-                               reindent=True), ('SELECT id,\n'
-                                                '       name\n'
-                                                'FROM\n'
-                                                '  (SELECT id,\n'
-                                                '          name\n'
-                                                '   FROM bar) as foo')
+
+def test_issue35():
+    # missing space before LIMIT
+    sql = sqlparse.format("select * from foo where bar = 1 limit 1",
+                          reindent=True)
+    assert sql == "\n".join([
+        "select *",
+        "from foo",
+        "where bar = 1 limit 1"])
+
+
+def test_issue38():
+    sql = sqlparse.format("SELECT foo; -- comment", strip_comments=True)
+    assert sql == "SELECT foo;"
+    sql = sqlparse.format("/* foo */", strip_comments=True)
+    assert sql == ""
+
+
+def test_issue39():
+    p = sqlparse.parse('select user.id from user')[0]
+    assert len(p.tokens) == 7
+    idt = p.tokens[2]
+    assert idt.__class__ == sql.Identifier
+    assert len(idt.tokens) == 3
+    assert idt.tokens[0].match(T.Name, 'user') is True
+    assert idt.tokens[1].match(T.Punctuation, '.') is True
+    assert idt.tokens[2].match(T.Name, 'id') is True
+
+
+def test_issue40():
+    # make sure identifier lists in subselects are grouped
+    p = sqlparse.parse(('SELECT id, name FROM '
+                        '(SELECT id, name FROM bar) as foo'))[0]
+    assert len(p.tokens) == 7
+    assert p.tokens[2].__class__ == sql.IdentifierList
+    assert p.tokens[-1].__class__ == sql.Identifier
+    assert p.tokens[-1].get_name() == 'foo'
+    sp = p.tokens[-1].tokens[0]
+    assert sp.tokens[3].__class__ == sql.IdentifierList
+    # make sure that formatting works as expected
+    s = sqlparse.format('SELECT id ==  name FROM '
+                        '(SELECT id, name FROM bar)', reindent=True)
+    assert s == '\n'.join([
+        'SELECT id == name',
+        'FROM',
+        '  (SELECT id,',
+        '          name',
+        '   FROM bar)'])
+
+    s = sqlparse.format('SELECT id ==  name FROM '
+                        '(SELECT id, name FROM bar) as foo', reindent=True)
+    assert s == '\n'.join([
+        'SELECT id == name',
+        'FROM',
+        '  (SELECT id,',
+        '          name',
+        '   FROM bar) as foo'])
 
 
 def test_issue78():
@@ -198,17 +205,18 @@ def test_issue90():
            ' "rating_score" = 0, "thumbnail_width" = NULL,'
            ' "thumbnail_height" = NULL, "price" = 1, "description" = NULL')
     formatted = sqlparse.format(sql, reindent=True)
-    tformatted = '\n'.join(['UPDATE "gallery_photo"',
-                            'SET "owner_id" = 4018,',
-                            '    "deleted_at" = NULL,',
-                            '    "width" = NULL,',
-                            '    "height" = NULL,',
-                            '    "rating_votes" = 0,',
-                            '    "rating_score" = 0,',
-                            '    "thumbnail_width" = NULL,',
-                            '    "thumbnail_height" = NULL,',
-                            '    "price" = 1,',
-                            '    "description" = NULL'])
+    tformatted = '\n'.join([
+        'UPDATE "gallery_photo"',
+        'SET "owner_id" = 4018,',
+        '    "deleted_at" = NULL,',
+        '    "width" = NULL,',
+        '    "height" = NULL,',
+        '    "rating_votes" = 0,',
+        '    "rating_score" = 0,',
+        '    "thumbnail_width" = NULL,',
+        '    "thumbnail_height" = NULL,',
+        '    "price" = 1,',
+        '    "description" = NULL'])
     assert formatted == tformatted
 
 
@@ -222,8 +230,7 @@ def test_except_formatting():
         'EXCEPT',
         'SELECT 2',
         'FROM bar',
-        'WHERE 1 = 2'
-    ])
+        'WHERE 1 = 2'])
     assert formatted == tformatted
 
 
@@ -233,8 +240,7 @@ def test_null_with_as():
     tformatted = '\n'.join([
         'SELECT NULL AS c1,',
         '       NULL AS c2',
-        'FROM t1'
-    ])
+        'FROM t1'])
     assert formatted == tformatted
 
 
@@ -270,8 +276,8 @@ def test_issue186_get_type():
 
 
 def test_issue212_py2unicode():
-    t1 = sql.Token(T.String, u"schöner ")
-    t2 = sql.Token(T.String, u"bug")
+    t1 = sql.Token(T.String, u'schöner ')
+    t2 = sql.Token(T.String, 'bug')
     l = sql.TokenList([t1, t2])
     assert str(l) == 'schöner bug'
 
@@ -298,12 +304,13 @@ def test_issue227_gettype_cte():
 def test_issue207_runaway_format():
     sql = 'select 1 from (select 1 as one, 2 as two, 3 from dual) t0'
     p = sqlparse.format(sql, reindent=True)
-    assert p == '\n'.join(["select 1",
-                           "from",
-                           "  (select 1 as one,",
-                           "          2 as two,",
-                           "          3",
-                           "   from dual) t0"])
+    assert p == '\n'.join([
+        "select 1",
+        "from",
+        "  (select 1 as one,",
+        "          2 as two,",
+        "          3",
+        "   from dual) t0"])
 
 
 def token_next_doesnt_ignore_skip_cm():
