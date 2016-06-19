@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import sys
-
 import pytest  # noqa
 
 import sqlparse
 from sqlparse import sql, tokens as T
-from tests.utils import load_file
+from sqlparse.compat import PY2
 
 
 class RegressionTests(object):
@@ -171,7 +169,7 @@ def test_parse_sql_with_binary():
     sql = "select * from foo where bar = '{0}'".format(digest)
     formatted = sqlparse.format(sql, reindent=True)
     tformatted = "select *\nfrom foo\nwhere bar = '{0}'".format(digest)
-    if sys.version_info < (3,):
+    if PY2:
         tformatted = tformatted.decode('unicode-escape')
     assert formatted == tformatted
 
@@ -186,7 +184,7 @@ def test_dont_alias_keywords():
     assert p.tokens[2].ttype is T.Keyword
 
 
-def test_format_accepts_encoding():  # issue20
+def test_format_accepts_encoding(load_file):  # issue20
     sql = load_file('test_cp1251.sql', 'cp1251')
     formatted = sqlparse.format(sql, reindent=True, encoding='cp1251')
     tformatted = u'insert into foo\nvalues (1); -- Песня про надежду\n'

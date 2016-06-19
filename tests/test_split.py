@@ -8,7 +8,6 @@ import pytest  # noqa
 
 import sqlparse
 from sqlparse.compat import StringIO, text_type
-from tests.utils import load_file
 
 
 class SQLSplitTest(object):
@@ -28,31 +27,31 @@ class SQLSplitTest(object):
         stmts = sqlparse.parse(r"select '\\'; select '\''; select '\\\'';")
         assert len(stmts) == 3
 
-    def test_create_function(self):
+    def test_create_function(self, load_file):
         sql = load_file('function.sql')
         stmts = sqlparse.parse(sql)
         assert len(stmts) == 1
         assert str(stmts[0]) == sql
 
-    def test_create_function_psql(self):
+    def test_create_function_psql(self, load_file):
         sql = load_file('function_psql.sql')
         stmts = sqlparse.parse(sql)
         assert len(stmts) == 1
         assert str(stmts[0]) == sql
 
-    def test_create_function_psql3(self):
+    def test_create_function_psql3(self, load_file):
         sql = load_file('function_psql3.sql')
         stmts = sqlparse.parse(sql)
         assert len(stmts) == 1
         assert str(stmts[0]) == sql
 
-    def test_create_function_psql2(self):
+    def test_create_function_psql2(self, load_file):
         sql = load_file('function_psql2.sql')
         stmts = sqlparse.parse(sql)
         assert len(stmts) == 1
         assert str(stmts[0]) == sql
 
-    def test_dashcomments(self):
+    def test_dashcomments(self, load_file):
         sql = load_file('dashcomment.sql')
         stmts = sqlparse.parse(sql)
         assert len(stmts) == 3
@@ -68,13 +67,13 @@ class SQLSplitTest(object):
         stmts = sqlparse.parse('select foo; -- comment')
         assert len(stmts) == 1
 
-    def test_begintag(self):
+    def test_begintag(self, load_file):
         sql = load_file('begintag.sql')
         stmts = sqlparse.parse(sql)
         assert len(stmts) == 3
         assert ''.join(str(q) for q in stmts) == sql
 
-    def test_begintag_2(self):
+    def test_begintag_2(self, load_file):
         sql = load_file('begintag_2.sql')
         stmts = sqlparse.parse(sql)
         assert len(stmts) == 1

@@ -1,15 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import os
 import subprocess
 import sys
 
 import pytest
 
 import sqlparse
-from tests.utils import FILES_DIR
-
-path = os.path.join(FILES_DIR, 'function.sql')
 
 
 def test_cli_main_empty():
@@ -30,12 +26,13 @@ def test_main_help():
     assert exinfo.value.code == 0
 
 
-def test_valid_args():
+def test_valid_args(filepath):
     # test doesn't abort
+    path = filepath('function.sql')
     assert sqlparse.cli.main([path, '-r']) is not None
 
 
 def test_script():
     # Call with the --help option as a basic sanity check.
-    cmdl = "{0:s} -m sqlparse.cli --help".format(sys.executable)
-    assert subprocess.call(cmdl.split()) == 0
+    cmd = "{0:s} -m sqlparse.cli --help".format(sys.executable)
+    assert subprocess.call(cmd.split()) == 0
