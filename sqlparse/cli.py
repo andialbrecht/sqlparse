@@ -123,7 +123,8 @@ def create_parser():
 
 def _error(msg):
     """Print msg and optionally exit with return code exit_."""
-    sys.stderr.write('[ERROR] %s\n' % msg)
+    sys.stderr.write('[ERROR] {0}\n'.format(msg))
+    return 1
 
 
 def main(args=None):
@@ -137,15 +138,13 @@ def main(args=None):
             # TODO: Needs to deal with encoding
             data = ''.join(open(args.filename).readlines())
         except IOError as e:
-            _error('Failed to read %s: %s' % (args.filename, e))
-            return 1
+            return _error('Failed to read {0}: {1}'.format(args.filename, e))
 
     if args.outfile:
         try:
             stream = open(args.outfile, 'w')
         except IOError as e:
-            _error('Failed to open %s: %s' % (args.outfile, e))
-            return 1
+            return _error('Failed to open {0}: {1}'.format(args.outfile, e))
     else:
         stream = sys.stdout
 
@@ -153,8 +152,7 @@ def main(args=None):
     try:
         formatter_opts = sqlparse.formatter.validate_options(formatter_opts)
     except SQLParseError as e:
-        _error('Invalid options: %s' % e)
-        return 1
+        return _error('Invalid options: {0}'.format(e))
 
     s = sqlparse.format(data, **formatter_opts)
     if PY2:

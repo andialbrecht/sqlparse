@@ -32,6 +32,43 @@ def test_valid_args(filepath):
     assert sqlparse.cli.main([path, '-r']) is not None
 
 
+def test_invalid_choise(filepath):
+    path = filepath('function.sql')
+    with pytest.raises(SystemExit):
+        sqlparse.cli.main([path, '-l', 'spanish'])
+
+
+def test_invalid_args(filepath, capsys):
+    path = filepath('function.sql')
+    sqlparse.cli.main([path, '-r', '--indent_width', '0'])
+    _, err = capsys.readouterr()
+    assert err == ("[ERROR] Invalid options: indent_width requires "
+                   "a positive integer\n")
+
+
+def test_invalid_infile(filepath, capsys):
+    path = filepath('missing.sql')
+    sqlparse.cli.main([path, '-r'])
+    _, err = capsys.readouterr()
+    assert err[:22] == "[ERROR] Failed to read"
+
+
+def test_invalid_outfile(filepath, capsys):
+    path = filepath('function.sql')
+    outpath = filepath('/missing/function.sql')
+    sqlparse.cli.main([path, '-r', '-o', outpath])
+    _, err = capsys.readouterr()
+    assert err[:22] == "[ERROR] Failed to open"
+
+
+def test_stdout(filepath, load_file, capsys):
+    path = filepath('begintag.sql')
+    expected = load_file('begintag.sql')
+    sqlparse.cli.main([path])
+    out, _ = capsys.readouterr()
+    assert out == expected
+
+
 def test_script():
     # Call with the --help option as a basic sanity check.
     cmd = "{0:s} -m sqlparse.cli --help".format(sys.executable)
