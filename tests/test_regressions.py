@@ -312,3 +312,9 @@ def test_issue207_runaway_format():
                            "          2 as two,",
                            "          3",
                            "   from dual) t0"])
+
+
+def token_next_doesnt_ignore_skip_cm():
+    sql = '--comment\nselect 1'
+    tok = sqlparse.parse(sql)[0].token_next(-1, skip_cm=True)[1]
+    assert tok.value == 'select'
