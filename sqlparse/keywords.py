@@ -437,6 +437,7 @@ KEYWORDS = {
     'RETURNED_LENGTH': tokens.Keyword,
     'RETURNED_OCTET_LENGTH': tokens.Keyword,
     'RETURNED_SQLSTATE': tokens.Keyword,
+    'RETURNING': tokens.Keyword,
     'RETURNS': tokens.Keyword,
     'REVOKE': tokens.Keyword,
     'RIGHT': tokens.Keyword,
