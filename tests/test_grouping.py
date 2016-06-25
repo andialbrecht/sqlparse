@@ -188,6 +188,14 @@ def test_grouping_where():
     assert isinstance(p.tokens[-1].tokens[0].tokens[-2], sql.Where)
 
 
+def test_returning_kw_ends_where_clause():
+    s = 'delete from foo where x > y returning z'
+    p = sqlparse.parse(s)[0]
+    assert isinstance(p.tokens[6], sql.Where)
+    assert p.tokens[7].ttype == T.Keyword
+    assert p.tokens[7].value == 'returning'
+
+
 def test_grouping_typecast():
     s = 'select foo::integer from bar'
     p = sqlparse.parse(s)[0]
