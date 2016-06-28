@@ -12,7 +12,7 @@ from sqlparse import tokens
 
 def is_keyword(value):
     val = value.upper()
-    return (KEYWORDS_COMMON.get(val) or KEYWORDS.get(val, tokens.Name)), value
+    return (KEYWORDS_COMMON.get(val) or KEYWORDS_ORACLE.get(val) or KEYWORDS.get(val, tokens.Name)), value
 
 
 SQL_REGEX = {
@@ -684,4 +684,109 @@ KEYWORDS_COMMON = {
     'MIN': tokens.Keyword,
     'MAX': tokens.Keyword,
     'DISTINCT': tokens.Keyword,
+}
+
+KEYWORDS_ORACLE = {
+    'ARCHIVE': tokens.Keyword,
+    'ARCHIVELOG': tokens.Keyword,
+
+    'BACKUP': tokens.Keyword,
+    'BECOME': tokens.Keyword,
+    'BLOCK': tokens.Keyword,
+    'BODY': tokens.Keyword,
+
+    'CANCEL': tokens.Keyword,
+    'CHANGE': tokens.Keyword,
+    'COMPILE': tokens.Keyword,
+    'CONTENTS': tokens.Keyword,
+    'CONTROLFILE': tokens.Keyword,
+
+    'DATAFILE': tokens.Keyword,
+    'DBA': tokens.Keyword,
+    'DISMOUNT': tokens.Keyword,
+    'DOUBLE': tokens.Keyword,
+    'DUMP': tokens.Keyword,
+
+    'EVENTS': tokens.Keyword,
+    'EXCEPTIONS': tokens.Keyword,
+    'EXPLAIN': tokens.Keyword,
+    'EXTENT': tokens.Keyword,
+    'EXTERNALLY': tokens.Keyword,
+
+    'FLUSH': tokens.Keyword,
+    'FREELIST': tokens.Keyword,
+    'FREELISTS': tokens.Keyword,
+
+    'GROUPS': tokens.Keyword,
+
+    'INDICATOR': tokens.Keyword,
+    'INITRANS': tokens.Keyword,
+    'INSTANCE': tokens.Keyword,
+
+    'LAYER': tokens.Keyword,
+    'LINK': tokens.Keyword,
+    'LISTS': tokens.Keyword,
+    'LOGFILE': tokens.Keyword,
+
+    'MANAGE': tokens.Keyword,
+    'MANUAL': tokens.Keyword,
+    'MAXDATAFILES': tokens.Keyword,
+    'MAXINSTANCES': tokens.Keyword,
+    'MAXLOGFILES': tokens.Keyword,
+    'MAXLOGHISTORY': tokens.Keyword,
+    'MAXLOGMEMBERS': tokens.Keyword,
+    'MAXTRANS': tokens.Keyword,
+    'MINEXTENTS': tokens.Keyword,
+    'MODULE': tokens.Keyword,
+    'MOUNT': tokens.Keyword,
+
+    'NOARCHIVELOG': tokens.Keyword,
+    'NOCACHE': tokens.Keyword,
+    'NOCYCLE': tokens.Keyword,
+    'NOMAXVALUE': tokens.Keyword,
+    'NOMINVALUE': tokens.Keyword,
+    'NOORDER': tokens.Keyword,
+    'NORESETLOGS': tokens.Keyword,
+    'NORMAL': tokens.Keyword,
+    'NOSORT': tokens.Keyword,
+
+    'OPTIMAL': tokens.Keyword,
+    'OWN': tokens.Keyword,
+
+    'PACKAGE': tokens.Keyword,
+    'PARALLEL': tokens.Keyword,
+    'PCTINCREASE': tokens.Keyword,
+    'PCTUSED': tokens.Keyword,
+    'PLAN': tokens.Keyword,
+    'PRIVATE': tokens.Keyword,
+    'PROFILE': tokens.Keyword,
+
+    'QUOTA': tokens.Keyword,
+
+    'RECOVER': tokens.Keyword,
+    'RESETLOGS': tokens.Keyword,
+    'RESTRICTED': tokens.Keyword,
+    'REUSE': tokens.Keyword,
+    'ROLES': tokens.Keyword,
+
+    'SAVEPOINT': tokens.Keyword,
+    'SCN': tokens.Keyword,
+    'SECTION': tokens.Keyword,
+    'SEGMENT': tokens.Keyword,
+    'SHARED': tokens.Keyword,
+    'SNAPSHOT': tokens.Keyword,
+    'SORT': tokens.Keyword,
+    'STATEMENT_ID': tokens.Keyword,
+    'STOP': tokens.Keyword,
+    'SWITCH': tokens.Keyword,
+
+    'TABLES': tokens.Keyword,
+    'TABLESPACE': tokens.Keyword,
+    'THREAD': tokens.Keyword,
+    'TIME': tokens.Keyword,
+    'TRACING': tokens.Keyword,
+    'TRANSACTION': tokens.Keyword,
+    'TRIGGERS': tokens.Keyword,
+
+    'UNLIMITED': tokens.Keyword,
 }
