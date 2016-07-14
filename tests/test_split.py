@@ -91,6 +91,14 @@ def test_split_comment_end_of_line():
     assert str(stmts[0]) == 'select * from foo; -- foo\n'
 
 
+def test_split_end_of_line():
+    sql = ('select * from foo; -- foo\n'
+           'select * from bar;\n')
+    stmts = sqlparse.parse(sql)
+    # make sure the trailing \n doesn't result in a third statement
+    assert len(stmts) == 2
+
+
 def test_split_casewhen():
     sql = ("SELECT case when val = 1 then 2 else null end as foo;\n"
            "comment on table actor is 'The actor table.';")

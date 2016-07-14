@@ -68,4 +68,5 @@ def split(sql, encoding=None):
     :returns: A list of strings.
     """
     stack = engine.FilterStack()
-    return [text_type(stmt).strip() for stmt in stack.run(sql, encoding)]
+    return [text_type(stmt).strip()
+            for stmt in stack.run(sql.strip(), encoding)]
