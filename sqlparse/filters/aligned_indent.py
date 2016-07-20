@@ -67,7 +67,7 @@ class AlignedIndentFilter(object):
         offset_ = len('case ') + len('when ')
         cases = tlist.get_cases(skip_ws=True)
         # align the end as well
-        _, end_token = tlist.token_next_by(m=(T.Keyword, 'END'))
+        end_token = tlist.token_next_by(m=(T.Keyword, 'END'))[1]
         cases.append((None, [end_token]))
 
         condition_width = [len(' '.join(map(text_type, cond))) if cond else 0
