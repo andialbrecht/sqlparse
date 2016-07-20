@@ -1,5 +1,5 @@
-Development Version
--------------------
+Release 0.2.0 (Jul 20, 2016)
+----------------------------
 
 IMPORTANT: The supported Python versions have changed with this release.
 sqlparse 0.2.x supports Python 2.7 and Python >= 3.3.
