@@ -4,6 +4,9 @@ Development Version
 IMPORTANT: The supported Python versions have changed with this release.
 sqlparse 0.2.x supports Python 2.7 and Python >= 3.3.
 
+Thanks to the many contributors for writing bug reports and working
+on pull requests who made this version possible!
+
 Internal Changes
 
 * sqlparse.SQLParseError was removed from top-level module and moved to
