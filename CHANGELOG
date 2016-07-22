@@ -1,7 +1,10 @@
 Development Version
 -------------------
 
-No changes yet.
+Bug Fixes
+
+* Fix a regression to parse streams again (issue273, reported and
+  test case by gmccreight).
 
 
 Release 0.2.0 (Jul 20, 2016)

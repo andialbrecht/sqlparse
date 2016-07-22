@@ -12,6 +12,8 @@
 # It's separated from the rest of pygments to increase performance
 # and to allow some customizations.
 
+from io import TextIOBase
+
 from sqlparse import tokens
 from sqlparse.keywords import SQL_REGEX
 from sqlparse.compat import StringIO, string_types, u
@@ -39,7 +41,7 @@ class Lexer(object):
         """
         if isinstance(text, string_types):
             text = u(text, encoding)
-        elif isinstance(text, StringIO):
+        elif isinstance(text, (StringIO, TextIOBase)):
             text = u(text.read(), encoding)
 
         iterable = enumerate(text)
