@@ -39,3 +39,11 @@ def load_file(filepath):
             return f.read()
 
     return make_load_file
+
+
+@pytest.fixture()
+def get_stream(filepath):
+    def make_stream(filename, encoding='utf-8'):
+        return io.open(filepath(filename), encoding=encoding)
+
+    return make_stream

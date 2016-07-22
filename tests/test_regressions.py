@@ -184,6 +184,12 @@ def test_format_accepts_encoding(load_file):
     assert formatted == tformatted
 
 
+def test_stream(get_stream):
+    stream = get_stream("stream.sql")
+    p = sqlparse.parse(stream)[0]
+    assert p.get_type() == 'INSERT'
+
+
 def test_issue90():
     sql = ('UPDATE "gallery_photo" SET "owner_id" = 4018, "deleted_at" = NULL,'
            ' "width" = NULL, "height" = NULL, "rating_votes" = 0,'
