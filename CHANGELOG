@@ -21,6 +21,9 @@ Internal Changes
 * sqlparse.SQLParseError was removed from top-level module and moved to
   sqlparse.exceptions.
 * sqlparse.sql.Token.to_unicode was removed.
+* The signature of a filter's process method has changed from
+  process(stack, stream) -> to process(stream). Stack was never used at
+  all.
 * Lots of code cleanups and modernization (thanks esp. to vmuriart!).
 * Improved grouping performance. (sjoerdjob)
 
