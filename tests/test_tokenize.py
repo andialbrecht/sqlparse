@@ -95,6 +95,12 @@ def test_tokenlist_repr():
     assert repr(p.tokens[0])[:len(tst)] == tst
 
 
+def test_single_quotes():
+    p = sqlparse.parse("'test'")[0]
+    tst = "<Single \"'test'\" at 0x"
+    assert repr(p.tokens[0])[:len(tst)] == tst
+
+
 def test_tokenlist_first():
     p = sqlparse.parse(' select foo')[0]
     first = p.token_first()
