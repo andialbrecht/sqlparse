@@ -20,6 +20,12 @@ from sqlparse.compat import StringIO, string_types, u
 from sqlparse.utils import consume
 
 
+try:
+    file_types = (file, StringIO, TextIOBase)
+except NameError:  # Python 3
+    file_types = (StringIO, TextIOBase)
+
+
 class Lexer(object):
     """Lexer
     Empty class. Leaving for backwards-compatibility
@@ -41,7 +47,7 @@ class Lexer(object):
         """
         if isinstance(text, string_types):
             text = u(text, encoding)
-        elif isinstance(text, (StringIO, TextIOBase)):
+        elif isinstance(text, file_types):
             text = u(text.read(), encoding)
 
         iterable = enumerate(text)

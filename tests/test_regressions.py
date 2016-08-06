@@ -235,6 +235,13 @@ def test_null_with_as():
     assert formatted == tformatted
 
 
+def test_issue190_open_file(filepath):
+    path = filepath('stream.sql')
+    stream = open(path)
+    p = sqlparse.parse(stream)[0]
+    assert p.get_type() == 'INSERT'
+
+
 def test_issue193_splitting_function():
     sql = """   CREATE FUNCTION a(x VARCHAR(20)) RETURNS VARCHAR(20)
                 BEGIN
