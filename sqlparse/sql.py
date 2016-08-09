@@ -149,7 +149,7 @@ class TokenList(Token):
         super(TokenList, self).__init__(None, text_type(self))
 
     def __str__(self):
-        return ''.join(token.value for token in self.flatten())
+        return ''.join(token.value for token in self.tokens)
 
     # weird bug
     # def __len__(self):
