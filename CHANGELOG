@@ -5,6 +5,8 @@ Bug Fixes
 
 * Fix a regression to parse streams again (issue273, reported and
   test case by gmccreight).
+* Improve Python 2/3 compatibility when using parsestream (isseu190,
+  by phdru).
 
 
 Release 0.2.0 (Jul 20, 2016)
