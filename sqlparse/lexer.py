@@ -12,18 +12,10 @@
 # It's separated from the rest of pygments to increase performance
 # and to allow some customizations.
 
-from io import TextIOBase
-
 from sqlparse import tokens
 from sqlparse.keywords import SQL_REGEX
-from sqlparse.compat import StringIO, string_types, u
+from sqlparse.compat import file_types, string_types, u
 from sqlparse.utils import consume
-
-
-try:
-    file_types = (file, StringIO, TextIOBase)
-except NameError:  # Python 3
-    file_types = (StringIO, TextIOBase)
 
 
 class Lexer(object):

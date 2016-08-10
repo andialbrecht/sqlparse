@@ -16,9 +16,11 @@ https://bitbucket.org/gutworth/six
 """
 
 import sys
+from io import TextIOBase
 
 PY2 = sys.version_info[0] == 2
 PY3 = sys.version_info[0] == 3
+
 
 if PY3:
     def u(s, encoding=None):
@@ -32,6 +34,7 @@ if PY3:
     text_type = str
     string_types = (str,)
     from io import StringIO
+    file_types = (StringIO, TextIOBase)
 
 
 elif PY2:
@@ -51,4 +54,6 @@ elif PY2:
 
     text_type = unicode
     string_types = (str, unicode,)
+    from StringIO import StringIO
+    file_types = (file, StringIO, TextIOBase)
     from StringIO import StringIO
