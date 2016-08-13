@@ -17,7 +17,6 @@ class StatementSplitter(object):
     def _reset(self):
         """Set the filter attributes to its default values"""
         self._in_declare = False
-        self._in_dbldollar = False
         self._is_create = False
         self._begin_depth = 0
 
@@ -27,23 +26,6 @@ class StatementSplitter(object):
 
     def _change_splitlevel(self, ttype, value):
         """Get the new split level (increase, decrease or remain equal)"""
-        # PostgreSQL
-        if ttype == T.Name.Builtin and value[0] == '$' and value[-1] == '$':
-
-            # 2nd dbldollar found. $quote$ completed
-            # decrease level
-            if self._in_dbldollar:
-                self._in_dbldollar = False
-                return -1
-            else:
-                self._in_dbldollar = True
-                return 1
-
-        # if inside $$ everything inside is defining function character.
-        # Nothing inside can create a new statement
-        elif self._in_dbldollar:
-            return 0
-
         # ANSI
         # if normal token return
         # wouldn't parenthesis increase/decrease a level?
