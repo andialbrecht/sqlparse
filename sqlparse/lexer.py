@@ -50,11 +50,14 @@ class Lexer(object):
                 if not m:
                     continue
                 elif isinstance(action, tokens._TokenType):
+                    consume_pos = m.end() - pos - 1
                     yield action, m.group()
                 elif callable(action):
-                    yield action(m.group())
+                    ttype, value = action(m.group(), text[pos:])
+                    consume_pos = len(value) - 1
+                    yield ttype, value
 
-                consume(iterable, m.end() - pos - 1)
+                consume(iterable, consume_pos)
                 break
             else:
                 yield tokens.Error, char

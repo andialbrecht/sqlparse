@@ -27,7 +27,8 @@ def test_split_backslash():
 @pytest.mark.parametrize('fn', ['function.sql',
                                 'function_psql.sql',
                                 'function_psql2.sql',
-                                'function_psql3.sql'])
+                                'function_psql3.sql',
+                                'function_psql4.sql'])
 def test_split_create_function(load_file, fn):
     sql = load_file(fn)
     stmts = sqlparse.parse(sql)

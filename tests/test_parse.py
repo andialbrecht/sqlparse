@@ -384,3 +384,22 @@ def test_stmt_tokens_parents():
     stmt = sqlparse.parse(s)[0]
     for token in stmt.tokens:
         assert token.has_ancestor(stmt)
+
+
+@pytest.mark.parametrize('sql, is_literal', [
+    ('$$foo$$', True),
+    ('$_$foo$_$', True),
+    ('$token$ foo $token$', True),
+    # don't parse inner tokens
+    ('$_$ foo $token$bar$token$ baz$_$', True),
+    ('$A$ foo $B$', False)  # tokens don't match
+])
+def test_dbldollar_as_literal(sql, is_literal):
+    # see issue 277
+    p = sqlparse.parse(sql)[0]
+    if is_literal:
+        assert len(p.tokens) == 1
+        assert p.tokens[0].ttype == T.Literal
+    else:
+        for token in p.tokens:
+            assert token.ttype != T.Literal

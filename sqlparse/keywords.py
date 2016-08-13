@@ -10,11 +10,20 @@ import re
 from sqlparse import tokens
 
 
-def is_keyword(value):
+def is_keyword(value, remaining):
     val = value.upper()
     return (KEYWORDS_COMMON.get(val) or
             KEYWORDS_ORACLE.get(val) or
             KEYWORDS.get(val, tokens.Name)), value
+
+
+def parse_literal_string(value, remaining):
+    try:
+        end = remaining[len(value):].index(value)
+    except ValueError:
+        return tokens.Name.Builtin, value
+    literal = remaining[:end + (len(value) * 2)]
+    return tokens.Literal, literal
 
 
 SQL_REGEX = {
@@ -35,7 +44,7 @@ SQL_REGEX = {
 
         (r"`(``|[^`])*`", tokens.Name),
         (r"´(´´|[^´])*´", tokens.Name),
-        (r'\$([_A-Z]\w*)?\$', tokens.Name.Builtin),
+        (r'\$([_A-Z]\w*)?\$', parse_literal_string),
 
         (r'\?', tokens.Name.Placeholder),
         (r'%(\(\w+\))?s', tokens.Name.Placeholder),
