@@ -179,7 +179,7 @@ def test_format_accepts_encoding(load_file):
     # issue20
     sql = load_file('test_cp1251.sql', 'cp1251')
     formatted = sqlparse.format(sql, reindent=True, encoding='cp1251')
-    tformatted = u'insert into foo\nvalues (1); -- Песня про надежду\n'
+    tformatted = u'insert into foo\nvalues (1); -- Песня про надежду'
 
     assert formatted == tformatted
 

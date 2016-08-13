@@ -36,7 +36,7 @@ def load_file(filepath):
         # Syntax is noisy and requires specific variable names
         # And seems to be limited to only 1 argument.
         with io.open(filepath(filename), encoding=encoding) as f:
-            return f.read()
+            return f.read().strip()
 
     return make_load_file
 
