@@ -314,3 +314,9 @@ def test_token_next_doesnt_ignore_skip_cm():
     sql = '--comment\nselect 1'
     tok = sqlparse.parse(sql)[0].token_next(-1, skip_cm=True)[1]
     assert tok.value == 'select'
+
+
+def test_issue284_as_grouping():
+    sql = 'SELECT x AS'
+    p = sqlparse.parse(sql)[0]
+    assert sql == str(p)
