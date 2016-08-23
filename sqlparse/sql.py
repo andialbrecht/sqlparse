@@ -44,10 +44,8 @@ class Token(object):
     def __repr__(self):
         cls = self._get_repr_name()
         value = self._get_repr_value()
-        if value.startswith("'") and value.endswith("'"):
-            q = '"'
-        else:
-            q = "'"
+
+        q = '"' if value.startswith("'") and value.endswith("'") else "'"
         return "<{cls} {q}{value}{q} at 0x{id:2X}>".format(
             id=id(self), **locals())
 
@@ -170,10 +168,8 @@ class TokenList(Token):
         for idx, token in enumerate(self.tokens):
             cls = token._get_repr_name()
             value = token._get_repr_value()
-            if value.startswith("'") and value.endswith("'"):
-                q = '"'
-            else:
-                q = "'"
+
+            q = '"' if value.startswith("'") and value.endswith("'") else "'"
             print("{indent}{idx:2d} {cls} {q}{value}{q}"
                   .format(**locals()), file=f)
 
