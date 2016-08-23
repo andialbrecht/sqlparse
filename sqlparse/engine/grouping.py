@@ -21,13 +21,13 @@ def _group_matching(tlist, cls):
     for idx, token in enumerate(list(tlist)):
         tidx = idx - tidx_offset
 
-        if token.is_whitespace():
+        if token.is_whitespace:
             # ~50% of tokens will be whitespace. Will checking early
             # for them avoid 3 comparisons, but then add 1 more comparison
             # for the other ~50% of tokens...
             continue
 
-        if token.is_group() and not isinstance(token, cls):
+        if token.is_group and not isinstance(token, cls):
             # Check inside previously grouped (ie. parenthesis) if group
             # of differnt type is inside (ie, case). though ideally  should
             # should check for all open/close tokens at once to avoid recursion
@@ -246,7 +246,7 @@ def group_comments(tlist):
     tidx, token = tlist.token_next_by(t=T.Comment)
     while token:
         eidx, end = tlist.token_not_matching(
-            lambda tk: imt(tk, t=T.Comment) or tk.is_whitespace(), idx=tidx)
+            lambda tk: imt(tk, t=T.Comment) or tk.is_whitespace, idx=tidx)
         if end is not None:
             eidx, end = tlist.token_prev(eidx, skip_ws=False)
             tlist.group_tokens(sql.Comment, tidx, eidx)
@@ -372,10 +372,10 @@ def _group(tlist, cls, match,
     for idx, token in enumerate(list(tlist)):
         tidx = idx - tidx_offset
 
-        if token.is_whitespace():
+        if token.is_whitespace:
             continue
 
-        if recurse and token.is_group() and not isinstance(token, cls):
+        if recurse and token.is_group and not isinstance(token, cls):
             _group(token, cls, match, valid_prev, valid_next, post, extend)
 
         if match(token):

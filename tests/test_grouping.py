@@ -51,7 +51,7 @@ def test_grouping_identifiers():
 
     s = "INSERT INTO `test` VALUES('foo', 'bar');"
     parsed = sqlparse.parse(s)[0]
-    types = [l.ttype for l in parsed.tokens if not l.is_whitespace()]
+    types = [l.ttype for l in parsed.tokens if not l.is_whitespace]
     assert types == [T.DML, T.Keyword, None, T.Keyword, None, T.Punctuation]
 
     s = "select 1.0*(a+b) as col, sum(c)/sum(d) from myschema.mytable"

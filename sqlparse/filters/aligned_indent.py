@@ -38,7 +38,7 @@ class AlignedIndentFilter(object):
             self._max_kwd_len + offset + indent + self.offset))
 
     def _process_statement(self, tlist):
-        if tlist.tokens[0].is_whitespace() and self.indent == 0:
+        if tlist.tokens[0].is_whitespace and self.indent == 0:
             tlist.tokens.pop(0)
 
         # process the main query body
