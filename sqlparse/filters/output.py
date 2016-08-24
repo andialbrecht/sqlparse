@@ -47,7 +47,7 @@ class OutputPythonFilter(OutputFilter):
         # Print the tokens on the quote
         for token in stream:
             # Token is a new line separator
-            if token.is_whitespace() and '\n' in token.value:
+            if token.is_whitespace and '\n' in token.value:
                 # Close quote and add a new line
                 yield sql.Token(T.Text, " '")
                 yield sql.Token(T.Whitespace, '\n')
@@ -93,7 +93,7 @@ class OutputPHPFilter(OutputFilter):
         # Print the tokens on the quote
         for token in stream:
             # Token is a new line separator
-            if token.is_whitespace() and '\n' in token.value:
+            if token.is_whitespace and '\n' in token.value:
                 # Close quote and add a new line
                 yield sql.Token(T.Text, ' ";')
                 yield sql.Token(T.Whitespace, '\n')

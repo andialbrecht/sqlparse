@@ -23,8 +23,8 @@ class StripCommentsFilter(object):
             # Replace by whitespace if prev and next exist and if they're not
             # whitespaces. This doesn't apply if prev or next is a paranthesis.
             if (prev_ is None or next_ is None or
-                    prev_.is_whitespace() or prev_.match(T.Punctuation, '(') or
-                    next_.is_whitespace() or next_.match(T.Punctuation, ')')):
+                    prev_.is_whitespace or prev_.match(T.Punctuation, '(') or
+                    next_.is_whitespace or next_.match(T.Punctuation, ')')):
                 tlist.tokens.remove(token)
             else:
                 tlist.tokens[tidx] = sql.Token(T.Whitespace, ' ')
@@ -48,9 +48,9 @@ class StripWhitespaceFilter(object):
         last_was_ws = False
         is_first_char = True
         for token in tlist.tokens:
-            if token.is_whitespace():
+            if token.is_whitespace:
                 token.value = '' if last_was_ws or is_first_char else ' '
-            last_was_ws = token.is_whitespace()
+            last_was_ws = token.is_whitespace
             is_first_char = False
 
     def _stripws_identifierlist(self, tlist):
@@ -59,25 +59,25 @@ class StripWhitespaceFilter(object):
         for token in list(tlist.tokens):
             if last_nl and token.ttype is T.Punctuation and token.value == ',':
                 tlist.tokens.remove(last_nl)
-            last_nl = token if token.is_whitespace() else None
+            last_nl = token if token.is_whitespace else None
 
             # next_ = tlist.token_next(token, skip_ws=False)
-            # if (next_ and not next_.is_whitespace() and
+            # if (next_ and not next_.is_whitespace and
             #             token.ttype is T.Punctuation and token.value == ','):
             #     tlist.insert_after(token, sql.Token(T.Whitespace, ' '))
         return self._stripws_default(tlist)
 
     def _stripws_parenthesis(self, tlist):
-        if tlist.tokens[1].is_whitespace():
+        if tlist.tokens[1].is_whitespace:
             tlist.tokens.pop(1)
-        if tlist.tokens[-2].is_whitespace():
+        if tlist.tokens[-2].is_whitespace:
             tlist.tokens.pop(-2)
         self._stripws_default(tlist)
 
     def process(self, stmt, depth=0):
         [self.process(sgroup, depth + 1) for sgroup in stmt.get_sublists()]
         self._stripws(stmt)
-        if depth == 0 and stmt.tokens and stmt.tokens[-1].is_whitespace():
+        if depth == 0 and stmt.tokens and stmt.tokens[-1].is_whitespace:
             stmt.tokens.pop(-1)
         return stmt
 

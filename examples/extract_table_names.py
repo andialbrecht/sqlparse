@@ -18,7 +18,7 @@ from sqlparse.tokens import Keyword, DML
 
 
 def is_subselect(parsed):
-    if not parsed.is_group():
+    if not parsed.is_group:
         return False
     for item in parsed.tokens:
         if item.ttype is DML and item.value.upper() == 'SELECT':

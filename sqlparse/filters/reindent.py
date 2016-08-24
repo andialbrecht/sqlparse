@@ -23,7 +23,7 @@ class ReindentFilter(object):
 
     def _flatten_up_to_token(self, token):
         """Yields all tokens up to token but excluding current."""
-        if token.is_group():
+        if token.is_group:
             token = next(token.flatten())
 
         for t in self._curr_stmt.flatten():
@@ -65,7 +65,7 @@ class ReindentFilter(object):
             pidx, prev_ = tlist.token_prev(tidx, skip_ws=False)
             uprev = text_type(prev_)
 
-            if prev_ and prev_.is_whitespace():
+            if prev_ and prev_.is_whitespace:
                 del tlist.tokens[pidx]
                 tidx -= 1
 
@@ -80,7 +80,7 @@ class ReindentFilter(object):
         tidx, token = tlist.token_next_by(t=ttypes)
         while token:
             pidx, prev_ = tlist.token_prev(tidx, skip_ws=False)
-            if prev_ and prev_.is_whitespace():
+            if prev_ and prev_.is_whitespace:
                 del tlist.tokens[pidx]
                 tidx -= 1
             # only break if it's not the first token
