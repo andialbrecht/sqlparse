@@ -36,7 +36,7 @@ class ReindentFilter(object):
         return self.offset + self.indent * self.width
 
     def _get_offset(self, token):
-        raw = ''.join(map(text_type, self._flatten_up_to_token(token)))
+        raw = u''.join(map(text_type, self._flatten_up_to_token(token)))
         line = (raw or '\n').splitlines()[-1]
         # Now take current offset into account and return relative offset.
         return len(line) - len(self.char * self.leading_ws)

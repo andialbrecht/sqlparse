@@ -57,7 +57,7 @@ def format(sql, encoding=None, **options):
     options = formatter.validate_options(options)
     stack = formatter.build_filter_stack(stack, options)
     stack.postprocess.append(filters.SerializerUnicode())
-    return ''.join(stack.run(sql, encoding))
+    return u''.join(stack.run(sql, encoding))
 
 
 def split(sql, encoding=None):
