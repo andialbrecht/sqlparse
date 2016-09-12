@@ -48,8 +48,8 @@ class Token(object):
         cls = self._get_repr_name()
         value = self._get_repr_value()
 
-        q = '"' if value.startswith("'") and value.endswith("'") else "'"
-        return "<{cls} {q}{value}{q} at 0x{id:2X}>".format(
+        q = u'"' if value.startswith("'") and value.endswith("'") else u"'"
+        return u"<{cls} {q}{value}{q} at 0x{id:2X}>".format(
             id=id(self), **locals())
 
     def _get_repr_name(self):
@@ -143,7 +143,7 @@ class TokenList(Token):
         self.is_group = True
 
     def __str__(self):
-        return ''.join(token.value for token in self.flatten())
+        return u''.join(token.value for token in self.flatten())
 
     # weird bug
     # def __len__(self):
@@ -160,13 +160,13 @@ class TokenList(Token):
 
     def _pprint_tree(self, max_depth=None, depth=0, f=None):
         """Pretty-print the object tree."""
-        indent = ' | ' * depth
+        indent = u' | ' * depth
         for idx, token in enumerate(self.tokens):
             cls = token._get_repr_name()
             value = token._get_repr_value()
 
-            q = '"' if value.startswith("'") and value.endswith("'") else "'"
-            print("{indent}{idx:2d} {cls} {q}{value}{q}"
+            q = u'"' if value.startswith("'") and value.endswith("'") else u"'"
+            print(u"{indent}{idx:2d} {cls} {q}{value}{q}"
                   .format(**locals()), file=f)
 
             if token.is_group and (max_depth is None or depth < max_depth):

@@ -22,7 +22,7 @@ class OutputFilter(object):
     def process(self, stmt):
         self.count += 1
         if self.count > 1:
-            varname = '{f.varname}{f.count}'.format(f=self)
+            varname = u'{f.varname}{f.count}'.format(f=self)
         else:
             varname = self.varname
 

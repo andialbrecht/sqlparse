@@ -6,7 +6,7 @@ import pytest
 
 import sqlparse
 from sqlparse import sql, tokens as T
-from sqlparse.compat import StringIO
+from sqlparse.compat import StringIO, text_type
 
 
 def test_parse_tokenize():
@@ -403,3 +403,21 @@ def test_dbldollar_as_literal(sql, is_literal):
     else:
         for token in p.tokens:
             assert token.ttype != T.Literal
+
+
+def test_non_ascii():
+    _test_non_ascii = u"insert into test (id, name) values (1, 'тест');"
+
+    s = _test_non_ascii
+    stmts = sqlparse.parse(s)
+    assert len(stmts) == 1
+    statement = stmts[0]
+    assert text_type(statement) == s
+    assert statement._pprint_tree() is None
+
+    s = _test_non_ascii.encode('utf-8')
+    stmts = sqlparse.parse(s, 'utf-8')
+    assert len(stmts) == 1
+    statement = stmts[0]
+    assert text_type(statement) == _test_non_ascii
+    assert statement._pprint_tree() is None

@@ -14,7 +14,7 @@
 
 from sqlparse import tokens
 from sqlparse.keywords import SQL_REGEX
-from sqlparse.compat import file_types, string_types, u
+from sqlparse.compat import bytes_type, text_type, file_types
 from sqlparse.utils import consume
 
 
@@ -37,10 +37,21 @@ class Lexer(object):
 
         ``stack`` is the inital stack (default: ``['root']``)
         """
-        if isinstance(text, string_types):
-            text = u(text, encoding)
-        elif isinstance(text, file_types):
-            text = u(text.read(), encoding)
+        if isinstance(text, file_types):
+            text = text.read()
+
+        if isinstance(text, text_type):
+            pass
+        elif isinstance(text, bytes_type):
+            try:
+                text = text.decode()
+            except UnicodeDecodeError:
+                if not encoding:
+                    encoding = 'unicode-escape'
+                text = text.decode(encoding)
+        else:
+            raise TypeError(u"Expected text or file-like object, got {!r}".
+                            format(type(text)))
 
         iterable = enumerate(text)
         for pos, char in iterable:
