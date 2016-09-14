@@ -11,7 +11,7 @@ It provides support for parsing, splitting and formatting SQL statements.
 
 The module is compatible with Python 2.7 and Python 3 (>= 3.3)
 and released under the terms of the `New BSD license
-<http://www.opensource.org/licenses/bsd-license.php>`_.
+<https://opensource.org/licenses/BSD-3-Clause>`_.
 
 Visit the project page at https://github.com/andialbrecht/sqlparse for
 further information about this project.
