@@ -1,6 +1,11 @@
 Development Version
 -------------------
 
+Bug Fixes
+
+* Fix parsing of incomplete AS (issue284, by vmuriart).
+
+
 Internal Changes
 
 * `is_whitespace` and `is_group` changed into properties
