@@ -11,13 +11,15 @@ from sqlparse.utils import offset, indent
 
 
 class ReindentFilter(object):
-    def __init__(self, width=2, char=' ', wrap_after=0, n='\n'):
+    def __init__(self, width=2, char=' ', wrap_after=0, n='\n',
+                 comma_first=False):
         self.n = n
         self.width = width
         self.char = char
         self.indent = 0
         self.offset = 0
         self.wrap_after = wrap_after
+        self.comma_first = comma_first
         self._curr_stmt = None
         self._last_stmt = None
 
@@ -123,7 +125,20 @@ class ReindentFilter(object):
                     # Add 1 for the "," separator
                     position += len(token.value) + 1
                     if position > (self.wrap_after - self.offset):
+                        if self.comma_first:
+                            _, comma = tlist.token_prev(
+                                tlist.token_index(token))
+                            if comma is None:
+                                continue
+                            token = comma
                         tlist.insert_before(token, self.nl())
+                        if self.comma_first:
+                            _, ws = tlist.token_next(
+                                tlist.token_index(token), skip_ws=False)
+                            if (ws is not None
+                                and not ws.ttype is T.Text.Whitespace):
+                                tlist.insert_after(
+                                    token, sql.Token(T.Whitespace, ' '))
                         position = 0
         self._process_default(tlist)
 

@@ -97,6 +97,11 @@ def validate_options(options):
         raise SQLParseError('wrap_after requires a positive integer')
     options['wrap_after'] = wrap_after
 
+    comma_first = options.get('comma_first', False)
+    if comma_first not in [True, False]:
+        raise SQLParseError('comma_first requires a boolean value')
+    options['comma_first'] = comma_first
+
     right_margin = options.get('right_margin')
     if right_margin is not None:
         try:
@@ -148,7 +153,8 @@ def build_filter_stack(stack, options):
         stack.stmtprocess.append(
             filters.ReindentFilter(char=options['indent_char'],
                                    width=options['indent_width'],
-                                   wrap_after=options['wrap_after']))
+                                   wrap_after=options['wrap_after'],
+                                   comma_first=options['comma_first']))
 
     if options.get('reindent_aligned', False):
         stack.enable_grouping()

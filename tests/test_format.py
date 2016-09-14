@@ -322,6 +322,8 @@ class TestFormatReindent(object):
             sqlparse.format('foo', reindent=True, wrap_after='foo')
         with pytest.raises(SQLParseError):
             sqlparse.format('foo', reindent=True, wrap_after=-12)
+        with pytest.raises(SQLParseError):
+            sqlparse.format('foo', reindent=True, comma_first='foo')
 
     def test_stmts(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)
@@ -427,6 +429,19 @@ class TestFormatReindent(object):
             '       baz',
             'from table1, table2',
             'where 1 = 2'])
+
+    def test_identifier_list_comment_first(self):
+        f = lambda sql: sqlparse.format(sql, reindent=True, comma_first=True)
+        # not the 3: It cleans up whitespace too!
+        s = 'select foo, bar, baz from table where foo in (1, 2,3)'
+        assert f(s) == '\n'.join([
+            'select foo',
+            '       , bar',
+            '       , baz',
+            'from table',
+            'where foo in (1',
+            '              , 2',
+            '              , 3)'])
 
     def test_identifier_list_with_functions(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)

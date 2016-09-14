@@ -118,6 +118,13 @@ def create_parser():
         type=int,
         help='Column after which lists should be wrapped')
 
+    group.add_argument(
+        '--comma_first',
+        dest='comma_first',
+        default=False,
+        type=bool,
+        help='Insert linebreak before comma (default False)')
+
     return parser
 
 
