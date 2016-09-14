@@ -39,7 +39,7 @@ SQL_REGEX = {
 
         (r'\?', tokens.Name.Placeholder),
         (r'%(\(\w+\))?s', tokens.Name.Placeholder),
-        (r'[$:?]\w+', tokens.Name.Placeholder),
+        (r'(?<!\w)[$:?]\w+', tokens.Name.Placeholder),
 
         # FIXME(andi): VALUES shouldn't be listed here
         # see https://github.com/andialbrecht/sqlparse/pull/64
@@ -76,7 +76,7 @@ SQL_REGEX = {
         (r'CREATE(\s+OR\s+REPLACE)?\b', tokens.Keyword.DDL),
         (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
 
-        (r'[_A-Z]\w*', is_keyword),
+        (r'[_A-Z][_$#\w]*', is_keyword),
 
         (r'[;:()\[\],\.]', tokens.Punctuation),
         (r'[<>=~!]+', tokens.Operator.Comparison),

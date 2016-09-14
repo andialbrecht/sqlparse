@@ -163,3 +163,17 @@ def test_parse_endifloop(s):
     p = sqlparse.parse(s)[0]
     assert len(p.tokens) == 1
     assert p.tokens[0].ttype is T.Keyword
+
+
+@pytest.mark.parametrize('s', [
+    'foo',
+    'Foo',
+    'FOO',
+    'v$name',  # issue291
+])
+def test_parse_identifiers(s):
+    p = sqlparse.parse(s)[0]
+    assert len(p.tokens) == 1
+    token = p.tokens[0]
+    assert str(token) == s
+    assert isinstance(token, sql.Identifier)

@@ -4,6 +4,7 @@ Development Version
 Bug Fixes
 
 * Fix parsing of incomplete AS (issue284, by vmuriart).
+* Fix parsing of Oracle names containing dollars (issue291).
 
 
 Internal Changes
