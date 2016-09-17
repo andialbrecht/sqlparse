@@ -43,8 +43,10 @@ class ReindentFilter(object):
         # Now take current offset into account and return relative offset.
         return len(line) - len(self.char * self.leading_ws)
 
-    def nl(self):
-        return sql.Token(T.Whitespace, self.n + self.char * self.leading_ws)
+    def nl(self, offset=0):
+        return sql.Token(
+            T.Whitespace,
+            self.n + self.char * max(0, self.leading_ws + offset))
 
     def _next_token(self, tlist, idx=-1):
         split_words = ('FROM', 'STRAIGHT_JOIN$', 'JOIN$', 'AND', 'OR',
@@ -125,13 +127,15 @@ class ReindentFilter(object):
                     # Add 1 for the "," separator
                     position += len(token.value) + 1
                     if position > (self.wrap_after - self.offset):
+                        adjust = 0
                         if self.comma_first:
+                            adjust = -2
                             _, comma = tlist.token_prev(
                                 tlist.token_index(token))
                             if comma is None:
                                 continue
                             token = comma
-                        tlist.insert_before(token, self.nl())
+                        tlist.insert_before(token, self.nl(offset=adjust))
                         if self.comma_first:
                             _, ws = tlist.token_next(
                                 tlist.token_index(token), skip_ws=False)

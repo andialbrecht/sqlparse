@@ -436,12 +436,12 @@ class TestFormatReindent(object):
         s = 'select foo, bar, baz from table where foo in (1, 2,3)'
         assert f(s) == '\n'.join([
             'select foo',
-            '       , bar',
-            '       , baz',
+            '     , bar',
+            '     , baz',
             'from table',
             'where foo in (1',
-            '              , 2',
-            '              , 3)'])
+            '            , 2',
+            '            , 3)'])
 
     def test_identifier_list_with_functions(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)
