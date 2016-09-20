@@ -10,7 +10,7 @@ Bug Fixes
 
 * Fix parsing of incomplete AS (issue284, by vmuriart).
 * Fix parsing of Oracle names containing dollars (issue291).
-
+* Fix Python 3.6 compatibility (issue286).
 
 Internal Changes
 
