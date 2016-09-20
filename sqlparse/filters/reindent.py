@@ -140,7 +140,7 @@ class ReindentFilter(object):
                             _, ws = tlist.token_next(
                                 tlist.token_index(token), skip_ws=False)
                             if (ws is not None
-                                and not ws.ttype is T.Text.Whitespace):
+                                    and ws.ttype is not T.Text.Whitespace):
                                 tlist.insert_after(
                                     token, sql.Token(T.Whitespace, ' '))
                         position = 0
