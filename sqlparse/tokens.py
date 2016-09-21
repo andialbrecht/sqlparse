@@ -19,8 +19,6 @@ class _TokenType(tuple):
         return item is not None and (self is item or item[:len(self)] == self)
 
     def __getattr__(self, name):
-        if name == '__set_name__':
-            raise AttributeError
         new = _TokenType(self + (name,))
         setattr(self, name, new)
         new.parent = self
