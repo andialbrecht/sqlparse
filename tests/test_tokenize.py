@@ -157,6 +157,12 @@ def test_parse_join(expr):
     assert p.tokens[0].ttype is T.Keyword
 
 
+def test_parse_union():  # issue294
+    p = sqlparse.parse('UNION ALL')[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype is T.Keyword
+
+
 @pytest.mark.parametrize('s', ['END IF', 'END   IF', 'END\t\nIF',
                                'END LOOP', 'END   LOOP', 'END\t\nLOOP'])
 def test_parse_endifloop(s):
