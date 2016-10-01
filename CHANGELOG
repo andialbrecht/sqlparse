@@ -11,6 +11,7 @@ Bug Fixes
 * Fix parsing of incomplete AS (issue284, by vmuriart).
 * Fix parsing of Oracle names containing dollars (issue291).
 * Fix parsing of UNION ALL (issue294).
+* Fix grouping of identifiers containing typecasts (issue297).
 
 Internal Changes
 

@@ -64,6 +64,20 @@ def test_grouping_identifiers():
     assert identifiers[0].get_alias() == "col"
 
 
+@pytest.mark.parametrize('s', [
+    'foo, bar',
+    'sum(a), sum(b)',
+    'sum(a) as x, b as y',
+    'sum(a)::integer, b',
+    'sum(a)/count(b) as x, y',
+    'sum(a)::integer as x, y',
+    'sum(a)::integer/count(b) as x, y',  # issue297
+])
+def test_group_identifier_list(s):
+    parsed = sqlparse.parse(s)[0]
+    assert isinstance(parsed.tokens[0], sql.IdentifierList)
+
+
 def test_grouping_identifier_wildcard():
     p = sqlparse.parse('a.*, b.id')[0]
     assert isinstance(p.tokens[0], sql.IdentifierList)
