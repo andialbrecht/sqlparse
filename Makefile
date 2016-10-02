@@ -23,3 +23,4 @@ clean:
 release:
 	@rm -rf dist/
 	python setup.py sdist upload --sign --identity E0B84F81
+	python setup.py bdist_wheel upload --sign --identity E0B84F81
