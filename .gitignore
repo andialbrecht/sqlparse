@@ -3,7 +3,8 @@
 
 *.py[co]
 docs/build
-dist
+dist/
+build/
 MANIFEST
 .coverage
 .tox/
