@@ -5,7 +5,7 @@ recursive-include tests *.py *.sql
 include COPYING
 include TODO
 include AUTHORS
-include CHANGES
+include CHANGELOG
 include Makefile
 include pytest.ini
 include tox.ini
