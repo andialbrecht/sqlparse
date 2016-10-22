@@ -12,6 +12,7 @@ Bug Fixes
 * Fix parsing of Oracle names containing dollars (issue291).
 * Fix parsing of UNION ALL (issue294).
 * Fix grouping of identifiers containing typecasts (issue297).
+* Add Changelog to sdist again (issue302).
 
 Internal Changes
 
