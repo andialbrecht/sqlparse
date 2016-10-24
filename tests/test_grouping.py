@@ -250,6 +250,16 @@ def test_grouping_alias_case():
     assert p.tokens[0].get_alias() == 'foo'
 
 
+def test_grouping_subquery_no_parens():
+    # Not totally sure if this is the right approach...
+    # When a THEN clause contains a subquery w/o parens around it *and*
+    # a WHERE condition, the WHERE grouper consumes END too.
+    # This takes makes sure that it doesn't fail.
+    p = sqlparse.parse('CASE WHEN 1 THEN select 2 where foo = 1 end')[0]
+    assert len(p.tokens) == 1
+    assert isinstance(p.tokens[0], sql.Case)
+
+
 def test_grouping_alias_returns_none():
     # see issue185
     p = sqlparse.parse('foo.bar')[0]

@@ -162,7 +162,8 @@ class ReindentFilter(object):
                 with offset(self, len("WHEN ")):
                     self._process_default(tlist)
             end_idx, end = tlist.token_next_by(m=sql.Case.M_CLOSE)
-            tlist.insert_before(end_idx, self.nl())
+            if end_idx is not None:
+                tlist.insert_before(end_idx, self.nl())
 
     def _process_default(self, tlist, stmts=True):
         self._split_statements(tlist) if stmts else None
