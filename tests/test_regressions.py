@@ -316,7 +316,10 @@ def test_token_next_doesnt_ignore_skip_cm():
     assert tok.value == 'select'
 
 
-def test_issue284_as_grouping():
-    sql = 'SELECT x AS'
-    p = sqlparse.parse(sql)[0]
-    assert sql == str(p)
+@pytest.mark.parametrize('s', [
+    'SELECT x AS',
+    'AS'
+])
+def test_issue284_as_grouping(s):
+    p = sqlparse.parse(s)[0]
+    assert s == str(p)

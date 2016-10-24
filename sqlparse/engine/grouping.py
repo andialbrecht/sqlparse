@@ -380,7 +380,7 @@ def _group(tlist, cls, match,
 
         if match(token):
             nidx, next_ = tlist.token_next(tidx)
-            if valid_prev(prev_) and valid_next(next_):
+            if prev_ and valid_prev(prev_) and valid_next(next_):
                 from_idx, to_idx = post(tlist, pidx, tidx, nidx)
                 grp = tlist.group_tokens(cls, from_idx, to_idx, extend=extend)
 
