@@ -168,7 +168,8 @@ class ReindentFilter(object):
     def _process_default(self, tlist, stmts=True):
         self._split_statements(tlist) if stmts else None
         self._split_kwds(tlist)
-        [self._process(sgroup) for sgroup in tlist.get_sublists()]
+        for sgroup in tlist.get_sublists():
+            self._process(sgroup)
 
     def process(self, stmt):
         self._curr_stmt = stmt
