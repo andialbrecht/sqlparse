@@ -10,7 +10,15 @@ sqlparse is a non-validating SQL parser module for Python.
 Install
 -------
 
-Run::
+From pip, run::
+
+    $ pip install --upgrade sqlparse
+
+Consider using the ``--user`` option_.
+
+.. _option: https://pip.pypa.io/en/latest/user_guide/#user-installs
+
+From the repository, run::
 
   python setup.py install
 
