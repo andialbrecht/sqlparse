@@ -23,6 +23,7 @@ matrix:
     allow_failures:
         - env: TOXENV=py26
         - env: TOXENV=py36
+        - env: TOXENV=pypy3
         - python: "nightly"
 
 install:
