@@ -2,10 +2,10 @@ recursive-include docs source/*
 include docs/sqlformat.1
 include docs/Makefile
 recursive-include tests *.py *.sql
-include COPYING
+include LICENSE
 include TODO
 include AUTHORS
 include CHANGELOG
 include Makefile
-include pytest.ini
+include setup.cfg
 include tox.ini
