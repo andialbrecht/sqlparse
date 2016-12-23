@@ -15,11 +15,14 @@ matrix:
     fast_finish: true
 
     include:
-        - python: "nightly"
+        - python: 3.6-dev
           env: TOXENV=py36
+        - python: "nightly"
+          env: TOXENV=py37
 
     allow_failures:
         - env: TOXENV=py26
+        - env: TOXENV=py36
         - python: "nightly"
 
 install:
