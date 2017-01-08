@@ -30,7 +30,7 @@ class ReindentFilter(object):
 
         for t in self._curr_stmt.flatten():
             if t == token:
-                raise StopIteration
+                break
             yield t
 
     @property
