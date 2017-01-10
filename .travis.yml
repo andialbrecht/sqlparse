@@ -8,6 +8,7 @@ env:
     - TOXENV=py33
     - TOXENV=py34
     - TOXENV=py35
+    - TOXENV=py36
     - TOXENV=pypy
     - TOXENV=pypy3
 
@@ -15,14 +16,11 @@ matrix:
     fast_finish: true
 
     include:
-        - python: 3.6-dev
-          env: TOXENV=py36
         - python: "nightly"
           env: TOXENV=py37
 
     allow_failures:
         - env: TOXENV=py26
-        - env: TOXENV=py36
         - env: TOXENV=pypy3
         - python: "nightly"
 
