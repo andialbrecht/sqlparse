@@ -8,12 +8,13 @@ env:
     - TOXENV=py33
     - TOXENV=py34
     - TOXENV=py35
-    - TOXENV=py36
 
 matrix:
     fast_finish: true
 
     include:
+        - python: 3.6-dev
+          env: TOXENV=py36
         - python: nightly
           env: TOXENV=py37
         - python: pypy-5.4
