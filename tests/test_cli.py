@@ -73,3 +73,63 @@ def test_script():
     # Call with the --help option as a basic sanity check.
     cmd = "{0:s} -m sqlparse.cli --help".format(sys.executable)
     assert subprocess.call(cmd.split()) == 0
+
+
+def test_encoding_utf8_stdout(filepath, load_file, capfd):
+    path = filepath('encoding_utf8.sql')
+    expected = load_file('encoding_utf8.sql', 'utf-8')
+    sys.stdout.encoding = 'utf-8'
+    sqlparse.cli.main([path])
+    out, _ = capfd.readouterr()
+    assert out == expected
+
+
+def test_encoding_utf8_output_file(filepath, load_file, tmpdir):
+    in_path = filepath('encoding_utf8.sql')
+    expected = load_file('encoding_utf8.sql', 'utf-8')
+    out_path = tmpdir.dirname + '/encoding_utf8.out.sql'
+    sqlparse.cli.main([in_path, '-o', out_path])
+    out = load_file(out_path, 'utf-8')
+    assert out == expected
+
+
+def test_encoding_gbk_stdout(filepath, load_file, capfd):
+    path = filepath('encoding_gbk.sql')
+    expected = load_file('encoding_gbk.sql', 'gbk')
+    sys.stdout.encoding = 'gbk'
+    sqlparse.cli.main([path, '--encoding', 'gbk'])
+    out, _ = capfd.readouterr()
+    assert out == expected
+
+
+def test_encoding_gbk_output_file(filepath, load_file, tmpdir):
+    in_path = filepath('encoding_gbk.sql')
+    expected = load_file('encoding_gbk.sql', 'gbk')
+    out_path = tmpdir.dirname + '/encoding_gbk.out.sql'
+    sqlparse.cli.main([in_path, '--encoding', 'gbk', '-o', out_path])
+    out = load_file(out_path, 'gbk')
+    assert out == expected
+
+
+def test_encoding_stdin_utf8(filepath, load_file, capfd):
+    path = filepath('encoding_utf8.sql')
+    expected = load_file('encoding_utf8.sql', 'utf-8')
+    old_stdin = sys.stdin
+    sys.stdin = open(path, 'r')
+    sys.stdout.encoding = 'utf-8'
+    sqlparse.cli.main(['-'])
+    sys.stdin = old_stdin
+    out, _ = capfd.readouterr()
+    assert out == expected
+
+
+def test_encoding_stdin_gbk(filepath, load_file, capfd):
+    path = filepath('encoding_gbk.sql')
+    expected = load_file('encoding_gbk.sql', 'gbk')
+    old_stdin = sys.stdin
+    sys.stdin = open(path, 'r')
+    sys.stdout.encoding = 'gbk'
+    sqlparse.cli.main(['-', '--encoding', 'gbk'])
+    sys.stdin = old_stdin
+    out, _ = capfd.readouterr()
+    assert out == expected
