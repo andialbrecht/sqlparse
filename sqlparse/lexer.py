@@ -44,7 +44,7 @@ class Lexer(object):
             pass
         elif isinstance(text, bytes_type):
             try:
-                text = text.decode()
+                text = text.decode('utf-8')
             except UnicodeDecodeError:
                 if not encoding:
                     encoding = 'unicode-escape'
