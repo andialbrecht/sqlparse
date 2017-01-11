@@ -43,12 +43,13 @@ class Lexer(object):
         if isinstance(text, text_type):
             pass
         elif isinstance(text, bytes_type):
-            try:
-                text = text.decode()
-            except UnicodeDecodeError:
-                if not encoding:
-                    encoding = 'unicode-escape'
+            if encoding:
                 text = text.decode(encoding)
+            else:
+                try:
+                    text = text.decode('utf-8')
+                except UnicodeDecodeError:
+                    text = text.decode('unicode-escape')
         else:
             raise TypeError(u"Expected text or file-like object, got {!r}".
                             format(type(text)))

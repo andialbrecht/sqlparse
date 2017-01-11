@@ -323,3 +323,22 @@ def test_token_next_doesnt_ignore_skip_cm():
 def test_issue284_as_grouping(s):
     p = sqlparse.parse(s)[0]
     assert s == str(p)
+
+
+def test_issue315_utf8_by_default():
+    # Make sure the lexer can handle utf-8 string by default correctly
+    # digest = '齐天大圣.カラフルな雲.사랑해요'
+    # The digest contains Chinese, Japanese and Korean characters
+    # All in 'utf-8' encoding.
+    digest = (
+        '\xe9\xbd\x90\xe5\xa4\xa9\xe5\xa4\xa7\xe5\x9c\xa3.'
+        '\xe3\x82\xab\xe3\x83\xa9\xe3\x83\x95\xe3\x83\xab\xe3\x81\xaa\xe9'
+        '\x9b\xb2.'
+        '\xec\x82\xac\xeb\x9e\x91\xed\x95\xb4\xec\x9a\x94'
+    )
+    sql = "select * from foo where bar = '{0}'".format(digest)
+    formatted = sqlparse.format(sql, reindent=True)
+    tformatted = "select *\nfrom foo\nwhere bar = '{0}'".format(digest)
+    if PY2:
+        tformatted = tformatted.decode('utf-8')
+    assert formatted == tformatted
