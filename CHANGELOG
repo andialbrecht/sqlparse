@@ -10,6 +10,7 @@ Bug Fixes
 * Fix some edge-cases when parsing invalid SQL statements.
 
 
+
 Release 0.2.2 (Oct 22, 2016)
 ----------------------------
 
