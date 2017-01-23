@@ -21,6 +21,8 @@ Why does this file exist, and why not put this in __main__?
 
 import argparse
 import sys
+from io import TextIOWrapper
+from codecs import open, getreader
 
 import sqlparse
 from sqlparse.compat import PY2
@@ -125,6 +127,12 @@ def create_parser():
         type=bool,
         help='Insert linebreak before comma (default False)')
 
+    group.add_argument(
+        '--encoding',
+        dest='encoding',
+        default='utf-8',
+        help='Specify the input encoding (default utf-8)')
+
     return parser
 
 
@@ -139,18 +147,21 @@ def main(args=None):
     args = parser.parse_args(args)
 
     if args.filename == '-':  # read from stdin
-        data = sys.stdin.read()
+        if PY2:
+            data = getreader(args.encoding)(sys.stdin).read()
+        else:
+            data = TextIOWrapper(
+                sys.stdin.buffer, encoding=args.encoding).read()
     else:
         try:
-            # TODO: Needs to deal with encoding
-            data = ''.join(open(args.filename).readlines())
+            data = ''.join(open(args.filename, 'r', args.encoding).readlines())
         except IOError as e:
             return _error(
                 u'Failed to read {0}: {1}'.format(args.filename, e))
 
     if args.outfile:
         try:
-            stream = open(args.outfile, 'w')
+            stream = open(args.outfile, 'w', args.encoding)
         except IOError as e:
             return _error(u'Failed to open {0}: {1}'.format(args.outfile, e))
     else:
@@ -163,8 +174,6 @@ def main(args=None):
         return _error(u'Invalid options: {0}'.format(e))
 
     s = sqlparse.format(data, **formatter_opts)
-    if PY2:
-        s = s.encode('utf-8', 'replace')
     stream.write(s)
     stream.flush()
     return 0
