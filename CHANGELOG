@@ -1,6 +1,10 @@
 Development Version
 -------------------
 
+Enhancements
+
+* New command line option "--encoding" (by twang2218, pr317).
+
 Bug Fixes
 
 * Fix some edge-cases when parsing invalid SQL statements.
