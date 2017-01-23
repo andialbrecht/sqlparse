@@ -9,6 +9,9 @@ Bug Fixes
 
 * Fix some edge-cases when parsing invalid SQL statements.
 
+Internal Changes
+
+* Several improvements regarding encodings.
 
 
 Release 0.2.2 (Oct 22, 2016)
