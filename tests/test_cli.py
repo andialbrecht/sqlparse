@@ -133,3 +133,11 @@ def test_encoding_stdin_gbk(filepath, load_file, capfd):
     sys.stdin = old_stdin
     out, _ = capfd.readouterr()
     assert out == expected
+
+
+def test_encoding(filepath, capsys):
+    path = filepath('test_cp1251.sql')
+    expected = u'insert into foo values (1); -- Песня про надежду\n'
+    sqlparse.cli.main([path, '--encoding=cp1251'])
+    out, _ = capsys.readouterr()
+    assert out == expected
