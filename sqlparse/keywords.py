@@ -721,7 +721,8 @@ KEYWORDS_ORACLE = {
     'FREELIST': tokens.Keyword,
     'FREELISTS': tokens.Keyword,
 
-    'GROUPS': tokens.Keyword,
+    # groups seems too common as table name
+    # 'GROUPS': tokens.Keyword,
 
     'INDICATOR': tokens.Keyword,
     'INITRANS': tokens.Keyword,
