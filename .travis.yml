@@ -15,7 +15,7 @@ matrix:
     include:
         - python: 3.6-dev
           env: TOXENV=py36
-        - python: nightly
+        - python: 3.7-dev
           env: TOXENV=py37
         - python: pypy-5.4
           env: TOXENV=pypy_54
@@ -24,12 +24,12 @@ matrix:
 
     allow_failures:
         - env: TOXENV=py26
+        - env: TOXENV=py37
         - env: TOXENV=pypy_54
         - env: TOXENV=pypy33
-        - python: nightly
 
 install:
-    - pip install tox coveralls codecov
+    - pip install tox codecov
 
 script:
     - tox
