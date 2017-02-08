@@ -43,13 +43,14 @@ def test_issue34(value):
 
 
 def test_issue35():
-    # missing space before LIMIT
+    # missing space before LIMIT. Updated for #321
     sql = sqlparse.format("select * from foo where bar = 1 limit 1",
                           reindent=True)
     assert sql == "\n".join([
         "select *",
         "from foo",
-        "where bar = 1 limit 1"])
+        "where bar = 1",
+        "limit 1"])
 
 
 def test_issue38():
