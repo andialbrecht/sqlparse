@@ -167,6 +167,7 @@ KEYWORDS = {
     'COMMIT': tokens.Keyword.DML,
     'COMMITTED': tokens.Keyword,
     'COMPLETION': tokens.Keyword,
+    'CONCURRENTLY': tokens.Keyword,
     'CONDITION_NUMBER': tokens.Keyword,
     'CONNECT': tokens.Keyword,
     'CONNECTION': tokens.Keyword,
