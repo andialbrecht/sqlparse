@@ -346,7 +346,8 @@ def test_issue315_utf8_by_default():
 
 
 def test_issue322_concurrently_is_keyword():
-    p = sqlparse.parse('CREATE INDEX CONCURRENTLY myindex ON mytable(col1);')[0]
+    s = 'CREATE INDEX CONCURRENTLY myindex ON mytable(col1);'
+    p = sqlparse.parse(s)[0]
 
     assert len(p.tokens) == 12
     assert p.tokens[0].ttype is T.Keyword.DDL  # CREATE
