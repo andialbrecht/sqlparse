@@ -343,3 +343,16 @@ def test_issue315_utf8_by_default():
     if PY2:
         tformatted = tformatted.decode('utf-8')
     assert formatted == tformatted
+
+
+def test_issue322_concurrently_is_keyword():
+    s = 'CREATE INDEX CONCURRENTLY myindex ON mytable(col1);'
+    p = sqlparse.parse(s)[0]
+
+    assert len(p.tokens) == 12
+    assert p.tokens[0].ttype is T.Keyword.DDL  # CREATE
+    assert p.tokens[2].ttype is T.Keyword      # INDEX
+    assert p.tokens[4].ttype is T.Keyword      # CONCURRENTLY
+    assert p.tokens[4].value == 'CONCURRENTLY'
+    assert isinstance(p.tokens[6], sql.Identifier)
+    assert p.tokens[6].value == 'myindex'
