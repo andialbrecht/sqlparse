@@ -4,6 +4,7 @@ Development Version
 Enhancements
 
 * New command line option "--encoding" (by twang2218, pr317).
+* Support CONCURRENTLY keyword (issue322, by rowanseymour).
 
 Bug Fixes
 
