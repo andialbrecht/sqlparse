@@ -9,7 +9,7 @@ Enhancements
 Bug Fixes
 
 * Fix some edge-cases when parsing invalid SQL statements.
-* Fix indentation of LIMIT (by romainr, pr321).
+* Fix indentation of LIMIT (by romainr, issue320).
 
 Internal Changes
 
