@@ -17,7 +17,7 @@ from sqlparse import formatter
 
 from sqlparse.compat import text_type
 
-__version__ = '0.2.3'
+__version__ = '0.2.4.dev0'
 __all__ = ['engine', 'filters', 'formatter', 'sql', 'tokens', 'cli']
 
 
