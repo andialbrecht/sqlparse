@@ -10,6 +10,7 @@ Bug Fixes
 
 * Fix some edge-cases when parsing invalid SQL statements.
 * Fix indentation of LIMIT (by romainr, issue320).
+* Fix parsing of INTO keyword (issue324).
 
 Internal Changes
 

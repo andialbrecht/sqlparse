@@ -210,6 +210,14 @@ def test_returning_kw_ends_where_clause():
     assert p.tokens[7].value == 'returning'
 
 
+def test_into_kw_ends_where_clause():  # issue324
+    s = 'select * from foo where a = 1 into baz'
+    p = sqlparse.parse(s)[0]
+    assert isinstance(p.tokens[8], sql.Where)
+    assert p.tokens[9].ttype == T.Keyword
+    assert p.tokens[9].value == 'into'
+
+
 @pytest.mark.parametrize('sql, expected', [
     # note: typecast needs to be 2nd token for this test
     ('select foo::integer from bar', 'integer'),
