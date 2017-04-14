@@ -795,4 +795,5 @@ KEYWORDS_ORACLE = {
     'TRIGGERS': tokens.Keyword,
 
     'UNLIMITED': tokens.Keyword,
+    'UNLOCK': tokens.Keyword,
 }
