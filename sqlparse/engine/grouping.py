@@ -274,7 +274,7 @@ def group_where(tlist):
 @recurse()
 def group_aliased(tlist):
     I_ALIAS = (sql.Parenthesis, sql.Function, sql.Case, sql.Identifier,
-               sql.Operation)
+               sql.Operation, sql.Comparison)
 
     tidx, token = tlist.token_next_by(i=I_ALIAS, t=T.Number)
     while token:
@@ -346,10 +346,10 @@ def group(stmt):
         group_order,
         group_typecasts,
         group_operator,
+        group_comparison,
         group_as,
         group_aliased,
         group_assignment,
-        group_comparison,
 
         align_comments,
         group_identifier_list,

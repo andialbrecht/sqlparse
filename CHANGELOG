@@ -1,7 +1,9 @@
 Development Version
 -------------------
 
-Nothing yet.
+Bug Fixes
+
+* Fix detection of identifiers using comparisons (issue327).
 
 
 Release 0.2.3 (Mar 02, 2017)

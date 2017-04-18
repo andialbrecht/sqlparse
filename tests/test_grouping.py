@@ -65,6 +65,20 @@ def test_grouping_identifiers():
 
 
 @pytest.mark.parametrize('s', [
+    '1 as f',
+    'foo as f',
+    'foo f',
+    '1/2 as f',
+    '1/2 f',
+    '1<2 as f',  # issue327
+    '1<2 f',
+])
+def test_simple_identifiers(s):
+    parsed = sqlparse.parse(s)[0]
+    assert isinstance(parsed.tokens[0], sql.Identifier)
+
+
+@pytest.mark.parametrize('s', [
     'foo, bar',
     'sum(a), sum(b)',
     'sum(a) as x, b as y',
