@@ -114,6 +114,7 @@ KEYWORDS = {
     'ATOMIC': tokens.Keyword,
     'AUDIT': tokens.Keyword,
     'AUTHORIZATION': tokens.Keyword,
+    'AUTO_INCREMENT': tokens.Keyword,
     'AVG': tokens.Keyword,
 
     'BACKWARD': tokens.Keyword,
@@ -142,6 +143,7 @@ KEYWORDS = {
     'CHARACTER_SET_NAME': tokens.Keyword,
     'CHARACTER_SET_SCHEMA': tokens.Keyword,
     'CHAR_LENGTH': tokens.Keyword,
+    'CHARSET': tokens.Keyword,
     'CHECK': tokens.Keyword,
     'CHECKED': tokens.Keyword,
     'CHECKPOINT': tokens.Keyword,
@@ -238,6 +240,7 @@ KEYWORDS = {
     'ENCODING': tokens.Keyword,
     'ENCRYPTED': tokens.Keyword,
     'END-EXEC': tokens.Keyword,
+    'ENGINE': tokens.Keyword,
     'EQUALS': tokens.Keyword,
     'ESCAPE': tokens.Keyword,
     'EVERY': tokens.Keyword,
