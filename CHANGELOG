@@ -1,6 +1,10 @@
 Development Version
 -------------------
 
+Enhancements
+
+* Add more keywords for MySQL table options (pr328, pr333, by phdru).
+
 Bug Fixes
 
 * Fix detection of identifiers using comparisons (issue327).
