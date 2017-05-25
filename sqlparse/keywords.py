@@ -60,7 +60,7 @@ SQL_REGEX = {
         (r'-?0x[\dA-F]+', tokens.Number.Hexadecimal),
         (r'-?\d*(\.\d+)?E-?\d+', tokens.Number.Float),
         (r'-?\d*\.\d+', tokens.Number.Float),
-        (r'-?\d+', tokens.Number.Integer),
+        (r'-?\d+(?![_A-Z])', tokens.Number.Integer),
 
         (r"'(''|\\\\|\\'|[^'])*'", tokens.String.Single),
         # not a real string literal in ANSI SQL:
@@ -77,7 +77,7 @@ SQL_REGEX = {
         (r'CREATE(\s+OR\s+REPLACE)?\b', tokens.Keyword.DDL),
         (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
 
-        (r'[_A-Z][_$#\w]*', is_keyword),
+        (r'[0-9_A-Z][_$#\w]*', is_keyword),
 
         (r'[;:()\[\],\.]', tokens.Punctuation),
         (r'[<>=~!]+', tokens.Operator.Comparison),
