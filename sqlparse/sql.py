@@ -526,8 +526,9 @@ class Comment(TokenList):
 class Where(TokenList):
     """A WHERE clause."""
     M_OPEN = T.Keyword, 'WHERE'
-    M_CLOSE = T.Keyword, ('ORDER', 'GROUP', 'LIMIT', 'UNION', 'EXCEPT',
-                          'HAVING', 'RETURNING', 'INTO')
+    M_CLOSE = T.Keyword, (
+        'ORDER', 'GROUP', 'LIMIT', 'UNION', 'UNION ALL', 'EXCEPT',
+        'HAVING', 'RETURNING', 'INTO')
 
 
 class Case(TokenList):

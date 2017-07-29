@@ -216,6 +216,15 @@ def test_grouping_where():
     assert isinstance(p.tokens[-1].tokens[0].tokens[-2], sql.Where)
 
 
+@pytest.mark.parametrize('s', (
+    'select 1 where 1 = 2 union select 2',
+    'select 1 where 1 = 2 union all select 2',
+))
+def test_grouping_where_union(s):
+    p = sqlparse.parse(s)[0]
+    assert p.tokens[5].value.startswith('union')
+
+
 def test_returning_kw_ends_where_clause():
     s = 'delete from foo where x > y returning z'
     p = sqlparse.parse(s)[0]
