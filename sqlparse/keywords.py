@@ -639,7 +639,7 @@ KEYWORDS = {
     'SERIAL8': tokens.Name.Builtin,
     'SIGNED': tokens.Name.Builtin,
     'SMALLINT': tokens.Name.Builtin,
-    'SYSDATE': tokens.Name.Builtin,
+    'SYSDATE': tokens.Name,
     'TEXT': tokens.Name.Builtin,
     'TINYINT': tokens.Name.Builtin,
     'UNSIGNED': tokens.Name.Builtin,
