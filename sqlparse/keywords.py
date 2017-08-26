@@ -35,7 +35,7 @@ SQL_REGEX = {
 
         (r"`(``|[^`])*`", tokens.Name),
         (r"´(´´|[^´])*´", tokens.Name),
-        (r'(\$(?:[_A-Z]\w*)?\$)[\s\S]*?\1', tokens.Literal),
+        (r'(\$(?:[_A-ZÀ-Ü]\w*)?\$)[\s\S]*?\1', tokens.Literal),
 
         (r'\?', tokens.Name.Placeholder),
         (r'%(\(\w+\))?s', tokens.Name.Placeholder),
@@ -47,20 +47,20 @@ SQL_REGEX = {
         # is never a functino, see issue183
         (r'(CASE|IN|VALUES|USING)\b', tokens.Keyword),
 
-        (r'(@|##|#)[A-Z]\w+', tokens.Name),
+        (r'(@|##|#)[A-ZÀ-Ü]\w+', tokens.Name),
 
         # see issue #39
         # Spaces around period `schema . name` are valid identifier
         # TODO: Spaces before period not implemented
-        (r'[A-Z]\w*(?=\s*\.)', tokens.Name),  # 'Name'   .
-        (r'(?<=\.)[A-Z]\w*', tokens.Name),  # .'Name'
-        (r'[A-Z]\w*(?=\()', tokens.Name),  # side effect: change kw to func
+        (r'[A-ZÀ-Ü]\w*(?=\s*\.)', tokens.Name),  # 'Name'   .
+        (r'(?<=\.)[A-ZÀ-Ü]\w*', tokens.Name),  # .'Name'
+        (r'[A-ZÀ-Ü]\w*(?=\()', tokens.Name),  # side effect: change kw to func
 
         # TODO: `1.` and `.1` are valid numbers
         (r'-?0x[\dA-F]+', tokens.Number.Hexadecimal),
         (r'-?\d*(\.\d+)?E-?\d+', tokens.Number.Float),
         (r'-?\d*\.\d+', tokens.Number.Float),
-        (r'-?\d+(?![_A-Z])', tokens.Number.Integer),
+        (r'-?\d+(?![_A-ZÀ-Ü])', tokens.Number.Integer),
 
         (r"'(''|\\\\|\\'|[^'])*'", tokens.String.Single),
         # not a real string literal in ANSI SQL:
@@ -77,7 +77,7 @@ SQL_REGEX = {
         (r'CREATE(\s+OR\s+REPLACE)?\b', tokens.Keyword.DDL),
         (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
 
-        (r'[0-9_A-Z][_$#\w]*', is_keyword),
+        (r'[0-9_A-ZÀ-Ü][_$#\w]*', is_keyword),
 
         (r'[;:()\[\],\.]', tokens.Punctuation),
         (r'[<>=~!]+', tokens.Operator.Comparison),
