@@ -804,15 +804,15 @@ KEYWORDS_ORACLE = {
 
 # PostgreSQL Syntax
 KEYWORDS_PLPGSQL = {
-    'PARTITION':    tokens.Keyword,
-    'OVER':         tokens.Keyword,
-    'PERFORM':      tokens.Keyword,
-    'NOTICE':       tokens.Keyword,
-    'PLPGSQL':      tokens.Keyword,
-    'INHERIT':      tokens.Keyword,
-    'INDEXES':      tokens.Keyword,
+    'PARTITION': tokens.Keyword,
+    'OVER': tokens.Keyword,
+    'PERFORM': tokens.Keyword,
+    'NOTICE': tokens.Keyword,
+    'PLPGSQL': tokens.Keyword,
+    'INHERIT': tokens.Keyword,
+    'INDEXES': tokens.Keyword,
 
-    'FOR':          tokens.Keyword,
-    'IN':           tokens.Keyword,
-    'LOOP':         tokens.Keyword,
+    'FOR': tokens.Keyword,
+    'IN': tokens.Keyword,
+    'LOOP': tokens.Keyword,
 }
