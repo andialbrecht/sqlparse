@@ -14,6 +14,7 @@ def is_keyword(value):
     val = value.upper()
     return (KEYWORDS_COMMON.get(val) or
             KEYWORDS_ORACLE.get(val) or
+            KEYWORDS_PLPGSQL.get(val) or
             KEYWORDS.get(val, tokens.Name)), value
 
 
@@ -799,4 +800,19 @@ KEYWORDS_ORACLE = {
 
     'UNLIMITED': tokens.Keyword,
     'UNLOCK': tokens.Keyword,
+}
+
+# PostgreSQL Syntax
+KEYWORDS_PLPGSQL = {
+    'PARTITION':    tokens.Keyword,
+    'OVER':         tokens.Keyword,
+    'PERFORM':      tokens.Keyword,
+    'NOTICE':       tokens.Keyword,
+    'PLPGSQL':      tokens.Keyword,
+    'INHERIT':      tokens.Keyword,
+    'INDEXES':      tokens.Keyword,
+
+    'FOR':          tokens.Keyword,
+    'IN':           tokens.Keyword,
+    'LOOP':         tokens.Keyword,
 }
