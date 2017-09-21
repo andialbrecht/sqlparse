@@ -135,11 +135,14 @@ def test_quoted_identifier():
     assert t[2].get_real_name() == 'y'
 
 
-@pytest.mark.parametrize('name', ['foo', '_foo'])
+@pytest.mark.parametrize('name', [
+    'foo', '_foo',  # issue175
+    '1_data',  # valid MySQL table name, see issue337
+])
 def test_valid_identifier_names(name):
-    # issue175
     t = sqlparse.parse(name)[0].tokens
     assert isinstance(t[0], sql.Identifier)
+    assert t[0].get_name() == name
 
 
 def test_psql_quotation_marks():

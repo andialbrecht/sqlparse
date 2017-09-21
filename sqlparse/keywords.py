@@ -14,6 +14,7 @@ def is_keyword(value):
     val = value.upper()
     return (KEYWORDS_COMMON.get(val) or
             KEYWORDS_ORACLE.get(val) or
+            KEYWORDS_PLPGSQL.get(val) or
             KEYWORDS.get(val, tokens.Name)), value
 
 
@@ -35,7 +36,7 @@ SQL_REGEX = {
 
         (r"`(``|[^`])*`", tokens.Name),
         (r"´(´´|[^´])*´", tokens.Name),
-        (r'(\$(?:[_A-Z]\w*)?\$)[\s\S]*?\1', tokens.Literal),
+        (r'(\$(?:[_A-ZÀ-Ü]\w*)?\$)[\s\S]*?\1', tokens.Literal),
 
         (r'\?', tokens.Name.Placeholder),
         (r'%(\(\w+\))?s', tokens.Name.Placeholder),
@@ -47,22 +48,20 @@ SQL_REGEX = {
         # is never a functino, see issue183
         (r'(CASE|IN|VALUES|USING)\b', tokens.Keyword),
 
-        (r'(@|##|#)[A-Z]\w+', tokens.Name),
+        (r'(@|##|#)[A-ZÀ-Ü]\w+', tokens.Name),
 
         # see issue #39
         # Spaces around period `schema . name` are valid identifier
         # TODO: Spaces before period not implemented
-        (r'[A-Z]\w*(?=\s*\.)', tokens.Name),  # 'Name'   .
+        (r'[A-ZÀ-Ü]\w*(?=\s*\.)', tokens.Name),  # 'Name'   .
         # FIXME(atronah): never match,
         # because `re.match` doesn't work with lookbehind regexp feature
-        (r'(?<=\.)[A-Z]\w*', tokens.Name),  # .'Name'
-        (r'[A-Z]\w*(?=\()', tokens.Name),  # side effect: change kw to func
-
+        (r'(?<=\.)[A-ZÀ-Ü]\w*', tokens.Name),  # .'Name'
+        (r'[A-ZÀ-Ü]\w*(?=\()', tokens.Name),  # side effect: change kw to func
         (r'-?0x[\dA-F]+', tokens.Number.Hexadecimal),
         (r'-?\d*(\.\d+)?E-?\d+', tokens.Number.Float),
         (r'-?(\d+(\.\d*)|\.\d+)', tokens.Number.Float),
-        (r'-?\d+', tokens.Number.Integer),
-
+        (r'-?\d+(?![_A-ZÀ-Ü])', tokens.Number.Integer),
         (r"'(''|\\\\|\\'|[^'])*'", tokens.String.Single),
         # not a real string literal in ANSI SQL:
         (r'(""|".*?[^\\]")', tokens.String.Symbol),
@@ -78,7 +77,7 @@ SQL_REGEX = {
         (r'CREATE(\s+OR\s+REPLACE)?\b', tokens.Keyword.DDL),
         (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
 
-        (r'[_A-Z][_$#\w]*', is_keyword),
+        (r'[0-9_A-ZÀ-Ü][_$#\w]*', is_keyword),
 
         (r'[;:()\[\],\.]', tokens.Punctuation),
         (r'[<>=~!]+', tokens.Operator.Comparison),
@@ -115,6 +114,7 @@ KEYWORDS = {
     'ATOMIC': tokens.Keyword,
     'AUDIT': tokens.Keyword,
     'AUTHORIZATION': tokens.Keyword,
+    'AUTO_INCREMENT': tokens.Keyword,
     'AVG': tokens.Keyword,
 
     'BACKWARD': tokens.Keyword,
@@ -143,6 +143,7 @@ KEYWORDS = {
     'CHARACTER_SET_NAME': tokens.Keyword,
     'CHARACTER_SET_SCHEMA': tokens.Keyword,
     'CHAR_LENGTH': tokens.Keyword,
+    'CHARSET': tokens.Keyword,
     'CHECK': tokens.Keyword,
     'CHECKED': tokens.Keyword,
     'CHECKPOINT': tokens.Keyword,
@@ -239,6 +240,7 @@ KEYWORDS = {
     'ENCODING': tokens.Keyword,
     'ENCRYPTED': tokens.Keyword,
     'END-EXEC': tokens.Keyword,
+    'ENGINE': tokens.Keyword,
     'EQUALS': tokens.Keyword,
     'ESCAPE': tokens.Keyword,
     'EVERY': tokens.Keyword,
@@ -637,7 +639,7 @@ KEYWORDS = {
     'SERIAL8': tokens.Name.Builtin,
     'SIGNED': tokens.Name.Builtin,
     'SMALLINT': tokens.Name.Builtin,
-    'SYSDATE': tokens.Name.Builtin,
+    'SYSDATE': tokens.Name,
     'TEXT': tokens.Name.Builtin,
     'TINYINT': tokens.Name.Builtin,
     'UNSIGNED': tokens.Name.Builtin,
@@ -797,4 +799,19 @@ KEYWORDS_ORACLE = {
 
     'UNLIMITED': tokens.Keyword,
     'UNLOCK': tokens.Keyword,
+}
+
+# PostgreSQL Syntax
+KEYWORDS_PLPGSQL = {
+    'PARTITION': tokens.Keyword,
+    'OVER': tokens.Keyword,
+    'PERFORM': tokens.Keyword,
+    'NOTICE': tokens.Keyword,
+    'PLPGSQL': tokens.Keyword,
+    'INHERIT': tokens.Keyword,
+    'INDEXES': tokens.Keyword,
+
+    'FOR': tokens.Keyword,
+    'IN': tokens.Keyword,
+    'LOOP': tokens.Keyword,
 }

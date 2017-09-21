@@ -95,9 +95,9 @@ def imt(token, i=None, m=None, t=None):
         return False
     elif clss and isinstance(token, clss):
         return True
-    elif mpatterns and any((token.match(*pattern) for pattern in mpatterns)):
+    elif mpatterns and any(token.match(*pattern) for pattern in mpatterns):
         return True
-    elif types and any([token.ttype in ttype for ttype in types]):
+    elif types and any(token.ttype in ttype for ttype in types):
         return True
     else:
         return False
