@@ -5,6 +5,7 @@ Enhancements
 
 * Add more keywords for MySQL table options (pr328, pr333, by phdru).
 * Add more PL/pgSQL keywords (pr357, by Demetrio92).
+* Improve parsing of floats (pr330, by atronah).
 
 Bug Fixes
 
