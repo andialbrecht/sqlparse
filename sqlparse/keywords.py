@@ -54,15 +54,14 @@ SQL_REGEX = {
         # Spaces around period `schema . name` are valid identifier
         # TODO: Spaces before period not implemented
         (r'[A-ZÀ-Ü]\w*(?=\s*\.)', tokens.Name),  # 'Name'   .
+        # FIXME(atronah): never match,
+        # because `re.match` doesn't work with lookbehind regexp feature
         (r'(?<=\.)[A-ZÀ-Ü]\w*', tokens.Name),  # .'Name'
         (r'[A-ZÀ-Ü]\w*(?=\()', tokens.Name),  # side effect: change kw to func
-
-        # TODO: `1.` and `.1` are valid numbers
         (r'-?0x[\dA-F]+', tokens.Number.Hexadecimal),
         (r'-?\d*(\.\d+)?E-?\d+', tokens.Number.Float),
-        (r'-?\d*\.\d+', tokens.Number.Float),
+        (r'-?(\d+(\.\d*)|\.\d+)', tokens.Number.Float),
         (r'-?\d+(?![_A-ZÀ-Ü])', tokens.Number.Integer),
-
         (r"'(''|\\\\|\\'|[^'])*'", tokens.String.Single),
         # not a real string literal in ANSI SQL:
         (r'(""|".*?[^\\]")', tokens.String.Symbol),
