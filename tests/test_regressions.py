@@ -186,9 +186,9 @@ def test_format_accepts_encoding(load_file):
 
 
 def test_stream(get_stream):
-    stream = get_stream("stream.sql")
-    p = sqlparse.parse(stream)[0]
-    assert p.get_type() == 'INSERT'
+    with get_stream("stream.sql") as stream:
+        p = sqlparse.parse(stream)[0]
+        assert p.get_type() == 'INSERT'
 
 
 def test_issue90():
@@ -238,9 +238,9 @@ def test_null_with_as():
 
 def test_issue190_open_file(filepath):
     path = filepath('stream.sql')
-    stream = open(path)
-    p = sqlparse.parse(stream)[0]
-    assert p.get_type() == 'INSERT'
+    with open(path) as stream:
+        p = sqlparse.parse(stream)[0]
+        assert p.get_type() == 'INSERT'
 
 
 def test_issue193_splitting_function():

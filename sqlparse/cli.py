@@ -154,14 +154,17 @@ def main(args=None):
                 sys.stdin.buffer, encoding=args.encoding).read()
     else:
         try:
-            data = ''.join(open(args.filename, 'r', args.encoding).readlines())
+            with open(args.filename, 'r', args.encoding) as f:
+                data = ''.join(f.readlines())
         except IOError as e:
             return _error(
                 u'Failed to read {0}: {1}'.format(args.filename, e))
 
+    close_stream = False
     if args.outfile:
         try:
             stream = open(args.outfile, 'w', args.encoding)
+            close_stream = True
         except IOError as e:
             return _error(u'Failed to open {0}: {1}'.format(args.outfile, e))
     else:
@@ -176,4 +179,6 @@ def main(args=None):
     s = sqlparse.format(data, **formatter_opts)
     stream.write(s)
     stream.flush()
+    if close_stream:
+        stream.close()
     return 0
