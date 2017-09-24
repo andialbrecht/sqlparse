@@ -134,7 +134,7 @@ def group_assignment(tlist):
         return token.match(T.Assignment, ':=')
 
     def valid(token):
-        return token is not None
+        return token is not None and token.ttype not in (T.Keyword)
 
     def post(tlist, pidx, tidx, nidx):
         m_semicolon = T.Punctuation, ';'

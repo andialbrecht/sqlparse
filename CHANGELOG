@@ -12,6 +12,7 @@ Bug Fixes
 * Fix parsing of MySQL table names starting with digits (issue337).
 * Fix detection of identifiers using comparisons (issue327).
 * Fix parsing of UNION ALL after WHERE (issue349).
+* Fix handling of semicolon in assignments (issue359, issue358).
 
 
 

@@ -356,3 +356,13 @@ def test_issue322_concurrently_is_keyword():
     assert p.tokens[4].value == 'CONCURRENTLY'
     assert isinstance(p.tokens[6], sql.Identifier)
     assert p.tokens[6].value == 'myindex'
+
+
+@pytest.mark.parametrize('s', [
+    'SELECT @min_price:=MIN(price), @max_price:=MAX(price) FROM shop;',
+    'SELECT @min_price:=MIN(price), @max_price:=MAX(price) FROM shop',
+
+])
+def test_issue359_index_error_assignments(s):
+    sqlparse.parse(s)
+    sqlparse.format(s, strip_comments=True)
