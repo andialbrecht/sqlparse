@@ -277,8 +277,8 @@ def test_issue186_get_type():
 def test_issue212_py2unicode():
     t1 = sql.Token(T.String, u'schöner ')
     t2 = sql.Token(T.String, 'bug')
-    l = sql.TokenList([t1, t2])
-    assert str(l) == 'schöner bug'
+    token_list = sql.TokenList([t1, t2])
+    assert str(token_list) == 'schöner bug'
 
 
 def test_issue213_leadingws():
