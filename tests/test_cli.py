@@ -115,9 +115,10 @@ def test_encoding_stdin_utf8(filepath, load_file, capfd):
     path = filepath('encoding_utf8.sql')
     expected = load_file('encoding_utf8.sql', 'utf-8')
     old_stdin = sys.stdin
-    sys.stdin = open(path, 'r')
-    sys.stdout.encoding = 'utf-8'
-    sqlparse.cli.main(['-'])
+    with open(path, 'r') as f:
+        sys.stdin = f
+        sys.stdout.encoding = 'utf-8'
+        sqlparse.cli.main(['-'])
     sys.stdin = old_stdin
     out, _ = capfd.readouterr()
     assert out == expected

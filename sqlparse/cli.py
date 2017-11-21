@@ -150,8 +150,11 @@ def main(args=None):
         if PY2:
             data = getreader(args.encoding)(sys.stdin).read()
         else:
-            data = TextIOWrapper(
-                sys.stdin.buffer, encoding=args.encoding).read()
+            wrapper = TextIOWrapper(sys.stdin.buffer, encoding=args.encoding)
+            try:
+                data = wrapper.read()
+            finally:
+                wrapper.detach()
     else:
         try:
             with open(args.filename, 'r', args.encoding) as f:
