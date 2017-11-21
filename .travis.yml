@@ -3,7 +3,6 @@ python: 3.5
 
 env:
     - TOXENV=flake8
-    - TOXENV=py26
     - TOXENV=py27
     - TOXENV=py33
     - TOXENV=py34
@@ -23,7 +22,6 @@ matrix:
           env: TOXENV=pypy33
 
     allow_failures:
-        - env: TOXENV=py26
         - env: TOXENV=py37
         - env: TOXENV=pypy_54
         - env: TOXENV=pypy33
