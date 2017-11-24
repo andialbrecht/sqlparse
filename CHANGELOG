@@ -1,7 +1,9 @@
 Development Version
 -------------------
 
-Nothing yet.
+Enhancements
+
+* New formatting option "--indent_after_first" (pr345, by johshoff).
 
 
 Release 0.2.4 (Sep 27, 2017)
