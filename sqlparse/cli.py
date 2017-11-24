@@ -102,6 +102,13 @@ def create_parser():
         help='indentation width (defaults to 2 spaces)')
 
     group.add_argument(
+        '--indent_after_first',
+        dest='indent_after_first',
+        action='store_true',
+        default=False,
+        help='indent after first line of statement (e.g. SELECT)')
+
+    group.add_argument(
         '-a', '--reindent_aligned',
         action='store_true',
         default=False,

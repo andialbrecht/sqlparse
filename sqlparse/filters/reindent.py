@@ -12,11 +12,11 @@ from sqlparse.utils import offset, indent
 
 class ReindentFilter(object):
     def __init__(self, width=2, char=' ', wrap_after=0, n='\n',
-                 comma_first=False):
+                 comma_first=False, indent_after_first=False):
         self.n = n
         self.width = width
         self.char = char
-        self.indent = 0
+        self.indent = 1 if indent_after_first else 0
         self.offset = 0
         self.wrap_after = wrap_after
         self.comma_first = comma_first
