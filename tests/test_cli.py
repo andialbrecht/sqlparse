@@ -35,7 +35,7 @@ def test_valid_args(filepath):
 def test_invalid_choise(filepath):
     path = filepath('function.sql')
     with pytest.raises(SystemExit):
-        sqlparse.cli.main([path, '-l', 'spanish'])
+        sqlparse.cli.main([path, '-l', 'Spanish'])
 
 
 def test_invalid_args(filepath, capsys):

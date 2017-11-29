@@ -45,7 +45,7 @@ SQL_REGEX = {
         # FIXME(andi): VALUES shouldn't be listed here
         # see https://github.com/andialbrecht/sqlparse/pull/64
         # IN is special, it may be followed by a parenthesis, but
-        # is never a functino, see issue183
+        # is never a function, see issue183
         (r'(CASE|IN|VALUES|USING)\b', tokens.Keyword),
 
         (r'(@|##|#)[A-ZÀ-Ü]\w+', tokens.Name),
@@ -55,7 +55,7 @@ SQL_REGEX = {
         # TODO: Spaces before period not implemented
         (r'[A-ZÀ-Ü]\w*(?=\s*\.)', tokens.Name),  # 'Name'   .
         # FIXME(atronah): never match,
-        # because `re.match` doesn't work with lookbehind regexp feature
+        # because `re.match` doesn't work with look-behind regexp feature
         (r'(?<=\.)[A-ZÀ-Ü]\w*', tokens.Name),  # .'Name'
         (r'[A-ZÀ-Ü]\w*(?=\()', tokens.Name),  # side effect: change kw to func
         (r'-?0x[\dA-F]+', tokens.Number.Hexadecimal),

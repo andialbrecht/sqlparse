@@ -25,7 +25,7 @@ class _TokenType(tuple):
         return new
 
     def __repr__(self):
-        # self can be False only if its the `root` ie. Token itself
+        # self can be False only if its the `root` i.e. Token itself
         return 'Token' + ('.' if self else '') + '.'.join(self)
 
 
@@ -55,7 +55,7 @@ Assignment = Token.Assignment
 # Generic types for non-source code
 Generic = Token.Generic
 
-# String and some others are not direct childs of Token.
+# String and some others are not direct children of Token.
 # alias them:
 Token.Token = Token
 Token.String = String
