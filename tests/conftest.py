@@ -17,7 +17,7 @@ def filepath():
 
     def make_filepath(filename):
         # http://stackoverflow.com/questions/18011902/parameter-to-a-fixture
-        # Alternate solution is to use paramtrization `inderect=True`
+        # Alternate solution is to use parametrization `indirect=True`
         # http://stackoverflow.com/a/33879151
         # Syntax is noisy and requires specific variable names
         return os.path.join(FILES_DIR, filename)
@@ -31,7 +31,7 @@ def load_file(filepath):
 
     def make_load_file(filename, encoding='utf-8'):
         # http://stackoverflow.com/questions/18011902/parameter-to-a-fixture
-        # Alternate solution is to use paramtrization `inderect=True`
+        # Alternate solution is to use parametrization `indirect=True`
         # http://stackoverflow.com/a/33879151
         # Syntax is noisy and requires specific variable names
         # And seems to be limited to only 1 argument.

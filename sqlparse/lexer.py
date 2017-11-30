@@ -35,7 +35,7 @@ class Lexer(object):
 
         Split ``text`` into (tokentype, text) pairs.
 
-        ``stack`` is the inital stack (default: ``['root']``)
+        ``stack`` is the initial stack (default: ``['root']``)
         """
         if isinstance(text, file_types):
             text = text.read()

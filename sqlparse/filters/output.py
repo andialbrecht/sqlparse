@@ -33,7 +33,7 @@ class OutputFilter(object):
 
 class OutputPythonFilter(OutputFilter):
     def _process(self, stream, varname, has_nl):
-        # SQL query asignation to varname
+        # SQL query assignation to varname
         if self.count > 1:
             yield sql.Token(T.Whitespace, '\n')
         yield sql.Token(T.Name, varname)
@@ -79,7 +79,7 @@ class OutputPHPFilter(OutputFilter):
     varname_prefix = '$'
 
     def _process(self, stream, varname, has_nl):
-        # SQL query asignation to varname (quote header)
+        # SQL query assignation to varname (quote header)
         if self.count > 1:
             yield sql.Token(T.Whitespace, '\n')
         yield sql.Token(T.Name, varname)

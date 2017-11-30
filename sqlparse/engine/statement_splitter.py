@@ -29,7 +29,7 @@ class StatementSplitter(object):
         # ANSI
         # if normal token return
         # wouldn't parenthesis increase/decrease a level?
-        # no, inside a paranthesis can't start new statement
+        # no, inside a parenthesis can't start new statement
         if ttype not in T.Keyword:
             return 0
 
@@ -56,9 +56,9 @@ class StatementSplitter(object):
                 return 1
             return 0
 
-        # Should this respect a preceeding BEGIN?
+        # Should this respect a preceding BEGIN?
         # In CASE ... WHEN ... END this results in a split level -1.
-        # Would having multiple CASE WHEN END and a Assigment Operator
+        # Would having multiple CASE WHEN END and a Assignment Operator
         # cause the statement to cut off prematurely?
         if unified == 'END':
             self._begin_depth = max(0, self._begin_depth - 1)

@@ -270,8 +270,8 @@ def test_array_literal():
 
 
 def test_typed_array_definition():
-    # array indices aren't grouped with builtins, but make sure we can extract
-    # indentifer names
+    # array indices aren't grouped with built-ins, but make sure we can extract
+    # identifier names
     p = sqlparse.parse('x int, y int[], z int')[0]
     names = [x.get_name() for x in p.get_sublists()
              if isinstance(x, sql.Identifier)]

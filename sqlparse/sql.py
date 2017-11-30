@@ -20,7 +20,7 @@ class Token(object):
     """Base class for all other classes in this module.
 
     It represents a single token and has two instance attributes:
-    ``value`` is the unchange value of the token and ``ttype`` is
+    ``value`` is the unchanged value of the token and ``ttype`` is
     the type of the token.
     """
 
@@ -73,7 +73,7 @@ class Token(object):
         *values* is a list of possible values for this token. The values
         are OR'ed together so if only one of the values matches ``True``
         is returned. Except for keyword tokens the comparison is
-        case-sensitive. For convenience it's ok to pass in a single string.
+        case-sensitive. For convenience it's OK to pass in a single string.
         If *regex* is ``True`` (default is ``False``) the given values are
         treated as regular expressions.
         """
@@ -363,7 +363,7 @@ class TokenList(Token):
     def get_parent_name(self):
         """Return name of the parent object if any.
 
-        A parent object is identified by the first occuring dot.
+        A parent object is identified by the first occurring dot.
         """
         dot_idx, _ = self.token_next_by(m=(T.Punctuation, '.'))
         _, prev_ = self.token_prev(dot_idx)

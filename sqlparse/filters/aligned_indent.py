@@ -31,7 +31,7 @@ class AlignedIndentFilter(object):
     def nl(self, offset=1):
         # offset = 1 represent a single space after SELECT
         offset = -len(offset) if not isinstance(offset, int) else offset
-        # add two for the space and parens
+        # add two for the space and parenthesis
         indent = self.indent * (2 + self._max_kwd_len)
 
         return sql.Token(T.Whitespace, self.n + self.char * (
@@ -50,7 +50,7 @@ class AlignedIndentFilter(object):
         if token is not None:
             with indent(self):
                 tlist.insert_after(tlist[0], self.nl('SELECT'))
-                # process the inside of the parantheses
+                # process the inside of the parenthesis
                 self._process_default(tlist)
 
             # de-indent last parenthesis

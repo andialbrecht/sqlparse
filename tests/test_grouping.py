@@ -283,7 +283,7 @@ def test_grouping_alias_case():
 
 def test_grouping_subquery_no_parens():
     # Not totally sure if this is the right approach...
-    # When a THEN clause contains a subquery w/o parens around it *and*
+    # When a THEN clause contains a subquery w/o parenthesis around it *and*
     # a WHERE condition, the WHERE grouper consumes END too.
     # This takes makes sure that it doesn't fail.
     p = sqlparse.parse('CASE WHEN 1 THEN select 2 where foo = 1 end')[0]

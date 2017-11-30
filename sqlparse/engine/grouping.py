@@ -28,8 +28,8 @@ def _group_matching(tlist, cls):
             continue
 
         if token.is_group and not isinstance(token, cls):
-            # Check inside previously grouped (ie. parenthesis) if group
-            # of differnt type is inside (ie, case). though ideally  should
+            # Check inside previously grouped (i.e. parenthesis) if group
+            # of different type is inside (i.e., case). though ideally  should
             # should check for all open/close tokens at once to avoid recursion
             _group_matching(token, cls)
             continue
@@ -365,7 +365,7 @@ def _group(tlist, cls, match,
            extend=True,
            recurse=True
            ):
-    """Groups together tokens that are joined by a middle token. ie. x < y"""
+    """Groups together tokens that are joined by a middle token. i.e. x < y"""
 
     tidx_offset = 0
     pidx, prev_ = None, None
