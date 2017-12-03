@@ -157,11 +157,12 @@ def build_filter_stack(stack, options):
     if options.get('reindent'):
         stack.enable_grouping()
         stack.stmtprocess.append(
-            filters.ReindentFilter(char=options['indent_char'],
-                                   width=options['indent_width'],
-                                   indent_after_first=options['indent_after_first'],
-                                   wrap_after=options['wrap_after'],
-                                   comma_first=options['comma_first']))
+            filters.ReindentFilter(
+                char=options['indent_char'],
+                width=options['indent_width'],
+                indent_after_first=options['indent_after_first'],
+                wrap_after=options['wrap_after'],
+                comma_first=options['comma_first']))
 
     if options.get('reindent_aligned', False):
         stack.enable_grouping()
