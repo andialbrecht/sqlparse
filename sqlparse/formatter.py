@@ -74,6 +74,7 @@ def validate_options(options):
     if indent_after_first not in [True, False]:
         raise SQLParseError('Invalid value for indent_after_first: '
                             '{0!r}'.format(indent_after_first))
+    options['indent_after_first'] = indent_after_first
 
     indent_tabs = options.get('indent_tabs', False)
     if indent_tabs not in [True, False]:
