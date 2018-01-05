@@ -5,6 +5,9 @@ Enhancements
 
 * New formatting option "--indent_after_first" (pr345, by johshoff).
 
+Internal Changes
+
+* Remove support for Python 3.3.
 
 Release 0.2.4 (Sep 27, 2017)
 ----------------------------
