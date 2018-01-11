@@ -44,4 +44,3 @@ elif PY2:
     string_types = (str, unicode,)
     from StringIO import StringIO
     file_types = (file, StringIO, TextIOBase)
-    from StringIO import StringIO
