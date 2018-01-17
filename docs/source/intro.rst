@@ -43,7 +43,7 @@ The end of a statement is identified by the occurrence of a semicolon.
 Semicolons within certain SQL constructs like ``BEGIN ... END`` blocks
 are handled correctly by the splitting mechanism.
 
-SQL statements can be beautified by using the :meth:`~sqlarse.format` function.
+SQL statements can be beautified by using the :meth:`~sqlparse.format` function.
 
 .. code-block:: python
 
