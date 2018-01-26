@@ -21,26 +21,28 @@ __version__ = '0.2.5.dev0'
 __all__ = ['engine', 'filters', 'formatter', 'sql', 'tokens', 'cli']
 
 
-def parse(sql, encoding=None):
+def parse(sql, encoding=None, sql_dialect=None):
     """Parse sql and return a list of statements.
 
     :param sql: A string containing one or more SQL statements.
     :param encoding: The encoding of the statement (optional).
+    :param sql_dialect: The sql dialect of the statement (optional).
     :returns: A tuple of :class:`~sqlparse.sql.Statement` instances.
     """
-    return tuple(parsestream(sql, encoding))
+    return tuple(parsestream(sql, encoding, sql_dialect))
 
 
-def parsestream(stream, encoding=None):
+def parsestream(stream, encoding=None, sql_dialect=None):
     """Parses sql statements from file-like object.
 
     :param stream: A file-like object.
     :param encoding: The encoding of the stream contents (optional).
+    :param sql_dialect: The sql dialect of the statement (optional).
     :returns: A generator of :class:`~sqlparse.sql.Statement` instances.
     """
     stack = engine.FilterStack()
     stack.enable_grouping()
-    return stack.run(stream, encoding)
+    return stack.run(stream, encoding, sql_dialect)
 
 
 def format(sql, encoding=None, **options):
