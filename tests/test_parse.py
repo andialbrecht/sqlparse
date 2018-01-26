@@ -209,6 +209,20 @@ def test_double_precision_is_builtin():
     assert t[0].value == 'DOUBLE PRECISION'
 
 
+def test_tsql_variable_and_builtin():
+    s = 'DECLARE @my_var int;'
+    t = sqlparse.parse(s, sql_dialect='TransactSQL')[0].tokens
+    assert len(t) == 6
+    assert t[2].ttype == sqlparse.tokens.Name.Variable
+    assert t[2].value == '@my_var'
+
+    s = 'SELECT @@Version;'
+    t = sqlparse.parse(s, sql_dialect='TransactSQL')[0].tokens
+    assert len(t) == 4
+    assert t[2].ttype == sqlparse.tokens.Name.Builtin
+    assert t[2].value == '@@Version'
+
+
 @pytest.mark.parametrize('ph', ['?', ':1', ':foo', '%s', '%(foo)s'])
 def test_placeholder(ph):
     p = sqlparse.parse(ph)[0].tokens
@@ -230,34 +244,42 @@ def test_scientific_numbers(num, sql_dialect):
     assert p[0].ttype is T.Number.Float
 
 
-def test_single_quotes_are_strings():
-    p = sqlparse.parse("'foo'")[0].tokens
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_single_quotes_are_strings(sql_dialect):
+    p = sqlparse.parse("'foo'",
+                       sql_dialect=sql_dialect)[0].tokens
     assert len(p) == 1
     assert p[0].ttype is T.String.Single
 
 
-def test_double_quotes_are_identifiers():
-    p = sqlparse.parse('"foo"')[0].tokens
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_double_quotes_are_identifiers(sql_dialect):
+    p = sqlparse.parse('"foo"', sql_dialect=sql_dialect)[0].tokens
     assert len(p) == 1
     assert isinstance(p[0], sql.Identifier)
 
 
-def test_single_quotes_with_linebreaks():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_single_quotes_with_linebreaks(sql_dialect):
     # issue118
-    p = sqlparse.parse("'f\nf'")[0].tokens
+    p = sqlparse.parse("'f\nf'",
+                       sql_dialect=sql_dialect)[0].tokens
     assert len(p) == 1
     assert p[0].ttype is T.String.Single
 
 
-def test_sqlite_identifiers():
-    # Make sure we still parse sqlite style escapes
-    p = sqlparse.parse('[col1],[col2]')[0].tokens
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_sqlite_identifiers(sql_dialect):
+    # Make sure we still parse sqlite/Transact SQL style escapes
+    p = sqlparse.parse('[col1],[col2]',
+                       sql_dialect=sql_dialect)[0].tokens
     id_names = [id_.get_name() for id_ in p[0].get_identifiers()]
     assert len(p) == 1
     assert isinstance(p[0], sql.IdentifierList)
     assert id_names == ['[col1]', '[col2]']
 
-    p = sqlparse.parse('[col1]+[col2]')[0]
+    p = sqlparse.parse('[col1]+[col2]',
+                       sql_dialect=sql_dialect)[0]
     types = [tok.ttype for tok in p.flatten()]
     assert types == [T.Name, T.Operator, T.Name]
 
@@ -413,21 +435,27 @@ def test_pprint():
     assert output.getvalue() == pprint
 
 
-def test_wildcard_multiplication():
-    p = sqlparse.parse('select * from dual')[0]
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_wildcard_multiplication(sql_dialect):
+    p = sqlparse.parse('select * from dual',
+                       sql_dialect=sql_dialect)[0]
     assert p.tokens[2].ttype == T.Wildcard
 
-    p = sqlparse.parse('select a0.* from dual a0')[0]
+    p = sqlparse.parse('select a0.* from dual a0',
+                       sql_dialect=sql_dialect)[0]
     assert p.tokens[2][2].ttype == T.Wildcard
 
-    p = sqlparse.parse('select 1 * 2 from dual')[0]
+    p = sqlparse.parse('select 1 * 2 from dual',
+                       sql_dialect=sql_dialect)[0]
     assert p.tokens[2][2].ttype == T.Operator
 
 
-def test_stmt_tokens_parents():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_stmt_tokens_parents(sql_dialect):
     # see issue 226
     s = "CREATE TABLE test();"
-    stmt = sqlparse.parse(s)[0]
+    stmt = sqlparse.parse(s,
+                          sql_dialect=sql_dialect)[0]
     for token in stmt.tokens:
         assert token.has_ancestor(stmt)
 

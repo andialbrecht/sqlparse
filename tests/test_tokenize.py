@@ -30,11 +30,19 @@ def test_tokenize_backticks(sql_dialect):
     assert tokens[0] == (T.Name, '`foo`')
 
 
-@pytest.mark.parametrize('s', ['foo\nbar\n', 'foo\rbar\r',
-                               'foo\r\nbar\r\n', 'foo\r\nbar\n'])
-def test_tokenize_linebreaks(s):
+@pytest.mark.parametrize(['s', 'sql_dialect'],
+                         [('foo\nbar\n', None),
+                          ('foo\rbar\r', None),
+                          ('foo\r\nbar\r\n', None),
+                          ('foo\r\nbar\n', None),
+                          ('foo\nbar\n', 'TransactSQL'),
+                          ('foo\rbar\r', 'TransactSQL'),
+                          ('foo\r\nbar\r\n', 'TransactSQL'),
+                          ('foo\r\nbar\n', 'TransactSQL')
+                          ])
+def test_tokenize_linebreaks(s, sql_dialect):
     # issue1
-    tokens = lexer.tokenize(s)
+    tokens = lexer.tokenize(s, sql_dialect=sql_dialect)
     assert ''.join(str(x[1]) for x in tokens) == s
 
 
@@ -159,15 +167,26 @@ def test_stream_error(sql_dialect):
     ('CROSS JOIN', None),
     ('STRAIGHT JOIN', None),
     ('INNER JOIN', None),
-    ('LEFT INNER JOIN', None)])
+    ('LEFT INNER JOIN', None),
+    ('JOIN', 'TransactSQL'),
+    ('LEFT JOIN', 'TransactSQL'),
+    ('LEFT OUTER JOIN', 'TransactSQL'),
+    ('FULL OUTER JOIN', 'TransactSQL'),
+    ('CROSS JOIN', 'TransactSQL'),
+    ('INNER JOIN', 'TransactSQL'),
+    ('LEFT INNER JOIN', 'TransactSQL')
+])
 def test_parse_join(expr, sql_dialect):
-    p = sqlparse.parse('{0} foo'.format(expr))[0]
+    p = sqlparse.parse('{0} foo'.format(expr),
+                       sql_dialect=sql_dialect)[0]
     assert len(p.tokens) == 3
     assert p.tokens[0].ttype is T.Keyword
 
 
-def test_parse_union():  # issue294
-    p = sqlparse.parse('UNION ALL')[0]
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_parse_union(sql_dialect):  # issue294
+    p = sqlparse.parse('UNION ALL',
+                       sql_dialect=sql_dialect)[0]
     assert len(p.tokens) == 1
     assert p.tokens[0].ttype is T.Keyword
 
@@ -177,28 +196,25 @@ def test_parse_union():  # issue294
                           ('END   IF', None),
                           ('END\t\nIF', None),
                           ('END LOOP', None),
-                          ('END   LOOP', None),
-                          ('END\t\nLOOP', 'TransactSQL'),
-                          ('END IF', 'TransactSQL'),
-                          ('END   IF', 'TransactSQL'),
-                          ('END\t\nIF', 'TransactSQL'),
-                          ('END LOOP', 'TransactSQL'),
-                          ('END   LOOP', 'TransactSQL'),
-                          ('END\t\nLOOP', 'TransactSQL')])
+                          ('END   LOOP', None)
+                          ])
 def test_parse_endifloop(s, sql_dialect):
     p = sqlparse.parse(s, sql_dialect=sql_dialect)[0]
     assert len(p.tokens) == 1
     assert p.tokens[0].ttype is T.Keyword
 
 
-@pytest.mark.parametrize('s', [
-    'foo',
-    'Foo',
-    'FOO',
-    'v$name',  # issue291
-])
-def test_parse_identifiers(s):
-    p = sqlparse.parse(s)[0]
+@pytest.mark.parametrize(['s', 'sql_dialect'],
+                         [('foo', None),
+                          ('Foo', None),
+                          ('FOO', None),
+                          ('v$name', None),  # issue291
+                          ('foo', 'TransactSQL'),
+                          ('Foo', 'TransactSQL'),
+                          ('FOO', 'TransactSQL'),
+                          ])
+def test_parse_identifiers(s, sql_dialect):
+    p = sqlparse.parse(s, sql_dialect=sql_dialect)[0]
     assert len(p.tokens) == 1
     token = p.tokens[0]
     assert str(token) == s

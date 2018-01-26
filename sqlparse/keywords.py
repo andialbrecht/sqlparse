@@ -115,11 +115,10 @@ SQL_REGEX_WITH_DIALECT = {
 
         (r'[A-ZÀ-Ü]\w*(?=\s*\.)', tokens.Name),  # 'Name'   .
         (r'(?<=\.)[A-ZÀ-Ü]\w*', tokens.Name),  # .'Name'
-        (r'((LEFT\s+|RIGHT\s+|FULL\s+)?'
-         r'(INNER\s+|OUTER\s+)?)?JOIN\b', tokens.Keyword),
-        (r'END(\s+IF|\s+LOOP|\s+WHILE)?\b', tokens.Keyword),
+        (r'((LEFT\s+|RIGHT\s+|FULL\s+)?(INNER\s+|OUTER\s+)?'
+         r'|(CROSS\s+)?)?JOIN\b', tokens.Keyword),
         (r'NOT\s+NULL\b', tokens.Keyword),
-        (r'UNION\s+', tokens.Keyword),
+        (r'UNION\s+ALL\b', tokens.Keyword),
         (r'[A-ZÀ-Ü]\w*(?=\()', tokens.Name),  # side effect: change kw to func
         # Below we use \w even for the first "real" character because
         # tokens starting with a digit have already been recognized
