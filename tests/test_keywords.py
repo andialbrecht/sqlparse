@@ -15,18 +15,20 @@ class TestSQLREGEX:
         ttype = next(tt for action, tt in SQL_REGEX if action(number))
         assert tokens.Number.Float == ttype
 
-    @pytest.mark.parametrize(['number', 'sql_dialect'], [('1.0', None),
-                                                         ('-1.0', None),
-                                                         ('1.', None),
-                                                         ('-1.', None),
-                                                         ('.1', None),
-                                                         ('-.1', None),
-                                                         ('1.0', 'TransactSQL'),
-                                                         ('-1.0', 'TransactSQL'),
-                                                         ('1.', 'TransactSQL'),
-                                                         ('-1.', 'TransactSQL'),
-                                                         ('.1', 'TransactSQL'),
-                                                         ('-.1', 'TransactSQL')])
+    @pytest.mark.parametrize(['number', 'sql_dialect'],
+                             [('1.0', None),
+                              ('-1.0', None),
+                              ('1.', None),
+                              ('-1.', None),
+                              ('.1', None),
+                              ('-.1', None),
+                              ('1.0', 'TransactSQL'),
+                              ('-1.0', 'TransactSQL'),
+                              ('1.', 'TransactSQL'),
+                              ('-1.', 'TransactSQL'),
+                              ('.1', 'TransactSQL'),
+                              ('-.1', 'TransactSQL')
+                              ])
     def test_float_numbers_for_TSQL(self, number, sql_dialect):
         SQL_REGEX = get_sql_regex(sql_dialect=sql_dialect)
 

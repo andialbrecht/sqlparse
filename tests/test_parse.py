@@ -27,15 +27,16 @@ def test_parse_multistatement(sql_dialect):
     assert str(stmts[1]) == sql2
 
 
-@pytest.mark.parametrize(['s', 'sql_dialect'], [('select\n*from foo;', None),
-                                                ('select\r\n*from foo', None),
-                                                ('select\r*from foo', None),
-                                                ('select\r\n*from foo\n', None),
-                                                ('select\n*from foo;', 'TransactSQL'),
-                                                ('select\r\n*from foo', 'TransactSQL'),
-                                                ('select\r*from foo', 'TransactSQL'),
-                                                ('select\r\n*from foo\n', 'TransactSQL')
-                                                ])
+@pytest.mark.parametrize(['s', 'sql_dialect'],
+                         [('select\n*from foo;', None),
+                          ('select\r\n*from foo', None),
+                          ('select\r*from foo', None),
+                          ('select\r\n*from foo\n', None),
+                          ('select\n*from foo;', 'TransactSQL'),
+                          ('select\r\n*from foo', 'TransactSQL'),
+                          ('select\r*from foo', 'TransactSQL'),
+                          ('select\r\n*from foo\n', 'TransactSQL')
+                          ])
 def test_parse_newlines(s, sql_dialect):
     p = sqlparse.parse(s, sql_dialect=sql_dialect)[0]
     assert str(p) == s
@@ -106,7 +107,8 @@ def test_parse_modulo_not_placeholder(sql_dialect):
 @pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
 def test_parse_access_symbol(sql_dialect):
     # see issue27
-    t = sqlparse.parse('select a.[foo bar] as foo', sql_dialect=sql_dialect)[0].tokens
+    t = sqlparse.parse('select a.[foo bar] as foo',
+                       sql_dialect=sql_dialect)[0].tokens
     assert isinstance(t[-1], sql.Identifier)
     assert t[-1].get_name() == 'foo'
     assert t[-1].get_real_name() == '[foo bar]'
@@ -134,28 +136,32 @@ def test_parse_keyword_like_identifier(sql_dialect):
 @pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
 def test_parse_function_parameter(sql_dialect):
     # see issue94
-    t = sqlparse.parse('abs(some_col)', sql_dialect=sql_dialect)[0].tokens[0].get_parameters()
+    t = sqlparse.parse('abs(some_col)',
+                       sql_dialect=sql_dialect)[0].tokens[0].get_parameters()
     assert len(t) == 1
     assert isinstance(t[0], sql.Identifier)
 
 
 @pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
 def test_parse_function_param_single_literal(sql_dialect):
-    t = sqlparse.parse('foo(5)', sql_dialect=sql_dialect)[0].tokens[0].get_parameters()
+    t = sqlparse.parse('foo(5)',
+                       sql_dialect=sql_dialect)[0].tokens[0].get_parameters()
     assert len(t) == 1
     assert t[0].ttype is T.Number.Integer
 
 
 @pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
 def test_parse_nested_function(sql_dialect):
-    t = sqlparse.parse('foo(bar(5))', sql_dialect=sql_dialect)[0].tokens[0].get_parameters()
+    t = sqlparse.parse('foo(bar(5))',
+                       sql_dialect=sql_dialect)[0].tokens[0].get_parameters()
     assert len(t) == 1
     assert type(t[0]) is sql.Function
 
 
 @pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
 def test_quoted_identifier(sql_dialect):
-    t = sqlparse.parse('select x.y as "z" from foo', sql_dialect=sql_dialect)[0].tokens
+    t = sqlparse.parse('select x.y as "z" from foo',
+                       sql_dialect=sql_dialect)[0].tokens
     assert isinstance(t[2], sql.Identifier)
     assert t[2].get_name() == 'z'
     assert t[2].get_real_name() == 'y'
@@ -210,13 +216,14 @@ def test_placeholder(ph):
     assert p[0].ttype is T.Name.Placeholder
 
 
-@pytest.mark.parametrize(['num', 'sql_dialect'], [('6.67428E-8', None),
-                                                  ('1.988e33', None),
-                                                  ('1e-12', None),
-                                                  ('6.67428E-8', 'TransactSQL'),
-                                                  ('1.988e33', 'TransactSQL'),
-                                                  ('1e-12', 'TransactSQL')
-                                                  ])
+@pytest.mark.parametrize(['num', 'sql_dialect'],
+                         [('6.67428E-8', None),
+                          ('1.988e33', None),
+                          ('1e-12', None),
+                          ('6.67428E-8', 'TransactSQL'),
+                          ('1.988e33', 'TransactSQL'),
+                          ('1e-12', 'TransactSQL')
+                          ])
 def test_scientific_numbers(num, sql_dialect):
     p = sqlparse.parse(num, sql_dialect=sql_dialect)[0].tokens
     assert len(p) == 1
@@ -310,9 +317,10 @@ def test_typed_array_definition():
     assert names == ['x', 'y', 'z']
 
 
-@pytest.mark.parametrize(['s', 'sql_dialect'], [('select 1 -- foo', None),
-                                                ('select 1 # foo', None),
-                                                ('select 1 -- foo', 'TransactSQL')])
+@pytest.mark.parametrize(['s', 'sql_dialect'],
+                         [('select 1 -- foo', None),
+                          ('select 1 # foo', None),
+                          ('select 1 -- foo', 'TransactSQL')])
 def test_single_line_comments(s, sql_dialect):
     # see issue178
     p = sqlparse.parse(s, sql_dialect=sql_dialect)[0]

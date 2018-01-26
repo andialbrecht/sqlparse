@@ -172,18 +172,19 @@ def test_parse_union():  # issue294
     assert p.tokens[0].ttype is T.Keyword
 
 
-@pytest.mark.parametrize(['s', 'sql_dialect'], [('END IF', None),
-                                                ('END   IF', None),
-                                                ('END\t\nIF', None),
-                                                ('END LOOP', None),
-                                                ('END   LOOP', None),
-                                                ('END\t\nLOOP', 'TransactSQL'),
-                                                ('END IF', 'TransactSQL'),
-                                                ('END   IF', 'TransactSQL'),
-                                                ('END\t\nIF', 'TransactSQL'),
-                                                ('END LOOP', 'TransactSQL'),
-                                                ('END   LOOP', 'TransactSQL'),
-                                                ('END\t\nLOOP', 'TransactSQL')])
+@pytest.mark.parametrize(['s', 'sql_dialect'],
+                         [('END IF', None),
+                          ('END   IF', None),
+                          ('END\t\nIF', None),
+                          ('END LOOP', None),
+                          ('END   LOOP', None),
+                          ('END\t\nLOOP', 'TransactSQL'),
+                          ('END IF', 'TransactSQL'),
+                          ('END   IF', 'TransactSQL'),
+                          ('END\t\nIF', 'TransactSQL'),
+                          ('END LOOP', 'TransactSQL'),
+                          ('END   LOOP', 'TransactSQL'),
+                          ('END\t\nLOOP', 'TransactSQL')])
 def test_parse_endifloop(s, sql_dialect):
     p = sqlparse.parse(s, sql_dialect=sql_dialect)[0]
     assert len(p.tokens) == 1

@@ -115,7 +115,8 @@ SQL_REGEX_WITH_DIALECT = {
 
         (r'[A-ZÀ-Ü]\w*(?=\s*\.)', tokens.Name),  # 'Name'   .
         (r'(?<=\.)[A-ZÀ-Ü]\w*', tokens.Name),  # .'Name'
-        (r'((LEFT\s+|RIGHT\s+|FULL\s+)?(INNER\s+|OUTER\s+)?)?JOIN\b', tokens.Keyword),
+        (r'((LEFT\s+|RIGHT\s+|FULL\s+)?'
+         r'(INNER\s+|OUTER\s+)?)?JOIN\b', tokens.Keyword),
         (r'END(\s+IF|\s+LOOP|\s+WHILE)?\b', tokens.Keyword),
         (r'NOT\s+NULL\b', tokens.Keyword),
         (r'UNION\s+', tokens.Keyword),
@@ -130,7 +131,7 @@ SQL_REGEX_WITH_DIALECT = {
         (r'@\w+', tokens.Name.Variable),
         (r'[;:()\[\],\.]', tokens.Punctuation),
         (r'#?#?\w+', tokens.Name),  # names for temp tables and anything else
-        (r'\?', tokens.Name.Variable.Magic),  # parameter for prepared statements
+        (r'\?', tokens.Name.Variable.Magic),
         (r'[<>=~!]+', tokens.Operator.Comparison),
         (r'[+/@#%^&|`?^-]+', tokens.Operator),
     ]
@@ -142,11 +143,14 @@ FLAGS = re.IGNORECASE | re.UNICODE
 def get_sql_regex(sql_dialect=None):
     if sql_dialect:
         if sql_dialect in SQL_REGEX_WITH_DIALECT:
-            return [(re.compile(rx, FLAGS).match, tt) for rx, tt in SQL_REGEX_WITH_DIALECT[sql_dialect]]
+            return [(re.compile(rx, FLAGS).match, tt)
+                    for rx, tt in SQL_REGEX_WITH_DIALECT[sql_dialect]]
         else:
-            raise KeyError('The selected sql dialect is invalid: {0}'.format(sql_dialect))
+            raise KeyError('The selected sql dialect is invalid: {0}'
+                           .format(sql_dialect))
     else:
-        return [(re.compile(rx, FLAGS).match, tt) for rx, tt in SQL_REGEX['root']]
+        return [(re.compile(rx, FLAGS).match, tt)
+                for rx, tt in SQL_REGEX['root']]
 
 
 KEYWORDS = {
@@ -1413,4 +1417,3 @@ KEYWORDS_TSQL = {
     'VARCHAR': tokens.Name.Builtin,
     'XML': tokens.Name.Builtin,
 }
-
