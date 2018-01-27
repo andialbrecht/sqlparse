@@ -372,8 +372,10 @@ def test_grouping_function_not_in():
     assert isinstance(p.tokens[1], sql.Parenthesis)
 
 
-def test_grouping_varchar():
-    p = sqlparse.parse('"text" Varchar(50) NOT NULL')[0]
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_varchar(sql_dialect):
+    p = sqlparse.parse('"text" Varchar(50) NOT NULL',
+                       sql_dialect=sql_dialect)[0]
     assert isinstance(p.tokens[2], sql.Function)
 
 
@@ -411,8 +413,9 @@ def test_identifier_with_op_trailing_ws():
     assert p.tokens[1].ttype is T.Whitespace
 
 
-def test_identifier_with_string_literals():
-    p = sqlparse.parse("foo + 'bar'")[0]
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_identifier_with_string_literals(sql_dialect):
+    p = sqlparse.parse("foo + 'bar'", sql_dialect=sql_dialect)[0]
     assert len(p.tokens) == 1
     assert isinstance(p.tokens[0], sql.Operation)
 
@@ -426,9 +429,11 @@ def test_identifier_with_string_literals():
 #     assert isinstance(p.tokens[0], sql.Identifier)
 
 
-def test_identifier_consumes_ordering():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_identifier_consumes_ordering(sql_dialect):
     # issue89
-    p = sqlparse.parse('select * from foo order by c1 desc, c2, c3')[0]
+    p = sqlparse.parse('select * from foo order by c1 desc, c2, c3',
+                       sql_dialect=sql_dialect)[0]
     assert isinstance(p.tokens[-1], sql.IdentifierList)
     ids = list(p.tokens[-1].get_identifiers())
     assert len(ids) == 3
@@ -438,10 +443,11 @@ def test_identifier_consumes_ordering():
     assert ids[1].get_ordering() is None
 
 
-def test_comparison_with_keywords():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_comparison_with_keywords(sql_dialect):
     # issue90
     # in fact these are assignments, but for now we don't distinguish them
-    p = sqlparse.parse('foo = NULL')[0]
+    p = sqlparse.parse('foo = NULL', sql_dialect=sql_dialect)[0]
     assert len(p.tokens) == 1
     assert isinstance(p.tokens[0], sql.Comparison)
     assert len(p.tokens[0].tokens) == 5
@@ -453,9 +459,10 @@ def test_comparison_with_keywords():
     assert isinstance(p.tokens[0], sql.Comparison)
 
 
-def test_comparison_with_floats():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_comparison_with_floats(sql_dialect):
     # issue145
-    p = sqlparse.parse('foo = 25.5')[0]
+    p = sqlparse.parse('foo = 25.5', sql_dialect=sql_dialect)[0]
     assert len(p.tokens) == 1
     assert isinstance(p.tokens[0], sql.Comparison)
     assert len(p.tokens[0].tokens) == 5
@@ -463,9 +470,10 @@ def test_comparison_with_floats():
     assert p.tokens[0].right.value == '25.5'
 
 
-def test_comparison_with_parenthesis():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_comparison_with_parenthesis(sql_dialect):
     # issue23
-    p = sqlparse.parse('(3 + 4) = 7')[0]
+    p = sqlparse.parse('(3 + 4) = 7', sql_dialect=sql_dialect)[0]
     assert len(p.tokens) == 1
     assert isinstance(p.tokens[0], sql.Comparison)
     comp = p.tokens[0]
@@ -473,32 +481,35 @@ def test_comparison_with_parenthesis():
     assert comp.right.ttype is T.Number.Integer
 
 
-def test_comparison_with_strings():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_comparison_with_strings(sql_dialect):
     # issue148
-    p = sqlparse.parse("foo = 'bar'")[0]
+    p = sqlparse.parse("foo = 'bar'", sql_dialect=sql_dialect)[0]
     assert len(p.tokens) == 1
     assert isinstance(p.tokens[0], sql.Comparison)
     assert p.tokens[0].right.value == "'bar'"
     assert p.tokens[0].right.ttype == T.String.Single
 
 
-def test_comparison_with_functions():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_comparison_with_functions(sql_dialect):
     # issue230
-    p = sqlparse.parse('foo = DATE(bar.baz)')[0]
+    p = sqlparse.parse('foo = DATE(bar.baz)', sql_dialect=sql_dialect)[0]
     assert len(p.tokens) == 1
     assert isinstance(p.tokens[0], sql.Comparison)
     assert len(p.tokens[0].tokens) == 5
     assert p.tokens[0].left.value == 'foo'
     assert p.tokens[0].right.value == 'DATE(bar.baz)'
 
-    p = sqlparse.parse('DATE(foo.bar) = DATE(bar.baz)')[0]
+    p = sqlparse.parse('DATE(foo.bar) = DATE(bar.baz)',
+                       sql_dialect=sql_dialect)[0]
     assert len(p.tokens) == 1
     assert isinstance(p.tokens[0], sql.Comparison)
     assert len(p.tokens[0].tokens) == 5
     assert p.tokens[0].left.value == 'DATE(foo.bar)'
     assert p.tokens[0].right.value == 'DATE(bar.baz)'
 
-    p = sqlparse.parse('DATE(foo.bar) = bar.baz')[0]
+    p = sqlparse.parse('DATE(foo.bar) = bar.baz', sql_dialect=sql_dialect)[0]
     assert len(p.tokens) == 1
     assert isinstance(p.tokens[0], sql.Comparison)
     assert len(p.tokens[0].tokens) == 5
@@ -525,8 +536,9 @@ def test_nested_for():
     assert for2.tokens[-1].value == 'END LOOP'
 
 
-def test_begin():
-    p = sqlparse.parse('BEGIN foo END')[0]
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_begin(sql_dialect):
+    p = sqlparse.parse('BEGIN foo END', sql_dialect=sql_dialect)[0]
     assert len(p.tokens) == 1
     assert isinstance(p.tokens[0], sql.Begin)
 
@@ -538,8 +550,10 @@ def test_keyword_followed_by_parenthesis():
     assert p.tokens[1].ttype == T.Punctuation
 
 
-def test_nested_begin():
-    p = sqlparse.parse('BEGIN foo BEGIN bar END END')[0]
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_nested_begin(sql_dialect):
+    p = sqlparse.parse('BEGIN foo BEGIN bar END END',
+                       sql_dialect=sql_dialect)[0]
     assert len(p.tokens) == 1
     outer = p.tokens[0]
     assert outer.tokens[0].value == 'BEGIN'
