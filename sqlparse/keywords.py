@@ -128,11 +128,11 @@ SQL_REGEX_WITH_DIALECT = {
         (r'[0-9_A-ZÀ-Ü][_$#\w]*', is_TSQL_keyword),
         (r'(?<![\w\])])(\[[^\]]+\])', tokens.Name),
         (r'@\w+', tokens.Name.Variable),
-        (r'[;:()\[\],\.]', tokens.Punctuation),
+        (r'[;(),.]', tokens.Punctuation),
         (r'#?#?\w+', tokens.Name),  # names for temp tables and anything else
         (r'\?', tokens.Name.Variable.Magic),
         (r'[<>=~!]+', tokens.Operator.Comparison),
-        (r'[+/@#%^&|`?^-]+', tokens.Operator),
+        (r'[+/@#%^&|?^-]+', tokens.Operator),
     ]
 }
 
@@ -1019,7 +1019,7 @@ KEYWORDS_TSQL = {
     'DENY': tokens.Keyword,
     'DEPTH': tokens.Keyword,
     'DEREF': tokens.Keyword,
-    'DESC': tokens.Keyword,
+    'DESC': tokens.Keyword.Order,
     'DESCRIBE': tokens.Keyword,
     'DESCRIPTOR': tokens.Keyword,
     'DESTROY': tokens.Keyword,
@@ -1354,7 +1354,7 @@ KEYWORDS_TSQL = {
     'WHILE': tokens.Keyword,
     'WIDTH_BUCKET': tokens.Keyword,
     'WINDOW': tokens.Keyword,
-    'WITH': tokens.Keyword,
+    'WITH': tokens.Keyword.CTE,
     'WITHIN': tokens.Keyword,
     'WITHOUT': tokens.Keyword,
     'WORK': tokens.Keyword,

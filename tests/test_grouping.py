@@ -6,9 +6,10 @@ import sqlparse
 from sqlparse import sql, tokens as T
 
 
-def test_grouping_parenthesis():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_parenthesis(sql_dialect):
     s = 'select (select (x3) x2) and (y2) bar'
-    parsed = sqlparse.parse(s)[0]
+    parsed = sqlparse.parse(s, sql_dialect=sql_dialect)[0]
     assert str(parsed) == s
     assert len(parsed.tokens) == 7
     assert isinstance(parsed.tokens[2], sql.Parenthesis)
@@ -19,9 +20,10 @@ def test_grouping_parenthesis():
     assert len(parsed.tokens[2].tokens[3].tokens) == 3
 
 
-def test_grouping_comments():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_comments(sql_dialect):
     s = '/*\n * foo\n */   \n  bar'
-    parsed = sqlparse.parse(s)[0]
+    parsed = sqlparse.parse(s, sql_dialect=sql_dialect)[0]
     assert str(parsed) == s
     assert len(parsed.tokens) == 2
 
@@ -33,19 +35,20 @@ def test_grouping_assignment(s):
     assert isinstance(parsed.tokens[0], sql.Assignment)
 
 
-def test_grouping_identifiers():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_identifiers(sql_dialect):
     s = 'select foo.bar from "myscheme"."table" where fail. order'
-    parsed = sqlparse.parse(s)[0]
+    parsed = sqlparse.parse(s, sql_dialect=sql_dialect)[0]
     assert str(parsed) == s
     assert isinstance(parsed.tokens[2], sql.Identifier)
     assert isinstance(parsed.tokens[6], sql.Identifier)
     assert isinstance(parsed.tokens[8], sql.Where)
     s = 'select * from foo where foo.id = 1'
-    parsed = sqlparse.parse(s)[0]
+    parsed = sqlparse.parse(s, sql_dialect=sql_dialect)[0]
     assert str(parsed) == s
     assert isinstance(parsed.tokens[-1].tokens[-1].tokens[0], sql.Identifier)
     s = 'select * from (select "foo"."id" from foo)'
-    parsed = sqlparse.parse(s)[0]
+    parsed = sqlparse.parse(s, sql_dialect=sql_dialect)[0]
     assert str(parsed) == s
     assert isinstance(parsed.tokens[-1].tokens[3], sql.Identifier)
 
@@ -55,7 +58,7 @@ def test_grouping_identifiers():
     assert types == [T.DML, T.Keyword, None, T.Keyword, None, T.Punctuation]
 
     s = "select 1.0*(a+b) as col, sum(c)/sum(d) from myschema.mytable"
-    parsed = sqlparse.parse(s)[0]
+    parsed = sqlparse.parse(s, sql_dialect=sql_dialect)[0]
     assert len(parsed.tokens) == 7
     assert isinstance(parsed.tokens[2], sql.IdentifierList)
     assert len(parsed.tokens[2].tokens) == 4
@@ -64,17 +67,24 @@ def test_grouping_identifiers():
     assert identifiers[0].get_alias() == "col"
 
 
-@pytest.mark.parametrize('s', [
-    '1 as f',
-    'foo as f',
-    'foo f',
-    '1/2 as f',
-    '1/2 f',
-    '1<2 as f',  # issue327
-    '1<2 f',
+@pytest.mark.parametrize(['s', 'sql_dialect'], [
+    ('1 as f', None),
+    ('foo as f', None),
+    ('foo f', None),
+    ('1/2 as f', None),
+    ('1/2 f', None),
+    ('1<2 as f', None),  # issue327
+    ('1<2 f', None),
+    ('1 as f', 'TransactSQL'),
+    ('foo as f', 'TransactSQL'),
+    ('foo f', 'TransactSQL'),
+    ('1/2 as f', 'TransactSQL'),
+    ('1/2 f', 'TransactSQL'),
+    ('1<2 as f', 'TransactSQL'),  # issue327
+    ('1<2 f', 'TransactSQL')
 ])
-def test_simple_identifiers(s):
-    parsed = sqlparse.parse(s)[0]
+def test_simple_identifiers(s, sql_dialect):
+    parsed = sqlparse.parse(s, sql_dialect=sql_dialect)[0]
     assert isinstance(parsed.tokens[0], sql.Identifier)
 
 
@@ -92,22 +102,25 @@ def test_group_identifier_list(s):
     assert isinstance(parsed.tokens[0], sql.IdentifierList)
 
 
-def test_grouping_identifier_wildcard():
-    p = sqlparse.parse('a.*, b.id')[0]
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_identifier_wildcard(sql_dialect):
+    p = sqlparse.parse('a.*, b.id', sql_dialect=sql_dialect)[0]
     assert isinstance(p.tokens[0], sql.IdentifierList)
     assert isinstance(p.tokens[0].tokens[0], sql.Identifier)
     assert isinstance(p.tokens[0].tokens[-1], sql.Identifier)
 
 
-def test_grouping_identifier_name_wildcard():
-    p = sqlparse.parse('a.*')[0]
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_identifier_name_wildcard(sql_dialect):
+    p = sqlparse.parse('a.*', sql_dialect=sql_dialect)[0]
     t = p.tokens[0]
     assert t.get_name() == '*'
     assert t.is_wildcard() is True
 
 
-def test_grouping_identifier_invalid():
-    p = sqlparse.parse('a.')[0]
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_identifier_invalid(sql_dialect):
+    p = sqlparse.parse('a.', sql_dialect=sql_dialect)[0]
     assert isinstance(p.tokens[0], sql.Identifier)
     assert p.tokens[0].has_alias() is False
     assert p.tokens[0].get_name() is None
@@ -115,27 +128,30 @@ def test_grouping_identifier_invalid():
     assert p.tokens[0].get_parent_name() == 'a'
 
 
-def test_grouping_identifier_invalid_in_middle():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_identifier_invalid_in_middle(sql_dialect):
     # issue261
     s = 'SELECT foo. FROM foo'
-    p = sqlparse.parse(s)[0]
+    p = sqlparse.parse(s, sql_dialect=sql_dialect)[0]
     assert isinstance(p[2], sql.Identifier)
     assert p[2][1].ttype == T.Punctuation
     assert p[3].ttype == T.Whitespace
     assert str(p[2]) == 'foo.'
 
 
-def test_grouping_identifier_as_invalid():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_identifier_as_invalid(sql_dialect):
     # issue8
-    p = sqlparse.parse('foo as select *')[0]
+    p = sqlparse.parse('foo as select *', sql_dialect=sql_dialect)[0]
     assert len(p.tokens), 5
     assert isinstance(p.tokens[0], sql.Identifier)
     assert len(p.tokens[0].tokens) == 1
     assert p.tokens[2].ttype == T.Keyword
 
 
-def test_grouping_identifier_function():
-    p = sqlparse.parse('foo() as bar')[0]
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_identifier_function(sql_dialect):
+    p = sqlparse.parse('foo() as bar', sql_dialect=sql_dialect)[0]
     assert isinstance(p.tokens[0], sql.Identifier)
     assert isinstance(p.tokens[0].tokens[0], sql.Function)
     p = sqlparse.parse('foo()||col2 bar')[0]
@@ -150,17 +166,20 @@ def test_grouping_operation(s):
     assert isinstance(p.tokens[0], sql.Operation)
 
 
-def test_grouping_identifier_list():
-    p = sqlparse.parse('a, b, c')[0]
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_identifier_list(sql_dialect):
+    p = sqlparse.parse('a, b, c', sql_dialect=sql_dialect)[0]
     assert isinstance(p.tokens[0], sql.IdentifierList)
     p = sqlparse.parse('(a, b, c)')[0]
     assert isinstance(p.tokens[0].tokens[1], sql.IdentifierList)
 
 
-def test_grouping_identifier_list_subquery():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_identifier_list_subquery(sql_dialect):
     """identifier lists should still work in subqueries with aliases"""
     p = sqlparse.parse("select * from ("
-                       "select a, b + c as d from table) sub")[0]
+                       "select a, b + c as d from table) sub",
+                       sql_dialect=sql_dialect)[0]
     subquery = p.tokens[-1].tokens[0]
     idx, iden_list = subquery.token_next_by(i=sql.IdentifierList)
     assert iden_list is not None
@@ -176,37 +195,45 @@ def test_grouping_identifier_list_case():
     assert isinstance(p.tokens[0].tokens[1], sql.IdentifierList)
 
 
-def test_grouping_identifier_list_other():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_identifier_list_other(sql_dialect):
     # issue2
-    p = sqlparse.parse("select *, null, 1, 'foo', bar from mytable, x")[0]
+    p = sqlparse.parse("select *, null, 1, 'foo', bar from mytable, x",
+                       sql_dialect=sql_dialect)[0]
     assert isinstance(p.tokens[2], sql.IdentifierList)
     assert len(p.tokens[2].tokens) == 13
 
 
-def test_grouping_identifier_list_with_inline_comments():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_identifier_list_with_inline_comments(sql_dialect):
     # issue163
-    p = sqlparse.parse('foo /* a comment */, bar')[0]
+    p = sqlparse.parse('foo /* a comment */, bar',
+                       sql_dialect=sql_dialect)[0]
     assert isinstance(p.tokens[0], sql.IdentifierList)
     assert isinstance(p.tokens[0].tokens[0], sql.Identifier)
     assert isinstance(p.tokens[0].tokens[3], sql.Identifier)
 
 
-def test_grouping_identifiers_with_operators():
-    p = sqlparse.parse('a+b as c from table where (d-e)%2= 1')[0]
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_identifiers_with_operators(sql_dialect):
+    p = sqlparse.parse('a+b as c from table where (d-e)%2= 1',
+                       sql_dialect=sql_dialect)[0]
     assert len([x for x in p.flatten() if x.ttype == T.Name]) == 5
 
 
-def test_grouping_identifier_list_with_order():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_identifier_list_with_order(sql_dialect):
     # issue101
-    p = sqlparse.parse('1, 2 desc, 3')[0]
+    p = sqlparse.parse('1, 2 desc, 3', sql_dialect=sql_dialect)[0]
     assert isinstance(p.tokens[0], sql.IdentifierList)
     assert isinstance(p.tokens[0].tokens[3], sql.Identifier)
     assert str(p.tokens[0].tokens[3]) == '2 desc'
 
 
-def test_grouping_where():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_where(sql_dialect):
     s = 'select * from foo where bar = 1 order by id desc'
-    p = sqlparse.parse(s)[0]
+    p = sqlparse.parse(s, sql_dialect=sql_dialect)[0]
     assert str(p) == s
     assert len(p.tokens) == 14
 
@@ -216,26 +243,31 @@ def test_grouping_where():
     assert isinstance(p.tokens[-1].tokens[0].tokens[-2], sql.Where)
 
 
-@pytest.mark.parametrize('s', (
-    'select 1 where 1 = 2 union select 2',
-    'select 1 where 1 = 2 union all select 2',
+@pytest.mark.parametrize(['s', 'sql_dialect'], (
+    ('select 1 where 1 = 2 union select 2', None),
+    ('select 1 where 1 = 2 union all select 2', None),
+    ('select 1 where 1 = 2 union select 2', 'TransactSQL'),
+    ('select 1 where 1 = 2 union all select 2', 'TransactSQL')
+
 ))
-def test_grouping_where_union(s):
-    p = sqlparse.parse(s)[0]
+def test_grouping_where_union(s, sql_dialect):
+    p = sqlparse.parse(s, sql_dialect=sql_dialect)[0]
     assert p.tokens[5].value.startswith('union')
 
 
-def test_returning_kw_ends_where_clause():
+@pytest.mark.parametrize('sql_dialect', [None])
+def test_returning_kw_ends_where_clause(sql_dialect):
     s = 'delete from foo where x > y returning z'
-    p = sqlparse.parse(s)[0]
+    p = sqlparse.parse(s, sql_dialect=sql_dialect)[0]
     assert isinstance(p.tokens[6], sql.Where)
     assert p.tokens[7].ttype == T.Keyword
     assert p.tokens[7].value == 'returning'
 
 
-def test_into_kw_ends_where_clause():  # issue324
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_into_kw_ends_where_clause(sql_dialect):  # issue324
     s = 'select * from foo where a = 1 into baz'
-    p = sqlparse.parse(s)[0]
+    p = sqlparse.parse(s, sql_dialect=sql_dialect)[0]
     assert isinstance(p.tokens[8], sql.Where)
     assert p.tokens[9].ttype == T.Keyword
     assert p.tokens[9].value == 'into'
@@ -252,6 +284,7 @@ def test_grouping_typecast(sql, expected):
     assert p.tokens[2].get_typecast() == expected
 
 
+# TODO
 def test_grouping_alias():
     s = 'select foo as bar from mytable'
     p = sqlparse.parse(s)[0]
@@ -274,49 +307,57 @@ def test_grouping_alias():
     assert p.tokens[4].get_alias() == 'view'
 
 
-def test_grouping_alias_case():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_alias_case(sql_dialect):
     # see issue46
-    p = sqlparse.parse('CASE WHEN 1 THEN 2 ELSE 3 END foo')[0]
+    p = sqlparse.parse('CASE WHEN 1 THEN 2 ELSE 3 END foo',
+                       sql_dialect=sql_dialect)[0]
     assert len(p.tokens) == 1
     assert p.tokens[0].get_alias() == 'foo'
 
 
-def test_grouping_subquery_no_parens():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_subquery_no_parens(sql_dialect):
     # Not totally sure if this is the right approach...
     # When a THEN clause contains a subquery w/o parenthesis around it *and*
     # a WHERE condition, the WHERE grouper consumes END too.
     # This takes makes sure that it doesn't fail.
-    p = sqlparse.parse('CASE WHEN 1 THEN select 2 where foo = 1 end')[0]
+    p = sqlparse.parse('CASE WHEN 1 THEN select 2 where foo = 1 end',
+                       sql_dialect=sql_dialect)[0]
     assert len(p.tokens) == 1
     assert isinstance(p.tokens[0], sql.Case)
 
 
-def test_grouping_alias_returns_none():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_alias_returns_none(sql_dialect):
     # see issue185
-    p = sqlparse.parse('foo.bar')[0]
+    p = sqlparse.parse('foo.bar', sql_dialect=sql_dialect)[0]
     assert len(p.tokens) == 1
     assert p.tokens[0].get_alias() is None
 
 
-def test_grouping_idlist_function():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_idlist_function(sql_dialect):
     # see issue10 too
-    p = sqlparse.parse('foo(1) x, bar')[0]
+    p = sqlparse.parse('foo(1) x, bar', sql_dialect=sql_dialect)[0]
     assert isinstance(p.tokens[0], sql.IdentifierList)
 
 
-def test_grouping_comparison_exclude():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_comparison_exclude(sql_dialect):
     # make sure operators are not handled too lazy
-    p = sqlparse.parse('(=)')[0]
+    p = sqlparse.parse('(=)', sql_dialect=sql_dialect)[0]
     assert isinstance(p.tokens[0], sql.Parenthesis)
     assert not isinstance(p.tokens[0].tokens[1], sql.Comparison)
-    p = sqlparse.parse('(a=1)')[0]
+    p = sqlparse.parse('(a=1)', sql_dialect=sql_dialect)[0]
     assert isinstance(p.tokens[0].tokens[1], sql.Comparison)
-    p = sqlparse.parse('(a>=1)')[0]
+    p = sqlparse.parse('(a>=1)', sql_dialect=sql_dialect)[0]
     assert isinstance(p.tokens[0].tokens[1], sql.Comparison)
 
 
-def test_grouping_function():
-    p = sqlparse.parse('foo()')[0]
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_grouping_function(sql_dialect):
+    p = sqlparse.parse('foo()', sql_dialect=sql_dialect)[0]
     assert isinstance(p.tokens[0], sql.Function)
     p = sqlparse.parse('foo(null, bar)')[0]
     assert isinstance(p.tokens[0], sql.Function)
