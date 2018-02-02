@@ -160,9 +160,14 @@ def test_grouping_identifier_function(sql_dialect):
     assert isinstance(p.tokens[0].tokens[0].tokens[0], sql.Function)
 
 
-@pytest.mark.parametrize('s', ['foo+100', 'foo + 100', 'foo*100'])
-def test_grouping_operation(s):
-    p = sqlparse.parse(s)[0]
+@pytest.mark.parametrize(['s', 'sql_dialect'], [('foo+100', None),
+                                                ('foo + 100', None),
+                                                ('foo*100', None),
+                                                ('foo+100', 'TransactSQL'),
+                                                ('foo + 100', 'TransactSQL'),
+                                                ('foo*100', 'TransactSQL')])
+def test_grouping_operation(s, sql_dialect):
+    p = sqlparse.parse(s, sql_dialect=sql_dialect)[0]
     assert isinstance(p.tokens[0], sql.Operation)
 
 
@@ -255,10 +260,9 @@ def test_grouping_where_union(s, sql_dialect):
     assert p.tokens[5].value.startswith('union')
 
 
-@pytest.mark.parametrize('sql_dialect', [None])
-def test_returning_kw_ends_where_clause(sql_dialect):
+def test_returning_kw_ends_where_clause():
     s = 'delete from foo where x > y returning z'
-    p = sqlparse.parse(s, sql_dialect=sql_dialect)[0]
+    p = sqlparse.parse(s)[0]
     assert isinstance(p.tokens[6], sql.Where)
     assert p.tokens[7].ttype == T.Keyword
     assert p.tokens[7].value == 'returning'
@@ -379,9 +383,10 @@ def test_grouping_varchar(sql_dialect):
     assert isinstance(p.tokens[2], sql.Function)
 
 
-def test_statement_get_type():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_statement_get_type(sql_dialect):
     def f(sql):
-        return sqlparse.parse(sql)[0]
+        return sqlparse.parse(sql, sql_dialect=sql_dialect)[0]
 
     assert f('select * from foo').get_type() == 'SELECT'
     assert f('update foo').get_type() == 'UPDATE'
@@ -564,24 +569,30 @@ def test_nested_begin(sql_dialect):
     assert isinstance(inner, sql.Begin)
 
 
-def test_aliased_column_without_as():
-    p = sqlparse.parse('foo bar')[0].tokens
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_aliased_column_without_as(sql_dialect):
+    p = sqlparse.parse('foo bar',
+                       sql_dialect=sql_dialect)[0].tokens
     assert len(p) == 1
     assert p[0].get_real_name() == 'foo'
     assert p[0].get_alias() == 'bar'
 
-    p = sqlparse.parse('foo.bar baz')[0].tokens[0]
+    p = sqlparse.parse('foo.bar baz',
+                       sql_dialect=sql_dialect)[0].tokens[0]
     assert p.get_parent_name() == 'foo'
     assert p.get_real_name() == 'bar'
     assert p.get_alias() == 'baz'
 
 
-def test_qualified_function():
-    p = sqlparse.parse('foo()')[0].tokens[0]
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_qualified_function(sql_dialect):
+    p = sqlparse.parse('foo()',
+                       sql_dialect=sql_dialect)[0].tokens[0]
     assert p.get_parent_name() is None
     assert p.get_real_name() == 'foo'
 
-    p = sqlparse.parse('foo.bar()')[0].tokens[0]
+    p = sqlparse.parse('foo.bar()',
+                       sql_dialect=sql_dialect)[0].tokens[0]
     assert p.get_parent_name() == 'foo'
     assert p.get_real_name() == 'bar'
 
