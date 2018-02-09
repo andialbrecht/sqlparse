@@ -99,12 +99,8 @@ SQL_REGEX_WITH_DIALECT = {
         (r'/\*[\s\S]*?\*/', tokens.Comment.Multiline),
 
         (r'0x[0-9a-f]+', tokens.Number.Hexadecimal),
-        # Float variant 1, for example: 1., 1.e2, 1.2e3
-        (r'-?[0-9]+\.[0-9]*(e[+-]?[0-9]+)?', tokens.Number.Float),
-        # Float variant 2, for example: .1, .1e2
-        (r'-?\.[0-9]+(e[+-]?[0-9]+)?', tokens.Number.Float),
-        # Float variant 3, for example: 123e45
-        (r'-?[0-9]+e[+-]?[0-9]+', tokens.Number.Float),
+        (r'-?\d*(\.\d+)?E-?\d+', tokens.Number.Float),
+        (r'-?(\d+(\.\d*)|\.\d+)', tokens.Number.Float),
         (r'-?[0-9]+', tokens.Number.Integer),
 
         (r"'(''|[^'])*'", tokens.String.Single),

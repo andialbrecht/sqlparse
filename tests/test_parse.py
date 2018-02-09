@@ -371,9 +371,11 @@ def test_get_token_at_offset(sql_dialect):
     assert p.get_token_at_offset(10) == p.tokens[4]
 
 
-def test_pprint():
+@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
+def test_pprint(sql_dialect):
     p = sqlparse.parse('select a0, b0, c0, d0, e0 from '
-                       '(select * from dual) q0 where 1=1 and 2=2')[0]
+                       '(select * from dual) q0 where 1=1 and 2=2',
+                       sql_dialect=sql_dialect)[0]
     output = StringIO()
 
     p._pprint_tree(f=output)
@@ -496,3 +498,6 @@ def test_non_ascii(sql_dialect):
     statement = stmts[0]
     assert text_type(statement) == _test_non_ascii
     assert statement._pprint_tree() is None
+
+
+
