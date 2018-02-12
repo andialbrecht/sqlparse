@@ -498,6 +498,3 @@ def test_non_ascii(sql_dialect):
     statement = stmts[0]
     assert text_type(statement) == _test_non_ascii
     assert statement._pprint_tree() is None
-
-
-
