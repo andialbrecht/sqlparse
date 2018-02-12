@@ -24,8 +24,8 @@ def is_TSQL_keyword(value):
             KEYWORDS_TSQL.get(val, tokens.Name)), value
 
 
-SQL_REGEX = {
-    'root': [
+SQL_REGEX_WITH_DIALECT = {
+    'Default': [
         (r'(--|# )\+.*?(\r\n|\r|\n|$)', tokens.Comment.Single.Hint),
         (r'/\*\+[\s\S]*?\*/', tokens.Comment.Multiline.Hint),
 
@@ -88,9 +88,7 @@ SQL_REGEX = {
         (r'[;:()\[\],\.]', tokens.Punctuation),
         (r'[<>=~!]+', tokens.Operator.Comparison),
         (r'[+/@#%^&|`?^-]+', tokens.Operator),
-    ]}
-
-SQL_REGEX_WITH_DIALECT = {
+    ],
     'TransactSQL': [
         (r'(\r\n|\r|\n)', tokens.Newline),
         (r'\s+', tokens.Whitespace),
@@ -144,7 +142,7 @@ def get_sql_regex(sql_dialect=None):
                            .format(sql_dialect))
     else:
         return [(re.compile(rx, FLAGS).match, tt)
-                for rx, tt in SQL_REGEX['root']]
+                for rx, tt in SQL_REGEX_WITH_DIALECT['Default']]
 
 
 KEYWORDS = {
