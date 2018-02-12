@@ -103,12 +103,11 @@ SQL_REGEX_WITH_DIALECT = {
         (r'-?(\d+(\.\d*)|\.\d+)', tokens.Number.Float),
         (r'-?[0-9]+', tokens.Number.Integer),
 
+        (r"'(''|\\\\|\\'|[^'])*'", tokens.String.Single),
         (r"'(''|[^'])*'", tokens.String.Single),
         (r'"(""|[^"])*"', tokens.String.Symbol),
 
-        (r'[;(),.]', tokens.Punctuation),
         (r'\*', tokens.Wildcard),
-
         (r'[A-ZÀ-Ü]\w*(?=\s*\.)', tokens.Name),  # 'Name'   .
         (r'(?<=\.)[A-ZÀ-Ü]\w*', tokens.Name),  # .'Name'
         (r'((LEFT\s+|RIGHT\s+|FULL\s+)?(INNER\s+|OUTER\s+)?'
@@ -1288,6 +1287,7 @@ KEYWORDS_TSQL = {
     'STATISTICS': tokens.Keyword,
     'STDDEV_POP': tokens.Keyword,
     'STDDEV_SAMP': tokens.Keyword,
+    'STRING_SPLIT': tokens.Keyword,
     'STRUCTURE': tokens.Keyword,
     'SUBMULTISET': tokens.Keyword,
     'SUBSTRING': tokens.Keyword,
