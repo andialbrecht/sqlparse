@@ -10,21 +10,23 @@ import sqlparse
 from sqlparse.compat import StringIO, text_type
 
 
-@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
-def test_split_semicolon(sql_dialect):
+@pytest.mark.parametrize('options', [({'sql_dialect': 'Default'}),
+                                     ({'sql_dialect': 'TransactSQL'})])
+def test_split_semicolon(options):
     sql1 = 'select * from foo;'
     sql2 = "select * from foo where bar = 'foo;bar';"
     stmts = sqlparse.parse(''.join([sql1, sql2]),
-                           sql_dialect=sql_dialect)
+                           **options)
     assert len(stmts) == 2
     assert str(stmts[0]) == sql1
     assert str(stmts[1]) == sql2
 
 
-@pytest.mark.parametrize('sql_dialect', [None, 'TransactSQL'])
-def test_split_backslash(sql_dialect):
+@pytest.mark.parametrize('options', [({'sql_dialect': 'Default'}),
+                                     ({'sql_dialect': 'TransactSQL'})])
+def test_split_backslash(options):
     stmts = sqlparse.parse(r"select '\\'; select '\''; select '\\\'';",
-                           sql_dialect=sql_dialect)
+                           **options)
     assert len(stmts) == 3
 
 
