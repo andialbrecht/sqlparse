@@ -62,13 +62,14 @@ The :meth:`~sqlparse.format` function accepts the following keyword arguments.
 
 .. _parsing:
 
-Formatting of SQL Statements
+Parsing of SQL Statements
 ----------------------------
 
 The :meth:`~sqlparse.parse` function accepts the following keyword arguments.
 
 ``sql_dialect``
   Changes which sql dialect to parse against. Allowed values are "TransactSQL".
+  If unspecified it uses the default option.
 
 ``additional_keywords``
   A list of additional keywords to parse against.
