@@ -10,18 +10,44 @@ import re
 from sqlparse import tokens
 
 
-def is_keyword(value):
+def is_general_SQL_keyword(value):
     val = value.upper()
     return (KEYWORDS_COMMON.get(val) or
             KEYWORDS_ORACLE.get(val) or
             KEYWORDS_PLPGSQL.get(val) or
-            KEYWORDS.get(val, tokens.Name)), value
+            KEYWORDS.get(val) or
+            ADDITIONAL_KEYWORDS.get(val, tokens.Name)), value
 
 
-def is_TSQL_keyword(value):
+def is_TransactSQL_keyword(value):
     val = value.upper()
     return (KEYWORDS_COMMON.get(val) or
-            KEYWORDS_TSQL.get(val, tokens.Name)), value
+            KEYWORDS_TSQL.get(val) or
+            ADDITIONAL_KEYWORDS.get(val, tokens.Name)), value
+
+
+def get_sql_regex_tokens_map(**options):
+    update_additional_keywords(**options)
+
+    sql_dialect = options.get('sql_dialect')
+    if sql_dialect:
+        if sql_dialect in SQL_REGEX_WITH_DIALECT:
+            return [(re.compile(rx, FLAGS).match, tt)
+                    for rx, tt in SQL_REGEX_WITH_DIALECT[sql_dialect]]
+        else:
+            raise KeyError('The selected sql dialect is invalid: {0}'
+                           .format(sql_dialect))
+    else:
+        return [(re.compile(rx, FLAGS).match, tt)
+                for rx, tt in SQL_REGEX_WITH_DIALECT['Default']]
+
+
+def update_additional_keywords(**options):
+    additional_keywords_list = options.get('additional_keywords') or []
+    additional_keywords_dict = {keyword: tokens.Keyword
+                                for keyword in additional_keywords_list}
+
+    ADDITIONAL_KEYWORDS.update(additional_keywords_dict)
 
 
 SQL_REGEX_WITH_DIALECT = {
@@ -83,7 +109,7 @@ SQL_REGEX_WITH_DIALECT = {
         (r'CREATE(\s+OR\s+REPLACE)?\b', tokens.Keyword.DDL),
         (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
 
-        (r'[0-9_A-ZÀ-Ü][_$#\w]*', is_keyword),
+        (r'[0-9_A-ZÀ-Ü][_$#\w]*', is_general_SQL_keyword),
 
         (r'[;:()\[\],\.]', tokens.Punctuation),
         (r'[<>=~!]+', tokens.Operator.Comparison),
@@ -118,7 +144,7 @@ SQL_REGEX_WITH_DIALECT = {
         # as Number above.
         (r'@@\w+', tokens.Name.Builtin),
 
-        (r'[0-9_A-ZÀ-Ü][_$#\w]*', is_TSQL_keyword),
+        (r'[0-9_A-ZÀ-Ü][_$#\w]*', is_TransactSQL_keyword),
         (r'(?<![\w\])])(\[[^\]]+\])', tokens.Name),
         (r'@\w+', tokens.Name.Variable),
         (r'[;(),.]', tokens.Punctuation),
@@ -131,26 +157,8 @@ SQL_REGEX_WITH_DIALECT = {
 
 FLAGS = re.IGNORECASE | re.UNICODE
 
-
-def get_sql_regex(**options):
-    sql_dialect = options.get('sql_dialect')
-    additional_keywords_list = options.get('additional_keywords') or []
-    additional_keywords_dict = {keyword: tokens.Keyword
-                                for keyword in additional_keywords_list}
-
-    KEYWORDS_COMMON.update(additional_keywords_dict)
-
-    if sql_dialect:
-        if sql_dialect in SQL_REGEX_WITH_DIALECT:
-            return [(re.compile(rx, FLAGS).match, tt)
-                    for rx, tt in SQL_REGEX_WITH_DIALECT[sql_dialect]]
-        else:
-            raise KeyError('The selected sql dialect is invalid: {0}'
-                           .format(sql_dialect))
-    else:
-        return [(re.compile(rx, FLAGS).match, tt)
-                for rx, tt in SQL_REGEX_WITH_DIALECT['Default']]
-
+# Leave empty so the client can add additional keywords to parse against via the parser options.
+ADDITIONAL_KEYWORDS = {}
 
 KEYWORDS = {
     'ABORT': tokens.Keyword,

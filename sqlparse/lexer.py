@@ -15,7 +15,7 @@
 from sqlparse import tokens
 from sqlparse.compat import bytes_type, text_type, file_types
 from sqlparse.exceptions import SQLParseError
-from sqlparse.keywords import get_sql_regex, SQL_REGEX_WITH_DIALECT
+from sqlparse.keywords import get_sql_regex_tokens_map, SQL_REGEX_WITH_DIALECT
 from sqlparse.utils import consume
 
 
@@ -56,7 +56,7 @@ class Lexer(object):
                             format(type(text)))
 
         iterable = enumerate(text)
-        SQL_REGEX = get_sql_regex(**options)
+        SQL_REGEX = get_sql_regex_tokens_map(**options)
         for pos, char in iterable:
             for rexmatch, action in SQL_REGEX:
                 m = rexmatch(text, pos)

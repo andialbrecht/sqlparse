@@ -7,6 +7,7 @@ import pytest
 import sqlparse
 from sqlparse import sql, tokens as T
 from sqlparse.compat import StringIO, text_type
+from sqlparse.exceptions import SQLParseError
 
 
 @pytest.mark.parametrize('options', [({'sql_dialect': 'Default'}),
@@ -16,6 +17,27 @@ def test_parse_tokenize(options):
     stmts = sqlparse.parse(s, **options)
     assert len(stmts) == 1
     assert str(stmts[0]) == s
+
+
+def test_parse_options_invalid_sql_dialect():
+    sql = 'select * from fool;'
+    with pytest.raises(SQLParseError):
+        sqlparse.parse(sql, sql_dialect='invalid_sql_dialect')
+
+
+def test_parse_options_invalid_additional_keywords():
+    sql = 'select * from fool;'
+    additional_keywords = {'keyword': 'value'}
+    with pytest.raises(SQLParseError):
+        sqlparse.parse(sql, additional_keywords=additional_keywords)
+
+
+def test_parse_options_additional_keywords():
+    sql = 'NEW_KEYWORD_FUNCTION'
+    additional_keywords = ['NEW_KEYWORD_FUNCTION']
+    stmts = sqlparse.parse(sql, additional_keywords=additional_keywords)
+    assert len(stmts) == 1
+    assert stmts[0].tokens[0].ttype == sqlparse.tokens.Keyword
 
 
 @pytest.mark.parametrize('options', [{'sql_dialect': 'Default'},

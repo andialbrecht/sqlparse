@@ -2,7 +2,7 @@
 import pytest
 
 from sqlparse import tokens
-from sqlparse.keywords import get_sql_regex
+from sqlparse.keywords import get_sql_regex_tokens_map
 
 
 class TestSQLREGEX:
@@ -10,7 +10,7 @@ class TestSQLREGEX:
                                         '1.', '-1.',
                                         '.1', '-.1'])
     def test_float_numbers(self, number):
-        SQL_REGEX = get_sql_regex()
+        SQL_REGEX = get_sql_regex_tokens_map()
 
         ttype = next(tt for action, tt in SQL_REGEX if action(number))
         assert tokens.Number.Float == ttype
@@ -24,7 +24,7 @@ class TestSQLREGEX:
                               ('-.1', {'sql_dialect': 'TransactSQL'})
                               ])
     def test_float_numbers_for_TSQL(self, number, options):
-        SQL_REGEX = get_sql_regex(**options)
+        SQL_REGEX = get_sql_regex_tokens_map(**options)
 
         ttype = next(tt for action, tt in SQL_REGEX if action(number))
         assert tokens.Number.Float == ttype
