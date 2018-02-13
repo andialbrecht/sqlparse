@@ -13,8 +13,9 @@
 # and to allow some customizations.
 
 from sqlparse import tokens
-from sqlparse.keywords import get_sql_regex
 from sqlparse.compat import bytes_type, text_type, file_types
+from sqlparse.exceptions import SQLParseError
+from sqlparse.keywords import get_sql_regex, SQL_REGEX_WITH_DIALECT
 from sqlparse.utils import consume
 
 
@@ -24,7 +25,7 @@ class Lexer(object):
     """
 
     @staticmethod
-    def get_tokens(text, encoding=None, sql_dialect=None):
+    def get_tokens(text, encoding=None, **sql_dialect_options):
         """
         Return an iterable of (tokentype, value) pairs generated from
         `text`. If `unfiltered` is set to `True`, the filtering mechanism
@@ -55,7 +56,7 @@ class Lexer(object):
                             format(type(text)))
 
         iterable = enumerate(text)
-        SQL_REGEX = get_sql_regex(sql_dialect)
+        SQL_REGEX = get_sql_regex(**sql_dialect_options)
         for pos, char in iterable:
             for rexmatch, action in SQL_REGEX:
                 m = rexmatch(text, pos)
@@ -72,10 +73,31 @@ class Lexer(object):
                 yield tokens.Error, char
 
 
-def tokenize(sql, encoding=None, sql_dialect=None):
+def tokenize(sql, encoding=None, **sql_dialect_options):
     """Tokenize sql.
 
     Tokenize *sql* using the :class:`Lexer` and return a 2-tuple stream
     of ``(token type, value)`` items.
     """
-    return Lexer().get_tokens(sql, encoding, sql_dialect)
+    return Lexer().get_tokens(sql, encoding, **sql_dialect_options)
+
+
+def validate_sql_dialect_options(sql_dialect_options=None):
+    """Validate sql dialect options.
+    """
+
+    if not sql_dialect_options:
+        return
+
+    sql_dialect = sql_dialect_options.get('sql_dialect')
+
+    if sql_dialect and sql_dialect not in SQL_REGEX_WITH_DIALECT:
+        raise SQLParseError('Invalid value for sql_dialect: '
+                            '{0!r}'.format(sql_dialect))
+
+    additional_keywords = sql_dialect_options.get('additional_keywords')
+    if additional_keywords:
+        if not isinstance(additional_keywords, list):
+            raise SQLParseError('additional_keywords: '
+                                '{0!r} must be a list'.format(additional_keywords))
+

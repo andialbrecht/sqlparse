@@ -132,7 +132,14 @@ SQL_REGEX_WITH_DIALECT = {
 FLAGS = re.IGNORECASE | re.UNICODE
 
 
-def get_sql_regex(sql_dialect=None):
+def get_sql_regex(**sql_dialect_options):
+    sql_dialect = sql_dialect_options.get('sql_dialect')
+    additional_keywords_list = sql_dialect_options.get('additional_keywords') or []
+    additional_keywords_dict = {keyword: tokens.Keyword
+                                for keyword in additional_keywords_list}
+
+    KEYWORDS_COMMON.update(additional_keywords_dict)
+
     if sql_dialect:
         if sql_dialect in SQL_REGEX_WITH_DIALECT:
             return [(re.compile(rx, FLAGS).match, tt)

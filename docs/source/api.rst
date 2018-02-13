@@ -59,3 +59,16 @@ The :meth:`~sqlparse.format` function accepts the following keyword arguments.
 ``output_format``
   If given the output is additionally formatted to be used as a variable
   in a programming language. Allowed values are "python" and "php".
+
+.. _parsing:
+
+Formatting of SQL Statements
+----------------------------
+
+The :meth:`~sqlparse.parse` function accepts the following keyword arguments.
+
+``sql_dialect``
+  Changes which sql dialect to parse against. Allowed values are "TransactSQL".
+
+``additional_keywords``
+  A list of additional keywords to parse against.
