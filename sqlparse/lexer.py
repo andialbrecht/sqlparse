@@ -25,7 +25,7 @@ class Lexer(object):
     """
 
     @staticmethod
-    def get_tokens(text, encoding=None, **sql_dialect_options):
+    def get_tokens(text, encoding=None, **options):
         """
         Return an iterable of (tokentype, value) pairs generated from
         `text`. If `unfiltered` is set to `True`, the filtering mechanism
@@ -56,7 +56,7 @@ class Lexer(object):
                             format(type(text)))
 
         iterable = enumerate(text)
-        SQL_REGEX = get_sql_regex(**sql_dialect_options)
+        SQL_REGEX = get_sql_regex(**options)
         for pos, char in iterable:
             for rexmatch, action in SQL_REGEX:
                 m = rexmatch(text, pos)
@@ -82,22 +82,18 @@ def tokenize(sql, encoding=None, **sql_dialect_options):
     return Lexer().get_tokens(sql, encoding, **sql_dialect_options)
 
 
-def validate_sql_dialect_options(sql_dialect_options=None):
-    """Validate sql dialect options.
+def validate_options(**options):
+    """Validate options.
     """
-
-    if not sql_dialect_options:
-        return
-
-    sql_dialect = sql_dialect_options.get('sql_dialect')
+    sql_dialect = options.get('sql_dialect')
 
     if sql_dialect and sql_dialect not in SQL_REGEX_WITH_DIALECT:
         raise SQLParseError('Invalid value for sql_dialect: '
                             '{0!r}'.format(sql_dialect))
 
-    additional_keywords = sql_dialect_options.get('additional_keywords')
+    additional_keywords = options.get('additional_keywords')
     if additional_keywords:
         if not isinstance(additional_keywords, list):
             raise SQLParseError('additional_keywords: '
-                                '{0!r} must be a list'.format(additional_keywords))
-
+                                '{0!r} must be a list'.format(
+                                    additional_keywords))
