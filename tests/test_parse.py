@@ -292,7 +292,7 @@ def test_single_quotes_are_strings(options):
 @pytest.mark.parametrize('options', [{'sql_dialect': 'Default'},
                                      {'sql_dialect': 'TransactSQL'}])
 def test_double_quotes_are_identifiers(options):
-    p = sqlparse.parse('"foo"', options)[0].tokens
+    p = sqlparse.parse('"foo"', **options)[0].tokens
     assert len(p) == 1
     assert isinstance(p[0], sql.Identifier)
 
@@ -401,7 +401,7 @@ def test_names_and_special_names(s):
 @pytest.mark.parametrize('options', [{'sql_dialect': 'Default'},
                                      {'sql_dialect': 'TransactSQL'}])
 def test_get_token_at_offset(options):
-    p = sqlparse.parse('select * from dual', options)[0]
+    p = sqlparse.parse('select * from dual', **options)[0]
     #                   0123456789
     assert p.get_token_at_offset(0) == p.tokens[0]
     assert p.get_token_at_offset(1) == p.tokens[0]
