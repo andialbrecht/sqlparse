@@ -73,13 +73,14 @@ class Lexer(object):
                 yield tokens.Error, char
 
 
-def tokenize(sql, encoding=None, **sql_dialect_options):
+def tokenize(sql, encoding=None, **options):
     """Tokenize sql.
 
     Tokenize *sql* using the :class:`Lexer` and return a 2-tuple stream
     of ``(token type, value)`` items.
     """
-    return Lexer().get_tokens(sql, encoding, **sql_dialect_options)
+    validate_options(**options)
+    return Lexer().get_tokens(sql, encoding, **options)
 
 
 def validate_options(**options):
@@ -92,6 +93,7 @@ def validate_options(**options):
                             '{0!r}'.format(sql_dialect))
 
     additional_keywords = options.get('additional_keywords')
+
     if additional_keywords:
         if not isinstance(additional_keywords, list):
             raise SQLParseError('additional_keywords: '

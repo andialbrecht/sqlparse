@@ -43,6 +43,7 @@ def parsestream(stream, encoding=None, **options):
 
     :param options: The options to parse with. (optional).
     Available options are documented in :ref:`parsing`.
+
     :returns: A generator of :class:`~sqlparse.sql.Statement` instances.
     """
     stack = engine.FilterStack()
