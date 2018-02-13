@@ -30,13 +30,9 @@ def get_sql_regex_tokens_map(**options):
     update_additional_keywords(**options)
 
     sql_dialect = options.get('sql_dialect')
-    if sql_dialect:
-        if sql_dialect in SQL_REGEX_WITH_DIALECT:
-            return [(re.compile(rx, FLAGS).match, tt)
-                    for rx, tt in SQL_REGEX_WITH_DIALECT[sql_dialect]]
-        else:
-            raise KeyError('The selected sql dialect is invalid: {0}'
-                           .format(sql_dialect))
+    if sql_dialect and sql_dialect in SQL_REGEX_WITH_DIALECT:
+        return [(re.compile(rx, FLAGS).match, tt)
+                for rx, tt in SQL_REGEX_WITH_DIALECT[sql_dialect]]
     else:
         return [(re.compile(rx, FLAGS).match, tt)
                 for rx, tt in SQL_REGEX_WITH_DIALECT['Default']]
