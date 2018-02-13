@@ -69,7 +69,7 @@ The :meth:`~sqlparse.parse` function accepts the following keyword arguments.
 
 ``sql_dialect``
   Changes which sql dialect to parse against. Allowed values are "TransactSQL".
-  If unspecified it uses the default option.
+  If unspecified it uses the default option, which is a general SQL parser.
 
 ``additional_keywords``
   A list of additional keywords to parse against.
