@@ -109,6 +109,13 @@ def create_parser():
         help='indent after first line of statement (e.g. SELECT)')
 
     group.add_argument(
+        '--indent_columns',
+        dest='indent_columns',
+        action='store_true',
+        default=False,
+        help='indent all columns by indent_width instead of keyword length')
+
+    group.add_argument(
         '-a', '--reindent_aligned',
         action='store_true',
         default=False,
