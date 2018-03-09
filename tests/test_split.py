@@ -139,3 +139,13 @@ def test_split_simple():
     assert len(stmts) == 2
     assert stmts[0] == 'select * from foo;'
     assert stmts[1] == 'select * from bar;'
+
+
+def test_split_quotes_with_new_line():
+    stmts = sqlparse.split('select "foo\nbar"')
+    assert len(stmts) == 1
+    assert stmts[0] == 'select "foo\nbar"'
+
+    stmts = sqlparse.split("select 'foo\n\bar'")
+    assert len(stmts) == 1
+    assert stmts[0] == "select 'foo\n\bar'"
