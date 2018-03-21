@@ -56,6 +56,14 @@ def validate_options(options):
         options['truncate_strings'] = truncate_strings
         options['truncate_char'] = options.get('truncate_char', '[...]')
 
+    indent_columns = options.get('indent_columns', False)
+    if indent_columns not in [True, False]:
+        raise SQLParseError('Invalid value for indent_columns: '
+                            '{0!r}'.format(indent_columns))
+    elif indent_columns:
+        options['reindent'] = True  # enforce reindent
+    options['indent_columns'] = indent_columns
+
     reindent = options.get('reindent', False)
     if reindent not in [True, False]:
         raise SQLParseError('Invalid value for reindent: '
@@ -161,6 +169,7 @@ def build_filter_stack(stack, options):
                 char=options['indent_char'],
                 width=options['indent_width'],
                 indent_after_first=options['indent_after_first'],
+                indent_columns=options['indent_columns'],
                 wrap_after=options['wrap_after'],
                 comma_first=options['comma_first']))
 

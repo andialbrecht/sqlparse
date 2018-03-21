@@ -12,7 +12,8 @@ from sqlparse.utils import offset, indent
 
 class ReindentFilter(object):
     def __init__(self, width=2, char=' ', wrap_after=0, n='\n',
-                 comma_first=False, indent_after_first=False):
+                 comma_first=False, indent_after_first=False,
+                 indent_columns=False):
         self.n = n
         self.width = width
         self.char = char
@@ -20,6 +21,7 @@ class ReindentFilter(object):
         self.offset = 0
         self.wrap_after = wrap_after
         self.comma_first = comma_first
+        self.indent_columns = indent_columns
         self._curr_stmt = None
         self._last_stmt = None
 
@@ -118,8 +120,12 @@ class ReindentFilter(object):
 
     def _process_identifierlist(self, tlist):
         identifiers = list(tlist.get_identifiers())
-        first = next(identifiers.pop(0).flatten())
-        num_offset = 1 if self.char == '\t' else self._get_offset(first)
+        if self.indent_columns:
+            first = next(identifiers[0].flatten())
+            num_offset = 1 if self.char == '\t' else self.width
+        else:
+            first = next(identifiers.pop(0).flatten())
+            num_offset = 1 if self.char == '\t' else self._get_offset(first)
         if not tlist.within(sql.Function):
             with offset(self, num_offset):
                 position = 0
