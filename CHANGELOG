@@ -4,10 +4,17 @@ Development Version
 Enhancements
 
 * New formatting option "--indent_after_first" (pr345, by johshoff).
+* New formatting option "--indent_columns" (pr393, by digitalarbeiter).
+
+Bug Fixes
+
+* Fix occasional IndexError (pr290, by circld).
+* Fix incorrect splitting of strings containing new lines (pr396, by fredyw).
 
 Internal Changes
 
 * Remove support for Python 3.3.
+
 
 Release 0.2.4 (Sep 27, 2017)
 ----------------------------
