@@ -358,7 +358,7 @@ class TokenList(Token):
         """Returns the real name (object name) of this identifier."""
         # a.b
         dot_idx, _ = self.token_next_by(m=(T.Punctuation, '.'))
-        return self._get_first_name(dot_idx)
+        return self._get_first_name(dot_idx, real_name=True)
 
     def get_parent_name(self):
         """Return name of the parent object if any.
@@ -369,7 +369,8 @@ class TokenList(Token):
         _, prev_ = self.token_prev(dot_idx)
         return remove_quotes(prev_.value) if prev_ is not None else None
 
-    def _get_first_name(self, idx=None, reverse=False, keywords=False):
+    def _get_first_name(self, idx=None, reverse=False, keywords=False,
+                        real_name=False):
         """Returns the name of the first token with a name"""
 
         tokens = self.tokens[idx:] if idx else self.tokens
@@ -383,7 +384,7 @@ class TokenList(Token):
             if token.ttype in types:
                 return remove_quotes(token.value)
             elif isinstance(token, (Identifier, Function)):
-                return token.get_name()
+                return token.get_real_name() if real_name else token.get_name()
 
 
 class Statement(TokenList):
