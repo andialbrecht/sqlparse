@@ -424,3 +424,12 @@ def test_non_ascii():
     statement = stmts[0]
     assert text_type(statement) == _test_non_ascii
     assert statement._pprint_tree() is None
+
+
+def test_get_real_name():
+    # issue 369
+    s = u"update a t set t.b=1"
+    stmts = sqlparse.parse(s)
+    assert len(stmts) == 1
+    assert 'a' == stmts[0].get_real_name()
+    assert 't' == stmts[0].get_alias()
