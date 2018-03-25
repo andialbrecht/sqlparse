@@ -167,7 +167,9 @@ class ReindentFilter(object):
 
             end_at = self.offset + sum(len(i.value) + 1 for i in identifiers)
             adjusted_offset = 0
-            if end_at > (self.wrap_after - self.offset) and self._last_func:
+            if (self.wrap_after > 0
+                    and end_at > (self.wrap_after - self.offset)
+                    and self._last_func):
                 adjusted_offset = -len(self._last_func.value) - 1
 
             with offset(self, adjusted_offset), indent(self):
@@ -177,7 +179,8 @@ class ReindentFilter(object):
                 for token in identifiers:
                     # Add 1 for the "," separator
                     position += len(token.value) + 1
-                    if position > (self.wrap_after - self.offset):
+                    if (self.wrap_after > 0
+                            and position > (self.wrap_after - self.offset)):
                         adjust = 0
                         tlist.insert_before(token, self.nl(offset=adjust))
                         position = 0
