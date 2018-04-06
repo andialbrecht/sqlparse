@@ -453,6 +453,18 @@ class TestFormatReindent(object):
             "       col3",
             "from my_table"])
 
+    def test_long_identifier_list_with_functions(self):
+        f = lambda sql: sqlparse.format(sql, reindent=True, wrap_after=30)
+        s = ("select 'abc' as foo, json_build_object('a',  a,"
+             "'b', b, 'c', c, 'd', d, 'e', e) as col2"
+             "col3 from my_table")
+        assert f(s) == '\n'.join([
+            "select 'abc' as foo,",
+            "       json_build_object('a',",
+            "         a, 'b', b, 'c', c, 'd', d,",
+            "         'e', e) as col2col3",
+            "from my_table"])
+
     def test_case(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)
         s = 'case when foo = 1 then 2 when foo = 3 then 4 else 5 end'
