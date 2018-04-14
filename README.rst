@@ -47,13 +47,13 @@ Documentation
   https://sqlparse.readthedocs.io/en/latest/
 
 Discussions
-  http://groups.google.com/group/sqlparse
+  https://groups.google.com/forum/#!forum/sqlparse
 
 Issues/Bugs
   https://github.com/andialbrecht/sqlparse/issues
 
 Online Demo
-  http://sqlformat.org
+  https://sqlformat.org/
 
 
 python-sqlparse is licensed under the BSD license.
@@ -62,6 +62,6 @@ Parts of the code are based on pygments written by Georg Brandl and others.
 pygments-Homepage: http://pygments.org/
 
 .. |buildstatus| image:: https://secure.travis-ci.org/andialbrecht/sqlparse.png?branch=master
-.. _buildstatus: http://travis-ci.org/#!/andialbrecht/sqlparse
+.. _buildstatus: https://travis-ci.org/#!/andialbrecht/sqlparse
 .. |coverage| image:: https://coveralls.io/repos/andialbrecht/sqlparse/badge.svg?branch=master&service=github
 .. _coverage: https://coveralls.io/github/andialbrecht/sqlparse?branch=master
