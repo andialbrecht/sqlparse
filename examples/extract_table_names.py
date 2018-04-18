@@ -10,7 +10,7 @@
 # SELECT statements.
 #
 # See:
-# http://groups.google.com/group/sqlparse/browse_thread/thread/b0bd9a022e9d4895
+# https://groups.google.com/forum/#!forum/sqlparse/browse_thread/thread/b0bd9a022e9d4895
 
 import sqlparse
 from sqlparse.sql import IdentifierList, Identifier

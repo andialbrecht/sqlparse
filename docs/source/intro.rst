@@ -6,7 +6,7 @@ Download & Installation
 -----------------------
 
 The latest released version can be obtained from the `Python Package
-Index (PyPI) <http://pypi.python.org/pypi/sqlparse/>`_. To extract the
+Index (PyPI) <https://pypi.python.org/pypi/sqlparse/>`_. To extract the
 install the module system-wide run
 
 .. code-block:: bash
@@ -136,8 +136,8 @@ locally.
 
 Please file bug reports and feature requests on the project site at
 https://github.com/andialbrecht/sqlparse/issues/new or if you have
-code to contribute upload it to http://codereview.appspot.com and
+code to contribute upload it to https://codereview.appspot.com/ and
 add albrecht.andi@googlemail.com as reviewer.
 
 For more information about the review tool and how to use it visit
-it's project page: http://code.google.com/p/rietveld.
+it's project page: https://github.com/rietveld-codereview/rietveld

@@ -16,9 +16,9 @@ def filepath():
     """Returns full file path for test files."""
 
     def make_filepath(filename):
-        # http://stackoverflow.com/questions/18011902/parameter-to-a-fixture
+        # https://stackoverflow.com/questions/18011902/py-test-pass-a-parameter-to-a-fixture-function
         # Alternate solution is to use parametrization `indirect=True`
-        # http://stackoverflow.com/a/33879151
+        # https://stackoverflow.com/questions/18011902/py-test-pass-a-parameter-to-a-fixture-function/33879151#33879151
         # Syntax is noisy and requires specific variable names
         return os.path.join(FILES_DIR, filename)
 
@@ -30,9 +30,9 @@ def load_file(filepath):
     """Opens filename with encoding and return its contents."""
 
     def make_load_file(filename, encoding='utf-8'):
-        # http://stackoverflow.com/questions/18011902/parameter-to-a-fixture
+        # https://stackoverflow.com/questions/18011902/py-test-pass-a-parameter-to-a-fixture-function
         # Alternate solution is to use parametrization `indirect=True`
-        # http://stackoverflow.com/a/33879151
+        # https://stackoverflow.com/questions/18011902/py-test-pass-a-parameter-to-a-fixture-function/33879151#33879151
         # Syntax is noisy and requires specific variable names
         # And seems to be limited to only 1 argument.
         with io.open(filepath(filename), encoding=encoding) as f:
