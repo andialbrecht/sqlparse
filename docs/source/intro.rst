@@ -6,7 +6,7 @@ Download & Installation
 -----------------------
 
 The latest released version can be obtained from the `Python Package
-Index (PyPI) <https://pypi.python.org/pypi/sqlparse/>`_. To extract the
+Index (PyPI) <https://pypi.org/project/sqlparse/>`_. To extract the
 install the module system-wide run
 
 .. code-block:: bash
