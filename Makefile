@@ -13,7 +13,7 @@ test:
 	tox
 
 coverage:
-	py.test --cov=sqlparse --cov-report=html --cov-report=term
+	pytest --cov=sqlparse --cov-report=html --cov-report=term
 
 clean:
 	$(PYTHON) setup.py clean
