@@ -363,7 +363,7 @@ Bug Fixes
 Other
 
 * Documentation updates.
-* Test suite now uses tox and py.test.
+* Test suite now uses tox and pytest.
 * py3k fixes (by vthriller).
 * py3k fixes in setup.py (by Florian Bauer).
 * setup.py now requires distribute (by Florian Bauer).
@@ -379,7 +379,7 @@ Bug Fixes
 * Improve grouping and formatting of concatenated strings (issue53).
 * Improve handling of varchar() (by Mike Amy).
 * Clean up handling of various SQL elements.
-* Switch to py.test and clean up tests.
+* Switch to pytest and clean up tests.
 * Several minor fixes.
 
 Other
