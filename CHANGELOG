@@ -315,7 +315,7 @@ Enhancements
 * Add STRAIGHT_JOIN statement (by Yago Riveiro).
 * Function.get_parameters() now returns the parameter if only one parameter is
   given (issue94, by wayne.wuw).
-* sqlparse.split() now removes leading and trailing whitespaces from splitted
+* sqlparse.split() now removes leading and trailing whitespaces from split
   statements.
 * Add USE as keyword token (by mulos).
 * Improve parsing of PEP249-style placeholders (issue103).
