@@ -177,7 +177,7 @@ Bug Fixes
 
 * Fix a regression in get_alias() introduced in 0.1.15 (issue185).
 * Fix a bug in the splitter regarding DECLARE (issue193).
-* sqlformat command line tool doesn't duplicat newlines anymore (issue191).
+* sqlformat command line tool doesn't duplicate newlines anymore (issue191).
 * Don't mix up MySQL comments starting with hash and MSSQL
   temp tables (issue192).
 * Statement.get_type() now ignores comments at the beginning of
