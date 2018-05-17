@@ -89,7 +89,7 @@ Bug Fixes
 
 * Fix a regression to parse streams again (issue273, reported and
   test case by gmccreight).
-* Improve Python 2/3 compatibility when using parsestream (isseu190,
+* Improve Python 2/3 compatibility when using parsestream (issue190,
   by phdru).
 * Improve splitting of PostgreSQL functions (issue277).
 
