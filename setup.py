@@ -40,7 +40,7 @@ Splitting SQL statements::
    [u'select * from foo; ', u'select * from bar;']
 
 
-Formatting statemtents::
+Formatting statements::
 
    >>> sql = 'select * from foo where id in (select id from bar);'
    >>> print sqlparse.format(sql, reindent=True, keyword_case='upper')
