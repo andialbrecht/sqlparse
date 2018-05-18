@@ -89,7 +89,7 @@ Bug Fixes
 
 * Fix a regression to parse streams again (issue273, reported and
   test case by gmccreight).
-* Improve Python 2/3 compatibility when using parsestream (isseu190,
+* Improve Python 2/3 compatibility when using parsestream (issue190,
   by phdru).
 * Improve splitting of PostgreSQL functions (issue277).
 
@@ -177,7 +177,7 @@ Bug Fixes
 
 * Fix a regression in get_alias() introduced in 0.1.15 (issue185).
 * Fix a bug in the splitter regarding DECLARE (issue193).
-* sqlformat command line tool doesn't duplicat newlines anymore (issue191).
+* sqlformat command line tool doesn't duplicate newlines anymore (issue191).
 * Don't mix up MySQL comments starting with hash and MSSQL
   temp tables (issue192).
 * Statement.get_type() now ignores comments at the beginning of
@@ -315,7 +315,7 @@ Enhancements
 * Add STRAIGHT_JOIN statement (by Yago Riveiro).
 * Function.get_parameters() now returns the parameter if only one parameter is
   given (issue94, by wayne.wuw).
-* sqlparse.split() now removes leading and trailing whitespaces from splitted
+* sqlparse.split() now removes leading and trailing whitespaces from split
   statements.
 * Add USE as keyword token (by mulos).
 * Improve parsing of PEP249-style placeholders (issue103).
@@ -443,7 +443,7 @@ Bug Fixes
 
 * Fixed incorrect detection of keyword fragments embed in names (issue7,
   reported and initial patch by andyboyko).
-* Stricter detection of identfier aliases (issue8, reported by estama).
+* Stricter detection of identifier aliases (issue8, reported by estama).
 * WHERE grouping consumed closing parenthesis (issue9, reported by estama).
 * Fixed an issue with trailing whitespaces (reported by Kris).
 * Better detection of escaped single quotes (issue13, reported by

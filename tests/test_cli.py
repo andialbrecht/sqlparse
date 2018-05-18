@@ -32,7 +32,7 @@ def test_valid_args(filepath):
     assert sqlparse.cli.main([path, '-r']) is not None
 
 
-def test_invalid_choise(filepath):
+def test_invalid_choice(filepath):
     path = filepath('function.sql')
     with pytest.raises(SystemExit):
         sqlparse.cli.main([path, '-l', 'Spanish'])

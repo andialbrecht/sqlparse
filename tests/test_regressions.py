@@ -250,8 +250,8 @@ def test_issue193_splitting_function():
                  RETURN x;
                 END;
                 SELECT * FROM a.b;"""
-    splitted = sqlparse.split(sql)
-    assert len(splitted) == 2
+    statements = sqlparse.split(sql)
+    assert len(statements) == 2
 
 
 def test_issue194_splitting_function():
@@ -264,8 +264,8 @@ def test_issue194_splitting_function():
                  RETURN x;
                 END;
                 SELECT * FROM a.b;"""
-    splitted = sqlparse.split(sql)
-    assert len(splitted) == 2
+    statements = sqlparse.split(sql)
+    assert len(statements) == 2
 
 
 def test_issue186_get_type():
