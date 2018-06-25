@@ -269,6 +269,23 @@ def group_where(tlist):
         eidx = tlist.token_index(end)
         tlist.group_tokens(sql.Where, tidx, eidx)
         tidx, token = tlist.token_next_by(m=sql.Where.M_OPEN, idx=tidx)
+       
+
+@recurse(sql.Having)
+def group_having(tlist):
+    tidx, token = tlist.token_next_by(m=sql.Having.M_OPEN)
+    while token:
+        eidx, end = tlist.token_next_by(m=sql.Having.M_CLOSE, idx=tidx)
+
+        if end is None:
+            end = tlist._groupable_tokens[-1]
+        else:
+            end = tlist.tokens[eidx - 1]
+        # TODO: convert this to eidx instead of end token.
+        # i think above values are len(tlist) and eidx-1
+        eidx = tlist.token_index(end)
+        tlist.group_tokens(sql.Having, tidx, eidx)
+        tidx, token = tlist.token_next_by(m=sql.Having.M_OPEN, idx=tidx)
 
 
 @recurse()
@@ -339,6 +356,7 @@ def group(stmt):
         group_begin,
 
         group_functions,
+        group_having,
         group_where,
         group_period,
         group_arrays,
