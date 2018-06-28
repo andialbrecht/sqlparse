@@ -418,7 +418,8 @@ class Statement(TokenList):
             if isinstance(token, (Identifier, IdentifierList)):
                 _, dml_keyword = self.token_next(tidx, skip_ws=True)
 
-                if dml_keyword is not None and dml_keyword.ttype == T.Keyword.DML:
+                if dml_keyword is not None \
+                        and dml_keyword.ttype == T.Keyword.DML:
                     return dml_keyword.normalized
 
         # Hmm, probably invalid syntax, so return unknown.
