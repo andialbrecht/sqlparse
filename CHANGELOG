@@ -12,6 +12,7 @@ Bug Fixes
 * Fix incorrect splitting of strings containing new lines (pr396, by fredyw).
 * Fix for get\_real_name() to return correct name (issue369, by fredyw).
 * Wrap function params when wrap_after is set (pr398, by soloman1124).
+* Fix parsing of "WHEN name" clauses (pr418, by andrew deryabin).
 
 Internal Changes
 
