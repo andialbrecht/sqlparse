@@ -50,6 +50,14 @@ def create_parser():
         help='write output to FILE (defaults to stdout)')
 
     parser.add_argument(
+        '-w', '--write',
+        dest='write_inline',
+        action='store_true',
+        default=False,
+        help='Edit files in-place. (Beware!)'
+    )
+
+    parser.add_argument(
         '--version',
         action='version',
         version=sqlparse.__version__)
@@ -178,7 +186,13 @@ def main(args=None):
                 u'Failed to read {0}: {1}'.format(args.filename, e))
 
     close_stream = False
-    if args.outfile:
+    if args.write_inline:
+        try:
+            stream = open(args.filename, 'w', args.encoding)
+            close_stream = True
+        except IOError as e:
+            return _error(u'Failed to open {0}: {1}'.format(args.filename, e))
+    else if args.outfile:
         try:
             stream = open(args.outfile, 'w', args.encoding)
             close_stream = True
