@@ -9,6 +9,12 @@ python:
   - "pypy"
   - "pypy3"
 
+matrix:
+  fast_finish: true
+  allow_failures:
+    # see https://github.com/travis-ci/travis-ci/issues/9815
+    - python: 3.7
+
 install:
   - pip install pytest pytest-cov codecov
 
