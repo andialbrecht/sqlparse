@@ -6,8 +6,8 @@ python:
   - "3.6"
   - "3.7"
   - "nightly"
-  - "pypy2.7"
-  - "pypy3.5"
+  - "pypy"
+  - "pypy3"
 
 install:
   - pip install pytest pytest-cov codecov
