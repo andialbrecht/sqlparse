@@ -5,6 +5,7 @@ Enhancements
 
 * New formatting option "--indent\_after_first" (pr345, by johshoff).
 * New formatting option "--indent_columns" (pr393, by digitalarbeiter).
+* Add UPSERT keyword (issue408).
 
 Bug Fixes
 

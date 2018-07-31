@@ -655,6 +655,7 @@ KEYWORDS_COMMON = {
     'INSERT': tokens.Keyword.DML,
     'DELETE': tokens.Keyword.DML,
     'UPDATE': tokens.Keyword.DML,
+    'UPSERT': tokens.Keyword.DML,
     'REPLACE': tokens.Keyword.DML,
     'MERGE': tokens.Keyword.DML,
     'DROP': tokens.Keyword.DDL,
