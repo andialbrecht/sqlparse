@@ -19,7 +19,9 @@ class StatementSplitter(object):
         """Set the filter attributes to its default values"""
         self._in_declare = False
         self._is_create = False
+        self._in_case = False
         self._begin_depth = 0
+        self._case_depth = 0
 
         self.consume_ws = False
         self.tokens = []
@@ -46,7 +48,7 @@ class StatementSplitter(object):
             return 0
 
         # can have nested declare inside of being...
-        if unified == 'DECLARE' and self._is_create and self._begin_depth == 0:
+        if unified == 'DECLARE':
             self._in_declare = True
             return 1
 
@@ -62,7 +64,17 @@ class StatementSplitter(object):
         # Would having multiple CASE WHEN END and a Assignment Operator
         # cause the statement to cut off prematurely?
         if unified == 'END':
-            self._begin_depth = max(0, self._begin_depth - 1)
+            if self._in_case:
+                self._case_depth = max(0, self._case_depth - 1)
+            else:
+                self._begin_depth = max(0, self._begin_depth - 1)
+
+            # decide the declare/begin is over.
+            if self._in_declare and self._begin_depth == 0:
+                self._in_declare = False
+
+            if self._in_case and self._case_depth == 0:
+                self._in_case = False
             return -1
 
         if (unified in ('IF', 'FOR', 'WHILE') and
@@ -71,6 +83,11 @@ class StatementSplitter(object):
 
         if unified in ('END IF', 'END FOR', 'END WHILE'):
             return -1
+
+        if unified == 'CASE':
+            self._in_case = True
+            self._case_depth += 1
+            return 1
 
         # Default
         return 0
@@ -98,7 +115,9 @@ class StatementSplitter(object):
             self.tokens.append(sql.Token(ttype, value))
 
             # Check if we get the end of a statement
-            if self.level <= 0 and ttype is T.Punctuation and value == ';':
+            if self.level <= 0 and ttype is T.Punctuation and value == ';' \
+                and not self._in_case and not self._in_declare and self._begin_depth == 0 \
+                and self._case_depth == 0:
                 self.consume_ws = True
 
         # Yield pending statement (if any)

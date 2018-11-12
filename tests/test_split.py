@@ -149,3 +149,28 @@ def test_split_quotes_with_new_line():
     stmts = sqlparse.split("select 'foo\n\bar'")
     assert len(stmts) == 1
     assert stmts[0] == "select 'foo\n\bar'"
+
+
+def test_split_begin_end_block():
+    sql = """
+        select * from dual;
+        DECLARE 
+        test_num number;
+        begin
+           dbms_output.put_line("123");
+           BEGIN
+              select (case when rownum > 1 then 
+                    case when rownum == 1 
+                      then 0 else 2 
+                     end
+                    else 0 
+                end) a into test_num from dual;
+                dbms_output.put_line(test_num);
+           end;
+        end;
+        
+        select * from dual;
+    """
+    stmts = sqlparse.split(sql.strip())
+    assert len(stmts) == 3
+
