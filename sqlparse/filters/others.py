@@ -26,6 +26,13 @@ class StripCommentsFilter(object):
             if (prev_ is None or next_ is None or
                     prev_.is_whitespace or prev_.match(T.Punctuation, '(') or
                     next_.is_whitespace or next_.match(T.Punctuation, ')')):
+                # Insert a whitespace to ensure the following SQL produces
+                # a valid SQL. For example:
+                #
+                # Before: select a--comment\nfrom foo
+                # After: select a from foo
+                if prev_ is not None and next_ is None:
+                    tlist.tokens.insert(tidx, sql.Token(T.Whitespace, ' '))
                 tlist.tokens.remove(token)
             else:
                 tlist.tokens[tidx] = sql.Token(T.Whitespace, ' ')

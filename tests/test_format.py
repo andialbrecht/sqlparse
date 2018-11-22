@@ -50,6 +50,19 @@ class TestFormat(object):
         sql = 'select-- foo\nfrom -- bar\nwhere'
         res = sqlparse.format(sql, strip_comments=True)
         assert res == 'select from where'
+        sql = 'select *-- statement starts here\n\nfrom foo'
+        res = sqlparse.format(sql, strip_comments=True)
+        assert res == 'select * from foo'
+        sql = 'select * from foo-- statement starts here\nwhere'
+        res = sqlparse.format(sql, strip_comments=True)
+        assert res == 'select * from foo where'
+        sql = 'select a-- statement starts here\nfrom foo'
+        res = sqlparse.format(sql, strip_comments=True)
+        assert res == 'select a from foo'
+        sql = '--comment\nselect a-- statement starts here\n' \
+              'from foo--comment\nf'
+        res = sqlparse.format(sql, strip_comments=True)
+        assert res == 'select a from foo f'
 
     def test_strip_comments_invalid_option(self):
         sql = 'select-- foo\nfrom -- bar\nwhere'
