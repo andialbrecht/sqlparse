@@ -47,7 +47,7 @@ SQL_REGEX = {
         # see https://github.com/andialbrecht/sqlparse/pull/64
         # IN is special, it may be followed by a parenthesis, but
         # is never a function, see issue183
-        (r'(CASE|IN|VALUES|USING)\b', tokens.Keyword),
+        (r'(CASE|IN|VALUES|USING|FROM)\b', tokens.Keyword),
 
         (r'(@|##|#)[A-ZÀ-Ü]\w+', tokens.Name),
 
