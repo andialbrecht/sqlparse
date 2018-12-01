@@ -433,3 +433,24 @@ def test_get_real_name():
     assert len(stmts) == 1
     assert 'a' == stmts[0].get_real_name()
     assert 't' == stmts[0].get_alias()
+
+
+def test_parenthesis():
+    tokens = sqlparse.parse("(\n\n1\n\n)")[0].tokens[0].tokens
+    assert list(map(lambda t: t.ttype, tokens)) == [T.Punctuation,
+                                                    T.Newline,
+                                                    T.Newline,
+                                                    T.Number.Integer,
+                                                    T.Newline,
+                                                    T.Newline,
+                                                    T.Punctuation]
+    tokens = sqlparse.parse("(\n\n 1 \n\n)")[0].tokens[0].tokens
+    assert list(map(lambda t: t.ttype, tokens)) == [T.Punctuation,
+                                                    T.Newline,
+                                                    T.Newline,
+                                                    T.Whitespace,
+                                                    T.Number.Integer,
+                                                    T.Whitespace,
+                                                    T.Newline,
+                                                    T.Newline,
+                                                    T.Punctuation]
