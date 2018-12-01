@@ -433,3 +433,21 @@ def test_get_real_name():
     assert len(stmts) == 1
     assert 'a' == stmts[0].get_real_name()
     assert 't' == stmts[0].get_alias()
+
+
+def test_from_subquery():
+    # issue 446
+    s = u'from(select 1)'
+    stmts = sqlparse.parse(s)
+    assert len(stmts) == 1
+    assert len(stmts[0].tokens) == 2
+    assert stmts[0].tokens[0].value == 'from'
+    assert stmts[0].tokens[0].ttype == T.Keyword
+
+    s = u'from (select 1)'
+    stmts = sqlparse.parse(s)
+    assert len(stmts) == 1
+    assert len(stmts[0].tokens) == 3
+    assert stmts[0].tokens[0].value == 'from'
+    assert stmts[0].tokens[0].ttype == T.Keyword
+    assert stmts[0].tokens[1].ttype == T.Whitespace
