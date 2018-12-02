@@ -880,7 +880,7 @@ KEYWORDS_BIGQUERY = {
     'VAR_POP': tokens.Keyword,
     'VAR_SAMP': tokens.Keyword,
     'VARIANCE': tokens.Keyword,
-    # Numbering Function
+    # Numbering Functions
     'RANK': tokens.Keyword,
     'DENSE_RANK': tokens.Keyword,
     'PERCENT_RANK': tokens.Keyword,
@@ -925,14 +925,15 @@ KEYWORDS_BIGQUERY = {
     'LAG': tokens.Keyword,
     'PERCENTILE_CONT': tokens.Keyword,
     'PERCENTILE_DISC': tokens.Keyword,
-    # Hash function
+    # Hash functions
     'FARM_FINGERPRINT': tokens.Keyword,
     'MD5': tokens.Keyword,
     'SHA1': tokens.Keyword,
     'SHA256': tokens.Keyword,
     'SHA512': tokens.Keyword,
-    # Json Function
+    # Json Functions
     'JSON_EXTRACT': tokens.Keyword,
     'JSON_EXTRACT_SCALAR': tokens.Keyword,
     'TO_JSON_STRING': tokens.Keyword,
+    # Array functions
 }
