@@ -963,4 +963,11 @@ KEYWORDS_BIGQUERY = {
     'DATETIME_TRUNC': tokens.Keyword,
     'FORMAT_DATETIME': tokens.Keyword,
     'PARSE_DATETIME': tokens.Keyword,
+    # Time functions
+    'TIME_ADD': tokens.Keyword,
+    'TIME_SUB': tokens.Keyword,
+    'TIME_DIFF': tokens.Keyword,
+    'TIME_TRUNC': tokens.Keyword,
+    'FORMAT_TIME': tokens.Keyword,
+    'PARSE_TIME': tokens.Keyword,
 }
