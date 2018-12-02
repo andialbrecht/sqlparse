@@ -955,4 +955,12 @@ KEYWORDS_BIGQUERY = {
     'FORMAT_DATE': tokens.Keyword,
     'PARSE_DATE': tokens.Keyword,
     'UNIX_DATE': tokens.Keyword,
+    # DateTime functions
+    'CURRENT_DATETIME': tokens.Keyword,
+    'DATETIME_ADD': tokens.Keyword,
+    'DATETIME_SUB': tokens.Keyword,
+    'DATETIME_DIFF': tokens.Keyword,
+    'DATETIME_TRUNC': tokens.Keyword,
+    'FORMAT_DATETIME': tokens.Keyword,
+    'PARSE_DATETIME': tokens.Keyword,
 }
