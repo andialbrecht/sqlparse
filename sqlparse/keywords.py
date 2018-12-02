@@ -16,6 +16,7 @@ def is_keyword(value):
     return (KEYWORDS_COMMON.get(val) or
             KEYWORDS_ORACLE.get(val) or
             KEYWORDS_PLPGSQL.get(val) or
+            KEYWORDS_BIGQUERY.get(val) or
             KEYWORDS.get(val, tokens.Name)), value
 
 
@@ -845,4 +846,28 @@ KEYWORDS_PLPGSQL = {
     'FOR': tokens.Keyword,
     'IN': tokens.Keyword,
     'LOOP': tokens.Keyword,
+}
+
+# BigQuery Standard SQL Syntax
+KEYWORDS_BIGQUERY = {
+    # Type keywords not in other keywords
+    'INT64': tokens.Keyword,
+    'FLOAT64': tokens.Keyword,
+    'BOOL': tokens.Keyword,
+    'STRING': tokens.Keyword,
+    'DATETIME': tokens.Keyword,
+    'STRUCT': tokens.Keyword,
+    # Aggregate Functions
+    'ANY_VALUE': tokens.Keyword,
+    'ARRAY_AGG': tokens.Keyword,
+    'ARRAY_CONCAT_AGG': tokens.Keyword,
+    'BIT_AND': tokens.Keyword,
+    'BIT_OR': tokens.Keyword,
+    'BIT_XOR': tokens.Keyword,
+    'LOGICAL_AND': tokens.Keyword,
+    'LOGICAL_OR': tokens.Keyword,
+    'STRING_AGG': tokens.Keyword,
+    'UNBOUNDED': tokens.Keyword,
+    'PRECEDING': tokens.Keyword,
+    'FOLLOWING': tokens.Keyword,
 }
