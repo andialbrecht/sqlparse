@@ -880,4 +880,11 @@ KEYWORDS_BIGQUERY = {
     'VAR_POP': tokens.Keyword,
     'VAR_SAMP': tokens.Keyword,
     'VARIANCE': tokens.Keyword,
+    # Numbering Function
+    'RANK': tokens.Keyword,
+    'DENSE_RANK': tokens.Keyword,
+    'PERCENT_RANK': tokens.Keyword,
+    'CUME_DIST': tokens.Keyword,
+    'NTILE': tokens.Keyword,
+    'ROW_NUMBER': tokens.Keyword,
 }
