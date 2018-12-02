@@ -970,4 +970,17 @@ KEYWORDS_BIGQUERY = {
     'TIME_TRUNC': tokens.Keyword,
     'FORMAT_TIME': tokens.Keyword,
     'PARSE_TIME': tokens.Keyword,
+    # Timestamp functions
+    'TIMESTAMP_ADD': tokens.Keyword,
+    'TIMESTAMP_SUB': tokens.Keyword,
+    'TIMESTAMP_DIFF': tokens.Keyword,
+    'TIMESTAMP_TRUNC': tokens.Keyword,
+    'FORMAT_TIMESTAMP': tokens.Keyword,
+    'PARSE_TIMESTAMP': tokens.Keyword,
+    'TIMESTAMP_SECONDS': tokens.Keyword,
+    'TIMESTAMP_MILLIS': tokens.Keyword,
+    'TIMESTAMP_MICROS': tokens.Keyword,
+    'UNIX_SECONDS': tokens.Keyword,
+    'UNIX_MILLIS': tokens.Keyword,
+    'UNIX_MICROS': tokens.Keyword,
 }
