@@ -925,4 +925,10 @@ KEYWORDS_BIGQUERY = {
     'LAG': tokens.Keyword,
     'PERCENTILE_CONT': tokens.Keyword,
     'PERCENTILE_DISC': tokens.Keyword,
+    # Hash function
+    'FARM_FINGERPRINT': tokens.Keyword,
+    'MD5': tokens.Keyword,
+    'SHA1': tokens.Keyword,
+    'SHA256': tokens.Keyword,
+    'SHA512': tokens.Keyword,
 }
