@@ -931,4 +931,8 @@ KEYWORDS_BIGQUERY = {
     'SHA1': tokens.Keyword,
     'SHA256': tokens.Keyword,
     'SHA512': tokens.Keyword,
+    # Json Function
+    'JSON_EXTRACT': tokens.Keyword,
+    'JSON_EXTRACT_SCALAR': tokens.Keyword,
+    'TO_JSON_STRING': tokens.Keyword,
 }
