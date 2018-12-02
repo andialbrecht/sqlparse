@@ -917,4 +917,12 @@ KEYWORDS_BIGQUERY = {
     'SINH': tokens.Keyword,
     'ASIN': tokens.Keyword,
     'ASINH': tokens.Keyword,
+    # Navigation Functions
+    'FIRST_VALUE': tokens.Keyword,
+    'LAST_VALUE': tokens.Keyword,
+    'NTH_VALUE': tokens.Keyword,
+    'LEAD': tokens.Keyword,
+    'LAG': tokens.Keyword,
+    'PERCENTILE_CONT': tokens.Keyword,
+    'PERCENTILE_DISC': tokens.Keyword,
 }
