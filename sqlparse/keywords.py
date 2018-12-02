@@ -870,4 +870,14 @@ KEYWORDS_BIGQUERY = {
     'UNBOUNDED': tokens.Keyword,
     'PRECEDING': tokens.Keyword,
     'FOLLOWING': tokens.Keyword,
+    # Statistical Aggregate Functions
+    'CORR': tokens.Keyword,
+    'COVAR_POP': tokens.Keyword,
+    'COVAR_SAMP': tokens.Keyword,
+    'STDDEV_POP': tokens.Keyword,
+    'STDDEV_SAMP': tokens.Keyword,
+    'STDDEV': tokens.Keyword,
+    'VAR_POP': tokens.Keyword,
+    'VAR_SAMP': tokens.Keyword,
+    'VARIANCE': tokens.Keyword,
 }
