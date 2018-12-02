@@ -946,4 +946,13 @@ KEYWORDS_BIGQUERY = {
     'ARRAY_REVERSE': tokens.Keyword,
     'SAFE_OFFSET': tokens.Keyword,
     'SAFE_ORDINAL': tokens.Keyword,
+    # Date functions
+    'DATE_ADD': tokens.Keyword,
+    'DATE_SUB': tokens.Keyword,
+    'DATE_DIFF': tokens.Keyword,
+    'DATE_TRUNC': tokens.Keyword,
+    'DATE_FROM_UNIX_DATE': tokens.Keyword,
+    'FORMAT_DATE': tokens.Keyword,
+    'PARSE_DATE': tokens.Keyword,
+    'UNIX_DATE': tokens.Keyword,
 }
