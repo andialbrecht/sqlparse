@@ -936,4 +936,14 @@ KEYWORDS_BIGQUERY = {
     'JSON_EXTRACT_SCALAR': tokens.Keyword,
     'TO_JSON_STRING': tokens.Keyword,
     # Array functions
+    'ARRAY_CONCAT': tokens.Keyword,
+    'ARRAY_LENGTH': tokens.Keyword,
+    'ARRAY_TO_STRING': tokens.Keyword,
+    'GENERATE_ARRAY': tokens.Keyword,
+    'GENERATE_DATE_ARRAY': tokens.Keyword,
+    'GENERATE_TIMESTAMP_ARRAY': tokens.Keyword,
+    'ORDINAL': tokens.Keyword,
+    'ARRAY_REVERSE': tokens.Keyword,
+    'SAFE_OFFSET': tokens.Keyword,
+    'SAFE_ORDINAL': tokens.Keyword,
 }
