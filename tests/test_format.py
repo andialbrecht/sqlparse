@@ -387,22 +387,38 @@ class TestFormatReindent(object):
         assert f(s) == '\n'.join([
             'select *',
             'from foo',
-            'join bar on 1 = 2'])
+            'join bar',
+            'on 1 = 2'])
         s = 'select * from foo inner join bar on 1 = 2'
         assert f(s) == '\n'.join([
             'select *',
             'from foo',
-            'inner join bar on 1 = 2'])
+            'inner join bar',
+            'on 1 = 2'])
         s = 'select * from foo left outer join bar on 1 = 2'
         assert f(s) == '\n'.join([
             'select *',
             'from foo',
-            'left outer join bar on 1 = 2'])
+            'left outer join bar',
+            'on 1 = 2'])
         s = 'select * from foo straight_join bar on 1 = 2'
         assert f(s) == '\n'.join([
             'select *',
             'from foo',
-            'straight_join bar on 1 = 2'])
+            'straight_join bar',
+            'on 1 = 2'])
+        s = 'select * from a inner join ' \
+            '(select * from b where c) as anon ' \
+            'on anon.d = a.d and a.e > 1'
+        assert f(s) == '\n'.join([
+            'select *',
+            'from a',
+            'inner join',
+            '  (select *',
+            '   from b',
+            '   where c) as anon',
+            'on anon.d = a.d',
+            'and a.e > 1'])
 
     def test_identifier_list(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)
