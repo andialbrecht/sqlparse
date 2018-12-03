@@ -451,3 +451,24 @@ def test_from_subquery():
     assert stmts[0].tokens[0].value == 'from'
     assert stmts[0].tokens[0].ttype == T.Keyword
     assert stmts[0].tokens[1].ttype == T.Whitespace
+
+
+def test_parenthesis():
+    tokens = sqlparse.parse("(\n\n1\n\n)")[0].tokens[0].tokens
+    assert list(map(lambda t: t.ttype, tokens)) == [T.Punctuation,
+                                                    T.Newline,
+                                                    T.Newline,
+                                                    T.Number.Integer,
+                                                    T.Newline,
+                                                    T.Newline,
+                                                    T.Punctuation]
+    tokens = sqlparse.parse("(\n\n 1 \n\n)")[0].tokens[0].tokens
+    assert list(map(lambda t: t.ttype, tokens)) == [T.Punctuation,
+                                                    T.Newline,
+                                                    T.Newline,
+                                                    T.Whitespace,
+                                                    T.Number.Integer,
+                                                    T.Whitespace,
+                                                    T.Newline,
+                                                    T.Newline,
+                                                    T.Punctuation]

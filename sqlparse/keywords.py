@@ -28,7 +28,7 @@ SQL_REGEX = {
         (r'/\*[\s\S]*?\*/', tokens.Comment.Multiline),
 
         (r'(\r\n|\r|\n)', tokens.Newline),
-        (r'\s+', tokens.Whitespace),
+        (r'\s+?', tokens.Whitespace),
 
         (r':=', tokens.Assignment),
         (r'::', tokens.Punctuation),
