@@ -133,7 +133,7 @@ class ReindentFilter(object):
             first = next(identifiers.pop(0).flatten())
             num_offset = 1 if self.char == '\t' else self._get_offset(first)
 
-        if not tlist.within(sql.Function):
+        if not tlist.within(sql.Function) and not tlist.within(sql.Values):
             with offset(self, num_offset):
                 position = 0
                 for token in identifiers:
@@ -205,6 +205,23 @@ class ReindentFilter(object):
             end_idx, end = tlist.token_next_by(m=sql.Case.M_CLOSE)
             if end_idx is not None:
                 tlist.insert_before(end_idx, self.nl())
+
+    def _process_values(self, tlist):
+        tlist.insert_before(0, self.nl())
+        tidx, token = tlist.token_next_by(i=sql.Parenthesis)
+        first_token = token
+        while token:
+            ptidx, ptoken = tlist.token_next_by(m=(T.Punctuation, ','),
+                                                idx=tidx)
+            if ptoken:
+                if self.comma_first:
+                    adjust = -2
+                    offset = self._get_offset(first_token) + adjust
+                    tlist.insert_before(ptoken, self.nl(offset))
+                else:
+                    tlist.insert_after(ptoken,
+                                       self.nl(self._get_offset(token)))
+            tidx, token = tlist.token_next_by(i=sql.Parenthesis, idx=tidx)
 
     def _process_default(self, tlist, stmts=True):
         self._split_statements(tlist) if stmts else None

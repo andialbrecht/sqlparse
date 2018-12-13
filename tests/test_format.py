@@ -541,6 +541,49 @@ class TestFormatReindent(object):
             '       nvl(1)',
             'from dual'])
 
+    def test_insert_values(self):
+        # issue 329
+        f = lambda sql: sqlparse.format(sql, reindent=True)
+        s = 'insert into foo values (1, 2)'
+        assert f(s) == '\n'.join([
+            'insert into foo',
+            'values (1, 2)'])
+
+        s = 'insert into foo values (1, 2), (3, 4), (5, 6)'
+        assert f(s) == '\n'.join([
+            'insert into foo',
+            'values (1, 2),',
+            '       (3, 4),',
+            '       (5, 6)'])
+
+        s = 'insert into foo(a, b) values (1, 2), (3, 4), (5, 6)'
+        assert f(s) == '\n'.join([
+            'insert into foo(a, b)',
+            'values (1, 2),',
+            '       (3, 4),',
+            '       (5, 6)'])
+
+        f = lambda sql: sqlparse.format(sql, reindent=True,
+                                        comma_first=True)
+        s = 'insert into foo values (1, 2)'
+        assert f(s) == '\n'.join([
+            'insert into foo',
+            'values (1, 2)'])
+
+        s = 'insert into foo values (1, 2), (3, 4), (5, 6)'
+        assert f(s) == '\n'.join([
+            'insert into foo',
+            'values (1, 2)',
+            '     , (3, 4)',
+            '     , (5, 6)'])
+
+        s = 'insert into foo(a, b) values (1, 2), (3, 4), (5, 6)'
+        assert f(s) == '\n'.join([
+            'insert into foo(a, b)',
+            'values (1, 2)',
+            '     , (3, 4)',
+            '     , (5, 6)'])
+
 
 class TestOutputFormat(object):
     def test_python(self):

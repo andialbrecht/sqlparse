@@ -49,10 +49,13 @@ def test_grouping_identifiers():
     assert str(parsed) == s
     assert isinstance(parsed.tokens[-1].tokens[3], sql.Identifier)
 
-    s = "INSERT INTO `test` VALUES('foo', 'bar');"
-    parsed = sqlparse.parse(s)[0]
-    types = [l.ttype for l in parsed.tokens if not l.is_whitespace]
-    assert types == [T.DML, T.Keyword, None, T.Keyword, None, T.Punctuation]
+    for s in ["INSERT INTO `test` VALUES('foo', 'bar');",
+              "INSERT INTO `test` VALUES(1, 2), (3, 4), (5, 6);",
+              "INSERT INTO `test(a, b)` VALUES(1, 2), (3, 4), (5, 6);"]:
+        parsed = sqlparse.parse(s)[0]
+        types = [l.ttype for l in parsed.tokens if not l.is_whitespace]
+        assert types == [T.DML, T.Keyword, None, None, T.Punctuation]
+        assert isinstance(parsed.tokens[6], sql.Values)
 
     s = "select 1.0*(a+b) as col, sum(c)/sum(d) from myschema.mytable"
     parsed = sqlparse.parse(s)[0]

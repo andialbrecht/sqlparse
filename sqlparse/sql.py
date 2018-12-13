@@ -615,3 +615,7 @@ class Begin(TokenList):
 
 class Operation(TokenList):
     """Grouping of operations"""
+
+
+class Values(TokenList):
+    """Grouping of values"""
