@@ -27,7 +27,6 @@ if PY3:
     def unicode_compatible(cls):
         return cls
 
-    bytes_type = bytes
     text_type = str
     string_types = (str,)
     from io import StringIO
@@ -40,7 +39,6 @@ elif PY2:
         cls.__str__ = lambda x: x.__unicode__().encode('utf-8')
         return cls
 
-    bytes_type = str
     text_type = unicode
     string_types = (str, unicode,)
     from StringIO import StringIO
