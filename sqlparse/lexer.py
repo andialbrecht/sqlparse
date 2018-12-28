@@ -15,7 +15,7 @@
 
 from sqlparse import tokens
 from sqlparse.keywords import SQL_REGEX
-from sqlparse.compat import bytes_type, text_type, file_types
+from sqlparse.compat import text_type, file_types
 from sqlparse.utils import consume
 
 
@@ -43,7 +43,7 @@ class Lexer(object):
 
         if isinstance(text, text_type):
             pass
-        elif isinstance(text, bytes_type):
+        elif isinstance(text, bytes):
             if encoding:
                 text = text.decode(encoding)
             else:
