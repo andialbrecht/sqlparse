@@ -10,7 +10,8 @@ python:
   - "pypy3"
 
 install:
-  - pip install pytest pytest-cov codecov
+  - pip install -Uq pytest pytest-cov codecov
+  - pytest --version
 
 script:
   - pytest --cov=sqlparse
