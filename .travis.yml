@@ -4,7 +4,7 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
-  # - "3.7" # see https://github.com/travis-ci/travis-ci/issues/9815
+  - "3.7"
   - "nightly"
   - "pypy"
   - "pypy3"
