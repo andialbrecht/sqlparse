@@ -78,6 +78,8 @@ SQL_REGEX = {
         (r'UNION\s+ALL\b', tokens.Keyword),
         (r'CREATE(\s+OR\s+REPLACE)?\b', tokens.Keyword.DDL),
         (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
+        (r'GROUP\s+BY\b', tokens.Keyword),
+        (r'ORDER\s+BY\b', tokens.Keyword),
 
         (r'[0-9_A-ZÀ-Ü][_$#\w]*', is_keyword),
 

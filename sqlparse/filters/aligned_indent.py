@@ -15,11 +15,12 @@ class AlignedIndentFilter(object):
     join_words = (r'((LEFT\s+|RIGHT\s+|FULL\s+)?'
                   r'(INNER\s+|OUTER\s+|STRAIGHT\s+)?|'
                   r'(CROSS\s+|NATURAL\s+)?)?JOIN\b')
+    by_words = ('GROUP BY', 'ORDER BY')
     split_words = ('FROM',
                    join_words, 'ON',
                    'WHERE', 'AND', 'OR',
-                   'GROUP', 'HAVING', 'LIMIT',
-                   'ORDER', 'UNION', 'VALUES',
+                   'GROUP BY', 'HAVING', 'LIMIT',
+                   'ORDER BY', 'UNION', 'VALUES',
                    'SET', 'BETWEEN', 'EXCEPT')
 
     def __init__(self, char=' ', n='\n'):
@@ -101,8 +102,12 @@ class AlignedIndentFilter(object):
     def _split_kwds(self, tlist):
         tidx, token = self._next_token(tlist)
         while token:
-            # joins are special case. only consider the first word as aligner
-            if token.match(T.Keyword, self.join_words, regex=True):
+            # joins, group/order by are special case. only consider the first
+            # word as aligner
+            if (
+                token.match(T.Keyword, self.join_words, regex=True) or
+                token.match(T.Keyword, ('GROUP BY', 'ORDER BY'))
+            ):
                 token_indent = token.value.split()[0]
             else:
                 token_indent = text_type(token)
@@ -117,7 +122,9 @@ class AlignedIndentFilter(object):
             idx = tlist.token_index(sgroup)
             pidx, prev_ = tlist.token_prev(idx)
             # HACK: make "group/order by" work. Longer than max_len.
-            offset_ = 3 if (prev_ and prev_.match(T.Keyword, 'BY')) else 0
+            offset_ = 3 if (
+                prev_ and prev_.match(T.Keyword, ('GROUP BY', 'ORDER BY'))
+            ) else 0
             with offset(self, offset_):
                 self._process(sgroup)
 
