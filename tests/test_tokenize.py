@@ -183,3 +183,15 @@ def test_parse_identifiers(s):
     token = p.tokens[0]
     assert str(token) == s
     assert isinstance(token, sql.Identifier)
+
+
+def test_parse_group_by():
+    p = sqlparse.parse('GROUP BY')[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype is T.Keyword
+
+
+def test_parse_order_by():
+    p = sqlparse.parse('ORDER BY')[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype is T.Keyword
