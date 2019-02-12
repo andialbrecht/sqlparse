@@ -289,6 +289,7 @@ KEYWORDS = {
     'HAVING': tokens.Keyword,
     'HIERARCHY': tokens.Keyword,
     'HOLD': tokens.Keyword,
+    'HOUR': tokens.Keyword,
     'HOST': tokens.Keyword,
 
     'IDENTIFIED': tokens.Keyword,
@@ -414,6 +415,8 @@ KEYWORDS = {
     'OVERLAY': tokens.Keyword,
     'OVERRIDING': tokens.Keyword,
     'OWNER': tokens.Keyword,
+
+    'QUARTER': tokens.Keyword,
 
     'PAD': tokens.Keyword,
     'PARAMETER': tokens.Keyword,
@@ -604,6 +607,7 @@ KEYWORDS = {
     'VIEW': tokens.Keyword,
     'VOLATILE': tokens.Keyword,
 
+    'WEEK': tokens.Keyword,
     'WHENEVER': tokens.Keyword,
     'WITH': tokens.Keyword.CTE,
     'WITHOUT': tokens.Keyword,
