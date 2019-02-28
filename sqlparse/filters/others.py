@@ -76,9 +76,9 @@ class StripWhitespaceFilter(object):
         return self._stripws_default(tlist)
 
     def _stripws_parenthesis(self, tlist):
-        if tlist.tokens[1].is_whitespace:
+        while tlist.tokens[1].is_whitespace:
             tlist.tokens.pop(1)
-        if tlist.tokens[-2].is_whitespace:
+        while tlist.tokens[-2].is_whitespace:
             tlist.tokens.pop(-2)
         self._stripws_default(tlist)
 
