@@ -364,9 +364,9 @@ class TestFormatReindent(object):
             '   from foo);'])
         assert f("select f(1)") == 'select f(1)'
         assert f("select f( 1 )") == 'select f(1)'
-        assert f("select f(\n\n\n1\n\n\n)") == 'select f( 1 )'
-        assert f("select f(\n\n\n 1 \n\n\n)") == 'select f( 1 )'
-        assert f("select f(\n\n\n  1  \n\n\n)") == 'select f( 1 )'
+        assert f("select f(\n\n\n1\n\n\n)") == 'select f(1)'
+        assert f("select f(\n\n\n 1 \n\n\n)") == 'select f(1)'
+        assert f("select f(\n\n\n  1  \n\n\n)") == 'select f(1)'
 
     def test_where(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)
