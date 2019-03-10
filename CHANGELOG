@@ -21,7 +21,9 @@ Bug Fixes
 * Wrap function params when wrap_after is set (pr398, by soloman1124).
 * Fix parsing of "WHEN name" clauses (pr418, by andrew deryabin).
 * Add missing EXPLAIN keyword (issue421).
-* Fix issue with strip_comments causing a syntax error (fixes #425, by fredyw).
+* Fix issue with strip_comments causing a syntax error (issue425, by fredyw).
+* Fix formatting on INSERT which caused staircase effect on values (issue329,
+  by fredyw).
 
 
 Release 0.2.4 (Sep 27, 2017)
