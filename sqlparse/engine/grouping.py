@@ -225,8 +225,8 @@ def group_identifier_list(tlist):
     m_role = T.Keyword, ('null', 'role')
     sqlcls = (sql.Function, sql.Case, sql.Identifier, sql.Comparison,
               sql.IdentifierList, sql.Operation)
-    ttypes = (T_NUMERICAL + T_STRING + T_NAME +
-              (T.Keyword, T.Comment, T.Wildcard))
+    ttypes = (T_NUMERICAL + T_STRING + T_NAME
+              + (T.Keyword, T.Comment, T.Wildcard))
 
     def match(token):
         return token.match(T.Punctuation, ',')

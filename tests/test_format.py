@@ -106,8 +106,8 @@ class TestFormat(object):
         assert f(s1) == "SELECT some_column LIKE 'value\r'"
         assert f(s2) == "SELECT some_column LIKE 'value\r'\nWHERE id = 1\n"
         assert f(s3) == "SELECT some_column LIKE 'value\\'\r' WHERE id = 1\n"
-        assert (f(s4) ==
-                "SELECT some_column LIKE 'value\\\\\\'\r' WHERE id = 1\n")
+        assert (f(s4)
+                == "SELECT some_column LIKE 'value\\\\\\'\r' WHERE id = 1\n")
 
 
 class TestFormatReindentAligned(object):

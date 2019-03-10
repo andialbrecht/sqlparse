@@ -239,8 +239,9 @@ class TokenList(Token):
         ignored too.
         """
         # this on is inconsistent, using Comment instead of T.Comment...
-        funcs = lambda tk: not ((skip_ws and tk.is_whitespace) or
-                                (skip_cm and imt(tk, t=T.Comment, i=Comment)))
+        funcs = lambda tk: not ((skip_ws and tk.is_whitespace)
+                                or (skip_cm and imt(tk,
+                                                    t=T.Comment, i=Comment)))
         return self._token_matching(funcs)[1]
 
     def token_next_by(self, i=None, m=None, t=None, idx=-1, end=None):
@@ -276,8 +277,9 @@ class TokenList(Token):
         if idx is None:
             return None, None
         idx += 1  # alot of code usage current pre-compensates for this
-        funcs = lambda tk: not ((skip_ws and tk.is_whitespace) or
-                                (skip_cm and imt(tk, t=T.Comment, i=Comment)))
+        funcs = lambda tk: not ((skip_ws and tk.is_whitespace)
+                                or (skip_cm and imt(tk,
+                                                    t=T.Comment, i=Comment)))
         return self._token_matching(funcs, idx, reverse=_reverse)
 
     def token_index(self, token, start=0):

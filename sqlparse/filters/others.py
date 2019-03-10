@@ -23,9 +23,9 @@ class StripCommentsFilter(object):
             nidx, next_ = tlist.token_next(tidx, skip_ws=False)
             # Replace by whitespace if prev and next exist and if they're not
             # whitespaces. This doesn't apply if prev or next is a parenthesis.
-            if (prev_ is None or next_ is None or
-                    prev_.is_whitespace or prev_.match(T.Punctuation, '(') or
-                    next_.is_whitespace or next_.match(T.Punctuation, ')')):
+            if (prev_ is None or next_ is None
+                    or prev_.is_whitespace or prev_.match(T.Punctuation, '(')
+                    or next_.is_whitespace or next_.match(T.Punctuation, ')')):
                 tlist.tokens.remove(token)
             else:
                 tlist.tokens[tidx] = sql.Token(T.Whitespace, ' ')
