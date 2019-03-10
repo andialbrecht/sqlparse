@@ -11,6 +11,7 @@ Enhancements
 * New formatting option "--indent_columns" (pr393, by digitalarbeiter).
 * Add UPSERT keyword (issue408).
 * Strip multiple whitespace within parentheses (issue473, by john-bodley).
+* Support double slash (//) comments (issue456, by theianrobertson).
 
 Bug Fixes
 
