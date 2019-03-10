@@ -12,6 +12,7 @@ Enhancements
 * Add UPSERT keyword (issue408).
 * Strip multiple whitespace within parentheses (issue473, by john-bodley).
 * Support double slash (//) comments (issue456, by theianrobertson).
+* Support for Calcite temporal keywords (pr468, by john-bodley).
 
 Bug Fixes
 
@@ -26,6 +27,11 @@ Bug Fixes
 * Fix issue with strip_comments causing a syntax error (issue425, by fredyw).
 * Fix formatting on INSERT which caused staircase effect on values (issue329,
   by fredyw).
+
+Internal Changes
+
+* Unify handling of GROUP BY/ORDER BY (pr457, by john-bodley).
+* Remove unnecessary compat shim for bytes (pr453, by jdufresne).
 
 
 Release 0.2.4 (Sep 27, 2017)
