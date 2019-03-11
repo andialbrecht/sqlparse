@@ -625,3 +625,7 @@ class Operation(TokenList):
 
 class Values(TokenList):
     """Grouping of values"""
+
+
+class Command(TokenList):
+    """Grouping of CLI commands."""

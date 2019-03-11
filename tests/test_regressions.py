@@ -366,3 +366,10 @@ def test_issue322_concurrently_is_keyword():
 def test_issue359_index_error_assignments(s):
     sqlparse.parse(s)
     sqlparse.format(s, strip_comments=True)
+
+
+def test_issue469_copy_as_psql_command():
+    formatted = sqlparse.format(
+        '\\copy select * from foo',
+        keyword_case='upper', identifier_case='capitalize')
+    assert formatted == '\\copy SELECT * FROM Foo'

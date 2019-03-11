@@ -27,6 +27,7 @@ Bug Fixes
 * Fix issue with strip_comments causing a syntax error (issue425, by fredyw).
 * Fix formatting on INSERT which caused staircase effect on values (issue329,
   by fredyw).
+* Avoid formatting of psql commands (issue469).
 
 Internal Changes
 

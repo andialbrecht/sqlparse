@@ -195,3 +195,9 @@ def test_parse_order_by():
     p = sqlparse.parse('ORDER BY')[0]
     assert len(p.tokens) == 1
     assert p.tokens[0].ttype is T.Keyword
+
+
+def test_cli_commands():
+    p = sqlparse.parse('\\copy')[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype == T.Command

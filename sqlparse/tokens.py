@@ -55,6 +55,7 @@ Assignment = Token.Assignment
 
 # Generic types for non-source code
 Generic = Token.Generic
+Command = Generic.Command
 
 # String and some others are not direct children of Token.
 # alias them:
@@ -66,4 +67,3 @@ Token.Number = Number
 DML = Keyword.DML
 DDL = Keyword.DDL
 CTE = Keyword.CTE
-Command = Keyword.Command
