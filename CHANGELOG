@@ -1,7 +1,9 @@
 Development Version
 -------------------
 
-Nothing yet.
+Enhancements
+
+* Add HQL keywords (pr475, by matwalk).
 
 
 Release 0.3.0 (Mar 11, 2019)
