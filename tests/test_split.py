@@ -52,22 +52,6 @@ def test_split_dashcomments_eol(s):
     assert len(stmts) == 1
 
 
-def test_split_slashcomments(load_file):
-    sql = load_file('slashcomment.sql')
-    stmts = sqlparse.parse(sql)
-    assert len(stmts) == 3
-    assert ''.join(str(q) for q in stmts) == sql
-
-
-@pytest.mark.parametrize('s', ['select foo; // comment\n',
-                               'select foo; // comment\r',
-                               'select foo; // comment\r\n',
-                               'select foo; // comment'])
-def test_split_slashcomments_eol(s):
-    stmts = sqlparse.parse(s)
-    assert len(stmts) == 1
-
-
 def test_split_begintag(load_file):
     sql = load_file('begintag.sql')
     stmts = sqlparse.parse(sql)
