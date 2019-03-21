@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Copyright (C) 2009-2018 the sqlparse authors and contributors
+# <see AUTHORS file>
+#
+# This example is part of python-sqlparse and is released under
+# the BSD License: https://opensource.org/licenses/BSD-3-Clause
+#
+# This example illustrates how to extract table names from nested
+# all SQL statements.
+#
+# See:
+# https://groups.google.com/forum/#!forum/sqlparse/browse_thread/thread/b0bd9a022e9d4895
+
+import sqlparse
+from sqlparse.sql import IdentifierList, Identifier
+from sqlparse.tokens import Keyword, DML
+
+
+
+def is_subsql(parsed):
+    if not parsed.is_group:
+        return False
+    for item in parsed.tokens:
+#	print item.value.upper()
+        if (item.ttype is Keyword or ((item.ttype is DML  and item.value.upper() == 'UPDATE') or ( item.ttype == Keyword.Order  and item.value.upper() == 'DESC' ))  ) and (item.value.upper() == 'SELECT' or item.value.upper() == 'DELETE' or item.value.upper() == 'ALTER' or item.value.upper() == 'CREATE' or item.value.upper() == 'DROP' or item.value.upper() == 'UPDATE' or item.value.upper() == 'INSERT' or item.value.upper() == 'DESC' or item.value.upper() == 'DESCRIBE' ) :
+            return True
+    return False
+
+
+def extract_keyword_before_tbl_identifier_part(parsed):
+    from_seen = False
+    for item in parsed.tokens:
+#	print item.value,item.ttype,(item.ttype == Keyword.Order),(item.ttype is Keyword),(item.ttype is DML)
+#       debug info for all 
+        if from_seen:
+            if is_subsql(item):#for select and delete extract FROM part
+                for x in extract_keyword_before_tbl_identifier_part(item):
+                    yield x
+            elif item.ttype is Keyword:
+                raise StopIteration
+            else:
+                yield item
+        elif (item.ttype is Keyword or((item.ttype is DML  and item.value.upper() == 'UPDATE') or ( item.ttype == Keyword.Order and item.value.upper() == 'DESC')) ) and (item.value.upper() == 'FROM' or item.value.upper() == 'INTO' or item.value.upper() == 'UPDATE' or item.value.upper() == 'TABLE' or item.value.upper() == 'DESC' or item.value.upper() == 'DESCRIBE' or item.value.upper() =='VIEW'):
+            from_seen = True
+
+
+def extract_table_identifiers(token_stream):
+    try:
+	    for item in token_stream:
+	        if isinstance(item, IdentifierList):
+	            for identifier in item.get_identifiers():
+	                yield identifier.get_name()
+	        elif isinstance(item, Identifier):
+	            yield item.get_name()
+	        # It's a bug to check for Keyword here, but in the example
+	        # above some tables names are identified as keywords...
+	        elif item.ttype is Keyword:
+	            yield item.value
+    except:
+	pass
+
+
+def extract_tables(sql):
+#    print sql
+    stream = extract_keyword_before_tbl_identifier_part(sqlparse.parse(sql)[0])
+    return list(extract_table_identifiers(stream))
+
+
+if __name__ == '__main__':
+    sql = """
+    select K.a,K.b from (select H.b from (select G.c from (select F.d from
+    (select E.e from A, B, C, D, E), F), G), H), I, J, K order by 1,2;
+    """
+
+    tables = ', '.join(extract_tables(sql))
+    print('Tables: {0}'.format(tables))
