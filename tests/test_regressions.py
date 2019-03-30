@@ -373,3 +373,20 @@ def test_issue469_copy_as_psql_command():
         '\\copy select * from foo',
         keyword_case='upper', identifier_case='capitalize')
     assert formatted == '\\copy SELECT * FROM Foo'
+
+
+@pytest.mark.xfail(reason='Needs to be fixed')
+def test_issue484_comments_and_newlines():
+    formatted = sqlparse.format('\n'.join([
+        'Create table myTable',
+        '(',
+        '  myId TINYINT NOT NULL, --my special comment',
+        '  myName VARCHAR2(100) NOT NULL',
+        ')']),
+        strip_comments=True)
+    assert formatted == ('\n'.join([
+        'Create table myTable',
+        '(',
+        '  myId TINYINT NOT NULL,',
+        '  myName VARCHAR2(100) NOT NULL',
+        ')']))
