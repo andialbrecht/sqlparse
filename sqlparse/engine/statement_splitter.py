@@ -36,7 +36,7 @@ class StatementSplitter(object):
         elif ttype not in T.Keyword: # if normal token return
             return 0
 
-        # Everything after here is ttype = T.Keyword or ttype = T.
+        # Everything after here is ttype = T.Keyword
         # Also to note, once entered an If statement you are done and basically
         # returning
         unified = value.upper()
