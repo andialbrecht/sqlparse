@@ -19,6 +19,7 @@ class StatementSplitter(object):
         """Set the filter attributes to its default values"""
         self._in_declare = False
         self._is_create = False
+        self._parenthesis_depth = 0
         self._begin_depth = 0
 
         self.consume_ws = False
@@ -27,14 +28,16 @@ class StatementSplitter(object):
 
     def _change_splitlevel(self, ttype, value):
         """Get the new split level (increase, decrease or remain equal)"""
-        # ANSI
-        # if normal token return
-        # wouldn't parenthesis increase/decrease a level?
-        # no, inside a parenthesis can't start new statement
-        if ttype not in T.Keyword:
+
+        # parenthesis increase/decrease a level
+        if ttype is T.Punctuation and value == '(':
+            return 1
+        elif ttype is T.Punctuation and value == ')':
+            return -1
+        elif ttype not in T.Keyword: # if normal token return
             return 0
 
-        # Everything after here is ttype = T.Keyword
+        # Everything after here is ttype = T.Keyword or ttype = T.
         # Also to note, once entered an If statement you are done and basically
         # returning
         unified = value.upper()
