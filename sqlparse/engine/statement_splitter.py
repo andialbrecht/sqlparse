@@ -19,7 +19,6 @@ class StatementSplitter(object):
         """Set the filter attributes to its default values"""
         self._in_declare = False
         self._is_create = False
-        self._parenthesis_depth = 0
         self._begin_depth = 0
 
         self.consume_ws = False
