@@ -5,6 +5,11 @@ Enhancements
 
 * Add HQL keywords (pr475, by matwalk).
 
+Bug Fixes
+
+* Fix splitting of SQL with multiple statements inside
+  parentheses (issue485, pr486 by win39).
+
 
 Release 0.3.0 (Mar 11, 2019)
 ----------------------------

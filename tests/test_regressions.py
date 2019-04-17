@@ -390,3 +390,13 @@ def test_issue484_comments_and_newlines():
         '  myId TINYINT NOT NULL,',
         '  myName VARCHAR2(100) NOT NULL',
         ')']))
+
+
+def test_issue485_split_multi():
+    p_sql = '''CREATE OR REPLACE RULE ruled_tab_2rules AS ON INSERT
+TO public.ruled_tab
+DO instead (
+select 1;
+select 2;
+);'''
+    assert len(sqlparse.split(p_sql)) == 1
