@@ -9,6 +9,7 @@ Bug Fixes
 
 * Fix splitting of SQL with multiple statements inside
   parentheses (issue485, pr486 by win39).
+* Correctly identify NULLS FIRST / NULLS LAST as keywords (issue487).
 
 
 Release 0.3.0 (Mar 11, 2019)

@@ -171,6 +171,13 @@ def test_parse_endifloop(s):
     assert p.tokens[0].ttype is T.Keyword
 
 
+@pytest.mark.parametrize('s', ['NULLS FIRST', 'NULLS LAST'])
+def test_parse_nulls(s):  # issue487
+    p = sqlparse.parse(s)[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype is T.Keyword
+
+
 @pytest.mark.parametrize('s', [
     'foo',
     'Foo',
