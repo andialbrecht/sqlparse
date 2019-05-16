@@ -85,7 +85,7 @@ SQL_REGEX = {
         (r'GROUP\s+BY\b', tokens.Keyword),
         (r'ORDER\s+BY\b', tokens.Keyword),
         (r'(LATERAL\s+VIEW\s+)(EXPLODE|INLINE|PARSE_URL_TUPLE|POSEXPLODE|STACK)\b', tokens.Keyword),
-
+        (r"(AT|WITH')\s+TIME\s+ZONE\s+'[^']+'", tokens.Keyword.TZCast),
         (r'[0-9_A-ZÀ-Ü][_$#\w]*', is_keyword),
 
         (r'[;:()\[\],\.]', tokens.Punctuation),

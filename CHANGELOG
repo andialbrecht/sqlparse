@@ -4,6 +4,7 @@ Development Version
 Enhancements
 
 * Add HQL keywords (pr475, by matwalk).
+* Add support for time zone casts (issue489).
 
 Bug Fixes
 

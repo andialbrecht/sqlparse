@@ -88,6 +88,19 @@ def group_typecasts(tlist):
     _group(tlist, sql.Identifier, match, valid_prev, valid_next, post)
 
 
+def group_tzcasts(tlist):
+    def match(token):
+        return token.ttype == T.Keyword.TZCast
+
+    def valid(token):
+        return token is not None
+
+    def post(tlist, pidx, tidx, nidx):
+        return pidx, nidx
+
+    _group(tlist, sql.Identifier, match, valid, valid, post)
+
+
 def group_period(tlist):
     def match(token):
         return token.match(T.Punctuation, '.')
@@ -358,6 +371,7 @@ def group(stmt):
         group_identifier,
         group_order,
         group_typecasts,
+        group_tzcasts,
         group_operator,
         group_comparison,
         group_as,

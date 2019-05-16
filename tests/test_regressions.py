@@ -400,3 +400,9 @@ select 1;
 select 2;
 );'''
     assert len(sqlparse.split(p_sql)) == 1
+
+
+def test_issue489_tzcasts():
+    p = sqlparse.parse('select bar at time zone \'UTC\' as foo')[0]
+    assert p.tokens[-1].has_alias() is True
+    assert p.tokens[-1].get_alias() == 'foo'

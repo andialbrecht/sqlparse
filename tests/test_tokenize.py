@@ -204,6 +204,15 @@ def test_parse_order_by():
     assert p.tokens[0].ttype is T.Keyword
 
 
+@pytest.mark.parametrize('s', (
+    'AT TIME ZONE \'UTC\'',
+))
+def test_parse_tzcast(s):
+    p = sqlparse.parse(s)[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype == T.Keyword.TZCast
+
+
 def test_cli_commands():
     p = sqlparse.parse('\\copy')[0]
     assert len(p.tokens) == 1
