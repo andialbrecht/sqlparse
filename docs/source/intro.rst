@@ -48,7 +48,7 @@ SQL statements can be beautified by using the :meth:`~sqlparse.format` function.
 .. code-block:: python
 
   >>> sql = 'select * from foo where id in (select id from bar);'
-  >>> print sqlparse.format(sql, reindent=True, keyword_case='upper')
+  >>> print(sqlparse.format(sql, reindent=True, keyword_case='upper'))
   SELECT *
   FROM foo
   WHERE id IN

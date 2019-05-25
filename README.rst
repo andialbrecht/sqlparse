@@ -10,32 +10,32 @@ sqlparse is a non-validating SQL parser module for Python.
 Install
 -------
 
-From pip, run::
+Using pip::
 
-    $ pip install --upgrade sqlparse
-
-Consider using the ``--user`` option_.
-
-.. _option: https://pip.pypa.io/en/latest/user_guide/#user-installs
+    $ pip install sqlparse
 
 From the repository, run::
 
   python setup.py install
 
-to install python-sqlparse on your system.
+to install sqlparse on your system.
 
-python-sqlparse is compatible with Python 2.7 and Python 3 (>= 3.3).
+sqlparse is compatible with Python 2.7 and Python 3 (>= 3.4).
 
 
-Run Tests
----------
+Quick Start
+-----------
 
-To run the test suite run::
+code-block:: python
 
-  tox
-
-Note, you'll need tox installed, of course.
-
+   >>> import sqlparse
+   >>> # Split a string containing two SQL statements:
+   >>> statements = sqlparse.split('select * from foo; select * from bar;')
+   >>> # Format the first statement and print it out:
+   >>> print(sqlparse.format(statements[0], reindent=True, keyword_case='upper'))
+   SELECT *
+   FROM foo;
+   >>>
 
 Links
 -----
@@ -46,9 +46,6 @@ Project Page
 Documentation
   https://sqlparse.readthedocs.io/en/latest/
 
-Discussions
-  https://groups.google.com/forum/#!forum/sqlparse
-
 Issues/Bugs
   https://github.com/andialbrecht/sqlparse/issues
 
@@ -56,7 +53,7 @@ Online Demo
   https://sqlformat.org/
 
 
-python-sqlparse is licensed under the BSD license.
+sqlparse is licensed under the BSD license.
 
 Parts of the code are based on pygments written by Georg Brandl and others.
 pygments-Homepage: http://pygments.org/
