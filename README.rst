@@ -1,53 +1,62 @@
 python-sqlparse - Parse SQL statements
 ======================================
 
-sqlparse is a non-validating SQL parser module for Python.
-
 |buildstatus|_
 |coverage|_
 
+.. docincludebegin
 
-Install
--------
+:mod:`sqlparse` is a non-validating SQL parser for Python.
+It provides support for parsing, splitting and formatting SQL statements.
 
-Using pip::
+The module is compatible with Python 2.7 and Python 3 (>= 3.4)
+and released under the terms of the `New BSD license
+<https://opensource.org/licenses/BSD-3-Clause>`_.
 
-    $ pip install sqlparse
-
-From the repository, run::
-
-  python setup.py install
-
-to install sqlparse on your system.
-
-sqlparse is compatible with Python 2.7 and Python 3 (>= 3.4).
+Visit the project page at https://github.com/andialbrecht/sqlparse for
+further information about this project.
 
 
 Quick Start
 -----------
 
-code-block:: python
+.. code-block:: sh
+
+   $ pip install sqlparse
+
+.. code-block:: python
 
    >>> import sqlparse
+
    >>> # Split a string containing two SQL statements:
-   >>> statements = sqlparse.split('select * from foo; select * from bar;')
+   >>> raw = 'select * from foo; select * from bar;'
+   >>> statements = sqlparse.split(raw)
+   >>> statements
+   ['select * from foo;', 'select * from bar;']
+
    >>> # Format the first statement and print it out:
-   >>> print(sqlparse.format(statements[0], reindent=True, keyword_case='upper'))
+   >>> first = statemets[0]
+   >>> print(sqlparse.format(first, reindent=True, keyword_case='upper'))
    SELECT *
    FROM foo;
+
+   >>> # Parsing a SQL statement:
+   >>> parsed = sqlparse.parse('select * from foo')[0]
+   >>> parsed.tokens
+   [<DML 'select' at 0x7f22c5e15368>, <Whitespace ' ' at 0x7f22c5e153b0>, <Wildcard '*' … ]
    >>>
 
 Links
 -----
 
-Project Page
-  https://github.com/andialbrecht/sqlparse
+Project page
+   https://github.com/andialbrecht/sqlparse
+
+Bug tracker
+   https://github.com/andialbrecht/sqlparse/issues
 
 Documentation
-  https://sqlparse.readthedocs.io/en/latest/
-
-Issues/Bugs
-  https://github.com/andialbrecht/sqlparse/issues
+   https://sqlparse.readthedocs.io/
 
 Online Demo
   https://sqlformat.org/

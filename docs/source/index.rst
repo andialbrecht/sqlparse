@@ -6,33 +6,9 @@
 python-sqlparse
 ===============
 
-:mod:`sqlparse` is a non-validating SQL parser for Python.
-It provides support for parsing, splitting and formatting SQL statements.
-
-The module is compatible with Python 2.7 and Python 3 (>= 3.4)
-and released under the terms of the `New BSD license
-<https://opensource.org/licenses/BSD-3-Clause>`_.
-
-Visit the project page at https://github.com/andialbrecht/sqlparse for
-further information about this project.
-
-
-tl;dr
------
-
-.. code-block:: bash
-
-   $ pip install sqlparse
-   $ python
-   >>> import sqlparse
-   >>> print(sqlparse.format('select * from foo', reindent=True))
-   select *
-   from foo
-   >>> parsed = sqlparse.parse('select * from foo')[0]
-   >>> parsed.tokens
-   [<DML 'select' at 0x7f22c5e15368>, <Whitespace ' ' at 0x7f22c5e153b0>, <Wildcard '*' … ]
-   >>>
-
+.. include:: ../../README.rst
+   :start-after: docincludebegin
+   :end-before: Links
 
 Contents
 --------
@@ -45,6 +21,7 @@ Contents
    analyzing
    ui
    changes
+   license
    indices
 
 
@@ -59,3 +36,7 @@ Bug tracker
 
 Documentation
    https://sqlparse.readthedocs.io/
+
+Online Demo
+  https://sqlformat.org/
+
