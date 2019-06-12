@@ -35,7 +35,7 @@ Quick Start
    ['select * from foo;', 'select * from bar;']
 
    >>> # Format the first statement and print it out:
-   >>> first = statemets[0]
+   >>> first = statements[0]
    >>> print(sqlparse.format(first, reindent=True, keyword_case='upper'))
    SELECT *
    FROM foo;
