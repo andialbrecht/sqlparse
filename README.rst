@@ -13,6 +13,10 @@ The module is compatible with Python 2.7 and Python 3 (>= 3.4)
 and released under the terms of the `New BSD license
 <https://opensource.org/licenses/BSD-3-Clause>`_.
 
+.. note::
+
+   Support for Python<3.4 (including 2.x) will be dropped soon.
+
 Visit the project page at https://github.com/andialbrecht/sqlparse for
 further information about this project.
 
