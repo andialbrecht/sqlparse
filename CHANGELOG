@@ -13,6 +13,9 @@ Bug Fixes
 * Correctly identify NULLS FIRST / NULLS LAST as keywords (issue487).
 * Fix splitting of SQL statements that contain dollar signs in
   identifiers (issue491).
+* Remove support for parsing double slash comments introduced in
+  0.3.0 (issue456) as it had some side-effects with other dialects and
+  doesn't seem to be widely used (issue476).
 
 
 Release 0.3.0 (Mar 11, 2019)
