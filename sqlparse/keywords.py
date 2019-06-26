@@ -38,7 +38,7 @@ SQL_REGEX = {
 
         (r"`(``|[^`])*`", tokens.Name),
         (r"´(´´|[^´])*´", tokens.Name),
-        (r'(\$(?:[_A-ZÀ-Ü]\w*)?\$)[\s\S]*?\1', tokens.Literal),
+        (r'((?<!\S)\$(?:[_A-ZÀ-Ü]\w*)?\$)[\s\S]*?\1', tokens.Literal),
 
         (r'\?', tokens.Name.Placeholder),
         (r'%(\(\w+\))?s', tokens.Name.Placeholder),
