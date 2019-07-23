@@ -14,7 +14,7 @@
 # and to allow some customizations.
 
 from sqlparse import tokens
-from sqlparse.keywords import SQL_REGEX
+from sqlparse.keywords import sql_regex
 from sqlparse.compat import text_type, file_types
 from sqlparse.utils import consume
 
@@ -25,7 +25,7 @@ class Lexer(object):
     """
 
     @staticmethod
-    def get_tokens(text, encoding=None):
+    def get_tokens(text, encoding=None, sql_keywords=None):
         """
         Return an iterable of (tokentype, value) pairs generated from
         `text`. If `unfiltered` is set to `True`, the filtering mechanism
@@ -55,9 +55,10 @@ class Lexer(object):
             raise TypeError(u"Expected text or file-like object, got {!r}".
                             format(type(text)))
 
+        regexes = sql_regex(sql_keywords)
         iterable = enumerate(text)
         for pos, char in iterable:
-            for rexmatch, action in SQL_REGEX:
+            for rexmatch, action in regexes:
                 m = rexmatch(text, pos)
 
                 if not m:
@@ -73,10 +74,10 @@ class Lexer(object):
                 yield tokens.Error, char
 
 
-def tokenize(sql, encoding=None):
+def tokenize(sql, encoding=None, sql_dialects=None):
     """Tokenize sql.
 
     Tokenize *sql* using the :class:`Lexer` and return a 2-tuple stream
     of ``(token type, value)`` items.
     """
-    return Lexer().get_tokens(sql, encoding)
+    return Lexer().get_tokens(sql, encoding, sql_dialects)

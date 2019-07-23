@@ -406,3 +406,12 @@ def test_issue489_tzcasts():
     p = sqlparse.parse('select bar at time zone \'UTC\' as foo')[0]
     assert p.tokens[-1].has_alias() is True
     assert p.tokens[-1].get_alias() == 'foo'
+
+def test_issue384():
+    from sqlparse import keywords
+    p = sqlparse.parse('select bar from instance')[0]
+    assert(p.tokens[-1].ttype == T.Keyword)
+    p = sqlparse.parse('select bar from instance',
+                       sql_keywords=keywords.keywords_map(keywords.KEYWORDS_PLPGSQL,
+                                                          keywords.KEYWORDS_HQL))[0]
+    assert(p.tokens[-1].__class__ == sql.Identifier)

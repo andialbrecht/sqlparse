@@ -22,17 +22,17 @@ __version__ = '0.3.1.dev0'
 __all__ = ['engine', 'filters', 'formatter', 'sql', 'tokens', 'cli']
 
 
-def parse(sql, encoding=None):
+def parse(sql, encoding=None, sql_keywords=None):
     """Parse sql and return a list of statements.
 
     :param sql: A string containing one or more SQL statements.
     :param encoding: The encoding of the statement (optional).
     :returns: A tuple of :class:`~sqlparse.sql.Statement` instances.
     """
-    return tuple(parsestream(sql, encoding))
+    return tuple(parsestream(sql, encoding,sql_keywords))
 
 
-def parsestream(stream, encoding=None):
+def parsestream(stream, encoding=None, sql_keywords=None):
     """Parses sql statements from file-like object.
 
     :param stream: A file-like object.
@@ -41,7 +41,7 @@ def parsestream(stream, encoding=None):
     """
     stack = engine.FilterStack()
     stack.enable_grouping()
-    return stack.run(stream, encoding)
+    return stack.run(stream, encoding, sql_keywords)
 
 
 def format(sql, encoding=None, **options):
@@ -61,7 +61,7 @@ def format(sql, encoding=None, **options):
     return u''.join(stack.run(sql, encoding))
 
 
-def split(sql, encoding=None):
+def split(sql, encoding=None, sql_keywords=None):
     """Split *sql* into single statements.
 
     :param sql: A string containing one or more SQL statements.
@@ -69,4 +69,4 @@ def split(sql, encoding=None):
     :returns: A list of strings.
     """
     stack = engine.FilterStack()
-    return [text_type(stmt).strip() for stmt in stack.run(sql, encoding)]
+    return [text_type(stmt).strip() for stmt in stack.run(sql, encoding,sql_keywords)]

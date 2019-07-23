@@ -8,17 +8,25 @@
 
 import re
 
-from sqlparse import tokens
+from sqlparse import tokens, exceptions
 
+def keywords_map(*dialects):
+    dialect_keywords = dict()
+    for it in dialects:
+        dialect_keywords.update(it)
+    return dialect_keywords
 
-def is_keyword(value):
-    val = value.upper()
-    return (KEYWORDS_COMMON.get(val)
-            or KEYWORDS_ORACLE.get(val)
-            or KEYWORDS_PLPGSQL.get(val)
-            or KEYWORDS_HQL.get(val)
-            or KEYWORDS.get(val, tokens.Name)), value
-
+def make_is_keyword(dialect_keywords=None):
+    if dialect_keywords is None:
+        dialect_keywords = keywords_map(KEYWORDS_ORACLE,
+                                        KEYWORDS_PLPGSQL,
+                                        KEYWORDS_HQL)
+    def is_keyword(value):
+        val = value.upper()
+        return (KEYWORDS_COMMON.get(val)
+                or dialect_keywords.get(val)
+                or KEYWORDS.get(val, tokens.Name)), value
+    return is_keyword
 
 SQL_REGEX = {
     'root': [
@@ -86,15 +94,18 @@ SQL_REGEX = {
         (r'ORDER\s+BY\b', tokens.Keyword),
         (r'(LATERAL\s+VIEW\s+)(EXPLODE|INLINE|PARSE_URL_TUPLE|POSEXPLODE|STACK)\b', tokens.Keyword),
         (r"(AT|WITH')\s+TIME\s+ZONE\s+'[^']+'", tokens.Keyword.TZCast),
-        (r'[0-9_A-ZÀ-Ü][_$#\w]*', is_keyword),
-
         (r'[;:()\[\],\.]', tokens.Punctuation),
         (r'[<>=~!]+', tokens.Operator.Comparison),
         (r'[+/@#%^&|`?^-]+', tokens.Operator),
+
     ]}
 
 FLAGS = re.IGNORECASE | re.UNICODE
 SQL_REGEX = [(re.compile(rx, FLAGS).match, tt) for rx, tt in SQL_REGEX['root']]
+KEYWORD_REGEX = re.compile(r'[0-9_A-ZÀ-Ü][_$#\w]*',FLAGS).match
+
+def sql_regex(dialects=None):
+    return SQL_REGEX+[(KEYWORD_REGEX,make_is_keyword(dialects))]
 
 KEYWORDS = {
     'ABORT': tokens.Keyword,
