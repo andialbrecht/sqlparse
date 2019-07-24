@@ -18,10 +18,10 @@ class _CaseFilter(object):
         self.convert = getattr(text_type, case)
 
     def process(self, stream):
-        for ttype, value in stream:
+        for ttype, value, span in stream:
             if ttype in self.ttype:
                 value = self.convert(value)
-            yield ttype, value
+            yield ttype, value, span
 
 
 class KeywordCaseFilter(_CaseFilter):
@@ -32,10 +32,10 @@ class IdentifierCaseFilter(_CaseFilter):
     ttype = T.Name, T.String.Symbol
 
     def process(self, stream):
-        for ttype, value in stream:
+        for ttype, value, span in stream:
             if ttype in self.ttype and value.strip()[0] != '"':
                 value = self.convert(value)
-            yield ttype, value
+            yield ttype, value, span
 
 
 class TruncateStringFilter(object):
@@ -44,9 +44,9 @@ class TruncateStringFilter(object):
         self.char = char
 
     def process(self, stream):
-        for ttype, value in stream:
+        for ttype, value, span in stream:
             if ttype != T.Literal.String.Single:
-                yield ttype, value
+                yield ttype, value, span
                 continue
 
             if value[:2] == "''":
@@ -58,4 +58,4 @@ class TruncateStringFilter(object):
 
             if len(inner) > self.width:
                 value = ''.join((quote, inner[:self.width], self.char, quote))
-            yield ttype, value
+            yield ttype, value, span

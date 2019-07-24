@@ -64,14 +64,15 @@ class Lexer(object):
                 if not m:
                     continue
                 elif isinstance(action, tokens._TokenType):
-                    yield action, m.group()
+                    yield action, m.group(), m.span()
                 elif callable(action):
-                    yield action(m.group())
+                    ttype, value = action(m.group())
+                    yield ttype, value, m.span()
 
                 consume(iterable, m.end() - pos - 1)
                 break
             else:
-                yield tokens.Error, char
+                yield tokens.Error, char, None
 
 
 def tokenize(sql, encoding=None, sql_dialects=None):

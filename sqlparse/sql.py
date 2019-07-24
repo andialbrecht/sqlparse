@@ -25,12 +25,13 @@ class Token(object):
     the type of the token.
     """
 
-    __slots__ = ('value', 'ttype', 'parent', 'normalized', 'is_keyword',
+    __slots__ = ('value', 'span', 'ttype', 'parent', 'normalized', 'is_keyword',
                  'is_group', 'is_whitespace')
 
-    def __init__(self, ttype, value):
+    def __init__(self, ttype, value, span=None):
         value = text_type(value)
         self.value = value
+        self.span = span
         self.ttype = ttype
         self.parent = None
         self.is_group = False
