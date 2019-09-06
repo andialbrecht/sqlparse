@@ -139,7 +139,7 @@ class TokenList(Token):
 
     def __init__(self, tokens=None):
         self.tokens = tokens or []
-        [setattr(token, 'parent', self) for token in tokens]
+        [setattr(token, 'parent', self) for token in self.tokens]
         super(TokenList, self).__init__(None, text_type(self))
         self.is_group = True
 
