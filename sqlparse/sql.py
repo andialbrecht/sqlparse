@@ -476,6 +476,9 @@ class IdentifierList(TokenList):
             if not (token.is_whitespace or token.match(T.Punctuation, ',')):
                 yield token
 
+    def get_alias(self):
+        return None
+
 
 class Parenthesis(TokenList):
     """Tokens between parenthesis."""
@@ -523,6 +526,9 @@ class Comparison(TokenList):
     @property
     def right(self):
         return self.tokens[-1]
+
+    def get_alias(self):
+        return None
 
 
 class Comment(TokenList):
@@ -622,6 +628,8 @@ class Begin(TokenList):
 class Operation(TokenList):
     """Grouping of operations"""
 
+    def get_alias(self):
+        return None
 
 class Values(TokenList):
     """Grouping of values"""

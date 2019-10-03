@@ -294,9 +294,10 @@ def test_grouping_subquery_no_parens():
     assert isinstance(p.tokens[0], sql.Case)
 
 
-def test_grouping_alias_returns_none():
-    # see issue185
-    p = sqlparse.parse('foo.bar')[0]
+@pytest.mark.parametrize('s', ['foo.bar', 'x, y', 'x > y', 'x / y'])
+def test_grouping_alias_returns_none(s):
+    # see issue185 and issue445
+    p = sqlparse.parse(s)[0]
     assert len(p.tokens) == 1
     assert p.tokens[0].get_alias() is None
 
