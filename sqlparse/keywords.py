@@ -48,9 +48,9 @@ SQL_REGEX = {
 
         # FIXME(andi): VALUES shouldn't be listed here
         # see https://github.com/andialbrecht/sqlparse/pull/64
-        # IN is special, it may be followed by a parenthesis, but
-        # is never a function, see issue183
-        (r'(CASE|IN|VALUES|USING|FROM)\b', tokens.Keyword),
+        # AS and IN are special, it may be followed by a parenthesis, but
+        # are never functions, see issue183 and issue507
+        (r'(CASE|IN|VALUES|USING|FROM|AS)\b', tokens.Keyword),
 
         (r'(@|##|#)[A-ZÀ-Ü]\w+', tokens.Name),
 

@@ -127,6 +127,14 @@ def test_grouping_identifier_invalid_in_middle():
     assert p[3].ttype == T.Whitespace
     assert str(p[2]) == 'foo.'
 
+@pytest.mark.parametrize('s', ['foo as (select *)', 'foo as(select *)'])
+def test_grouping_identifer_as(s):
+    # issue507
+    p = sqlparse.parse(s)[0]
+    assert isinstance(p.tokens[0], sql.Identifier)
+    token = p.tokens[0].tokens[2]
+    assert token.ttype == T.Keyword
+    assert token.normalized == 'AS'
 
 def test_grouping_identifier_as_invalid():
     # issue8
