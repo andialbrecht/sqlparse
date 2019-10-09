@@ -431,8 +431,8 @@ def test_get_real_name():
     s = u"update a t set t.b=1"
     stmts = sqlparse.parse(s)
     assert len(stmts) == 1
-    assert 'a' == stmts[0].get_real_name()
-    assert 't' == stmts[0].get_alias()
+    assert 'a' == stmts[0].tokens[2].get_real_name()
+    assert 't' == stmts[0].tokens[2].get_alias()
 
 
 def test_from_subquery():

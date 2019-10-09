@@ -16,6 +16,29 @@ from sqlparse.compat import string_types, text_type, unicode_compatible
 from sqlparse.utils import imt, remove_quotes
 
 
+class NameAliasMixin:
+    """Implements get_real_name and get_alias."""
+
+    def get_real_name(self):
+        """Returns the real name (object name) of this identifier."""
+        # a.b
+        dot_idx, _ = self.token_next_by(m=(T.Punctuation, '.'))
+        return self._get_first_name(dot_idx, real_name=True)
+
+    def get_alias(self):
+        """Returns the alias for this identifier or ``None``."""
+
+        # "name AS alias"
+        kw_idx, kw = self.token_next_by(m=(T.Keyword, 'AS'))
+        if kw is not None:
+            return self._get_first_name(kw_idx + 1, keywords=True)
+
+        # "name alias" or "complicated column expression alias"
+        _, ws = self.token_next_by(t=T.Whitespace)
+        if len(self.tokens) > 2 and ws is not None:
+            return self._get_first_name(reverse=True)
+
+
 @unicode_compatible
 class Token(object):
     """Base class for all other classes in this module.
@@ -341,16 +364,7 @@ class TokenList(Token):
 
     def get_alias(self):
         """Returns the alias for this identifier or ``None``."""
-
-        # "name AS alias"
-        kw_idx, kw = self.token_next_by(m=(T.Keyword, 'AS'))
-        if kw is not None:
-            return self._get_first_name(kw_idx + 1, keywords=True)
-
-        # "name alias" or "complicated column expression alias"
-        _, ws = self.token_next_by(t=T.Whitespace)
-        if len(self.tokens) > 2 and ws is not None:
-            return self._get_first_name(reverse=True)
+        return None
 
     def get_name(self):
         """Returns the name of this identifier.
@@ -363,9 +377,7 @@ class TokenList(Token):
 
     def get_real_name(self):
         """Returns the real name (object name) of this identifier."""
-        # a.b
-        dot_idx, _ = self.token_next_by(m=(T.Punctuation, '.'))
-        return self._get_first_name(dot_idx, real_name=True)
+        return None
 
     def get_parent_name(self):
         """Return name of the parent object if any.
@@ -433,7 +445,7 @@ class Statement(TokenList):
         return 'UNKNOWN'
 
 
-class Identifier(TokenList):
+class Identifier(NameAliasMixin, TokenList):
     """Represents an identifier.
 
     Identifiers may have aliases or typecasts.
@@ -599,7 +611,7 @@ class Case(TokenList):
         return ret
 
 
-class Function(TokenList):
+class Function(NameAliasMixin, TokenList):
     """A function or procedure call."""
 
     def get_parameters(self):
