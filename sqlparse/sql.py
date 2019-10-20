@@ -489,6 +489,13 @@ class IdentifierList(TokenList):
                 yield token
 
 
+class TypedLiteral(TokenList):
+    """A typed literal (?), such as "date '2001-09-28'" or "interval '2 hours'"."""
+    M_OPEN = T.Name.Builtin, None
+    M_CLOSE = T.String.Single, None
+    M_EXTEND = T.Keyword, ("DAY", "MONTH", "YEAR", "HOUR", "MINUTE", "SECOND")
+
+
 class Parenthesis(TokenList):
     """Tokens between parenthesis."""
     M_OPEN = T.Punctuation, '('

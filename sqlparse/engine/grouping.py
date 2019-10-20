@@ -101,6 +101,34 @@ def group_tzcasts(tlist):
     _group(tlist, sql.Identifier, match, valid, valid, post)
 
 
+def group_typed_literal(tlist):
+    # definitely not complete, see e.g.:
+    # https://docs.microsoft.com/en-us/sql/odbc/reference/appendixes/interval-literal-syntax
+    # https://docs.microsoft.com/en-us/sql/odbc/reference/appendixes/interval-literals
+    # https://www.postgresql.org/docs/9.1/datatype-datetime.html
+    # https://www.postgresql.org/docs/9.1/functions-datetime.html
+    def match(token):
+        return token.match(*sql.TypedLiteral.M_OPEN)
+
+    def match_to_extend(token):
+        return isinstance(token, sql.TypedLiteral)
+
+    def valid_prev(token):
+        return token is not None
+
+    def valid_next(token):
+        return token is not None and token.match(*sql.TypedLiteral.M_CLOSE)
+
+    def valid_final(token):
+        return token is not None and token.match(*sql.TypedLiteral.M_EXTEND)
+
+    def post(tlist, pidx, tidx, nidx):
+        return tidx, nidx
+
+    _group(tlist, sql.TypedLiteral, match, valid_prev, valid_next, post, extend=False)
+    _group(tlist, sql.TypedLiteral, match_to_extend, valid_prev, valid_final, post, extend=True)
+
+
 def group_period(tlist):
     def match(token):
         return token.match(T.Punctuation, '.')
@@ -217,13 +245,14 @@ def group_arrays(tlist):
 def group_operator(tlist):
     ttypes = T_NUMERICAL + T_STRING + T_NAME
     sqlcls = (sql.SquareBrackets, sql.Parenthesis, sql.Function,
-              sql.Identifier, sql.Operation)
+              sql.Identifier, sql.Operation, sql.TypedLiteral)
 
     def match(token):
         return imt(token, t=(T.Operator, T.Wildcard))
 
     def valid(token):
-        return imt(token, i=sqlcls, t=ttypes)
+        return imt(token, i=sqlcls, t=ttypes) \
+            or token.match(T.Keyword, ("CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP"))
 
     def post(tlist, pidx, tidx, nidx):
         tlist[tidx].ttype = T.Operator
@@ -372,6 +401,7 @@ def group(stmt):
         group_order,
         group_typecasts,
         group_tzcasts,
+        group_typed_literal,
         group_operator,
         group_comparison,
         group_as,
