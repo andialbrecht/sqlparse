@@ -20,6 +20,7 @@ matrix:
         - pip install flake8
       script:
         - flake8 sqlparse
+      after_success: skip
 
 install:
   - pip install -Uq pytest pytest-cov codecov
