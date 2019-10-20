@@ -262,15 +262,14 @@ class TokenList(Token):
         ignored too.
         """
         # this on is inconsistent, using Comment instead of T.Comment...
-        funcs = lambda tk: not ((skip_ws and tk.is_whitespace)
-                                or (skip_cm and imt(tk,
-                                                    t=T.Comment, i=Comment)))
-        return self._token_matching(funcs)[1]
+        def matcher(tk):
+            return not ((skip_ws and tk.is_whitespace)
+                        or (skip_cm and imt(tk, t=T.Comment, i=Comment)))
+        return self._token_matching(matcher)[1]
 
     def token_next_by(self, i=None, m=None, t=None, idx=-1, end=None):
-        funcs = lambda tk: imt(tk, i, m, t)
         idx += 1
-        return self._token_matching(funcs, idx, end)
+        return self._token_matching(lambda tk: imt(tk, i, m, t), idx, end)
 
     def token_not_matching(self, funcs, idx):
         funcs = (funcs,) if not isinstance(funcs, (list, tuple)) else funcs
@@ -300,10 +299,11 @@ class TokenList(Token):
         if idx is None:
             return None, None
         idx += 1  # alot of code usage current pre-compensates for this
-        funcs = lambda tk: not ((skip_ws and tk.is_whitespace)
-                                or (skip_cm and imt(tk,
-                                                    t=T.Comment, i=Comment)))
-        return self._token_matching(funcs, idx, reverse=_reverse)
+
+        def matcher(tk):
+            return not ((skip_ws and tk.is_whitespace)
+                        or (skip_cm and imt(tk, t=T.Comment, i=Comment)))
+        return self._token_matching(matcher, idx, reverse=_reverse)
 
     def token_index(self, token, start=0):
         """Return list index of token."""
@@ -490,7 +490,7 @@ class IdentifierList(TokenList):
 
 
 class TypedLiteral(TokenList):
-    """A typed literal (?), such as "date '2001-09-28'" or "interval '2 hours'"."""
+    """A typed literal, such as "date '2001-09-28'" or "interval '2 hours'"."""
     M_OPEN = T.Name.Builtin, None
     M_CLOSE = T.String.Single, None
     M_EXTEND = T.Keyword, ("DAY", "MONTH", "YEAR", "HOUR", "MINUTE", "SECOND")

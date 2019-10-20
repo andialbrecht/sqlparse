@@ -105,8 +105,8 @@ class AlignedIndentFilter(object):
             # joins, group/order by are special case. only consider the first
             # word as aligner
             if (
-                token.match(T.Keyword, self.join_words, regex=True) or
-                token.match(T.Keyword, self.by_words, regex=True)
+                token.match(T.Keyword, self.join_words, regex=True)
+                or token.match(T.Keyword, self.by_words, regex=True)
             ):
                 token_indent = token.value.split()[0]
             else:

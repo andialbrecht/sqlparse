@@ -64,7 +64,8 @@ SQL_REGEX = {
         (r'[A-ZÀ-Ü]\w*(?=\()', tokens.Name),  # side effect: change kw to func
         (r'-?0x[\dA-F]+', tokens.Number.Hexadecimal),
         (r'-?\d*(\.\d+)?E-?\d+', tokens.Number.Float),
-        (r'(?![_A-ZÀ-Ü])-?(\d+(\.\d*)|\.\d+)(?![_A-ZÀ-Ü])', tokens.Number.Float),
+        (r'(?![_A-ZÀ-Ü])-?(\d+(\.\d*)|\.\d+)(?![_A-ZÀ-Ü])',
+         tokens.Number.Float),
         (r'(?![_A-ZÀ-Ü])-?\d+(?![_A-ZÀ-Ü])', tokens.Number.Integer),
         (r"'(''|\\\\|\\'|[^'])*'", tokens.String.Single),
         # not a real string literal in ANSI SQL:
@@ -84,7 +85,9 @@ SQL_REGEX = {
         (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
         (r'GROUP\s+BY\b', tokens.Keyword),
         (r'ORDER\s+BY\b', tokens.Keyword),
-        (r'(LATERAL\s+VIEW\s+)(EXPLODE|INLINE|PARSE_URL_TUPLE|POSEXPLODE|STACK)\b', tokens.Keyword),
+        (r'(LATERAL\s+VIEW\s+)'
+         r'(EXPLODE|INLINE|PARSE_URL_TUPLE|POSEXPLODE|STACK)\b',
+         tokens.Keyword),
         (r"(AT|WITH')\s+TIME\s+ZONE\s+'[^']+'", tokens.Keyword.TZCast),
         (r'[0-9_A-ZÀ-Ü][_$#\w]*', is_keyword),
 

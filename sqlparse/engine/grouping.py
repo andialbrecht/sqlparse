@@ -125,8 +125,10 @@ def group_typed_literal(tlist):
     def post(tlist, pidx, tidx, nidx):
         return tidx, nidx
 
-    _group(tlist, sql.TypedLiteral, match, valid_prev, valid_next, post, extend=False)
-    _group(tlist, sql.TypedLiteral, match_to_extend, valid_prev, valid_final, post, extend=True)
+    _group(tlist, sql.TypedLiteral, match, valid_prev, valid_next,
+           post, extend=False)
+    _group(tlist, sql.TypedLiteral, match_to_extend, valid_prev, valid_final,
+           post, extend=True)
 
 
 def group_period(tlist):
@@ -252,7 +254,9 @@ def group_operator(tlist):
 
     def valid(token):
         return imt(token, i=sqlcls, t=ttypes) \
-            or token.match(T.Keyword, ("CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP"))
+            or token.match(
+                T.Keyword,
+                ('CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP'))
 
     def post(tlist, pidx, tidx, nidx):
         tlist[tidx].ttype = T.Operator

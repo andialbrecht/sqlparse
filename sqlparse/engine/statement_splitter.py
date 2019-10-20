@@ -33,7 +33,7 @@ class StatementSplitter(object):
             return 1
         elif ttype is T.Punctuation and value == ')':
             return -1
-        elif ttype not in T.Keyword: # if normal token return
+        elif ttype not in T.Keyword:  # if normal token return
             return 0
 
         # Everything after here is ttype = T.Keyword
