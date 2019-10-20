@@ -33,6 +33,34 @@ def test_grouping_assignment(s):
     assert isinstance(parsed.tokens[0], sql.Assignment)
 
 
+@pytest.mark.parametrize('s, a, b', [
+    ('select a from b where c < d + e', sql.Identifier, sql.Identifier),
+    ('select a from b where c < d + interval \'1 day\'', sql.Identifier, sql.TypedLiteral),
+    ('select a from b where c < d + interval \'6\' month', sql.Identifier, sql.TypedLiteral),
+    ('select a from b where c < current_timestamp - interval \'1 day\'', sql.Token, sql.TypedLiteral),
+])
+def test_compare_expr(s, a, b):
+    parsed = sqlparse.parse(s)[0]
+    assert str(parsed) == s
+    assert isinstance(parsed.tokens[2], sql.Identifier)
+    assert isinstance(parsed.tokens[6], sql.Identifier)
+    assert isinstance(parsed.tokens[8], sql.Where)
+    assert len(parsed.tokens) == 9
+    where = parsed.tokens[8]
+    assert isinstance(where.tokens[2], sql.Comparison)
+    assert len(where.tokens) == 3
+    comparison = where.tokens[2]
+    assert isinstance(comparison.tokens[0], sql.Identifier)
+    assert comparison.tokens[2].ttype is T.Operator.Comparison
+    assert isinstance(comparison.tokens[4], sql.Operation)
+    assert len(comparison.tokens) == 5
+    operation = comparison.tokens[4]
+    assert isinstance(operation.tokens[0], a)
+    assert operation.tokens[2].ttype is T.Operator
+    assert isinstance(operation.tokens[4], b)
+    assert len(operation.tokens) == 5
+
+
 def test_grouping_identifiers():
     s = 'select foo.bar from "myscheme"."table" where fail. order'
     parsed = sqlparse.parse(s)[0]
