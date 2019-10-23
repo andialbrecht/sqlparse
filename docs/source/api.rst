@@ -65,3 +65,8 @@ The :meth:`~sqlparse.format` function accepts the following keyword arguments.
 ``output_format``
   If given the output is additionally formatted to be used as a variable
   in a programming language. Allowed values are "python" and "php".
+
+``comma_first``
+  If ``True`` comma-first notation for column names is used.
+
+ 
