@@ -46,6 +46,12 @@ The :meth:`~sqlparse.format` function accepts the following keyword arguments.
 ``reindent``
   If ``True`` the indentations of the statements are changed.
 
+``reindent_aligned``
+  If ``True`` the indentations of the statements are changed, and statements are aligned by keywords.
+
+``use_space_around_operators``
+  If ``True`` spaces are used around all operators.
+
 ``indent_tabs``
   If ``True`` tabs instead of spaces are used for indentation.
 
