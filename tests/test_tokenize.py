@@ -205,6 +205,25 @@ def test_parse_order_by():
 
 
 @pytest.mark.parametrize('s', (
+    "LIKE", "ILIKE", "NOT LIKE", "NOT ILIKE",
+    "NOT   LIKE", "NOT    ILIKE",
+))
+def test_like_and_ilike_parsed_as_comparisons(s):
+    p = sqlparse.parse(s)[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype == T.Operator.Comparison
+
+
+@pytest.mark.parametrize('s', (
+    "LIKEaaa", "bILIKE", "aaILIKEbb", "NOTLIKE", "NOTILIKE",
+))
+def test_near_like_and_ilike_parsed_appropriately(s):
+    p = sqlparse.parse(s)[0]
+    assert len(p.tokens) == 1
+    assert isinstance(p.tokens[0], sql.Identifier)
+    
+
+@pytest.mark.parametrize('s', (
     'AT TIME ZONE \'UTC\'',
 ))
 def test_parse_tzcast(s):

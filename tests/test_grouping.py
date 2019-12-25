@@ -472,7 +472,9 @@ def test_comparison_with_parenthesis():
     assert comp.right.ttype is T.Number.Integer
 
 
-@pytest.mark.parametrize('operator', ['LIKE', 'NOT LIKE', 'ILIKE', 'NOT ILIKE'])
+@pytest.mark.parametrize('operator', (
+    'LIKE', 'NOT LIKE', 'ILIKE', 'NOT ILIKE',
+))
 def test_comparison_with_strings(operator):
     # issue148
     p = sqlparse.parse("foo {0} 'bar'".format(operator))[0]
