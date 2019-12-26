@@ -485,6 +485,41 @@ def test_comparison_with_strings(operator):
     assert p.tokens[0].right.ttype == T.String.Single
 
 
+def test_like_and_ilike_comparison():
+    def validate_where_clause(where_clause, expected_tokens):
+        assert len(where_clause.tokens) == len(expected_tokens)
+        for where_token, expected_token in zip(where_clause, expected_tokens):
+            expected_ttype, expected_value = expected_token
+            assert where_token.match(expected_ttype, expected_value)
+
+    [p1] = sqlparse.parse("select * from mytable where column LIKE 'expr%' limit 5;")
+    [p1_where] = [token for token in p1 if isinstance(token, sql.Where)]
+    validate_where_clause(p1_where, [
+        (T.Keyword, "where"),
+        (T.Whitespace, None),
+        (T.Keyword, "column"),
+        (T.Whitespace, None),
+        (T.Comparison, "LIKE"),
+        (T.Whitespace, None),
+        (T.String.Single, "'expr%'"),
+        (T.Whitespace, None),
+    ])
+
+    [p2] = sqlparse.parse(
+        "select * from mytable where mycol NOT ILIKE '-expr' group by mytable.othercolumn")
+    [p2_where] = [token for token in p2 if isinstance(token, sql.Where)]
+    validate_where_clause(p2_where, [
+        (T.Keyword, "where"),
+        (T.Whitespace, None),
+        (T.Keyword, "mycol"),
+        (T.Whitespace, None),
+        (T.Comparison, "NOT ILIKE"),
+        (T.Whitespace, None),
+        (T.String.Single, "'-expr'"),
+        (T.Whitespace, None),
+    ])
+
+
 def test_comparison_with_functions():
     # issue230
     p = sqlparse.parse('foo = DATE(bar.baz)')[0]
