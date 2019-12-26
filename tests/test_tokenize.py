@@ -221,7 +221,7 @@ def test_near_like_and_ilike_parsed_appropriately(s):
     p = sqlparse.parse(s)[0]
     assert len(p.tokens) == 1
     assert isinstance(p.tokens[0], sql.Identifier)
-    
+
 
 @pytest.mark.parametrize('s', (
     'AT TIME ZONE \'UTC\'',
