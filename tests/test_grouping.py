@@ -473,6 +473,7 @@ def test_comparison_with_parenthesis():
 
 
 @pytest.mark.parametrize('operator', (
+    '=', '!=', '>', '<', '<=', '>=', '~', '~~', '!~~',
     'LIKE', 'NOT LIKE', 'ILIKE', 'NOT ILIKE',
 ))
 def test_comparison_with_strings(operator):
