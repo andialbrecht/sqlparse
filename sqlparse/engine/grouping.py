@@ -254,9 +254,9 @@ def group_operator(tlist):
 
     def valid(token):
         return imt(token, i=sqlcls, t=ttypes) \
-            or token.match(
+            or (token and token.match(
                 T.Keyword,
-                ('CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP'))
+                ('CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP')))
 
     def post(tlist, pidx, tidx, nidx):
         tlist[tidx].ttype = T.Operator
