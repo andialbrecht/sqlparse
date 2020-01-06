@@ -17,18 +17,25 @@ def extract_definitions(token_list):
     # assumes that token_list is a parenthesis
     definitions = []
     tmp = []
-    # grab the first token, ignoring whitespace. idx=1 to skip open (
-    tidx, token = token_list.token_next(1)
-    while token and not token.match(sqlparse.tokens.Punctuation, ')'):
-        tmp.append(token)
-        # grab the next token, this times including whitespace
-        tidx, token = token_list.token_next(tidx, skip_ws=False)
-        # split on ",", except when on end of statement
-        if token and token.match(sqlparse.tokens.Punctuation, ','):
-            definitions.append(tmp)
+    par_level = 0
+    for token in token_list.flatten():
+        if token.is_whitespace:
+            continue
+        elif token.match(sqlparse.tokens.Punctuation, '('):
+            par_level += 1
+            continue
+        if token.match(sqlparse.tokens.Punctuation, ')'):
+            if par_level == 0:
+                break
+            else:
+                par_level += 1
+        elif token.match(sqlparse.tokens.Punctuation, ','):
+            if tmp:
+                definitions.append(tmp)
             tmp = []
-            tidx, token = token_list.token_next(tidx)
-    if tmp and isinstance(tmp[0], sqlparse.sql.Identifier):
+        else:
+            tmp.append(token)
+    if tmp:
         definitions.append(tmp)
     return definitions
 
@@ -46,5 +53,5 @@ if __name__ == '__main__':
     columns = extract_definitions(par)
 
     for column in columns:
-        print('NAME: {name:10} DEFINITION: {definition}'.format(
-            name=column[0], definition=''.join(str(t) for t in column[1:])))
+        print('NAME: {name!s:12} DEFINITION: {definition}'.format(
+            name=column[0], definition=' '.join(str(t) for t in column[1:])))
