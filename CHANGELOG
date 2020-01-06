@@ -6,6 +6,7 @@ Enhancements
 * Add HQL keywords (pr475, by matwalk).
 * Add support for time zone casts (issue489).
 * Enhance formatting of AS keyword (issue507, by john-bodley).
+* Stabilize grouping engine when parsing invalid SQL statements.
 
 Bug Fixes
 
