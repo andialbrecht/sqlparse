@@ -587,3 +587,11 @@ def test_aliased_literal_without_as():
     p = sqlparse.parse('1 foo')[0].tokens
     assert len(p) == 1
     assert p[0].get_alias() == 'foo'
+
+
+def test_grouping_as_cte():
+    p = sqlparse.parse('foo AS WITH apple AS 1, banana AS 2')[0].tokens
+    assert len(p) > 4
+    assert p[0].get_alias() is None
+    assert p[2].value == 'AS'
+    assert p[4].value == 'WITH'

@@ -164,7 +164,7 @@ def group_as(tlist):
         return token.normalized == 'NULL' or not token.is_keyword
 
     def valid_next(token):
-        ttypes = T.DML, T.DDL
+        ttypes = T.DML, T.DDL, T.CTE
         return not imt(token, t=ttypes) and token is not None
 
     def post(tlist, pidx, tidx, nidx):
