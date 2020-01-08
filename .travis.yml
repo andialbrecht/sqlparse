@@ -4,6 +4,7 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
+  - "3.7"
   - "3.8"
   - "nightly"
   - "pypy"
@@ -12,9 +13,6 @@ python:
 # See https://github.com/travis-ci/travis-ci/issues/9815
 matrix:
   include:
-    - python: 3.7
-      dist: xenial
-      sudo: true
     - stage: codecheck
       python: 3.7
       install:
