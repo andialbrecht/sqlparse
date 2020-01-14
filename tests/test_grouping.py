@@ -490,32 +490,32 @@ def test_like_and_ilike_comparison():
         assert len(where_clause.tokens) == len(expected_tokens)
         for where_token, expected_token in zip(where_clause, expected_tokens):
             expected_ttype, expected_value = expected_token
-            assert where_token.match(expected_ttype, expected_value)
+            if where_token.ttype is not None:
+                assert where_token.match(expected_ttype, expected_value, regex=True)
+            else:
+                # Certain tokens, such as comparison tokens, do not define a ttype that can be
+                # matched against. For these tokens, we ensure that the token instance is of
+                # the expected type and has a value conforming to specified regular expression
+                import re
+                assert (isinstance(where_token, expected_ttype)
+                        and re.match(expected_value, where_token.value))
 
-    [p1] = sqlparse.parse("select * from mytable where column LIKE 'expr%' limit 5;")
+    [p1] = sqlparse.parse("select * from mytable where mytable.mycolumn LIKE 'expr%' limit 5;")
     [p1_where] = [token for token in p1 if isinstance(token, sql.Where)]
     validate_where_clause(p1_where, [
         (T.Keyword, "where"),
         (T.Whitespace, None),
-        (T.Keyword, "column"),
-        (T.Whitespace, None),
-        (T.Comparison, "LIKE"),
-        (T.Whitespace, None),
-        (T.String.Single, "'expr%'"),
+        (sql.Comparison, r"mytable.mycolumn LIKE.*"),
         (T.Whitespace, None),
     ])
 
     [p2] = sqlparse.parse(
-        "select * from mytable where mycol NOT ILIKE '-expr' group by mytable.othercolumn")
+        "select * from mytable where mycolumn NOT ILIKE '-expr' group by othercolumn;")
     [p2_where] = [token for token in p2 if isinstance(token, sql.Where)]
     validate_where_clause(p2_where, [
         (T.Keyword, "where"),
         (T.Whitespace, None),
-        (T.Keyword, "mycol"),
-        (T.Whitespace, None),
-        (T.Comparison, "NOT ILIKE"),
-        (T.Whitespace, None),
-        (T.String.Single, "'-expr'"),
+        (sql.Comparison, r"mycolumn NOT ILIKE.*"),
         (T.Whitespace, None),
     ])
 
