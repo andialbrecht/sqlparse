@@ -22,6 +22,7 @@ Bug Fixes
   have an alias (issue455, adopted some parts of pr509 by john-bodley).
 * Fix parsing of date/time literals (issue438, by vashek).
 * Fix initialization of TokenList (issue499, pr505 by john-bodley).
+* Fix parsing of LIKE (issue493, pr525 by dbczumar).
 
 
 Release 0.3.0 (Mar 11, 2019)
