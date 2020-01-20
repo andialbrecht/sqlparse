@@ -33,6 +33,12 @@ def test_grouping_assignment(s):
     assert isinstance(parsed.tokens[0], sql.Assignment)
 
 
+@pytest.mark.parametrize('s', ["x > DATE '2020-01-01'", "x > TIMESTAMP '2020-01-01 00:00:00'"])
+def test_grouping_typed_literal(s):
+    parsed = sqlparse.parse(s)[0]
+    assert isinstance(parsed[4], sql.TypedLiteral)
+
+
 @pytest.mark.parametrize('s, a, b', [
     ('select a from b where c < d + e', sql.Identifier, sql.Identifier),
     ('select a from b where c < d + interval \'1 day\'', sql.Identifier, sql.TypedLiteral),

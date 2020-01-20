@@ -108,7 +108,7 @@ def group_typed_literal(tlist):
     # https://www.postgresql.org/docs/9.1/datatype-datetime.html
     # https://www.postgresql.org/docs/9.1/functions-datetime.html
     def match(token):
-        return token.match(*sql.TypedLiteral.M_OPEN)
+        return imt(token, m=sql.TypedLiteral.M_OPEN)
 
     def match_to_extend(token):
         return isinstance(token, sql.TypedLiteral)
