@@ -491,10 +491,9 @@ class IdentifierList(TokenList):
 
 class TypedLiteral(TokenList):
     """A typed literal, such as "date '2001-09-28'" or "interval '2 hours'"."""
-    M_OPEN = T.Name.Builtin, None
+    M_OPEN = [(T.Name.Builtin, None), (T.Keyword, "TIMESTAMP")]
     M_CLOSE = T.String.Single, None
-    M_EXTEND = T.Keyword, (
-        "DAY", "HOUR", "MINUTE", "MONTH", "SECOND", "TIMESTAMP", "YEAR")
+    M_EXTEND = T.Keyword, ("DAY", "HOUR", "MINUTE", "MONTH", "SECOND", "YEAR")
 
 
 class Parenthesis(TokenList):
