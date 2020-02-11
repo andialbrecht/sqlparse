@@ -19,6 +19,20 @@ def test_grouping_parenthesis():
     assert len(parsed.tokens[2].tokens[3].tokens) == 3
 
 
+def test_grouping_enable_row_movement():
+    s = 'CREATE TABLE t1 (id NUMBER, description VARCHAR2(30)) ENABLE ROW MOVEMENT GROUP BY Test'
+    parsed = sqlparse.parse(s)[0]
+    assert str(parsed) == s
+    assert len(parsed.tokens) == 2
+
+
+def test_grouping_mv():
+    s = 'CREATE MATERIALIZED VIEW SCHEMA_NAME.TABLE_NAME ORGANIZATION HEAP PCTFREE AS SELECT * from TABLE_NAME;'
+    parsed = sqlparse.parse(s)[0]
+    assert str(parsed) == s
+    assert len(parsed.tokens) == 2
+
+
 def test_grouping_comments():
     s = '/*\n * foo\n */   \n  bar'
     parsed = sqlparse.parse(s)[0]

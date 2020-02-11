@@ -198,6 +198,18 @@ def test_parse_group_by():
     assert p.tokens[0].ttype is T.Keyword
 
 
+def test_parse_enable_row_movement():
+    p = sqlparse.parse('ENABLE ROW MOVEMENT')[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype is T.Keyword
+
+
+def test_parse_disable_row_movement():
+    p = sqlparse.parse('DISABLE ROW MOVEMENT')[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype is T.Keyword
+
+
 def test_parse_order_by():
     p = sqlparse.parse('ORDER BY')[0]
     assert len(p.tokens) == 1
