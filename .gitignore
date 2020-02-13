@@ -1,6 +1,6 @@
 # PyCharm
 .idea/
-
+*.iml
 *.py[co]
 docs/build
 dist/

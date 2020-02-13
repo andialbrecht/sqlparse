@@ -654,8 +654,10 @@ def test_grouping_as_cte():
     assert p[4].value == 'WITH'
 
 
-def test_grouping_partition():
-    p = sqlparse.parse('DENSE_RANK() OVER (PARTITION BY deptno ORDER BY sal DESC) AS myrank')[0].tokens
+def test_grouping_window():
+    p = sqlparse.parse('DENSE_RANK() OVER (PARTITION BY deptno ORDER BY foo DESC, bar ASC) AS myrank')[0].tokens
     assert len(p) == 1
-    assert p[0].tokens[0].window_function.value == 'DENSE_RANK()'
-    assert p[0].tokens[0].window_definition.value == '(PARTITION BY deptno ORDER BY sal DESC)'
+    window = p[0].tokens[0]
+    assert window.window_function.value == 'DENSE_RANK()'
+    assert window.window_definition.value == '(PARTITION BY deptno ORDER BY foo DESC, bar ASC)'
+    assert window.window_definition.tokens[7].value == 'foo DESC, bar ASC'
