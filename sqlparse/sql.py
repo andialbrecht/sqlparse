@@ -520,6 +520,53 @@ class Assignment(TokenList):
     """An assignment like 'var := val;'"""
 
 
+class Window(TokenList):
+    """A window function like 'DENSE_RANK() OVER (PARTITION BY deptno ORDER BY sal DESC)'"""
+    @property
+    def window_function(self):
+        return self.tokens[0]
+
+    @property
+    def window_definition(self):
+        return self.tokens[-1]
+
+
+class ColumnDefinition(TokenList):
+    """A column definition like '"text" VARCHAR(500) NOT NULL DEFAULT '''"""
+    @property
+    def identifier(self):
+        return self.tokens[0]
+
+    @property
+    def column_type(self):
+        return self.tokens[1]
+
+    @property
+    def not_null(self):
+        """Returns the nullable definition or ``None`` as uppercase string."""
+        _, not_null = self.token_next_by(t=T.Keyword.NotNull)
+        return not_null.normalized if not_null else None
+
+    @property
+    def default_value(self):
+        """Returns the default value or ``None`` as uppercase string."""
+        _, default_value = self.token_next_by(t=T.Keyword.Default)
+        return default_value.normalized if default_value else None
+
+
+class ColumnDefinitionList(TokenList):
+    """A list of :class:`~sqlparse.sql.ColumnDefinition`\'s."""
+
+    def get_column_definitions(self):
+        """Returns the column definitions.
+
+        Whitespaces and punctuations are not included in this generator.
+        """
+        for token in self.tokens:
+            if not (token.is_whitespace or token.match(T.Punctuation, ',')):
+                yield token
+
+
 class If(TokenList):
     """An 'if' clause with possible 'else if' or 'else' parts."""
     M_OPEN = T.Keyword, 'IF'

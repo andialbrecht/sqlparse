@@ -161,6 +161,8 @@ def group_as(tlist):
         return token.is_keyword and token.normalized == 'AS'
 
     def valid_prev(token):
+        if imt(token, t=T.Window):
+            return True
         return token.normalized == 'NULL' or not token.is_keyword
 
     def valid_next(token):
@@ -351,6 +353,55 @@ def group_functions(tlist):
         tidx, token = tlist.token_next_by(t=T.Name, idx=tidx)
 
 
+# def group_identifier_list(tlist):
+#     has_create = False
+#     has_table = False
+#     for tmp_token in tlist.tokens:
+#         if tmp_token.value == 'CREATE':
+#             has_create = True
+#         if tmp_token.value == 'TABLE':
+#             has_table = True
+#     if not has_create or not has_table:
+#         return
+#
+#     m_role = T.Keyword, ('null', 'role')
+#     sqlcls = (sql.Function, sql.Case, sql.Identifier, sql.Comparison,
+#               sql.IdentifierList, sql.Operation)
+#     ttypes = (T_NUMERICAL + T_STRING + T_NAME
+#               + (T.Keyword, T.Comment, T.Wildcard))
+#
+#     def match(token):
+#         return token.match(T.Punctuation, ',')
+#
+#     def valid(token):
+#         return imt(token, i=sqlcls, m=m_role, t=ttypes)
+#
+#     def post(tlist, pidx, tidx, nidx):
+#         return pidx, nidx
+#
+#     valid_prev = valid_next = valid
+#     _group(tlist, sql.IdentifierList, match,
+#            valid_prev, valid_next, post, extend=True)
+
+
+# def group_column_definition_list(tlist):
+#     m_role = T.Keyword, ('null', 'role')
+#     sqlcls = sql.ColumnDefinition
+#
+#     def match(token):
+#         return token.match(T.Punctuation, ',')
+#
+#     def valid(token):
+#         return imt(token, i=sqlcls, m=m_role)
+#
+#     def post(tlist, pidx, tidx, nidx):
+#         return pidx, nidx
+#
+#     valid_prev = valid_next = valid
+#     _group(tlist, sql.ColumnDefinitionList, match,
+#            valid_prev, valid_next, post, extend=True)
+
+
 def group_order(tlist):
     """Group together Identifier and Asc/Desc token"""
     tidx, token = tlist.token_next_by(t=T.Keyword.Order)
@@ -385,6 +436,24 @@ def group_values(tlist):
         tlist.group_tokens(sql.Values, start_idx, end_idx, extend=True)
 
 
+def group_window(tlist):
+    def match(token):
+        return token.ttype == T.Window
+
+    def valid_prev(token):
+        if imt(token, i=sql.Function):
+            return True
+        return False
+
+    def valid_next(token):
+        return not token.match(T.Punctuation, ')')
+
+    def post(tlist, pidx, tidx, nidx):
+        return pidx, nidx
+
+    _group(tlist, sql.Window, match, valid_prev, valid_next, post)
+
+
 def group(stmt):
     for func in [
         group_comments,
@@ -408,13 +477,16 @@ def group(stmt):
         group_typed_literal,
         group_operator,
         group_comparison,
+        group_window,
         group_as,
         group_aliased,
         group_assignment,
 
         align_comments,
         group_identifier_list,
+        #group_column_definition_list,
         group_values,
+
     ]:
         func(stmt)
     return stmt

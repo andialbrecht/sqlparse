@@ -78,13 +78,14 @@ SQL_REGEX = {
         (r'((LEFT\s+|RIGHT\s+|FULL\s+)?(INNER\s+|OUTER\s+|STRAIGHT\s+)?'
          r'|(CROSS\s+|NATURAL\s+)?)?JOIN\b', tokens.Keyword),
         (r'END(\s+IF|\s+LOOP|\s+WHILE)?\b', tokens.Keyword),
-        (r'NOT\s+NULL\b', tokens.Keyword),
+        (r'NOT\s+NULL\b', tokens.Keyword.NotNull),
         (r'NULLS\s+(FIRST|LAST)\b', tokens.Keyword),
         (r'UNION\s+ALL\b', tokens.Keyword),
         (r'CREATE(\s+OR\s+REPLACE)?\b', tokens.Keyword.DDL),
         (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
         (r'GROUP\s+BY\b', tokens.Keyword),
         (r'ORDER\s+BY\b', tokens.Keyword),
+        (r'PARTITION\s+BY\b', tokens.Keyword),
         (r'(LATERAL\s+VIEW\s+)'
          r'(EXPLODE|INLINE|PARSE_URL_TUPLE|POSEXPLODE|STACK)\b',
          tokens.Keyword),
@@ -224,7 +225,7 @@ KEYWORDS = {
     'DAY': tokens.Keyword,
     'DEALLOCATE': tokens.Keyword,
     'DECLARE': tokens.Keyword,
-    'DEFAULT': tokens.Keyword,
+    'DEFAULT': tokens.Keyword.Default,
     'DEFAULTS': tokens.Keyword,
     'DEFERRABLE': tokens.Keyword,
     'DEFERRED': tokens.Keyword,
@@ -838,7 +839,7 @@ KEYWORDS_ORACLE = {
 # PostgreSQL Syntax
 KEYWORDS_PLPGSQL = {
     'PARTITION': tokens.Keyword,
-    'OVER': tokens.Keyword,
+    'OVER': tokens.Window,
     'PERFORM': tokens.Keyword,
     'NOTICE': tokens.Keyword,
     'PLPGSQL': tokens.Keyword,

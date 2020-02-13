@@ -19,13 +19,6 @@ def test_grouping_parenthesis():
     assert len(parsed.tokens[2].tokens[3].tokens) == 3
 
 
-def test_grouping_enable_row_movement():
-    s = 'CREATE TABLE t1 (id NUMBER, description VARCHAR2(30)) ENABLE ROW MOVEMENT GROUP BY Test'
-    parsed = sqlparse.parse(s)[0]
-    assert str(parsed) == s
-    assert len(parsed.tokens) == 2
-
-
 def test_grouping_mv():
     s = 'CREATE MATERIALIZED VIEW SCHEMA_NAME.TABLE_NAME ORGANIZATION HEAP PCTFREE AS SELECT * from TABLE_NAME;'
     parsed = sqlparse.parse(s)[0]
@@ -396,6 +389,11 @@ def test_grouping_varchar():
     assert isinstance(p.tokens[2], sql.Function)
 
 
+def test_grouping_column_definition():
+    p = sqlparse.parse('''CREATE TABLE test ("text" Varchar NOT NULL DEFAULT '')''')[0]
+    assert isinstance(p.tokens[2], sql.Function)
+
+
 def test_statement_get_type():
     def f(sql):
         return sqlparse.parse(sql)[0]
@@ -654,3 +652,10 @@ def test_grouping_as_cte():
     assert p[0].get_alias() is None
     assert p[2].value == 'AS'
     assert p[4].value == 'WITH'
+
+
+def test_grouping_partition():
+    p = sqlparse.parse('DENSE_RANK() OVER (PARTITION BY deptno ORDER BY sal DESC) AS myrank')[0].tokens
+    assert len(p) == 1
+    assert p[0].tokens[0].window_function.value == 'DENSE_RANK()'
+    assert p[0].tokens[0].window_definition.value == '(PARTITION BY deptno ORDER BY sal DESC)'

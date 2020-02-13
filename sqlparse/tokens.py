@@ -52,6 +52,7 @@ Comparison = Operator.Comparison
 Wildcard = Token.Wildcard
 Comment = Token.Comment
 Assignment = Token.Assignment
+Window = Token.Window
 
 # Generic types for non-source code
 Generic = Token.Generic
