@@ -23,4 +23,4 @@ clean:
 release:
 	@rm -rf dist/
 	python setup.py sdist bdist_wheel
-	twine upload --sign --identity E0B84F81
+	twine upload --sign --identity E0B84F81 dist/*
