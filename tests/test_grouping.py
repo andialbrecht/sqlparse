@@ -36,7 +36,7 @@ def test_grouping_assignment(s):
 @pytest.mark.parametrize('s', ["x > DATE '2020-01-01'", "x > TIMESTAMP '2020-01-01 00:00:00'"])
 def test_grouping_typed_literal(s):
     parsed = sqlparse.parse(s)[0]
-    assert isinstance(parsed[4], sql.TypedLiteral)
+    assert isinstance(parsed[0][4], sql.TypedLiteral)
 
 
 @pytest.mark.parametrize('s, a, b', [
@@ -548,6 +548,17 @@ def test_comparison_with_functions():
     assert len(p.tokens[0].tokens) == 5
     assert p.tokens[0].left.value == 'DATE(foo.bar)'
     assert p.tokens[0].right.value == 'bar.baz'
+
+
+def test_comparison_with_typed_literal():
+    p = sqlparse.parse("foo = DATE 'bar.baz'")[0]
+    assert len(p.tokens) == 1
+    comp = p.tokens[0]
+    assert isinstance(comp, sql.Comparison)
+    assert len(comp.tokens) == 5
+    assert comp.left.value == 'foo'
+    assert isinstance(comp.right, sql.TypedLiteral)
+    assert comp.right.value == "DATE 'bar.baz'"
 
 
 @pytest.mark.parametrize('start', ['FOR', 'FOREACH'])
