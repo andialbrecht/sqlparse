@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
-
 """Tests sqlparse.parse()."""
+from io import StringIO
 
 import pytest
 
 import sqlparse
 from sqlparse import sql, tokens as T
-from sqlparse.compat import StringIO, text_type
 
 
 def test_parse_tokenize():
@@ -409,26 +407,26 @@ def test_dbldollar_as_literal(sql, is_literal):
 
 
 def test_non_ascii():
-    _test_non_ascii = u"insert into test (id, name) values (1, 'тест');"
+    _test_non_ascii = "insert into test (id, name) values (1, 'тест');"
 
     s = _test_non_ascii
     stmts = sqlparse.parse(s)
     assert len(stmts) == 1
     statement = stmts[0]
-    assert text_type(statement) == s
+    assert str(statement) == s
     assert statement._pprint_tree() is None
 
     s = _test_non_ascii.encode('utf-8')
     stmts = sqlparse.parse(s, 'utf-8')
     assert len(stmts) == 1
     statement = stmts[0]
-    assert text_type(statement) == _test_non_ascii
+    assert str(statement) == _test_non_ascii
     assert statement._pprint_tree() is None
 
 
 def test_get_real_name():
     # issue 369
-    s = u"update a t set t.b=1"
+    s = "update a t set t.b=1"
     stmts = sqlparse.parse(s)
     assert len(stmts) == 1
     assert 'a' == stmts[0].tokens[2].get_real_name()
@@ -437,14 +435,14 @@ def test_get_real_name():
 
 def test_from_subquery():
     # issue 446
-    s = u'from(select 1)'
+    s = 'from(select 1)'
     stmts = sqlparse.parse(s)
     assert len(stmts) == 1
     assert len(stmts[0].tokens) == 2
     assert stmts[0].tokens[0].value == 'from'
     assert stmts[0].tokens[0].ttype == T.Keyword
 
-    s = u'from (select 1)'
+    s = 'from (select 1)'
     stmts = sqlparse.parse(s)
     assert len(stmts) == 1
     assert len(stmts[0].tokens) == 3

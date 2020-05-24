@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2009-2018 the sqlparse authors and contributors
 # <see AUTHORS file>

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2009-2018 the sqlparse authors and contributors
 # <see AUTHORS file>
@@ -9,7 +8,7 @@
 from sqlparse import sql, tokens as T
 
 
-class StatementSplitter(object):
+class StatementSplitter:
     """Filter that split stream at individual statements"""
 
     def __init__(self):
