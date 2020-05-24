@@ -39,7 +39,7 @@ class RightMarginFilter(object):
                         indent = match.group()
                     else:
                         indent = ''
-                    yield sql.Token(T.Whitespace, '\n{0}'.format(indent))
+                    yield sql.Token(T.Whitespace, '\n{}'.format(indent))
                     self.line = indent
                 self.line += val
             yield token

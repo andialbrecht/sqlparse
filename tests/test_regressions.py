@@ -20,9 +20,9 @@ def test_issue9():
 
 
 def test_issue13():
-    parsed = sqlparse.parse(("select 'one';\n"
-                             "select 'two\\'';\n"
-                             "select 'three';"))
+    parsed = sqlparse.parse("select 'one';\n"
+                            "select 'two\\'';\n"
+                            "select 'three';")
     assert len(parsed) == 3
     assert str(parsed[1]).strip() == "select 'two\\'';"
 
@@ -73,8 +73,8 @@ def test_issue39():
 
 def test_issue40():
     # make sure identifier lists in subselects are grouped
-    p = sqlparse.parse(('SELECT id, name FROM '
-                        '(SELECT id, name FROM bar) as foo'))[0]
+    p = sqlparse.parse('SELECT id, name FROM '
+                       '(SELECT id, name FROM bar) as foo')[0]
     assert len(p.tokens) == 7
     assert p.tokens[2].__class__ == sql.IdentifierList
     assert p.tokens[-1].__class__ == sql.Identifier
@@ -158,9 +158,9 @@ def test_parse_sql_with_binary():
     # See https://github.com/andialbrecht/sqlparse/pull/88
     # digest = '|ËêplL4¡høN{'
     digest = '\x82|\xcb\x0e\xea\x8aplL4\xa1h\x91\xf8N{'
-    sql = "select * from foo where bar = '{0}'".format(digest)
+    sql = "select * from foo where bar = '{}'".format(digest)
     formatted = sqlparse.format(sql, reindent=True)
-    tformatted = "select *\nfrom foo\nwhere bar = '{0}'".format(digest)
+    tformatted = "select *\nfrom foo\nwhere bar = '{}'".format(digest)
     if PY2:
         tformatted = tformatted.decode('unicode-escape')
     assert formatted == tformatted
@@ -337,9 +337,9 @@ def test_issue315_utf8_by_default():
         '\x9b\xb2.'
         '\xec\x82\xac\xeb\x9e\x91\xed\x95\xb4\xec\x9a\x94'
     )
-    sql = "select * from foo where bar = '{0}'".format(digest)
+    sql = "select * from foo where bar = '{}'".format(digest)
     formatted = sqlparse.format(sql, reindent=True)
-    tformatted = "select *\nfrom foo\nwhere bar = '{0}'".format(digest)
+    tformatted = "select *\nfrom foo\nwhere bar = '{}'".format(digest)
     if PY2:
         tformatted = tformatted.decode('utf-8')
     assert formatted == tformatted

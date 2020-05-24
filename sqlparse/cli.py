@@ -62,16 +62,16 @@ def create_parser():
         metavar='CHOICE',
         dest='keyword_case',
         choices=_CASE_CHOICES,
-        help='change case of keywords, CHOICE is one of {0}'.format(
-            ', '.join('"{0}"'.format(x) for x in _CASE_CHOICES)))
+        help='change case of keywords, CHOICE is one of {}'.format(
+            ', '.join('"{}"'.format(x) for x in _CASE_CHOICES)))
 
     group.add_argument(
         '-i', '--identifiers',
         metavar='CHOICE',
         dest='identifier_case',
         choices=_CASE_CHOICES,
-        help='change case of identifiers, CHOICE is one of {0}'.format(
-            ', '.join('"{0}"'.format(x) for x in _CASE_CHOICES)))
+        help='change case of identifiers, CHOICE is one of {}'.format(
+            ', '.join('"{}"'.format(x) for x in _CASE_CHOICES)))
 
     group.add_argument(
         '-l', '--language',
@@ -153,7 +153,7 @@ def create_parser():
 
 def _error(msg):
     """Print msg and optionally exit with return code exit_."""
-    sys.stderr.write(u'[ERROR] {0}\n'.format(msg))
+    sys.stderr.write(u'[ERROR] {}\n'.format(msg))
     return 1
 
 
@@ -176,7 +176,7 @@ def main(args=None):
                 data = ''.join(f.readlines())
         except IOError as e:
             return _error(
-                u'Failed to read {0}: {1}'.format(args.filename, e))
+                u'Failed to read {}: {}'.format(args.filename, e))
 
     close_stream = False
     if args.outfile:
@@ -184,7 +184,7 @@ def main(args=None):
             stream = open(args.outfile, 'w', args.encoding)
             close_stream = True
         except IOError as e:
-            return _error(u'Failed to open {0}: {1}'.format(args.outfile, e))
+            return _error(u'Failed to open {}: {}'.format(args.outfile, e))
     else:
         stream = sys.stdout
 
@@ -192,7 +192,7 @@ def main(args=None):
     try:
         formatter_opts = sqlparse.formatter.validate_options(formatter_opts)
     except SQLParseError as e:
-        return _error(u'Invalid options: {0}'.format(e))
+        return _error(u'Invalid options: {}'.format(e))
 
     s = sqlparse.format(data, **formatter_opts)
     stream.write(s)

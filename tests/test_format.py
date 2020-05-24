@@ -663,7 +663,7 @@ def test_format_column_ordering():
 
 
 def test_truncate_strings():
-    sql = "update foo set value = '{0}';".format('x' * 1000)
+    sql = "update foo set value = '{}';".format('x' * 1000)
     formatted = sqlparse.format(sql, truncate_strings=10)
     assert formatted == "update foo set value = 'xxxxxxxxxx[...]';"
     formatted = sqlparse.format(sql, truncate_strings=3, truncate_char='YYY')
