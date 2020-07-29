@@ -45,7 +45,7 @@ SQL_REGEX = {
         (r'(?<!\w)[$:?]\w+', tokens.Name.Placeholder),
 
         (r'\\\w+', tokens.Command),
-
+        (r'(NOT\s+)?(IN)\b', tokens.Operator.Comparison),
         # FIXME(andi): VALUES shouldn't be listed here
         # see https://github.com/andialbrecht/sqlparse/pull/64
         # AS and IN are special, it may be followed by a parenthesis, but

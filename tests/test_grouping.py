@@ -373,8 +373,18 @@ def test_grouping_function_not_in():
     # issue183
     p = sqlparse.parse('in(1, 2)')[0]
     assert len(p.tokens) == 2
-    assert p.tokens[0].ttype == T.Keyword
+    assert p.tokens[0].ttype == T.Comparison
     assert isinstance(p.tokens[1], sql.Parenthesis)
+
+
+def test_in_comparison():
+    # issue566
+    p = sqlparse.parse('a in (1, 2)')[0]
+    assert len(p.tokens) == 1
+    assert isinstance(p.tokens[0], sql.Comparison)
+    assert len(p.tokens[0].tokens) == 5
+    assert p.tokens[0].left.value == 'a'
+    assert p.tokens[0].right.value == '(1, 2)'
 
 
 def test_grouping_varchar():
