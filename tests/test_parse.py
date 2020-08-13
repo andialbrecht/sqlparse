@@ -474,7 +474,7 @@ def test_parenthesis():
                                                     T.Punctuation]
 
 
-def test_parse_wrongly_grouping_cte_with_data_as_keyword() -> None:
+def test_parse_wrongly_grouping_cte_with_data_as_keyword():
     """
     There is a bug caused by having "data" as keyword for the __second__ CTE.
     See the tests
@@ -494,7 +494,7 @@ def test_parse_wrongly_grouping_cte_with_data_as_keyword() -> None:
     assert not identifier_list.value.endswith("data")
 
 
-def test_parse_wrongly_grouping_cte_with_data_as_keyword_alternative1() -> None:
+def test_parse_wrongly_grouping_cte_with_data_as_keyword_alternative1():
     """
     This is a slight alternative to
     `test_parse_wrongly_grouping_cte_with_data_as_keyword` which does work.
@@ -512,7 +512,7 @@ def test_parse_wrongly_grouping_cte_with_data_as_keyword_alternative1() -> None:
     assert not identifier_list.value.endswith("not_data")
 
 
-def test_parse_wrongly_grouping_cte_with_data_as_keyword_alternative2() -> None:
+def test_parse_wrongly_grouping_cte_with_data_as_keyword_alternative2():
     """
     This is a slight alternative to
     `test_parse_wrongly_grouping_cte_with_data_as_keyword` which does work.
