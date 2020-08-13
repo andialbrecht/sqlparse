@@ -472,3 +472,60 @@ def test_parenthesis():
                                                     T.Newline,
                                                     T.Newline,
                                                     T.Punctuation]
+
+
+def test_parse_wrongly_grouping_cte_with_data_as_keyword() -> None:
+    """
+    There is a bug caused by having "data" as keyword for the __second__ CTE.
+    See the tests
+    `test_parse_wrongly_grouping_cte_with_data_as_keyword_alternative*` below
+    for examples which are slightly different but DO work.
+    """
+    sql = (
+        "WITH first_cte AS (SELECT * FROM table), "
+        "data AS (SELECT * FROM first_cte) "
+        "SELECT * FROM data "
+    )
+
+    statements = sqlparse.parse(sql)
+    statement = statements[0]
+    identifier_list = statement[2]
+
+    assert not identifier_list.value.endswith("data")
+
+
+def test_parse_wrongly_grouping_cte_with_data_as_keyword_alternative1() -> None:
+    """
+    This is a slight alternative to
+    `test_parse_wrongly_grouping_cte_with_data_as_keyword` which does work.
+    """
+    sql = (
+        "WITH first_cte AS (SELECT * FROM table), "
+        "not_data AS (SELECT * FROM first_cte) "
+        "SELECT * FROM not_data "
+    )
+
+    statements = sqlparse.parse(sql)
+    statement = statements[0]
+    identifier_list = statement[2]
+
+    assert not identifier_list.value.endswith("not_data")
+
+
+def test_parse_wrongly_grouping_cte_with_data_as_keyword_alternative2() -> None:
+    """
+    This is a slight alternative to
+    `test_parse_wrongly_grouping_cte_with_data_as_keyword` which does work.
+    """
+    sql = (
+        "WITH first_cte AS (SELECT * FROM table), "
+        "second_cte AS (SELECT * FROM first_cte) "
+        "data AS (SELECT * FROM second_cte) "
+        "SELECT * FROM data "
+    )
+
+    statements = sqlparse.parse(sql)
+    statement = statements[0]
+    identifier_list = statement[2]
+
+    assert not identifier_list.value.endswith("data")
