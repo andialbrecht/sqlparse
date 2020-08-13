@@ -491,6 +491,7 @@ def test_parse_wrongly_grouping_cte_with_data_as_keyword():
     statement = statements[0]
     identifier_list = statement[2]
 
+    __import__('ipdb').set_trace()
     assert not identifier_list.value.endswith("data")
 
 
@@ -519,7 +520,7 @@ def test_parse_wrongly_grouping_cte_with_data_as_keyword_alternative2():
     """
     sql = (
         "WITH first_cte AS (SELECT * FROM table), "
-        "second_cte AS (SELECT * FROM first_cte) "
+        "second_cte AS (SELECT * FROM first_cte), "
         "data AS (SELECT * FROM second_cte) "
         "SELECT * FROM data "
     )
