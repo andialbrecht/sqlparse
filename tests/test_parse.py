@@ -472,3 +472,20 @@ def test_parenthesis():
                                                     T.Newline,
                                                     T.Newline,
                                                     T.Punctuation]
+
+
+def test_parse_keyword_before_as_should_be_identifier():
+    """A keyword before an AS should be an identifier."""
+    sql_statement = (
+        "WITH first_cte AS (SELECT * FROM table), "
+        "data AS (SELECT * FROM first_cte) "
+        "SELECT * FROM data "
+    )
+
+    statements = sqlparse.parse(sql_statement)
+    statement = statements[0]
+    identifier_list = statement[2]
+    data_token = identifier_list.tokens[-1]
+
+    assert data_token.ttype != T.Keyword
+    assert isinstance(data_keyword, sql.Identifier)
