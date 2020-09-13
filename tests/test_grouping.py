@@ -399,10 +399,6 @@ def test_statement_get_type():
     assert f(' update foo').get_type() == 'UPDATE'
     assert f('\nupdate foo').get_type() == 'UPDATE'
     assert f('foo').get_type() == 'UNKNOWN'
-    # Statements that have a whitespace after the closing semicolon
-    # are parsed as two statements where later only consists of the
-    # trailing whitespace.
-    assert f('\n').get_type() == 'UNKNOWN'
 
 
 def test_identifier_with_operators():
