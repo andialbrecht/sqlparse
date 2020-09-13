@@ -120,7 +120,7 @@ To check out the latest sources of this module run
 
 to check out the latest sources from the repository.
 
-:mod:`sqlparse` is currently tested under Python 3.5+ and pypy. Tests are
+:mod:`sqlparse` is currently tested under Python 3.5+ and PyPy. Tests are
 automatically run on each commit and for each pull request on Travis:
 https://travis-ci.org/andialbrecht/sqlparse
 
