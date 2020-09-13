@@ -41,26 +41,26 @@ class TestFormat:
     def test_strip_comments_single(self):
         sql = 'select *-- statement starts here\nfrom foo'
         res = sqlparse.format(sql, strip_comments=True)
-        assert res == 'select * from foo'
+        assert res == 'select *\nfrom foo'
         sql = 'select * -- statement starts here\nfrom foo'
         res = sqlparse.format(sql, strip_comments=True)
-        assert res == 'select * from foo'
+        assert res == 'select *\nfrom foo'
         sql = 'select-- foo\nfrom -- bar\nwhere'
         res = sqlparse.format(sql, strip_comments=True)
-        assert res == 'select from where'
+        assert res == 'select\nfrom\nwhere'
         sql = 'select *-- statement starts here\n\nfrom foo'
         res = sqlparse.format(sql, strip_comments=True)
-        assert res == 'select * from foo'
+        assert res == 'select *\n\nfrom foo'
         sql = 'select * from foo-- statement starts here\nwhere'
         res = sqlparse.format(sql, strip_comments=True)
-        assert res == 'select * from foo where'
+        assert res == 'select * from foo\nwhere'
         sql = 'select a-- statement starts here\nfrom foo'
         res = sqlparse.format(sql, strip_comments=True)
-        assert res == 'select a from foo'
+        assert res == 'select a\nfrom foo'
         sql = '--comment\nselect a-- statement starts here\n' \
               'from foo--comment\nf'
         res = sqlparse.format(sql, strip_comments=True)
-        assert res == 'select a from foo f'
+        assert res == 'select a\nfrom foo\nf'
 
     def test_strip_comments_invalid_option(self):
         sql = 'select-- foo\nfrom -- bar\nwhere'

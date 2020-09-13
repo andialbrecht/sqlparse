@@ -5,16 +5,28 @@
 # This module is part of python-sqlparse and is released under
 # the BSD License: https://opensource.org/licenses/BSD-3-Clause
 
+import re
+
 from sqlparse import sql, tokens as T
 from sqlparse.utils import split_unquoted_newlines
 
 
 class StripCommentsFilter:
+
     @staticmethod
     def _process(tlist):
         def get_next_comment():
             # TODO(andi) Comment types should be unified, see related issue38
             return tlist.token_next_by(i=sql.Comment, t=T.Comment)
+
+        def _get_insert_token(token):
+            """Returns either a whitespace or the line breaks from token."""
+            # See issue484 why line breaks should be preserved.
+            m = re.search(r'((\r\n|\r|\n)+) *$', token.value)
+            if m is not None:
+                return sql.Token(T.Whitespace.Newline, m.groups()[0])
+            else:
+                return sql.Token(T.Whitespace, ' ')
 
         tidx, token = get_next_comment()
         while token:
@@ -26,15 +38,12 @@ class StripCommentsFilter:
                     or prev_.is_whitespace or prev_.match(T.Punctuation, '(')
                     or next_.is_whitespace or next_.match(T.Punctuation, ')')):
                 # Insert a whitespace to ensure the following SQL produces
-                # a valid SQL (see #425). For example:
-                #
-                # Before: select a--comment\nfrom foo
-                # After: select a from foo
-                if prev_ is not None and next_ is None:
-                    tlist.tokens.insert(tidx, sql.Token(T.Whitespace, ' '))
+                # a valid SQL (see #425).
+                if prev_ is not None and not prev_.match(T.Punctuation, '('):
+                    tlist.tokens.insert(tidx, _get_insert_token(token))
                 tlist.tokens.remove(token)
             else:
-                tlist.tokens[tidx] = sql.Token(T.Whitespace, ' ')
+                tlist.tokens[tidx] = _get_insert_token(token)
 
             tidx, token = get_next_comment()
 
