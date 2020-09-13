@@ -80,7 +80,6 @@ def test_script():
 def test_encoding_stdout(fpath, encoding, filepath, load_file, capfd):
     path = filepath(fpath)
     expected = load_file(fpath, encoding)
-    sys.stdout.reconfigure(encoding=encoding)
     sqlparse.cli.main([path, '--encoding', encoding])
     out, _ = capfd.readouterr()
     assert out == expected
@@ -109,7 +108,6 @@ def test_encoding_stdin(fpath, encoding, filepath, load_file, capfd):
     old_stdin = sys.stdin
     with open(path) as f:
         sys.stdin = f
-        sys.stdout.reconfigure(encoding=encoding)
         sqlparse.cli.main(['-', '--encoding', encoding])
     sys.stdin = old_stdin
     out, _ = capfd.readouterr()
