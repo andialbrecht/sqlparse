@@ -3,6 +3,7 @@ python-sqlparse - Parse SQL statements
 
 |buildstatus|_
 |coverage|_
+|docs|_
 
 .. docincludebegin
 
@@ -70,3 +71,5 @@ pygments-Homepage: http://pygments.org/
 .. _buildstatus: https://travis-ci.org/#!/andialbrecht/sqlparse
 .. |coverage| image:: https://codecov.io/gh/andialbrecht/sqlparse/branch/master/graph/badge.svg
 .. _coverage: https://codecov.io/gh/andialbrecht/sqlparse
+.. |docs| image:: https://readthedocs.org/projects/sqlparse/badge/?version=latest
+.. _docs: https://sqlparse.readthedocs.io/en/latest/?badge=latest
