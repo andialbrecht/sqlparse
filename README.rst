@@ -68,5 +68,5 @@ pygments-Homepage: http://pygments.org/
 
 .. |buildstatus| image:: https://secure.travis-ci.org/andialbrecht/sqlparse.png?branch=master
 .. _buildstatus: https://travis-ci.org/#!/andialbrecht/sqlparse
-.. |coverage| image:: https://coveralls.io/repos/andialbrecht/sqlparse/badge.svg?branch=master&service=github
-.. _coverage: https://coveralls.io/github/andialbrecht/sqlparse?branch=master
+.. |coverage| image:: https://codecov.io/gh/andialbrecht/sqlparse/branch/master/graph/badge.svg
+.. _coverage: https://codecov.io/gh/andialbrecht/sqlparse
