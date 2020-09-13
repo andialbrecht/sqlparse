@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import subprocess
 import sys
 
@@ -71,75 +69,56 @@ def test_stdout(filepath, load_file, capsys):
 
 def test_script():
     # Call with the --help option as a basic sanity check.
-    cmd = "{0:s} -m sqlparse.cli --help".format(sys.executable)
+    cmd = "{:s} -m sqlparse.cli --help".format(sys.executable)
     assert subprocess.call(cmd.split()) == 0
 
 
-def test_encoding_utf8_stdout(filepath, load_file, capfd):
-    path = filepath('encoding_utf8.sql')
-    expected = load_file('encoding_utf8.sql', 'utf-8')
-    sys.stdout.encoding = 'utf-8'
-    sqlparse.cli.main([path])
+@pytest.mark.parametrize('fpath, encoding', (
+    ('encoding_utf8.sql', 'utf-8'),
+    ('encoding_gbk.sql', 'gbk'),
+))
+def test_encoding_stdout(fpath, encoding, filepath, load_file, capfd):
+    path = filepath(fpath)
+    expected = load_file(fpath, encoding)
+    sys.stdout.reconfigure(encoding=encoding)
+    sqlparse.cli.main([path, '--encoding', encoding])
     out, _ = capfd.readouterr()
     assert out == expected
 
 
-def test_encoding_utf8_output_file(filepath, load_file, tmpdir):
-    in_path = filepath('encoding_utf8.sql')
-    expected = load_file('encoding_utf8.sql', 'utf-8')
-    out_path = tmpdir.dirname + '/encoding_utf8.out.sql'
-    sqlparse.cli.main([in_path, '-o', out_path])
-    out = load_file(out_path, 'utf-8')
+@pytest.mark.parametrize('fpath, encoding', (
+    ('encoding_utf8.sql', 'utf-8'),
+    ('encoding_gbk.sql', 'gbk'),
+))
+def test_encoding_output_file(fpath, encoding, filepath, load_file, tmpdir):
+    in_path = filepath(fpath)
+    expected = load_file(fpath, encoding)
+    out_path = tmpdir.dirname + '/encoding_out.sql'
+    sqlparse.cli.main([in_path, '--encoding', encoding, '-o', out_path])
+    out = load_file(out_path, encoding)
     assert out == expected
 
 
-def test_encoding_gbk_stdout(filepath, load_file, capfd):
-    path = filepath('encoding_gbk.sql')
-    expected = load_file('encoding_gbk.sql', 'gbk')
-    sys.stdout.encoding = 'gbk'
-    sqlparse.cli.main([path, '--encoding', 'gbk'])
-    out, _ = capfd.readouterr()
-    assert out == expected
-
-
-def test_encoding_gbk_output_file(filepath, load_file, tmpdir):
-    in_path = filepath('encoding_gbk.sql')
-    expected = load_file('encoding_gbk.sql', 'gbk')
-    out_path = tmpdir.dirname + '/encoding_gbk.out.sql'
-    sqlparse.cli.main([in_path, '--encoding', 'gbk', '-o', out_path])
-    out = load_file(out_path, 'gbk')
-    assert out == expected
-
-
-def test_encoding_stdin_utf8(filepath, load_file, capfd):
-    path = filepath('encoding_utf8.sql')
-    expected = load_file('encoding_utf8.sql', 'utf-8')
+@pytest.mark.parametrize('fpath, encoding', (
+    ('encoding_utf8.sql', 'utf-8'),
+    ('encoding_gbk.sql', 'gbk'),
+))
+def test_encoding_stdin(fpath, encoding, filepath, load_file, capfd):
+    path = filepath(fpath)
+    expected = load_file(fpath, encoding)
     old_stdin = sys.stdin
-    with open(path, 'r') as f:
+    with open(path) as f:
         sys.stdin = f
-        sys.stdout.encoding = 'utf-8'
-        sqlparse.cli.main(['-'])
+        sys.stdout.reconfigure(encoding=encoding)
+        sqlparse.cli.main(['-', '--encoding', encoding])
     sys.stdin = old_stdin
-    out, _ = capfd.readouterr()
-    assert out == expected
-
-
-def test_encoding_stdin_gbk(filepath, load_file, capfd):
-    path = filepath('encoding_gbk.sql')
-    expected = load_file('encoding_gbk.sql', 'gbk')
-    old_stdin = sys.stdin
-    with open(path, 'r') as stream:
-        sys.stdin = stream
-        sys.stdout.encoding = 'gbk'
-        sqlparse.cli.main(['-', '--encoding', 'gbk'])
-        sys.stdin = old_stdin
     out, _ = capfd.readouterr()
     assert out == expected
 
 
 def test_encoding(filepath, capsys):
     path = filepath('test_cp1251.sql')
-    expected = u'insert into foo values (1); -- Песня про надежду\n'
+    expected = 'insert into foo values (1); -- Песня про надежду\n'
     sqlparse.cli.main([path, '--encoding=cp1251'])
     out, _ = capsys.readouterr()
     assert out == expected

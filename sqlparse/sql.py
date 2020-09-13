@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2009-2018 the sqlparse authors and contributors
 # <see AUTHORS file>
@@ -7,12 +6,10 @@
 # the BSD License: https://opensource.org/licenses/BSD-3-Clause
 
 """This module contains classes representing syntactical elements of SQL."""
-from __future__ import print_function
 
 import re
 
 from sqlparse import tokens as T
-from sqlparse.compat import string_types, text_type, unicode_compatible
 from sqlparse.utils import imt, remove_quotes
 
 
@@ -39,8 +36,7 @@ class NameAliasMixin:
             return self._get_first_name(reverse=True)
 
 
-@unicode_compatible
-class Token(object):
+class Token:
     """Base class for all other classes in this module.
 
     It represents a single token and has two instance attributes:
@@ -52,7 +48,7 @@ class Token(object):
                  'is_group', 'is_whitespace')
 
     def __init__(self, ttype, value):
-        value = text_type(value)
+        value = str(value)
         self.value = value
         self.ttype = ttype
         self.parent = None
@@ -72,15 +68,15 @@ class Token(object):
         cls = self._get_repr_name()
         value = self._get_repr_value()
 
-        q = u'"' if value.startswith("'") and value.endswith("'") else u"'"
-        return u"<{cls} {q}{value}{q} at 0x{id:2X}>".format(
+        q = '"' if value.startswith("'") and value.endswith("'") else "'"
+        return "<{cls} {q}{value}{q} at 0x{id:2X}>".format(
             id=id(self), **locals())
 
     def _get_repr_name(self):
         return str(self.ttype).split('.')[-1]
 
     def _get_repr_value(self):
-        raw = text_type(self)
+        raw = str(self)
         if len(raw) > 7:
             raw = raw[:6] + '...'
         return re.sub(r'\s+', ' ', raw)
@@ -105,7 +101,7 @@ class Token(object):
         if not type_matched or values is None:
             return type_matched
 
-        if isinstance(values, string_types):
+        if isinstance(values, str):
             values = (values,)
 
         if regex:
@@ -150,7 +146,6 @@ class Token(object):
         return False
 
 
-@unicode_compatible
 class TokenList(Token):
     """A group of tokens.
 
@@ -163,11 +158,11 @@ class TokenList(Token):
     def __init__(self, tokens=None):
         self.tokens = tokens or []
         [setattr(token, 'parent', self) for token in self.tokens]
-        super(TokenList, self).__init__(None, text_type(self))
+        super().__init__(None, str(self))
         self.is_group = True
 
     def __str__(self):
-        return u''.join(token.value for token in self.flatten())
+        return ''.join(token.value for token in self.flatten())
 
     # weird bug
     # def __len__(self):
@@ -190,14 +185,14 @@ class TokenList(Token):
             value = token._get_repr_value()
 
             last = idx == (token_count - 1)
-            pre = u'`- ' if last else u'|- '
+            pre = '`- ' if last else '|- '
 
-            q = u'"' if value.startswith("'") and value.endswith("'") else u"'"
-            print(u"{_pre}{pre}{idx} {cls} {q}{value}{q}"
+            q = '"' if value.startswith("'") and value.endswith("'") else "'"
+            print("{_pre}{pre}{idx} {cls} {q}{value}{q}"
                   .format(**locals()), file=f)
 
             if token.is_group and (max_depth is None or depth < max_depth):
-                parent_pre = u'   ' if last else u'|  '
+                parent_pre = '   ' if last else '|  '
                 token._pprint_tree(max_depth, depth + 1, f, _pre + parent_pre)
 
     def get_token_at_offset(self, offset):
@@ -216,8 +211,7 @@ class TokenList(Token):
         """
         for token in self.tokens:
             if token.is_group:
-                for item in token.flatten():
-                    yield item
+                yield from token.flatten()
             else:
                 yield token
 
@@ -328,7 +322,7 @@ class TokenList(Token):
             grp = start
             grp.tokens.extend(subtokens)
             del self.tokens[start_idx + 1:end_idx]
-            grp.value = text_type(start)
+            grp.value = str(start)
         else:
             subtokens = self.tokens[start_idx:end_idx]
             grp = grp_cls(subtokens)

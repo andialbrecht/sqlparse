@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2009-2018 the sqlparse authors and contributors
 # <see AUTHORS file>
@@ -7,11 +6,10 @@
 # the BSD License: https://opensource.org/licenses/BSD-3-Clause
 
 from sqlparse import sql, tokens as T
-from sqlparse.compat import text_type
 from sqlparse.utils import offset, indent
 
 
-class ReindentFilter(object):
+class ReindentFilter:
     def __init__(self, width=2, char=' ', wrap_after=0, n='\n',
                  comma_first=False, indent_after_first=False,
                  indent_columns=False):
@@ -42,7 +40,7 @@ class ReindentFilter(object):
         return self.offset + self.indent * self.width
 
     def _get_offset(self, token):
-        raw = u''.join(map(text_type, self._flatten_up_to_token(token)))
+        raw = ''.join(map(str, self._flatten_up_to_token(token)))
         line = (raw or '\n').splitlines()[-1]
         # Now take current offset into account and return relative offset.
         return len(line) - len(self.char * self.leading_ws)
@@ -71,7 +69,7 @@ class ReindentFilter(object):
         tidx, token = self._next_token(tlist)
         while token:
             pidx, prev_ = tlist.token_prev(tidx, skip_ws=False)
-            uprev = text_type(prev_)
+            uprev = str(prev_)
 
             if prev_ and prev_.is_whitespace:
                 del tlist.tokens[pidx]
@@ -234,7 +232,7 @@ class ReindentFilter(object):
         self._process(stmt)
 
         if self._last_stmt is not None:
-            nl = '\n' if text_type(self._last_stmt).endswith('\n') else '\n\n'
+            nl = '\n' if str(self._last_stmt).endswith('\n') else '\n\n'
             stmt.tokens.insert(0, sql.Token(T.Whitespace, nl))
 
         self._last_stmt = stmt

@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 
 import sqlparse
 from sqlparse.exceptions import SQLParseError
 
 
-class TestFormat(object):
+class TestFormat:
     def test_keywordcase(self):
         sql = 'select * from bar; -- select foo\n'
         res = sqlparse.format(sql, keyword_case='upper')
@@ -123,7 +121,7 @@ class TestFormat(object):
                 == "SELECT some_column LIKE 'value\\\\\\'\r' WHERE id = 1\n")
 
 
-class TestFormatReindentAligned(object):
+class TestFormatReindentAligned:
     @staticmethod
     def formatter(sql):
         return sqlparse.format(sql, reindent_aligned=True)
@@ -294,7 +292,7 @@ class TestFormatReindentAligned(object):
             '  from table'])
 
 
-class TestSpacesAroundOperators(object):
+class TestSpacesAroundOperators:
     @staticmethod
     def formatter(sql):
         return sqlparse.format(sql, use_space_around_operators=True)
@@ -321,7 +319,7 @@ class TestSpacesAroundOperators(object):
         assert self.formatter(sql) == 'select a * b - c from table'
 
 
-class TestFormatReindent(object):
+class TestFormatReindent:
     def test_option(self):
         with pytest.raises(SQLParseError):
             sqlparse.format('foo', reindent=2)
@@ -598,7 +596,7 @@ class TestFormatReindent(object):
             '     , (5, 6)'])
 
 
-class TestOutputFormat(object):
+class TestOutputFormat:
     def test_python(self):
         sql = 'select * from foo;'
         f = lambda sql: sqlparse.format(sql, output_format='python')
@@ -663,7 +661,7 @@ def test_format_column_ordering():
 
 
 def test_truncate_strings():
-    sql = "update foo set value = '{0}';".format('x' * 1000)
+    sql = "update foo set value = '{}';".format('x' * 1000)
     formatted = sqlparse.format(sql, truncate_strings=10)
     assert formatted == "update foo set value = 'xxxxxxxxxx[...]';"
     formatted = sqlparse.format(sql, truncate_strings=3, truncate_char='YYY')

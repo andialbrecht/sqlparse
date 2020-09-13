@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 
 import sqlparse
@@ -484,7 +482,7 @@ def test_comparison_with_parenthesis():
 ))
 def test_comparison_with_strings(operator):
     # issue148
-    p = sqlparse.parse("foo {0} 'bar'".format(operator))[0]
+    p = sqlparse.parse("foo {} 'bar'".format(operator))[0]
     assert len(p.tokens) == 1
     assert isinstance(p.tokens[0], sql.Comparison)
     assert p.tokens[0].right.value == "'bar'"
@@ -563,7 +561,7 @@ def test_comparison_with_typed_literal():
 
 @pytest.mark.parametrize('start', ['FOR', 'FOREACH'])
 def test_forloops(start):
-    p = sqlparse.parse('{0} foo in bar LOOP foobar END LOOP'.format(start))[0]
+    p = sqlparse.parse('{} foo in bar LOOP foobar END LOOP'.format(start))[0]
     assert (len(p.tokens)) == 1
     assert isinstance(p.tokens[0], sql.For)
 

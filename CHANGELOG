@@ -1,7 +1,10 @@
 Development Version
 -------------------
 
-Nothing yet. ¯\_(ツ)_/¯
+Notable Changes
+
+* Remove support for end-of-life Python 2.7 and 3.4. Python 3.5+ is now
+  required.
 
 
 Release 0.3.1 (Feb 29, 2020)

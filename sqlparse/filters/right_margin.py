@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2009-2018 the sqlparse authors and contributors
 # <see AUTHORS file>
@@ -9,11 +8,10 @@
 import re
 
 from sqlparse import sql, tokens as T
-from sqlparse.compat import text_type
 
 
 # FIXME: Doesn't work
-class RightMarginFilter(object):
+class RightMarginFilter:
     keep_together = (
         # sql.TypeCast, sql.Identifier, sql.Alias,
     )
@@ -32,14 +30,14 @@ class RightMarginFilter(object):
             elif token.is_group and type(token) not in self.keep_together:
                 token.tokens = self._process(token, token.tokens)
             else:
-                val = text_type(token)
+                val = str(token)
                 if len(self.line) + len(val) > self.width:
                     match = re.search(r'^ +', self.line)
                     if match is not None:
                         indent = match.group()
                     else:
                         indent = ''
-                    yield sql.Token(T.Whitespace, '\n{0}'.format(indent))
+                    yield sql.Token(T.Whitespace, '\n{}'.format(indent))
                     self.line = indent
                 self.line += val
             yield token
