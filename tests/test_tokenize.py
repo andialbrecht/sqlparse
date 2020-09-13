@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
-
 import types
+from io import StringIO
 
 import pytest
 
 import sqlparse
 from sqlparse import lexer
 from sqlparse import sql, tokens as T
-from sqlparse.compat import StringIO
 
 
 def test_tokenize_simple():
@@ -152,7 +150,7 @@ def test_stream_error():
     'INNER JOIN',
     'LEFT INNER JOIN'])
 def test_parse_join(expr):
-    p = sqlparse.parse('{0} foo'.format(expr))[0]
+    p = sqlparse.parse('{} foo'.format(expr))[0]
     assert len(p.tokens) == 3
     assert p.tokens[0].ttype is T.Keyword
 

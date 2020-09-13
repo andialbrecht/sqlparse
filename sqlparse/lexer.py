@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2009-2018 the sqlparse authors and contributors
 # <see AUTHORS file>
@@ -13,13 +12,14 @@
 # It's separated from the rest of pygments to increase performance
 # and to allow some customizations.
 
+from io import TextIOBase
+
 from sqlparse import tokens
 from sqlparse.keywords import SQL_REGEX
-from sqlparse.compat import text_type, file_types
 from sqlparse.utils import consume
 
 
-class Lexer(object):
+class Lexer:
     """Lexer
     Empty class. Leaving for backwards-compatibility
     """
@@ -38,10 +38,10 @@ class Lexer(object):
 
         ``stack`` is the initial stack (default: ``['root']``)
         """
-        if isinstance(text, file_types):
+        if isinstance(text, TextIOBase):
             text = text.read()
 
-        if isinstance(text, text_type):
+        if isinstance(text, str):
             pass
         elif isinstance(text, bytes):
             if encoding:
@@ -52,7 +52,7 @@ class Lexer(object):
                 except UnicodeDecodeError:
                     text = text.decode('unicode-escape')
         else:
-            raise TypeError(u"Expected text or file-like object, got {!r}".
+            raise TypeError("Expected text or file-like object, got {!r}".
                             format(type(text)))
 
         iterable = enumerate(text)

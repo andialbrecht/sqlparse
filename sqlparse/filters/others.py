@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2009-2018 the sqlparse authors and contributors
 # <see AUTHORS file>
@@ -10,7 +9,7 @@ from sqlparse import sql, tokens as T
 from sqlparse.utils import split_unquoted_newlines
 
 
-class StripCommentsFilter(object):
+class StripCommentsFilter:
     @staticmethod
     def _process(tlist):
         def get_next_comment():
@@ -45,7 +44,7 @@ class StripCommentsFilter(object):
         return stmt
 
 
-class StripWhitespaceFilter(object):
+class StripWhitespaceFilter:
     def _stripws(self, tlist):
         func_name = '_stripws_{cls}'.format(cls=type(tlist).__name__)
         func = getattr(self, func_name.lower(), self._stripws_default)
@@ -90,7 +89,7 @@ class StripWhitespaceFilter(object):
         return stmt
 
 
-class SpacesAroundOperatorsFilter(object):
+class SpacesAroundOperatorsFilter:
     @staticmethod
     def _process(tlist):
 
@@ -118,7 +117,7 @@ class SpacesAroundOperatorsFilter(object):
 # ---------------------------
 # postprocess
 
-class SerializerUnicode(object):
+class SerializerUnicode:
     @staticmethod
     def process(stmt):
         lines = split_unquoted_newlines(stmt)
