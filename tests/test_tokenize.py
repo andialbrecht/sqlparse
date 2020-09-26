@@ -202,6 +202,12 @@ def test_parse_order_by():
     assert p.tokens[0].ttype is T.Keyword
 
 
+def test_parse_window_as():
+    p = sqlparse.parse('WINDOW w AS')[0]
+    assert len(p.tokens) == 5
+    assert p.tokens[0].ttype is T.Keyword
+
+
 @pytest.mark.parametrize('s', (
     "LIKE", "ILIKE", "NOT LIKE", "NOT ILIKE",
     "NOT   LIKE", "NOT    ILIKE",
