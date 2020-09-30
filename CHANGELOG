@@ -11,11 +11,15 @@ Notable Changes
   now doesn't return an empty string as the last element in some
   cases (issue496).
 
+Enhancements
+
+* Add WINDOW keyword (pr579 by ali-tny).
+* Add RLIKE keyword (pr582 by wjones1).
+
 Bug Fixes
 
 * Improved parsing of IN(...) statements (issue566, pr567 by hurcy).
 * Preserve line breaks when removing comments (issue484).
-* Improve parsing of WINDOW keyword (pr579 by ali-tny).
 
 
 Release 0.3.1 (Feb 29, 2020)
