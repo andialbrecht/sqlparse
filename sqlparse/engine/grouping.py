@@ -432,6 +432,8 @@ def _group(tlist, cls, match,
     pidx, prev_ = None, None
     for idx, token in enumerate(list(tlist)):
         tidx = idx - tidx_offset
+        if tidx < 0:  # tidx shouldn't get negative
+            continue
 
         if token.is_whitespace:
             continue
