@@ -66,7 +66,7 @@ class StatementSplitter:
             self._begin_depth = max(0, self._begin_depth - 1)
             return -1
 
-        if (unified in ('IF', 'FOR', 'WHILE')
+        if (unified in ('IF', 'FOR', 'WHILE', 'CASE')
                 and self._is_create and self._begin_depth > 0):
             return 1
 

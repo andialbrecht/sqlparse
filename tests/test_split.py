@@ -97,6 +97,12 @@ def test_split_casewhen():
     assert len(stmts) == 2
 
 
+def test_split_casewhen_procedure(load_file):
+    # see issue580
+    stmts = sqlparse.split(load_file('casewhen_procedure.sql'))
+    assert len(stmts) == 2
+
+
 def test_split_cursor_declare():
     sql = ('DECLARE CURSOR "foo" AS SELECT 1;\n'
            'SELECT 2;')
