@@ -73,7 +73,7 @@ SQL_REGEX = {
         # sqlite names can be escaped with [square brackets]. left bracket
         # cannot be preceded by word character or a right bracket --
         # otherwise it's probably an array index
-        (r'(?<![\w\])])(\[[^\]]+\])', tokens.Name),
+        (r'(?<![\w\])])(\[[^\]\[]+\])', tokens.Name),
         (r'((LEFT\s+|RIGHT\s+|FULL\s+)?(INNER\s+|OUTER\s+|STRAIGHT\s+)?'
          r'|(CROSS\s+|NATURAL\s+)?)?JOIN\b', tokens.Keyword),
         (r'END(\s+IF|\s+LOOP|\s+WHILE)?\b', tokens.Keyword),

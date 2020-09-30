@@ -20,6 +20,7 @@ Bug Fixes
 
 * Improved parsing of IN(...) statements (issue566, pr567 by hurcy).
 * Preserve line breaks when removing comments (issue484).
+* Fix parsing error when using square bracket notation (issue583).
 
 
 Release 0.3.1 (Feb 29, 2020)

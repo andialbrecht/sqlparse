@@ -100,6 +100,12 @@ def test_parse_square_brackets_notation_isnt_too_greedy():
     assert t[0].tokens[-1].get_real_name() == '[bar]'
 
 
+def test_parse_square_brackets_notation_isnt_too_greedy2():
+    # see issue583
+    t = sqlparse.parse('[(foo[i])]')[0].tokens
+    assert isinstance(t[0], sql.SquareBrackets)  # not Identifier!
+
+
 def test_parse_keyword_like_identifier():
     # see issue47
     t = sqlparse.parse('foo.key')[0].tokens
