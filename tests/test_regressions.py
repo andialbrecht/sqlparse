@@ -405,3 +405,9 @@ def test_as_in_parentheses_indents():
     # did raise NoneType has no attribute is_group in _process_parentheses
     formatted = sqlparse.format('(as foo)', reindent=True)
     assert formatted == '(as foo)'
+
+
+def test_format_invalid_where_clause():
+    # did raise ValueError
+    formatted = sqlparse.format('where, foo', reindent=True)
+    assert formatted == 'where, foo'

@@ -102,7 +102,10 @@ class ReindentFilter:
 
     def _process_where(self, tlist):
         tidx, token = tlist.token_next_by(m=(T.Keyword, 'WHERE'))
+        if not token:
+            return
         # issue121, errors in statement fixed??
+        print(tidx, token, tlist)
         tlist.insert_before(tidx, self.nl())
 
         with indent(self):
