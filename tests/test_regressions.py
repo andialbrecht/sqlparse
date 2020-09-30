@@ -399,3 +399,9 @@ def test_issue489_tzcasts():
     p = sqlparse.parse('select bar at time zone \'UTC\' as foo')[0]
     assert p.tokens[-1].has_alias() is True
     assert p.tokens[-1].get_alias() == 'foo'
+
+
+def test_as_in_parentheses_indents():
+    # did raise NoneType has no attribute is_group in _process_parentheses
+    formatted = sqlparse.format('(as foo)', reindent=True)
+    assert formatted == '(as foo)'

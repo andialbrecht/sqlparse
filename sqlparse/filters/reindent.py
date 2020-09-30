@@ -112,6 +112,8 @@ class ReindentFilter:
         ttypes = T.Keyword.DML, T.Keyword.DDL
         _, is_dml_dll = tlist.token_next_by(t=ttypes)
         fidx, first = tlist.token_next_by(m=sql.Parenthesis.M_OPEN)
+        if first is None:
+            return
 
         with indent(self, 1 if is_dml_dll else 0):
             tlist.tokens.insert(0, self.nl()) if is_dml_dll else None

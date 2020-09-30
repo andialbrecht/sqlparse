@@ -23,6 +23,7 @@ Bug Fixes
 * Fix parsing error when using square bracket notation (issue583).
 * Fix splitting when using DECLARE ... HANDLER (issue581).
 * Fix splitting of statements using CASE ... WHEN (issue580).
+* Improve formatting of type casts in parentheses.
 
 
 Release 0.3.1 (Feb 29, 2020)
