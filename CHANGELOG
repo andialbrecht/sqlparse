@@ -15,6 +15,7 @@ Bug Fixes
 
 * Improved parsing of IN(...) statements (issue566, pr567 by hurcy).
 * Preserve line breaks when removing comments (issue484).
+* Improve parsing of WINDOW keyword (pr579 by ali-tny).
 
 
 Release 0.3.1 (Feb 29, 2020)
