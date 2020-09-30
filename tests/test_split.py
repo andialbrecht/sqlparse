@@ -154,3 +154,9 @@ def test_split_quotes_with_new_line():
     stmts = sqlparse.split("select 'foo\n\bar'")
     assert len(stmts) == 1
     assert stmts[0] == "select 'foo\n\bar'"
+
+
+def test_split_mysql_handler_for(load_file):
+    # see issue581
+    stmts = sqlparse.split(load_file('mysql_handler.sql'))
+    assert len(stmts) == 2

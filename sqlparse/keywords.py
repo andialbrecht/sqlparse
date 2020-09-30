@@ -84,6 +84,7 @@ SQL_REGEX = {
         (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
         (r'GROUP\s+BY\b', tokens.Keyword),
         (r'ORDER\s+BY\b', tokens.Keyword),
+        (r'HANDLER\s+FOR\b', tokens.Keyword),
         (r'(LATERAL\s+VIEW\s+)'
          r'(EXPLODE|INLINE|PARSE_URL_TUPLE|POSEXPLODE|STACK)\b',
          tokens.Keyword),
@@ -294,7 +295,6 @@ KEYWORDS = {
     'GRANTED': tokens.Keyword,
     'GROUPING': tokens.Keyword,
 
-    'HANDLER': tokens.Keyword,
     'HAVING': tokens.Keyword,
     'HIERARCHY': tokens.Keyword,
     'HOLD': tokens.Keyword,
