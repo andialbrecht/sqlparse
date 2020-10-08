@@ -1,7 +1,8 @@
 Development Version
 -------------------
 
-Nothing yet.
+Bug Fixes
+* Just removed a debug print statement, sorry...
 
 
 Release 0.4.0 (Oct 07, 2020)

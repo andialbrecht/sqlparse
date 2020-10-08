@@ -105,9 +105,7 @@ class ReindentFilter:
         if not token:
             return
         # issue121, errors in statement fixed??
-        print(tidx, token, tlist)
         tlist.insert_before(tidx, self.nl())
-
         with indent(self):
             self._process_default(tlist)
 
