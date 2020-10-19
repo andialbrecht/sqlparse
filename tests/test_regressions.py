@@ -411,3 +411,10 @@ def test_format_invalid_where_clause():
     # did raise ValueError
     formatted = sqlparse.format('where, foo', reindent=True)
     assert formatted == 'where, foo'
+
+
+def test_splitting_at_and_backticks_issue588():
+    splitted = sqlparse.split(
+        'grant foo to user1@`myhost`; grant bar to user1@`myhost`;')
+    assert len(splitted) == 2
+    assert splitted[-1] == 'grant bar to user1@`myhost`;'

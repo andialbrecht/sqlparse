@@ -1,7 +1,9 @@
 Development Version
 -------------------
 
-Nothing yet.
+Bug Fixes
+
+* Fix parsing of backticks (issue588).
 
 
 Release 0.4.1 (Oct 08, 2020)

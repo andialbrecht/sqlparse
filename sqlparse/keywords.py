@@ -93,7 +93,7 @@ SQL_REGEX = {
         (r'[0-9_A-ZÀ-Ü][_$#\w]*', is_keyword),
         (r'[;:()\[\],\.]', tokens.Punctuation),
         (r'[<>=~!]+', tokens.Operator.Comparison),
-        (r'[+/@#%^&|`?^-]+', tokens.Operator),
+        (r'[+/@#%^&|^-]+', tokens.Operator),
     ]}
 
 FLAGS = re.IGNORECASE | re.UNICODE
