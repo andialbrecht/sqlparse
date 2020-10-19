@@ -1,6 +1,10 @@
 Development Version
 -------------------
 
+Enhancements
+
+* Add ELSIF as keyword (issue584).
+
 Bug Fixes
 
 * Fix parsing of backticks (issue588).

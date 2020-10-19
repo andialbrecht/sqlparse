@@ -745,6 +745,7 @@ KEYWORDS_ORACLE = {
     'DOUBLE': tokens.Keyword,
     'DUMP': tokens.Keyword,
 
+    'ELSIF': tokens.Keyword,
     'EVENTS': tokens.Keyword,
     'EXCEPTIONS': tokens.Keyword,
     'EXPLAIN': tokens.Keyword,
