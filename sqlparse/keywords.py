@@ -834,6 +834,7 @@ KEYWORDS_ORACLE = {
 
 # PostgreSQL Syntax
 KEYWORDS_PLPGSQL = {
+    'CONFLICT': tokens.Keyword,
     'WINDOW': tokens.Keyword,
     'PARTITION': tokens.Keyword,
     'OVER': tokens.Keyword,
