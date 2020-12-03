@@ -843,6 +843,7 @@ KEYWORDS_PLPGSQL = {
     'PLPGSQL': tokens.Keyword,
     'INHERIT': tokens.Keyword,
     'INDEXES': tokens.Keyword,
+    'ON_ERROR_STOP': tokens.Keyword,
 
     'BYTEA': tokens.Keyword,
     'BIGSERIAL': tokens.Keyword,
