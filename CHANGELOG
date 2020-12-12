@@ -4,6 +4,7 @@ Development Version
 Enhancements
 
 * Add ELSIF as keyword (issue584).
+* Add CONFLICT and ON_ERROR_STOP keywords (pr595, by j-martin).
 
 Bug Fixes
 
