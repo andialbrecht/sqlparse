@@ -12,10 +12,16 @@ The :mod:`sqlparse` module provides the following functions on module-level.
 
 .. autofunction:: sqlparse.parse
 
+.. autofunction:: sqlparse.parsestream
+
 In most cases there's no need to set the `encoding` parameter. If
 `encoding` is not set, sqlparse assumes that the given SQL statement
 is encoded either in utf-8 or latin-1.
 
+The `stream` parameter controls the way sql input is read. If
+`True`, parser is optimized to keep a low memory usage. if `False`,
+the whole content is loaded in memory at the beginning of the process,
+but parsing should be faster.
 
 .. _formatting:
 
@@ -69,4 +75,4 @@ The :meth:`~sqlparse.format` function accepts the following keyword arguments.
 ``comma_first``
   If ``True`` comma-first notation for column names is used.
 
- 
+

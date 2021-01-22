@@ -402,6 +402,9 @@ class TokenList(Token):
 
 class Statement(TokenList):
     """Represents a SQL statement."""
+    def __init__(self, tokens=None, pending=False):
+        super().__init__(tokens)
+        self.pending = pending
 
     def get_type(self):
         """Returns the type of a statement.

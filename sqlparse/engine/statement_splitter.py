@@ -104,4 +104,4 @@ class StatementSplitter:
 
         # Yield pending statement (if any)
         if self.tokens and not all(t.is_whitespace for t in self.tokens):
-            yield sql.Statement(self.tokens)
+            yield sql.Statement(self.tokens, pending=not self.consume_ws)

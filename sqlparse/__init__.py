@@ -15,34 +15,46 @@ from sqlparse import tokens
 from sqlparse import filters
 from sqlparse import formatter
 
+import warnings
+
 
 __version__ = '0.4.2.dev0'
 __all__ = ['engine', 'filters', 'formatter', 'sql', 'tokens', 'cli']
 
 
-def parse(sql, encoding=None):
+def parse(sql, encoding=None, stream=False):
     """Parse sql and return a list of statements.
 
     :param sql: A string containing one or more SQL statements.
     :param encoding: The encoding of the statement (optional).
+    :param stream: A boolean to enable stream mode (optional).
     :returns: A tuple of :class:`~sqlparse.sql.Statement` instances.
     """
-    return tuple(parsestream(sql, encoding))
+    return tuple(parsestream(sql, encoding, stream))
 
 
-def parsestream(stream, encoding=None):
+def parsestream(sql, encoding=None, stream=True):
     """Parses sql statements from file-like object.
 
-    :param stream: A file-like object.
+    :param sql: A file-like object.
     :param encoding: The encoding of the stream contents (optional).
+    :param stream: A boolean to enable stream mode (optional).
     :returns: A generator of :class:`~sqlparse.sql.Statement` instances.
     """
+    if stream not in [None, True, False]:  # Backward compatibility
+        warnings.warn("parsestream(stream=***) is deprecated; "
+                      "use parsestream(sql=***) instead. "
+                      "stream argument is now used to enable stream mode "
+                      "(bool).",
+                      DeprecationWarning)
+        sql = stream
+
     stack = engine.FilterStack()
     stack.enable_grouping()
-    return stack.run(stream, encoding)
+    return stack.run(sql, encoding, stream)
 
 
-def format(sql, encoding=None, **options):
+def format(sql, encoding=None, stream=False, **options):
     """Format *sql* according to *options*.
 
     Available options are documented in :ref:`formatting`.
@@ -56,15 +68,16 @@ def format(sql, encoding=None, **options):
     options = formatter.validate_options(options)
     stack = formatter.build_filter_stack(stack, options)
     stack.postprocess.append(filters.SerializerUnicode())
-    return ''.join(stack.run(sql, encoding))
+    return ''.join(stack.run(sql, encoding, stream))
 
 
-def split(sql, encoding=None):
+def split(sql, encoding=None, stream=False):
     """Split *sql* into single statements.
 
     :param sql: A string containing one or more SQL statements.
     :param encoding: The encoding of the statement (optional).
+    :param stream: A boolean to enable stream mode (optional).
     :returns: A list of strings.
     """
     stack = engine.FilterStack()
-    return [str(stmt).strip() for stmt in stack.run(sql, encoding)]
+    return [str(stmt).strip() for stmt in stack.run(sql, encoding, stream)]
