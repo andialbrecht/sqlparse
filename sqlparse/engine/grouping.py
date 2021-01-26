@@ -191,7 +191,7 @@ def group_assignment(tlist):
 
 def group_comparison(tlist):
     sqlcls = (sql.Parenthesis, sql.Function, sql.Identifier,
-              sql.Operation, sql.TypedLiteral)
+              sql.Operation, sql.TypedLiteral, sql.Case)
     ttypes = T_NUMERICAL + T_STRING + T_NAME
 
     def match(token):
