@@ -6,7 +6,7 @@ Download & Installation
 -----------------------
 
 The latest released version can be obtained from the `Python Package
-Index (PyPI) <https://pypi.org/project/sqlparse/>`_. To extract the
+Index (PyPI) <https://pypi.org/project/sqlparse/>`_. To extract and
 install the module system-wide run
 
 .. code-block:: bash
@@ -48,7 +48,7 @@ SQL statements can be beautified by using the :meth:`~sqlparse.format` function.
 .. code-block:: python
 
   >>> sql = 'select * from foo where id in (select id from bar);'
-  >>> print sqlparse.format(sql, reindent=True, keyword_case='upper')
+  >>> print(sqlparse.format(sql, reindent=True, keyword_case='upper'))
   SELECT *
   FROM foo
   WHERE id IN
@@ -120,7 +120,7 @@ To check out the latest sources of this module run
 
 to check out the latest sources from the repository.
 
-:mod:`sqlparse` is currently tested under Python 2.7, >=3.3 and pypy. Tests are
+:mod:`sqlparse` is currently tested under Python 3.5+ and PyPy. Tests are
 automatically run on each commit and for each pull request on Travis:
 https://travis-ci.org/andialbrecht/sqlparse
 
@@ -135,9 +135,4 @@ above. Ideally a Python 2 and a Python 3 version should be tested
 locally.
 
 Please file bug reports and feature requests on the project site at
-https://github.com/andialbrecht/sqlparse/issues/new or if you have
-code to contribute upload it to https://codereview.appspot.com/ and
-add albrecht.andi@googlemail.com as reviewer.
-
-For more information about the review tool and how to use it visit
-it's project page: https://github.com/rietveld-codereview/rietveld
+https://github.com/andialbrecht/sqlparse/issues/new.

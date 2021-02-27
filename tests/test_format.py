@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 
 import sqlparse
 from sqlparse.exceptions import SQLParseError
 
 
-class TestFormat(object):
+class TestFormat:
     def test_keywordcase(self):
         sql = 'select * from bar; -- select foo\n'
         res = sqlparse.format(sql, keyword_case='upper')
@@ -43,13 +41,26 @@ class TestFormat(object):
     def test_strip_comments_single(self):
         sql = 'select *-- statement starts here\nfrom foo'
         res = sqlparse.format(sql, strip_comments=True)
-        assert res == 'select * from foo'
+        assert res == 'select *\nfrom foo'
         sql = 'select * -- statement starts here\nfrom foo'
         res = sqlparse.format(sql, strip_comments=True)
-        assert res == 'select * from foo'
+        assert res == 'select *\nfrom foo'
         sql = 'select-- foo\nfrom -- bar\nwhere'
         res = sqlparse.format(sql, strip_comments=True)
-        assert res == 'select from where'
+        assert res == 'select\nfrom\nwhere'
+        sql = 'select *-- statement starts here\n\nfrom foo'
+        res = sqlparse.format(sql, strip_comments=True)
+        assert res == 'select *\n\nfrom foo'
+        sql = 'select * from foo-- statement starts here\nwhere'
+        res = sqlparse.format(sql, strip_comments=True)
+        assert res == 'select * from foo\nwhere'
+        sql = 'select a-- statement starts here\nfrom foo'
+        res = sqlparse.format(sql, strip_comments=True)
+        assert res == 'select a\nfrom foo'
+        sql = '--comment\nselect a-- statement starts here\n' \
+              'from foo--comment\nf'
+        res = sqlparse.format(sql, strip_comments=True)
+        assert res == 'select a\nfrom foo\nf'
 
     def test_strip_comments_invalid_option(self):
         sql = 'select-- foo\nfrom -- bar\nwhere'
@@ -106,11 +117,11 @@ class TestFormat(object):
         assert f(s1) == "SELECT some_column LIKE 'value\r'"
         assert f(s2) == "SELECT some_column LIKE 'value\r'\nWHERE id = 1\n"
         assert f(s3) == "SELECT some_column LIKE 'value\\'\r' WHERE id = 1\n"
-        assert (f(s4) ==
-                "SELECT some_column LIKE 'value\\\\\\'\r' WHERE id = 1\n")
+        assert (f(s4)
+                == "SELECT some_column LIKE 'value\\\\\\'\r' WHERE id = 1\n")
 
 
-class TestFormatReindentAligned(object):
+class TestFormatReindentAligned:
     @staticmethod
     def formatter(sql):
         return sqlparse.format(sql, reindent_aligned=True)
@@ -281,7 +292,7 @@ class TestFormatReindentAligned(object):
             '  from table'])
 
 
-class TestSpacesAroundOperators(object):
+class TestSpacesAroundOperators:
     @staticmethod
     def formatter(sql):
         return sqlparse.format(sql, use_space_around_operators=True)
@@ -308,7 +319,7 @@ class TestSpacesAroundOperators(object):
         assert self.formatter(sql) == 'select a * b - c from table'
 
 
-class TestFormatReindent(object):
+class TestFormatReindent:
     def test_option(self):
         with pytest.raises(SQLParseError):
             sqlparse.format('foo', reindent=2)
@@ -362,6 +373,11 @@ class TestFormatReindent(object):
             'from',
             '  (select *',
             '   from foo);'])
+        assert f("select f(1)") == 'select f(1)'
+        assert f("select f( 1 )") == 'select f(1)'
+        assert f("select f(\n\n\n1\n\n\n)") == 'select f(1)'
+        assert f("select f(\n\n\n 1 \n\n\n)") == 'select f(1)'
+        assert f("select f(\n\n\n  1  \n\n\n)") == 'select f(1)'
 
     def test_where(self):
         f = lambda sql: sqlparse.format(sql, reindent=True)
@@ -536,8 +552,51 @@ class TestFormatReindent(object):
             '       nvl(1)',
             'from dual'])
 
+    def test_insert_values(self):
+        # issue 329
+        f = lambda sql: sqlparse.format(sql, reindent=True)
+        s = 'insert into foo values (1, 2)'
+        assert f(s) == '\n'.join([
+            'insert into foo',
+            'values (1, 2)'])
 
-class TestOutputFormat(object):
+        s = 'insert into foo values (1, 2), (3, 4), (5, 6)'
+        assert f(s) == '\n'.join([
+            'insert into foo',
+            'values (1, 2),',
+            '       (3, 4),',
+            '       (5, 6)'])
+
+        s = 'insert into foo(a, b) values (1, 2), (3, 4), (5, 6)'
+        assert f(s) == '\n'.join([
+            'insert into foo(a, b)',
+            'values (1, 2),',
+            '       (3, 4),',
+            '       (5, 6)'])
+
+        f = lambda sql: sqlparse.format(sql, reindent=True,
+                                        comma_first=True)
+        s = 'insert into foo values (1, 2)'
+        assert f(s) == '\n'.join([
+            'insert into foo',
+            'values (1, 2)'])
+
+        s = 'insert into foo values (1, 2), (3, 4), (5, 6)'
+        assert f(s) == '\n'.join([
+            'insert into foo',
+            'values (1, 2)',
+            '     , (3, 4)',
+            '     , (5, 6)'])
+
+        s = 'insert into foo(a, b) values (1, 2), (3, 4), (5, 6)'
+        assert f(s) == '\n'.join([
+            'insert into foo(a, b)',
+            'values (1, 2)',
+            '     , (3, 4)',
+            '     , (5, 6)'])
+
+
+class TestOutputFormat:
     def test_python(self):
         sql = 'select * from foo;'
         f = lambda sql: sqlparse.format(sql, output_format='python')
@@ -602,7 +661,7 @@ def test_format_column_ordering():
 
 
 def test_truncate_strings():
-    sql = "update foo set value = '{0}';".format('x' * 1000)
+    sql = "update foo set value = '{}';".format('x' * 1000)
     formatted = sqlparse.format(sql, truncate_strings=10)
     assert formatted == "update foo set value = 'xxxxxxxxxx[...]';"
     formatted = sqlparse.format(sql, truncate_strings=3, truncate_char='YYY')

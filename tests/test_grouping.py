@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import pytest
 
 import sqlparse
@@ -33,6 +31,40 @@ def test_grouping_assignment(s):
     assert isinstance(parsed.tokens[0], sql.Assignment)
 
 
+@pytest.mark.parametrize('s', ["x > DATE '2020-01-01'", "x > TIMESTAMP '2020-01-01 00:00:00'"])
+def test_grouping_typed_literal(s):
+    parsed = sqlparse.parse(s)[0]
+    assert isinstance(parsed[0][4], sql.TypedLiteral)
+
+
+@pytest.mark.parametrize('s, a, b', [
+    ('select a from b where c < d + e', sql.Identifier, sql.Identifier),
+    ('select a from b where c < d + interval \'1 day\'', sql.Identifier, sql.TypedLiteral),
+    ('select a from b where c < d + interval \'6\' month', sql.Identifier, sql.TypedLiteral),
+    ('select a from b where c < current_timestamp - interval \'1 day\'', sql.Token, sql.TypedLiteral),
+])
+def test_compare_expr(s, a, b):
+    parsed = sqlparse.parse(s)[0]
+    assert str(parsed) == s
+    assert isinstance(parsed.tokens[2], sql.Identifier)
+    assert isinstance(parsed.tokens[6], sql.Identifier)
+    assert isinstance(parsed.tokens[8], sql.Where)
+    assert len(parsed.tokens) == 9
+    where = parsed.tokens[8]
+    assert isinstance(where.tokens[2], sql.Comparison)
+    assert len(where.tokens) == 3
+    comparison = where.tokens[2]
+    assert isinstance(comparison.tokens[0], sql.Identifier)
+    assert comparison.tokens[2].ttype is T.Operator.Comparison
+    assert isinstance(comparison.tokens[4], sql.Operation)
+    assert len(comparison.tokens) == 5
+    operation = comparison.tokens[4]
+    assert isinstance(operation.tokens[0], a)
+    assert operation.tokens[2].ttype is T.Operator
+    assert isinstance(operation.tokens[4], b)
+    assert len(operation.tokens) == 5
+
+
 def test_grouping_identifiers():
     s = 'select foo.bar from "myscheme"."table" where fail. order'
     parsed = sqlparse.parse(s)[0]
@@ -49,10 +81,13 @@ def test_grouping_identifiers():
     assert str(parsed) == s
     assert isinstance(parsed.tokens[-1].tokens[3], sql.Identifier)
 
-    s = "INSERT INTO `test` VALUES('foo', 'bar');"
-    parsed = sqlparse.parse(s)[0]
-    types = [l.ttype for l in parsed.tokens if not l.is_whitespace]
-    assert types == [T.DML, T.Keyword, None, T.Keyword, None, T.Punctuation]
+    for s in ["INSERT INTO `test` VALUES('foo', 'bar');",
+              "INSERT INTO `test` VALUES(1, 2), (3, 4), (5, 6);",
+              "INSERT INTO `test(a, b)` VALUES(1, 2), (3, 4), (5, 6);"]:
+        parsed = sqlparse.parse(s)[0]
+        types = [l.ttype for l in parsed.tokens if not l.is_whitespace]
+        assert types == [T.DML, T.Keyword, None, None, T.Punctuation]
+        assert isinstance(parsed.tokens[6], sql.Values)
 
     s = "select 1.0*(a+b) as col, sum(c)/sum(d) from myschema.mytable"
     parsed = sqlparse.parse(s)[0]
@@ -124,6 +159,14 @@ def test_grouping_identifier_invalid_in_middle():
     assert p[3].ttype == T.Whitespace
     assert str(p[2]) == 'foo.'
 
+@pytest.mark.parametrize('s', ['foo as (select *)', 'foo as(select *)'])
+def test_grouping_identifer_as(s):
+    # issue507
+    p = sqlparse.parse(s)[0]
+    assert isinstance(p.tokens[0], sql.Identifier)
+    token = p.tokens[0].tokens[2]
+    assert token.ttype == T.Keyword
+    assert token.normalized == 'AS'
 
 def test_grouping_identifier_as_invalid():
     # issue8
@@ -208,7 +251,7 @@ def test_grouping_where():
     s = 'select * from foo where bar = 1 order by id desc'
     p = sqlparse.parse(s)[0]
     assert str(p) == s
-    assert len(p.tokens) == 14
+    assert len(p.tokens) == 12
 
     s = 'select x from (select y from foo where bar = 1) z'
     p = sqlparse.parse(s)[0]
@@ -291,9 +334,10 @@ def test_grouping_subquery_no_parens():
     assert isinstance(p.tokens[0], sql.Case)
 
 
-def test_grouping_alias_returns_none():
-    # see issue185
-    p = sqlparse.parse('foo.bar')[0]
+@pytest.mark.parametrize('s', ['foo.bar', 'x, y', 'x > y', 'x / y'])
+def test_grouping_alias_returns_none(s):
+    # see issue185 and issue445
+    p = sqlparse.parse(s)[0]
     assert len(p.tokens) == 1
     assert p.tokens[0].get_alias() is None
 
@@ -327,8 +371,18 @@ def test_grouping_function_not_in():
     # issue183
     p = sqlparse.parse('in(1, 2)')[0]
     assert len(p.tokens) == 2
-    assert p.tokens[0].ttype == T.Keyword
+    assert p.tokens[0].ttype == T.Comparison
     assert isinstance(p.tokens[1], sql.Parenthesis)
+
+
+def test_in_comparison():
+    # issue566
+    p = sqlparse.parse('a in (1, 2)')[0]
+    assert len(p.tokens) == 1
+    assert isinstance(p.tokens[0], sql.Comparison)
+    assert len(p.tokens[0].tokens) == 5
+    assert p.tokens[0].left.value == 'a'
+    assert p.tokens[0].right.value == '(1, 2)'
 
 
 def test_grouping_varchar():
@@ -345,10 +399,6 @@ def test_statement_get_type():
     assert f(' update foo').get_type() == 'UPDATE'
     assert f('\nupdate foo').get_type() == 'UPDATE'
     assert f('foo').get_type() == 'UNKNOWN'
-    # Statements that have a whitespace after the closing semicolon
-    # are parsed as two statements where later only consists of the
-    # trailing whitespace.
-    assert f('\n').get_type() == 'UNKNOWN'
 
 
 def test_identifier_with_operators():
@@ -432,13 +482,52 @@ def test_comparison_with_parenthesis():
     assert comp.right.ttype is T.Number.Integer
 
 
-def test_comparison_with_strings():
+@pytest.mark.parametrize('operator', (
+    '=', '!=', '>', '<', '<=', '>=', '~', '~~', '!~~',
+    'LIKE', 'NOT LIKE', 'ILIKE', 'NOT ILIKE',
+))
+def test_comparison_with_strings(operator):
     # issue148
-    p = sqlparse.parse("foo = 'bar'")[0]
+    p = sqlparse.parse("foo {} 'bar'".format(operator))[0]
     assert len(p.tokens) == 1
     assert isinstance(p.tokens[0], sql.Comparison)
     assert p.tokens[0].right.value == "'bar'"
     assert p.tokens[0].right.ttype == T.String.Single
+
+
+def test_like_and_ilike_comparison():
+    def validate_where_clause(where_clause, expected_tokens):
+        assert len(where_clause.tokens) == len(expected_tokens)
+        for where_token, expected_token in zip(where_clause, expected_tokens):
+            expected_ttype, expected_value = expected_token
+            if where_token.ttype is not None:
+                assert where_token.match(expected_ttype, expected_value, regex=True)
+            else:
+                # Certain tokens, such as comparison tokens, do not define a ttype that can be
+                # matched against. For these tokens, we ensure that the token instance is of
+                # the expected type and has a value conforming to specified regular expression
+                import re
+                assert (isinstance(where_token, expected_ttype)
+                        and re.match(expected_value, where_token.value))
+
+    [p1] = sqlparse.parse("select * from mytable where mytable.mycolumn LIKE 'expr%' limit 5;")
+    [p1_where] = [token for token in p1 if isinstance(token, sql.Where)]
+    validate_where_clause(p1_where, [
+        (T.Keyword, "where"),
+        (T.Whitespace, None),
+        (sql.Comparison, r"mytable.mycolumn LIKE.*"),
+        (T.Whitespace, None),
+    ])
+
+    [p2] = sqlparse.parse(
+        "select * from mytable where mycolumn NOT ILIKE '-expr' group by othercolumn;")
+    [p2_where] = [token for token in p2 if isinstance(token, sql.Where)]
+    validate_where_clause(p2_where, [
+        (T.Keyword, "where"),
+        (T.Whitespace, None),
+        (sql.Comparison, r"mycolumn NOT ILIKE.*"),
+        (T.Whitespace, None),
+    ])
 
 
 def test_comparison_with_functions():
@@ -465,9 +554,20 @@ def test_comparison_with_functions():
     assert p.tokens[0].right.value == 'bar.baz'
 
 
+def test_comparison_with_typed_literal():
+    p = sqlparse.parse("foo = DATE 'bar.baz'")[0]
+    assert len(p.tokens) == 1
+    comp = p.tokens[0]
+    assert isinstance(comp, sql.Comparison)
+    assert len(comp.tokens) == 5
+    assert comp.left.value == 'foo'
+    assert isinstance(comp.right, sql.TypedLiteral)
+    assert comp.right.value == "DATE 'bar.baz'"
+
+
 @pytest.mark.parametrize('start', ['FOR', 'FOREACH'])
 def test_forloops(start):
-    p = sqlparse.parse('{0} foo in bar LOOP foobar END LOOP'.format(start))[0]
+    p = sqlparse.parse('{} foo in bar LOOP foobar END LOOP'.format(start))[0]
     assert (len(p.tokens)) == 1
     assert isinstance(p.tokens[0], sql.For)
 
@@ -547,3 +647,11 @@ def test_aliased_literal_without_as():
     p = sqlparse.parse('1 foo')[0].tokens
     assert len(p) == 1
     assert p[0].get_alias() == 'foo'
+
+
+def test_grouping_as_cte():
+    p = sqlparse.parse('foo AS WITH apple AS 1, banana AS 2')[0].tokens
+    assert len(p) > 4
+    assert p[0].get_alias() is None
+    assert p[2].value == 'AS'
+    assert p[4].value == 'WITH'

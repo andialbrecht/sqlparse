@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2009-2018 the sqlparse authors and contributors
+# Copyright (C) 2009-2020 the sqlparse authors and contributors
 # <see AUTHORS file>
 #
 # This module is part of python-sqlparse and is released under
@@ -17,32 +16,32 @@ def validate_options(options):
     kwcase = options.get('keyword_case')
     if kwcase not in [None, 'upper', 'lower', 'capitalize']:
         raise SQLParseError('Invalid value for keyword_case: '
-                            '{0!r}'.format(kwcase))
+                            '{!r}'.format(kwcase))
 
     idcase = options.get('identifier_case')
     if idcase not in [None, 'upper', 'lower', 'capitalize']:
         raise SQLParseError('Invalid value for identifier_case: '
-                            '{0!r}'.format(idcase))
+                            '{!r}'.format(idcase))
 
     ofrmt = options.get('output_format')
     if ofrmt not in [None, 'sql', 'python', 'php']:
         raise SQLParseError('Unknown output format: '
-                            '{0!r}'.format(ofrmt))
+                            '{!r}'.format(ofrmt))
 
     strip_comments = options.get('strip_comments', False)
     if strip_comments not in [True, False]:
         raise SQLParseError('Invalid value for strip_comments: '
-                            '{0!r}'.format(strip_comments))
+                            '{!r}'.format(strip_comments))
 
     space_around_operators = options.get('use_space_around_operators', False)
     if space_around_operators not in [True, False]:
         raise SQLParseError('Invalid value for use_space_around_operators: '
-                            '{0!r}'.format(space_around_operators))
+                            '{!r}'.format(space_around_operators))
 
     strip_ws = options.get('strip_whitespace', False)
     if strip_ws not in [True, False]:
         raise SQLParseError('Invalid value for strip_whitespace: '
-                            '{0!r}'.format(strip_ws))
+                            '{!r}'.format(strip_ws))
 
     truncate_strings = options.get('truncate_strings')
     if truncate_strings is not None:
@@ -50,17 +49,17 @@ def validate_options(options):
             truncate_strings = int(truncate_strings)
         except (ValueError, TypeError):
             raise SQLParseError('Invalid value for truncate_strings: '
-                                '{0!r}'.format(truncate_strings))
+                                '{!r}'.format(truncate_strings))
         if truncate_strings <= 1:
             raise SQLParseError('Invalid value for truncate_strings: '
-                                '{0!r}'.format(truncate_strings))
+                                '{!r}'.format(truncate_strings))
         options['truncate_strings'] = truncate_strings
         options['truncate_char'] = options.get('truncate_char', '[...]')
 
     indent_columns = options.get('indent_columns', False)
     if indent_columns not in [True, False]:
         raise SQLParseError('Invalid value for indent_columns: '
-                            '{0!r}'.format(indent_columns))
+                            '{!r}'.format(indent_columns))
     elif indent_columns:
         options['reindent'] = True  # enforce reindent
     options['indent_columns'] = indent_columns
@@ -68,27 +67,27 @@ def validate_options(options):
     reindent = options.get('reindent', False)
     if reindent not in [True, False]:
         raise SQLParseError('Invalid value for reindent: '
-                            '{0!r}'.format(reindent))
+                            '{!r}'.format(reindent))
     elif reindent:
         options['strip_whitespace'] = True
 
     reindent_aligned = options.get('reindent_aligned', False)
     if reindent_aligned not in [True, False]:
         raise SQLParseError('Invalid value for reindent_aligned: '
-                            '{0!r}'.format(reindent))
+                            '{!r}'.format(reindent))
     elif reindent_aligned:
         options['strip_whitespace'] = True
 
     indent_after_first = options.get('indent_after_first', False)
     if indent_after_first not in [True, False]:
         raise SQLParseError('Invalid value for indent_after_first: '
-                            '{0!r}'.format(indent_after_first))
+                            '{!r}'.format(indent_after_first))
     options['indent_after_first'] = indent_after_first
 
     indent_tabs = options.get('indent_tabs', False)
     if indent_tabs not in [True, False]:
         raise SQLParseError('Invalid value for indent_tabs: '
-                            '{0!r}'.format(indent_tabs))
+                            '{!r}'.format(indent_tabs))
     elif indent_tabs:
         options['indent_char'] = '\t'
     else:

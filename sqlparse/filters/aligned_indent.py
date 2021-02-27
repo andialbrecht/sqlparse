@@ -1,25 +1,24 @@
-# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2009-2018 the sqlparse authors and contributors
+# Copyright (C) 2009-2020 the sqlparse authors and contributors
 # <see AUTHORS file>
 #
 # This module is part of python-sqlparse and is released under
 # the BSD License: https://opensource.org/licenses/BSD-3-Clause
 
 from sqlparse import sql, tokens as T
-from sqlparse.compat import text_type
 from sqlparse.utils import offset, indent
 
 
-class AlignedIndentFilter(object):
+class AlignedIndentFilter:
     join_words = (r'((LEFT\s+|RIGHT\s+|FULL\s+)?'
                   r'(INNER\s+|OUTER\s+|STRAIGHT\s+)?|'
                   r'(CROSS\s+|NATURAL\s+)?)?JOIN\b')
+    by_words = r'(GROUP|ORDER)\s+BY\b'
     split_words = ('FROM',
-                   join_words, 'ON',
+                   join_words, 'ON', by_words,
                    'WHERE', 'AND', 'OR',
-                   'GROUP', 'HAVING', 'LIMIT',
-                   'ORDER', 'UNION', 'VALUES',
+                   'HAVING', 'LIMIT',
+                   'UNION', 'VALUES',
                    'SET', 'BETWEEN', 'EXCEPT')
 
     def __init__(self, char=' ', n='\n'):
@@ -72,7 +71,7 @@ class AlignedIndentFilter(object):
         end_token = tlist.token_next_by(m=(T.Keyword, 'END'))[1]
         cases.append((None, [end_token]))
 
-        condition_width = [len(' '.join(map(text_type, cond))) if cond else 0
+        condition_width = [len(' '.join(map(str, cond))) if cond else 0
                            for cond, _ in cases]
         max_cond_width = max(condition_width)
 
@@ -81,8 +80,7 @@ class AlignedIndentFilter(object):
             stmt = cond[0] if cond else value[0]
 
             if i > 0:
-                tlist.insert_before(stmt, self.nl(
-                    offset_ - len(text_type(stmt))))
+                tlist.insert_before(stmt, self.nl(offset_ - len(str(stmt))))
             if cond:
                 ws = sql.Token(T.Whitespace, self.char * (
                     max_cond_width - condition_width[i]))
@@ -101,11 +99,15 @@ class AlignedIndentFilter(object):
     def _split_kwds(self, tlist):
         tidx, token = self._next_token(tlist)
         while token:
-            # joins are special case. only consider the first word as aligner
-            if token.match(T.Keyword, self.join_words, regex=True):
+            # joins, group/order by are special case. only consider the first
+            # word as aligner
+            if (
+                token.match(T.Keyword, self.join_words, regex=True)
+                or token.match(T.Keyword, self.by_words, regex=True)
+            ):
                 token_indent = token.value.split()[0]
             else:
-                token_indent = text_type(token)
+                token_indent = str(token)
             tlist.insert_before(token, self.nl(token_indent))
             tidx += 1
             tidx, token = self._next_token(tlist, tidx)
@@ -117,7 +119,9 @@ class AlignedIndentFilter(object):
             idx = tlist.token_index(sgroup)
             pidx, prev_ = tlist.token_prev(idx)
             # HACK: make "group/order by" work. Longer than max_len.
-            offset_ = 3 if (prev_ and prev_.match(T.Keyword, 'BY')) else 0
+            offset_ = 3 if (
+                prev_ and prev_.match(T.Keyword, self.by_words, regex=True)
+            ) else 0
             with offset(self, offset_):
                 self._process(sgroup)
 

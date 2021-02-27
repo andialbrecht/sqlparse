@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
-
 import types
+from io import StringIO
 
 import pytest
 
 import sqlparse
 from sqlparse import lexer
 from sqlparse import sql, tokens as T
-from sqlparse.compat import StringIO
 
 
 def test_tokenize_simple():
@@ -152,7 +150,7 @@ def test_stream_error():
     'INNER JOIN',
     'LEFT INNER JOIN'])
 def test_parse_join(expr):
-    p = sqlparse.parse('{0} foo'.format(expr))[0]
+    p = sqlparse.parse('{} foo'.format(expr))[0]
     assert len(p.tokens) == 3
     assert p.tokens[0].ttype is T.Keyword
 
@@ -171,6 +169,13 @@ def test_parse_endifloop(s):
     assert p.tokens[0].ttype is T.Keyword
 
 
+@pytest.mark.parametrize('s', ['NULLS FIRST', 'NULLS LAST'])
+def test_parse_nulls(s):  # issue487
+    p = sqlparse.parse(s)[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype is T.Keyword
+
+
 @pytest.mark.parametrize('s', [
     'foo',
     'Foo',
@@ -183,3 +188,55 @@ def test_parse_identifiers(s):
     token = p.tokens[0]
     assert str(token) == s
     assert isinstance(token, sql.Identifier)
+
+
+def test_parse_group_by():
+    p = sqlparse.parse('GROUP BY')[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype is T.Keyword
+
+
+def test_parse_order_by():
+    p = sqlparse.parse('ORDER BY')[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype is T.Keyword
+
+
+def test_parse_window_as():
+    p = sqlparse.parse('WINDOW w AS')[0]
+    assert len(p.tokens) == 5
+    assert p.tokens[0].ttype is T.Keyword
+
+
+@pytest.mark.parametrize('s', (
+    "LIKE", "ILIKE", "NOT LIKE", "NOT ILIKE",
+    "NOT   LIKE", "NOT    ILIKE",
+))
+def test_like_and_ilike_parsed_as_comparisons(s):
+    p = sqlparse.parse(s)[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype == T.Operator.Comparison
+
+
+@pytest.mark.parametrize('s', (
+    "LIKEaaa", "bILIKE", "aaILIKEbb", "NOTLIKE", "NOTILIKE",
+))
+def test_near_like_and_ilike_parsed_appropriately(s):
+    p = sqlparse.parse(s)[0]
+    assert len(p.tokens) == 1
+    assert isinstance(p.tokens[0], sql.Identifier)
+
+
+@pytest.mark.parametrize('s', (
+    'AT TIME ZONE \'UTC\'',
+))
+def test_parse_tzcast(s):
+    p = sqlparse.parse(s)[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype == T.Keyword.TZCast
+
+
+def test_cli_commands():
+    p = sqlparse.parse('\\copy')[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype == T.Command

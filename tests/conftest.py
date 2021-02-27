@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Helpers for testing."""
 
 import io
@@ -35,7 +33,7 @@ def load_file(filepath):
         # https://stackoverflow.com/questions/18011902/py-test-pass-a-parameter-to-a-fixture-function/33879151#33879151
         # Syntax is noisy and requires specific variable names
         # And seems to be limited to only 1 argument.
-        with io.open(filepath(filename), encoding=encoding) as f:
+        with open(filepath(filename), encoding=encoding) as f:
             return f.read().strip()
 
     return make_load_file
@@ -44,6 +42,6 @@ def load_file(filepath):
 @pytest.fixture()
 def get_stream(filepath):
     def make_stream(filename, encoding='utf-8'):
-        return io.open(filepath(filename), encoding=encoding)
+        return open(filepath(filename), encoding=encoding)
 
     return make_stream

@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2009-2018 the sqlparse authors and contributors
+# Copyright (C) 2009-2020 the sqlparse authors and contributors
 # <see AUTHORS file>
 #
 # This module is part of python-sqlparse and is released under
@@ -9,7 +8,7 @@
 from sqlparse import sql, tokens as T
 
 
-class StatementSplitter(object):
+class StatementSplitter:
     """Filter that split stream at individual statements"""
 
     def __init__(self):
@@ -27,11 +26,13 @@ class StatementSplitter(object):
 
     def _change_splitlevel(self, ttype, value):
         """Get the new split level (increase, decrease or remain equal)"""
-        # ANSI
-        # if normal token return
-        # wouldn't parenthesis increase/decrease a level?
-        # no, inside a parenthesis can't start new statement
-        if ttype not in T.Keyword:
+
+        # parenthesis increase/decrease a level
+        if ttype is T.Punctuation and value == '(':
+            return 1
+        elif ttype is T.Punctuation and value == ')':
+            return -1
+        elif ttype not in T.Keyword:  # if normal token return
             return 0
 
         # Everything after here is ttype = T.Keyword
@@ -65,8 +66,8 @@ class StatementSplitter(object):
             self._begin_depth = max(0, self._begin_depth - 1)
             return -1
 
-        if (unified in ('IF', 'FOR', 'WHILE') and
-                self._is_create and self._begin_depth > 0):
+        if (unified in ('IF', 'FOR', 'WHILE', 'CASE')
+                and self._is_create and self._begin_depth > 0):
             return 1
 
         if unified in ('END IF', 'END FOR', 'END WHILE'):
@@ -102,5 +103,5 @@ class StatementSplitter(object):
                 self.consume_ws = True
 
         # Yield pending statement (if any)
-        if self.tokens:
+        if self.tokens and not all(t.is_whitespace for t in self.tokens):
             yield sql.Statement(self.tokens)

@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2009-2018 the sqlparse authors and contributors
+# Copyright (C) 2009-2020 the sqlparse authors and contributors
 # <see AUTHORS file>
 #
 # This module is part of python-sqlparse and is released under
@@ -13,7 +12,7 @@ from sqlparse.engine import grouping
 from sqlparse.engine.statement_splitter import StatementSplitter
 
 
-class FilterStack(object):
+class FilterStack:
     def __init__(self):
         self.preprocess = []
         self.stmtprocess = []

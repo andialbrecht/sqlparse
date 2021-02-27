@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2009-2018 the sqlparse authors and contributors
+# Copyright (C) 2009-2020 the sqlparse authors and contributors
 # <see AUTHORS file>
 #
 # This module is part of python-sqlparse and is released under
@@ -16,9 +15,8 @@ from sqlparse import tokens
 from sqlparse import filters
 from sqlparse import formatter
 
-from sqlparse.compat import text_type
 
-__version__ = '0.2.5.dev0'
+__version__ = '0.4.2.dev0'
 __all__ = ['engine', 'filters', 'formatter', 'sql', 'tokens', 'cli']
 
 
@@ -58,7 +56,7 @@ def format(sql, encoding=None, **options):
     options = formatter.validate_options(options)
     stack = formatter.build_filter_stack(stack, options)
     stack.postprocess.append(filters.SerializerUnicode())
-    return u''.join(stack.run(sql, encoding))
+    return ''.join(stack.run(sql, encoding))
 
 
 def split(sql, encoding=None):
@@ -69,4 +67,4 @@ def split(sql, encoding=None):
     :returns: A list of strings.
     """
     stack = engine.FilterStack()
-    return [text_type(stmt).strip() for stmt in stack.run(sql, encoding)]
+    return [str(stmt).strip() for stmt in stack.run(sql, encoding)]

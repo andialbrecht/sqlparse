@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
-
 """Tests sqlparse.parse()."""
+from io import StringIO
 
 import pytest
 
 import sqlparse
 from sqlparse import sql, tokens as T
-from sqlparse.compat import StringIO, text_type
 
 
 def test_parse_tokenize():
@@ -100,6 +98,12 @@ def test_parse_square_brackets_notation_isnt_too_greedy():
     assert len(t[0].tokens) == 4
     assert t[0].tokens[0].get_real_name() == '[foo]'
     assert t[0].tokens[-1].get_real_name() == '[bar]'
+
+
+def test_parse_square_brackets_notation_isnt_too_greedy2():
+    # see issue583
+    t = sqlparse.parse('[(foo[i])]')[0].tokens
+    assert isinstance(t[0], sql.SquareBrackets)  # not Identifier!
 
 
 def test_parse_keyword_like_identifier():
@@ -313,59 +317,59 @@ def test_pprint():
 
     p._pprint_tree(f=output)
     pprint = '\n'.join([
-        " 0 DML 'select'",
-        " 1 Whitespace ' '",
-        " 2 IdentifierList 'a0, b0...'",
-        " |  0 Identifier 'a0'",
-        " |  |  0 Name 'a0'",
-        " |  1 Punctuation ','",
-        " |  2 Whitespace ' '",
-        " |  3 Identifier 'b0'",
-        " |  |  0 Name 'b0'",
-        " |  4 Punctuation ','",
-        " |  5 Whitespace ' '",
-        " |  6 Identifier 'c0'",
-        " |  |  0 Name 'c0'",
-        " |  7 Punctuation ','",
-        " |  8 Whitespace ' '",
-        " |  9 Identifier 'd0'",
-        " |  |  0 Name 'd0'",
-        " | 10 Punctuation ','",
-        " | 11 Whitespace ' '",
-        " | 12 Float 'e0'",
-        " 3 Whitespace ' '",
-        " 4 Keyword 'from'",
-        " 5 Whitespace ' '",
-        " 6 Identifier '(selec...'",
-        " |  0 Parenthesis '(selec...'",
-        " |  |  0 Punctuation '('",
-        " |  |  1 DML 'select'",
-        " |  |  2 Whitespace ' '",
-        " |  |  3 Wildcard '*'",
-        " |  |  4 Whitespace ' '",
-        " |  |  5 Keyword 'from'",
-        " |  |  6 Whitespace ' '",
-        " |  |  7 Identifier 'dual'",
-        " |  |  |  0 Name 'dual'",
-        " |  |  8 Punctuation ')'",
-        " |  1 Whitespace ' '",
-        " |  2 Identifier 'q0'",
-        " |  |  0 Name 'q0'",
-        " 7 Whitespace ' '",
-        " 8 Where 'where ...'",
-        " |  0 Keyword 'where'",
-        " |  1 Whitespace ' '",
-        " |  2 Comparison '1=1'",
-        " |  |  0 Integer '1'",
-        " |  |  1 Comparison '='",
-        " |  |  2 Integer '1'",
-        " |  3 Whitespace ' '",
-        " |  4 Keyword 'and'",
-        " |  5 Whitespace ' '",
-        " |  6 Comparison '2=2'",
-        " |  |  0 Integer '2'",
-        " |  |  1 Comparison '='",
-        " |  |  2 Integer '2'",
+        "|- 0 DML 'select'",
+        "|- 1 Whitespace ' '",
+        "|- 2 IdentifierList 'a0, b0...'",
+        "|  |- 0 Identifier 'a0'",
+        "|  |  `- 0 Name 'a0'",
+        "|  |- 1 Punctuation ','",
+        "|  |- 2 Whitespace ' '",
+        "|  |- 3 Identifier 'b0'",
+        "|  |  `- 0 Name 'b0'",
+        "|  |- 4 Punctuation ','",
+        "|  |- 5 Whitespace ' '",
+        "|  |- 6 Identifier 'c0'",
+        "|  |  `- 0 Name 'c0'",
+        "|  |- 7 Punctuation ','",
+        "|  |- 8 Whitespace ' '",
+        "|  |- 9 Identifier 'd0'",
+        "|  |  `- 0 Name 'd0'",
+        "|  |- 10 Punctuation ','",
+        "|  |- 11 Whitespace ' '",
+        "|  `- 12 Float 'e0'",
+        "|- 3 Whitespace ' '",
+        "|- 4 Keyword 'from'",
+        "|- 5 Whitespace ' '",
+        "|- 6 Identifier '(selec...'",
+        "|  |- 0 Parenthesis '(selec...'",
+        "|  |  |- 0 Punctuation '('",
+        "|  |  |- 1 DML 'select'",
+        "|  |  |- 2 Whitespace ' '",
+        "|  |  |- 3 Wildcard '*'",
+        "|  |  |- 4 Whitespace ' '",
+        "|  |  |- 5 Keyword 'from'",
+        "|  |  |- 6 Whitespace ' '",
+        "|  |  |- 7 Identifier 'dual'",
+        "|  |  |  `- 0 Name 'dual'",
+        "|  |  `- 8 Punctuation ')'",
+        "|  |- 1 Whitespace ' '",
+        "|  `- 2 Identifier 'q0'",
+        "|     `- 0 Name 'q0'",
+        "|- 7 Whitespace ' '",
+        "`- 8 Where 'where ...'",
+        "   |- 0 Keyword 'where'",
+        "   |- 1 Whitespace ' '",
+        "   |- 2 Comparison '1=1'",
+        "   |  |- 0 Integer '1'",
+        "   |  |- 1 Comparison '='",
+        "   |  `- 2 Integer '1'",
+        "   |- 3 Whitespace ' '",
+        "   |- 4 Keyword 'and'",
+        "   |- 5 Whitespace ' '",
+        "   `- 6 Comparison '2=2'",
+        "      |- 0 Integer '2'",
+        "      |- 1 Comparison '='",
+        "      `- 2 Integer '2'",
         ""])
     assert output.getvalue() == pprint
 
@@ -409,27 +413,66 @@ def test_dbldollar_as_literal(sql, is_literal):
 
 
 def test_non_ascii():
-    _test_non_ascii = u"insert into test (id, name) values (1, 'тест');"
+    _test_non_ascii = "insert into test (id, name) values (1, 'тест');"
 
     s = _test_non_ascii
     stmts = sqlparse.parse(s)
     assert len(stmts) == 1
     statement = stmts[0]
-    assert text_type(statement) == s
+    assert str(statement) == s
     assert statement._pprint_tree() is None
 
     s = _test_non_ascii.encode('utf-8')
     stmts = sqlparse.parse(s, 'utf-8')
     assert len(stmts) == 1
     statement = stmts[0]
-    assert text_type(statement) == _test_non_ascii
+    assert str(statement) == _test_non_ascii
     assert statement._pprint_tree() is None
 
 
 def test_get_real_name():
     # issue 369
-    s = u"update a t set t.b=1"
+    s = "update a t set t.b=1"
     stmts = sqlparse.parse(s)
     assert len(stmts) == 1
-    assert 'a' == stmts[0].get_real_name()
-    assert 't' == stmts[0].get_alias()
+    assert 'a' == stmts[0].tokens[2].get_real_name()
+    assert 't' == stmts[0].tokens[2].get_alias()
+
+
+def test_from_subquery():
+    # issue 446
+    s = 'from(select 1)'
+    stmts = sqlparse.parse(s)
+    assert len(stmts) == 1
+    assert len(stmts[0].tokens) == 2
+    assert stmts[0].tokens[0].value == 'from'
+    assert stmts[0].tokens[0].ttype == T.Keyword
+
+    s = 'from (select 1)'
+    stmts = sqlparse.parse(s)
+    assert len(stmts) == 1
+    assert len(stmts[0].tokens) == 3
+    assert stmts[0].tokens[0].value == 'from'
+    assert stmts[0].tokens[0].ttype == T.Keyword
+    assert stmts[0].tokens[1].ttype == T.Whitespace
+
+
+def test_parenthesis():
+    tokens = sqlparse.parse("(\n\n1\n\n)")[0].tokens[0].tokens
+    assert list(map(lambda t: t.ttype, tokens)) == [T.Punctuation,
+                                                    T.Newline,
+                                                    T.Newline,
+                                                    T.Number.Integer,
+                                                    T.Newline,
+                                                    T.Newline,
+                                                    T.Punctuation]
+    tokens = sqlparse.parse("(\n\n 1 \n\n)")[0].tokens[0].tokens
+    assert list(map(lambda t: t.ttype, tokens)) == [T.Punctuation,
+                                                    T.Newline,
+                                                    T.Newline,
+                                                    T.Whitespace,
+                                                    T.Number.Integer,
+                                                    T.Whitespace,
+                                                    T.Newline,
+                                                    T.Newline,
+                                                    T.Punctuation]

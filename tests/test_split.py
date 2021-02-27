@@ -1,13 +1,11 @@
-# -*- coding: utf-8 -*-
-
 # Tests splitting functions.
 
 import types
+from io import StringIO
 
 import pytest
 
 import sqlparse
-from sqlparse.compat import StringIO, text_type
 
 
 def test_split_semicolon():
@@ -33,7 +31,7 @@ def test_split_create_function(load_file, fn):
     sql = load_file(fn)
     stmts = sqlparse.parse(sql)
     assert len(stmts) == 1
-    assert text_type(stmts[0]) == sql
+    assert str(stmts[0]) == sql
 
 
 def test_split_dashcomments(load_file):
@@ -74,12 +72,12 @@ def test_split_dropif():
 
 
 def test_split_comment_with_umlaut():
-    sql = (u'select * from foo;\n'
-           u'-- Testing an umlaut: ä\n'
-           u'select * from bar;')
+    sql = ('select * from foo;\n'
+           '-- Testing an umlaut: ä\n'
+           'select * from bar;')
     stmts = sqlparse.parse(sql)
     assert len(stmts) == 2
-    assert ''.join(text_type(q) for q in stmts) == sql
+    assert ''.join(str(q) for q in stmts) == sql
 
 
 def test_split_comment_end_of_line():
@@ -96,6 +94,12 @@ def test_split_casewhen():
     sql = ("SELECT case when val = 1 then 2 else null end as foo;\n"
            "comment on table actor is 'The actor table.';")
     stmts = sqlparse.split(sql)
+    assert len(stmts) == 2
+
+
+def test_split_casewhen_procedure(load_file):
+    # see issue580
+    stmts = sqlparse.split(load_file('casewhen_procedure.sql'))
     assert len(stmts) == 2
 
 
@@ -125,11 +129,11 @@ def test_split_stream():
 def test_split_encoding_parsestream():
     stream = StringIO("SELECT 1; SELECT 2;")
     stmts = list(sqlparse.parsestream(stream))
-    assert isinstance(stmts[0].tokens[0].value, text_type)
+    assert isinstance(stmts[0].tokens[0].value, str)
 
 
 def test_split_unicode_parsestream():
-    stream = StringIO(u'SELECT ö')
+    stream = StringIO('SELECT ö')
     stmts = list(sqlparse.parsestream(stream))
     assert str(stmts[0]) == 'SELECT ö'
 
@@ -141,6 +145,13 @@ def test_split_simple():
     assert stmts[1] == 'select * from bar;'
 
 
+def test_split_ignores_empty_newlines():
+    stmts = sqlparse.split('select foo;\nselect bar;\n')
+    assert len(stmts) == 2
+    assert stmts[0] == 'select foo;'
+    assert stmts[1] == 'select bar;'
+
+
 def test_split_quotes_with_new_line():
     stmts = sqlparse.split('select "foo\nbar"')
     assert len(stmts) == 1
@@ -149,3 +160,9 @@ def test_split_quotes_with_new_line():
     stmts = sqlparse.split("select 'foo\n\bar'")
     assert len(stmts) == 1
     assert stmts[0] == "select 'foo\n\bar'"
+
+
+def test_split_mysql_handler_for(load_file):
+    # see issue581
+    stmts = sqlparse.split(load_file('mysql_handler.sql'))
+    assert len(stmts) == 2

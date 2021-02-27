@@ -1,16 +1,14 @@
-# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2009-2018 the sqlparse authors and contributors
+# Copyright (C) 2009-2020 the sqlparse authors and contributors
 # <see AUTHORS file>
 #
 # This module is part of python-sqlparse and is released under
 # the BSD License: https://opensource.org/licenses/BSD-3-Clause
 
 from sqlparse import sql, tokens as T
-from sqlparse.compat import text_type
 
 
-class OutputFilter(object):
+class OutputFilter:
     varname_prefix = ''
 
     def __init__(self, varname='sql'):
@@ -23,11 +21,11 @@ class OutputFilter(object):
     def process(self, stmt):
         self.count += 1
         if self.count > 1:
-            varname = u'{f.varname}{f.count}'.format(f=self)
+            varname = '{f.varname}{f.count}'.format(f=self)
         else:
             varname = self.varname
 
-        has_nl = len(text_type(stmt).strip().splitlines()) > 1
+        has_nl = len(str(stmt).strip().splitlines()) > 1
         stmt.tokens = self._process(stmt.tokens, varname, has_nl)
         return stmt
 

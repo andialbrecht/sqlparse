@@ -46,6 +46,12 @@ The :meth:`~sqlparse.format` function accepts the following keyword arguments.
 ``reindent``
   If ``True`` the indentations of the statements are changed.
 
+``reindent_aligned``
+  If ``True`` the indentations of the statements are changed, and statements are aligned by keywords.
+
+``use_space_around_operators``
+  If ``True`` spaces are used around all operators.
+
 ``indent_tabs``
   If ``True`` tabs instead of spaces are used for indentation.
 
@@ -53,9 +59,14 @@ The :meth:`~sqlparse.format` function accepts the following keyword arguments.
   The width of the indentation, defaults to 2.
 
 ``wrap_after``
-  The column limit for wrapping comma-separated lists. If unspecified, it
+  The column limit (in characters) for wrapping comma-separated lists. If unspecified, it
   puts every item in the list on its own line.
 
 ``output_format``
   If given the output is additionally formatted to be used as a variable
   in a programming language. Allowed values are "python" and "php".
+
+``comma_first``
+  If ``True`` comma-first notation for column names is used.
+
+ 

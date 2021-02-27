@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2009-2018 the sqlparse authors and contributors
+# Copyright (C) 2009-2020 the sqlparse authors and contributors
 # <see AUTHORS file>
 #
 # This module is part of python-sqlparse and is released under
@@ -23,10 +22,8 @@ Why does this file exist, and why not put this in __main__?
 import argparse
 import sys
 from io import TextIOWrapper
-from codecs import open, getreader
 
 import sqlparse
-from sqlparse.compat import PY2
 from sqlparse.exceptions import SQLParseError
 
 
@@ -62,16 +59,16 @@ def create_parser():
         metavar='CHOICE',
         dest='keyword_case',
         choices=_CASE_CHOICES,
-        help='change case of keywords, CHOICE is one of {0}'.format(
-            ', '.join('"{0}"'.format(x) for x in _CASE_CHOICES)))
+        help='change case of keywords, CHOICE is one of {}'.format(
+            ', '.join('"{}"'.format(x) for x in _CASE_CHOICES)))
 
     group.add_argument(
         '-i', '--identifiers',
         metavar='CHOICE',
         dest='identifier_case',
         choices=_CASE_CHOICES,
-        help='change case of identifiers, CHOICE is one of {0}'.format(
-            ', '.join('"{0}"'.format(x) for x in _CASE_CHOICES)))
+        help='change case of identifiers, CHOICE is one of {}'.format(
+            ', '.join('"{}"'.format(x) for x in _CASE_CHOICES)))
 
     group.add_argument(
         '-l', '--language',
@@ -153,7 +150,7 @@ def create_parser():
 
 def _error(msg):
     """Print msg and optionally exit with return code exit_."""
-    sys.stderr.write(u'[ERROR] {0}\n'.format(msg))
+    sys.stderr.write('[ERROR] {}\n'.format(msg))
     return 1
 
 
@@ -162,29 +159,26 @@ def main(args=None):
     args = parser.parse_args(args)
 
     if args.filename == '-':  # read from stdin
-        if PY2:
-            data = getreader(args.encoding)(sys.stdin).read()
-        else:
-            wrapper = TextIOWrapper(sys.stdin.buffer, encoding=args.encoding)
-            try:
-                data = wrapper.read()
-            finally:
-                wrapper.detach()
+        wrapper = TextIOWrapper(sys.stdin.buffer, encoding=args.encoding)
+        try:
+            data = wrapper.read()
+        finally:
+            wrapper.detach()
     else:
         try:
-            with open(args.filename, 'r', args.encoding) as f:
+            with open(args.filename, encoding=args.encoding) as f:
                 data = ''.join(f.readlines())
-        except IOError as e:
+        except OSError as e:
             return _error(
-                u'Failed to read {0}: {1}'.format(args.filename, e))
+                'Failed to read {}: {}'.format(args.filename, e))
 
     close_stream = False
     if args.outfile:
         try:
-            stream = open(args.outfile, 'w', args.encoding)
+            stream = open(args.outfile, 'w', encoding=args.encoding)
             close_stream = True
-        except IOError as e:
-            return _error(u'Failed to open {0}: {1}'.format(args.outfile, e))
+        except OSError as e:
+            return _error('Failed to open {}: {}'.format(args.outfile, e))
     else:
         stream = sys.stdout
 
@@ -192,7 +186,7 @@ def main(args=None):
     try:
         formatter_opts = sqlparse.formatter.validate_options(formatter_opts)
     except SQLParseError as e:
-        return _error(u'Invalid options: {0}'.format(e))
+        return _error('Invalid options: {}'.format(e))
 
     s = sqlparse.format(data, **formatter_opts)
     stream.write(s)

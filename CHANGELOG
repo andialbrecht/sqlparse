@@ -3,22 +3,114 @@ Development Version
 
 Enhancements
 
-* New formatting option "--indent\_after_first" (pr345, by johshoff).
+* Add ELSIF as keyword (issue584).
+* Add CONFLICT and ON_ERROR_STOP keywords (pr595, by j-martin).
+
+Bug Fixes
+
+* Fix parsing of backticks (issue588).
+
+
+Release 0.4.1 (Oct 08, 2020)
+----------------------------
+
+Bug Fixes
+
+* Just removed a debug print statement, sorry...
+
+
+Release 0.4.0 (Oct 07, 2020)
+----------------------------
+
+Notable Changes
+
+* Remove support for end-of-life Python 2.7 and 3.4. Python 3.5+ is now
+  required.
+* Remaining strings that only consist of whitespaces are not treated as
+  statements anymore. Code that ignored the last element from
+  sqlparse.split() should be updated accordingly since that function
+  now doesn't return an empty string as the last element in some
+  cases (issue496).
+
+Enhancements
+
+* Add WINDOW keyword (pr579 by ali-tny).
+* Add RLIKE keyword (pr582 by wjones1).
+
+Bug Fixes
+
+* Improved parsing of IN(...) statements (issue566, pr567 by hurcy).
+* Preserve line breaks when removing comments (issue484).
+* Fix parsing error when using square bracket notation (issue583).
+* Fix splitting when using DECLARE ... HANDLER (issue581).
+* Fix splitting of statements using CASE ... WHEN (issue580).
+* Improve formatting of type casts in parentheses.
+* Stabilize formatting of invalid SQL statements.
+
+
+Release 0.3.1 (Feb 29, 2020)
+----------------------------
+
+Enhancements
+
+* Add HQL keywords (pr475, by matwalk).
+* Add support for time zone casts (issue489).
+* Enhance formatting of AS keyword (issue507, by john-bodley).
+* Stabilize grouping engine when parsing invalid SQL statements.
+
+Bug Fixes
+
+* Fix splitting of SQL with multiple statements inside
+  parentheses (issue485, pr486 by win39).
+* Correctly identify NULLS FIRST / NULLS LAST as keywords (issue487).
+* Fix splitting of SQL statements that contain dollar signs in
+  identifiers (issue491).
+* Remove support for parsing double slash comments introduced in
+  0.3.0 (issue456) as it had some side-effects with other dialects and
+  doesn't seem to be widely used (issue476).
+* Restrict detection of alias names to objects that acutally could
+  have an alias (issue455, adopted some parts of pr509 by john-bodley).
+* Fix parsing of date/time literals (issue438, by vashek).
+* Fix initialization of TokenList (issue499, pr505 by john-bodley).
+* Fix parsing of LIKE (issue493, pr525 by dbczumar).
+* Improve parsing of identifiers (pr527 by liulk).
+
+
+Release 0.3.0 (Mar 11, 2019)
+----------------------------
+
+Notable Changes
+
+* Remove support for Python 3.3.
+
+Enhancements
+
+* New formatting option "--indent_after_first" (pr345, by johshoff).
 * New formatting option "--indent_columns" (pr393, by digitalarbeiter).
 * Add UPSERT keyword (issue408).
+* Strip multiple whitespace within parentheses (issue473, by john-bodley).
+* Support double slash (//) comments (issue456, by theianrobertson).
+* Support for Calcite temporal keywords (pr468, by john-bodley).
 
 Bug Fixes
 
 * Fix occasional IndexError (pr390, by circld, issue313).
 * Fix incorrect splitting of strings containing new lines (pr396, by fredyw).
-* Fix for get\_real_name() to return correct name (issue369, by fredyw).
+* Fix reindent issue for parenthesis (issue427, by fredyw).
+* Fix from( parsing issue (issue446, by fredyw)	.
+* Fix for get_real_name() to return correct name (issue369, by fredyw).
 * Wrap function params when wrap_after is set (pr398, by soloman1124).
 * Fix parsing of "WHEN name" clauses (pr418, by andrew deryabin).
 * Add missing EXPLAIN keyword (issue421).
+* Fix issue with strip_comments causing a syntax error (issue425, by fredyw).
+* Fix formatting on INSERT which caused staircase effect on values (issue329,
+  by fredyw).
+* Avoid formatting of psql commands (issue469).
 
 Internal Changes
 
-* Remove support for Python 3.3.
+* Unify handling of GROUP BY/ORDER BY (pr457, by john-bodley).
+* Remove unnecessary compat shim for bytes (pr453, by jdufresne).
 
 
 Release 0.2.4 (Sep 27, 2017)
@@ -80,7 +172,7 @@ Internal Changes
 
 
 Release 0.2.1 (Aug 13, 2016)
----------------------------
+----------------------------
 
 Notable Changes
 
