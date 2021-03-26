@@ -700,7 +700,7 @@ def test_truncate_values():
 def test_truncate_values_invalid_option():
     sql = 'update foo set value = 123;'
     with pytest.raises(SQLParseError):
-        sqlparse.format(sql, strip_values=2)
+        sqlparse.format(sql, truncate_values=None)
 
 
 def test_having_produces_newline():
