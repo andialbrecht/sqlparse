@@ -56,6 +56,11 @@ def validate_options(options):
         options['truncate_strings'] = truncate_strings
         options['truncate_char'] = options.get('truncate_char', '[...]')
 
+    truncate_values = options.get('truncate_values', False)
+    if truncate_values not in [True, False]:
+        raise SQLParseError('Invalid value for truncate_values: '
+                            '{!r}'.format(truncate_values))
+
     indent_columns = options.get('indent_columns', False)
     if indent_columns not in [True, False]:
         raise SQLParseError('Invalid value for indent_columns: '
@@ -148,6 +153,9 @@ def build_filter_stack(stack, options):
     if options.get('truncate_strings'):
         stack.preprocess.append(filters.TruncateStringFilter(
             width=options['truncate_strings'], char=options['truncate_char']))
+
+    if options.get('truncate_values', False):
+        stack.preprocess.append(filters.TruncateValueFilter())
 
     if options.get('use_space_around_operators', False):
         stack.enable_grouping()

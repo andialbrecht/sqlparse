@@ -682,6 +682,26 @@ def test_truncate_strings_doesnt_truncate_identifiers(sql):
     assert formatted == sql
 
 
+def test_truncate_values():
+    sql = "update foo set value = 123;"
+    formatted = sqlparse.format(sql, truncate_values=True)
+    assert formatted == "update foo set value = 1.23;"
+    formatted = sqlparse.format(sql, truncate_values=True)
+    assert formatted == "update foo set value = ?;"
+    assert formatted == "update foo set value = 0x100;"
+    formatted = sqlparse.format(sql, truncate_values=True)
+    assert formatted == "update foo set value = ?;"
+    assert formatted == "update foo set value = 'xxx';"
+    formatted = sqlparse.format(sql, truncate_values=True)
+    assert formatted == "update foo set value = ?;"
+
+
+def test_truncate_values_invalid_option():
+    sql = 'update foo set value = 123;'
+    with pytest.raises(SQLParseError):
+        sqlparse.format(sql, strip_values=None)
+
+
 def test_having_produces_newline():
     sql = ('select * from foo, bar where bar.id = foo.bar_id '
            'having sum(bar.value) > 100')

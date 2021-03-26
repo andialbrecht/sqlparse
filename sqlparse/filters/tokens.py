@@ -57,3 +57,17 @@ class TruncateStringFilter:
             if len(inner) > self.width:
                 value = ''.join((quote, inner[:self.width], self.char, quote))
             yield ttype, value
+
+
+class TruncateValueFilter:
+    def __init__(self):
+        return
+
+    def process(self, stream):
+        for ttype, value in stream:
+            if ttype != T.Literal.String.Single and ttype not in (T.Literal.Number.Integer, T.Literal.Number.Float, T.Literal.Number.Hexadecimal):
+                yield ttype, value
+                continue
+
+            value = '?'
+            yield ttype, value
