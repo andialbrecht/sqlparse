@@ -65,7 +65,8 @@ class TruncateValueFilter:
 
     def process(self, stream):
         for ttype, value in stream:
-            if ttype != T.Literal.String.Single and ttype not in (T.Literal.Number.Integer, T.Literal.Number.Float, T.Literal.Number.Hexadecimal):
+            if ttype != T.Literal.String.Single and ttype not in (T.Literal.Number.Integer,
+                                                                  T.Literal.Number.Float, T.Literal.Number.Hexadecimal):
                 yield ttype, value
                 continue
 
