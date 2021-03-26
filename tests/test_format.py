@@ -685,13 +685,14 @@ def test_truncate_strings_doesnt_truncate_identifiers(sql):
 def test_truncate_values():
     sql = "update foo set value = 123;"
     formatted = sqlparse.format(sql, truncate_values=True)
-    assert formatted == "update foo set value = 1.23;"
+    assert formatted == "update foo set value = ?;"
+    sql = "update foo set value = 1.23;"
     formatted = sqlparse.format(sql, truncate_values=True)
     assert formatted == "update foo set value = ?;"
-    assert formatted == "update foo set value = 0x100;"
+    sql = "update foo set value = 0x100;"
     formatted = sqlparse.format(sql, truncate_values=True)
     assert formatted == "update foo set value = ?;"
-    assert formatted == "update foo set value = 'xxx';"
+    sql = "update foo set value = 'xxx';"
     formatted = sqlparse.format(sql, truncate_values=True)
     assert formatted == "update foo set value = ?;"
 
@@ -699,7 +700,7 @@ def test_truncate_values():
 def test_truncate_values_invalid_option():
     sql = 'update foo set value = 123;'
     with pytest.raises(SQLParseError):
-        sqlparse.format(sql, strip_values=None)
+        sqlparse.format(sql, strip_values=2)
 
 
 def test_having_produces_newline():
