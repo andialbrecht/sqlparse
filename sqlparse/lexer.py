@@ -25,7 +25,7 @@ class Lexer:
     """
 
     @staticmethod
-    def get_tokens(text, encoding=None):
+    def get_tokens(text, encoding=None, dismiss_whitespace=False):
         """
         Return an iterable of (tokentype, value) pairs generated from
         `text`. If `unfiltered` is set to `True`, the filtering mechanism
@@ -62,6 +62,8 @@ class Lexer:
 
                 if not m:
                     continue
+                elif dismiss_whitespace and action in (tokens.Text.Whitespace, tokens.Text.Whitespace.Newline):
+                    break
                 elif isinstance(action, tokens._TokenType):
                     yield action, m.group()
                 elif callable(action):
@@ -72,11 +74,10 @@ class Lexer:
             else:
                 yield tokens.Error, char
 
-
-def tokenize(sql, encoding=None):
+def tokenize(sql, encoding=None, dismiss_whitespace=False):
     """Tokenize sql.
 
     Tokenize *sql* using the :class:`Lexer` and return a 2-tuple stream
     of ``(token type, value)`` items.
     """
-    return Lexer().get_tokens(sql, encoding)
+    return Lexer().get_tokens(sql, encoding, dismiss_whitespace)

@@ -22,8 +22,8 @@ class FilterStack:
     def enable_grouping(self):
         self._grouping = True
 
-    def run(self, sql, encoding=None):
-        stream = lexer.tokenize(sql, encoding)
+    def run(self, sql, encoding=None, dismiss_whitespace=False):
+        stream = lexer.tokenize(sql, encoding, dismiss_whitespace)
         # Process token stream
         for filter_ in self.preprocess:
             stream = filter_.process(stream)
