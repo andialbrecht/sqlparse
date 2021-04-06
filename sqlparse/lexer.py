@@ -62,7 +62,7 @@ class Lexer:
 
                 if not m:
                     continue
-                elif dismiss_whitespace and action in (tokens.Text.Whitespace, tokens.Text.Whitespace.Newline):
+                elif dismiss_whitespace and action in (tokens.Whitespace, tokens.Whitespace.Newline):
                     break
                 elif isinstance(action, tokens._TokenType):
                     yield action, m.group()
@@ -74,6 +74,7 @@ class Lexer:
             else:
                 yield tokens.Error, char
 
+                
 def tokenize(sql, encoding=None, dismiss_whitespace=False):
     """Tokenize sql.
 
