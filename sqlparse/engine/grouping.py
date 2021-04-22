@@ -317,6 +317,23 @@ def group_where(tlist):
         tidx, token = tlist.token_next_by(m=sql.Where.M_OPEN, idx=tidx)
 
 
+@recurse(sql.Prewhere)
+def group_prewhere(tlist):
+    tidx, token = tlist.token_next_by(m=sql.Prewhere.M_OPEN)
+    while token:
+        eidx, end = tlist.token_next_by(m=sql.Prewhere.M_CLOSE, idx=tidx)
+
+        if end is None:
+            end = tlist._groupable_tokens[-1]
+        else:
+            end = tlist.tokens[eidx - 1]
+        # TODO: convert this to eidx instead of end token.
+        # i think above values are len(tlist) and eidx-1
+        eidx = tlist.token_index(end)
+        tlist.group_tokens(sql.Prewhere, tidx, eidx)
+        tidx, token = tlist.token_next_by(m=sql.Prewhere.M_OPEN, idx=tidx)
+
+
 @recurse()
 def group_aliased(tlist):
     I_ALIAS = (sql.Parenthesis, sql.Function, sql.Case, sql.Identifier,
@@ -397,6 +414,7 @@ def group(stmt):
         group_begin,
 
         group_functions,
+        group_prewhere,
         group_where,
         group_period,
         group_arrays,

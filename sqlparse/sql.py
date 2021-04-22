@@ -545,6 +545,14 @@ class Comment(TokenList):
         return self.tokens and self.tokens[0].ttype == T.Comment.Multiline
 
 
+class Prewhere(TokenList):
+    """A PREWHERE clause."""
+    M_OPEN = T.Keyword, 'PREWHERE'
+    M_CLOSE = T.Keyword, (
+        'WHERE', 'ORDER BY', 'GROUP BY', 'LIMIT', 'UNION', 'UNION ALL', 'EXCEPT',
+        'HAVING', 'RETURNING', 'INTO')
+
+
 class Where(TokenList):
     """A WHERE clause."""
     M_OPEN = T.Keyword, 'WHERE'

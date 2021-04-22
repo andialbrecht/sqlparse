@@ -100,6 +100,15 @@ class ReindentFilter:
         func = getattr(self, func_name.lower(), self._process_default)
         func(tlist)
 
+    def _process_prewhere(self, tlist):
+        tidx, token = tlist.token_next_by(m=(T.Keyword, 'PREWHERE'))
+        if not token:
+            return
+        # issue121, errors in statement fixed??
+        tlist.insert_before(tidx, self.nl())
+        with indent(self):
+            self._process_default(tlist)
+
     def _process_where(self, tlist):
         tidx, token = tlist.token_next_by(m=(T.Keyword, 'WHERE'))
         if not token:

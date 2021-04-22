@@ -12,11 +12,11 @@ from sqlparse.utils import offset, indent
 class AlignedIndentFilter:
     join_words = (r'((LEFT\s+|RIGHT\s+|FULL\s+)?'
                   r'(INNER\s+|OUTER\s+|STRAIGHT\s+)?|'
-                  r'(CROSS\s+|NATURAL\s+)?)?JOIN\b')
+                  r'(CROSS\s+|ARRAY\s+|NATURAL\s+)?)?JOIN\b')
     by_words = r'(GROUP|ORDER)\s+BY\b'
     split_words = ('FROM',
                    join_words, 'ON', by_words,
-                   'WHERE', 'AND', 'OR',
+                   'PREWHERE', 'WHERE', 'AND', 'OR',
                    'HAVING', 'LIMIT',
                    'UNION', 'VALUES',
                    'SET', 'BETWEEN', 'EXCEPT')

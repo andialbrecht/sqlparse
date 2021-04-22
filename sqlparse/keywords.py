@@ -16,6 +16,7 @@ def is_keyword(value):
             or KEYWORDS_ORACLE.get(val)
             or KEYWORDS_PLPGSQL.get(val)
             or KEYWORDS_HQL.get(val)
+            or KEYWORDS_CLICKHOUSE.get(val)
             or KEYWORDS.get(val, tokens.Name)), value
 
 
@@ -75,7 +76,7 @@ SQL_REGEX = {
         # otherwise it's probably an array index
         (r'(?<![\w\])])(\[[^\]\[]+\])', tokens.Name),
         (r'((LEFT\s+|RIGHT\s+|FULL\s+)?(INNER\s+|OUTER\s+|STRAIGHT\s+)?'
-         r'|(CROSS\s+|NATURAL\s+)?)?JOIN\b', tokens.Keyword),
+         r'|(CROSS\s+|NATURAL\s+|ARRAY\s+)?)?JOIN\b', tokens.Keyword),
         (r'END(\s+IF|\s+LOOP|\s+WHILE)?\b', tokens.Keyword),
         (r'NOT\s+NULL\b', tokens.Keyword),
         (r'NULLS\s+(FIRST|LAST)\b', tokens.Keyword),
@@ -955,4 +956,11 @@ KEYWORDS_HQL = {
     'EXIT': tokens.Keyword,
     'BREAK': tokens.Keyword,
     'LEAVE': tokens.Keyword,
+}
+
+KEYWORDS_CLICKHOUSE = {
+    'FORMAT': tokens.Keyword,
+    'PREWHERE': tokens.Keyword,
+    'OPTIMIZE': tokens.Keyword,
+    'MATERIALIZED': tokens.Keyword,
 }
