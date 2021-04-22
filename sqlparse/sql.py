@@ -549,8 +549,8 @@ class Prewhere(TokenList):
     """A PREWHERE clause."""
     M_OPEN = T.Keyword, 'PREWHERE'
     M_CLOSE = T.Keyword, (
-        'WHERE', 'ORDER BY', 'GROUP BY', 'LIMIT', 'UNION', 'UNION ALL', 'EXCEPT',
-        'HAVING', 'RETURNING', 'INTO')
+        'ORDER BY', 'GROUP BY', 'LIMIT', 'UNION', 'UNION ALL', 'EXCEPT',
+        'WHERE', 'HAVING', 'RETURNING', 'INTO')
 
 
 class Where(TokenList):
