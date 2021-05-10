@@ -5,6 +5,7 @@
 # This module is part of python-sqlparse and is released under
 # the BSD License: https://opensource.org/licenses/BSD-3-Clause
 
+from sqlparse.filters.others import GroupingFilter
 from sqlparse.filters.others import SerializerUnicode
 from sqlparse.filters.others import StripCommentsFilter
 from sqlparse.filters.others import StripWhitespaceFilter
@@ -22,6 +23,7 @@ from sqlparse.filters.right_margin import RightMarginFilter
 from sqlparse.filters.aligned_indent import AlignedIndentFilter
 
 __all__ = [
+    'GroupingFilter',
     'SerializerUnicode',
     'StripCommentsFilter',
     'StripWhitespaceFilter',

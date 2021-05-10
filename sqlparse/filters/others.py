@@ -8,7 +8,22 @@
 import re
 
 from sqlparse import sql, tokens as T
+from sqlparse.engine import grouping
 from sqlparse.utils import split_unquoted_newlines
+
+
+class GroupingFilter:
+    def __init__(self):
+        self._enabled = False
+
+    def enable(self):
+        self._enabled = True
+
+    def process(self, stmt):
+        if self._enabled:
+            return grouping.group(stmt)
+        else:
+            return stmt
 
 
 class StripCommentsFilter:

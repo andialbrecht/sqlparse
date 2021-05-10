@@ -7,8 +7,8 @@
 
 """filter"""
 
+from sqlparse import filters
 from sqlparse import lexer
-from sqlparse.engine import grouping
 from sqlparse.engine.statement_splitter import StatementSplitter
 
 
@@ -17,10 +17,10 @@ class FilterStack:
         self.preprocess = []
         self.stmtprocess = []
         self.postprocess = []
-        self._grouping = False
+        self.grouping_filter = filters.GroupingFilter()
 
     def enable_grouping(self):
-        self._grouping = True
+        self.grouping_filter.enable()
 
     def run(self, sql, encoding=None):
         stream = lexer.tokenize(sql, encoding)
@@ -32,9 +32,6 @@ class FilterStack:
 
         # Output: Stream processed Statements
         for stmt in stream:
-            if self._grouping:
-                stmt = grouping.group(stmt)
-
             for filter_ in self.stmtprocess:
                 filter_.process(stmt)
 
