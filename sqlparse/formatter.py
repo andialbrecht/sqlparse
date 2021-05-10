@@ -149,6 +149,10 @@ def build_filter_stack(stack, options):
         stack.preprocess.append(filters.TruncateStringFilter(
             width=options['truncate_strings'], char=options['truncate_char']))
 
+    # Before grouping
+    if options.get('strip_comments'):
+        stack.stmtprocess.append(filters.StripCommentsFilter())
+
     # Grouping
     stack.stmtprocess.append(stack.grouping_filter)
 
@@ -156,10 +160,6 @@ def build_filter_stack(stack, options):
     if options.get('use_space_around_operators', False):
         stack.enable_grouping()
         stack.stmtprocess.append(filters.SpacesAroundOperatorsFilter())
-
-    if options.get('strip_comments'):
-        stack.enable_grouping()
-        stack.stmtprocess.append(filters.StripCommentsFilter())
 
     if options.get('strip_whitespace') or options.get('reindent'):
         stack.enable_grouping()

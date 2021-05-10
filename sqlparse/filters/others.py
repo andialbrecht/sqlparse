@@ -63,7 +63,7 @@ class StripCommentsFilter:
             tidx, token = get_next_comment()
 
     def process(self, stmt):
-        [self.process(sgroup) for sgroup in stmt.get_sublists()]
+        grouping.group_comments(stmt)
         StripCommentsFilter._process(stmt)
         return stmt
 
