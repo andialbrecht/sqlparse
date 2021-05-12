@@ -36,29 +36,14 @@ class NameAliasMixin:
             return self._get_first_name(reverse=True)
 
 
-class Token:
+class TokenBase:
     """Base class for all other classes in this module.
-
-    It represents a single token and has two instance attributes:
-    ``value`` is the unchanged value of the token and ``ttype`` is
-    the type of the token.
     """
 
-    __slots__ = ('value', 'ttype', 'parent', 'normalized', 'is_keyword',
-                 'is_group', 'is_whitespace')
+    __slots__ = ('parent')
 
-    def __init__(self, ttype, value):
-        value = str(value)
-        self.value = value
-        self.ttype = ttype
+    def __init__(self):
         self.parent = None
-        self.is_group = False
-        self.is_keyword = ttype in T.Keyword
-        self.is_whitespace = self.ttype in T.Whitespace
-        self.normalized = value.upper() if self.is_keyword else value
-
-    def __str__(self):
-        return self.value
 
     # Pending tokenlist __len__ bug fix
     # def __len__(self):
@@ -72,18 +57,11 @@ class Token:
         return "<{cls} {q}{value}{q} at 0x{id:2X}>".format(
             id=id(self), **locals())
 
-    def _get_repr_name(self):
-        return str(self.ttype).split('.')[-1]
-
     def _get_repr_value(self):
         raw = str(self)
         if len(raw) > 7:
             raw = raw[:6] + '...'
         return re.sub(r'\s+', ' ', raw)
-
-    def flatten(self):
-        """Resolve subgroups."""
-        yield self
 
     def match(self, ttype, values, regex=False):
         """Checks whether the token matches the given arguments.
@@ -146,23 +124,64 @@ class Token:
         return False
 
 
-class TokenList(Token):
+class Token(TokenBase):
+    """"A single token.
+
+    It has two instance attributes:
+    ``value`` is the unchanged value of the token and ``ttype`` is
+    the type of the token.
+    """
+    is_group = False
+
+    __slots__ = ('value', 'ttype', 'normalized', 'is_keyword', 'is_whitespace')
+
+    def __init__(self, ttype, value):
+        super().__init__()
+        value = str(value)
+        self.value = value
+        self.ttype = ttype
+        self.is_keyword = ttype in T.Keyword
+        self.is_whitespace = ttype in T.Whitespace
+        self.normalized = value.upper() if self.is_keyword else value
+
+    def __str__(self):
+        return self.value
+
+    def _get_repr_name(self):
+        return str(self.ttype).split('.')[-1]
+
+    def flatten(self):
+        """Resolve subgroups."""
+        yield self
+
+
+class TokenList(TokenBase):
     """A group of tokens.
 
-    It has an additional instance attribute ``tokens`` which holds a
-    list of child-tokens.
+    It has two instance attributes:
+    ``value`` is the unchanged value of the token and ``tokens`` is a list of
+    child-tokens.
     """
 
-    __slots__ = 'tokens'
+    __slots__ = ('tokens', 'value')
+
+    is_group = True
+    ttype = None
+    is_keyword = False
+    is_whitespace = False
 
     def __init__(self, tokens=None):
+        super().__init__()
         self.tokens = tokens or []
+        self.value = str(self)
         [setattr(token, 'parent', self) for token in self.tokens]
-        super().__init__(None, str(self))
-        self.is_group = True
 
     def __str__(self):
         return ''.join(token.value for token in self.flatten())
+
+    @property
+    def normalized(self):
+        return self.value
 
     # weird bug
     # def __len__(self):
