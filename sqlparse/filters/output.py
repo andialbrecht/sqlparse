@@ -65,7 +65,7 @@ class OutputPythonFilter(OutputFilter):
             # Escape backslashes before quotes so a backslash preceding a
             # quote cannot break out of the generated string literal
             # (GHSA-3496-9g83-7v6x).
-            else:
+            elif not token.is_group:
                 token.value = token.value.replace('\\', '\\\\').replace("'", "\\'")
 
             # Put the token
@@ -116,7 +116,7 @@ class OutputPHPFilter(OutputFilter):
             # Escape backslashes before quotes so a backslash preceding a
             # quote cannot break out of the generated string literal
             # (GHSA-3496-9g83-7v6x).
-            else:
+            elif not token.is_group:
                 token.value = token.value.replace('\\', '\\\\').replace('"', '\\"')
 
             # Put the token
