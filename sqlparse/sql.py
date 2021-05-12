@@ -48,6 +48,9 @@ class TokenBase:
     def __init__(self):
         self.parent = None
 
+    def __str__(self):
+        return self.value
+
     # Pending tokenlist __len__ bug fix
     # def __len__(self):
     #     return len(self.value)
@@ -155,9 +158,6 @@ class Token(TokenBase):
         self.is_newline = self.ttype in T.Newline
         self.normalized = value.upper() if self.is_keyword else value
 
-    def __str__(self):
-        return self.value
-
     def _get_repr_name(self):
         return str(self.ttype).split('.')[-1]
 
@@ -169,11 +169,11 @@ class Token(TokenBase):
 class TokenList(TokenBase):
     """A group of tokens.
 
-    It has two additional instance attributes, ``value``, which is the value of
-    the token list, and ``tokens``, which holds a list of child-tokens.
+    It has an additional instance attribute ``tokens`` which holds a
+    list of child-tokens.
     """
 
-    __slots__ = ('tokens', 'value')
+    __slots__ = 'tokens'
 
     is_group = True
     ttype = None
@@ -184,10 +184,10 @@ class TokenList(TokenBase):
     def __init__(self, tokens=None):
         super().__init__()
         self.tokens = tokens or []
-        self.value = str(self)
         [setattr(token, 'parent', self) for token in self.tokens]
 
-    def __str__(self):
+    @property
+    def value(self):
         return ''.join(token.value for token in self.flatten())
 
     @property
@@ -352,7 +352,6 @@ class TokenList(TokenBase):
             grp = start
             grp.tokens.extend(subtokens)
             del self.tokens[start_idx + 1:end_idx]
-            grp.value = str(start)
         else:
             subtokens = self.tokens[start_idx:end_idx]
             grp = grp_cls(subtokens)
