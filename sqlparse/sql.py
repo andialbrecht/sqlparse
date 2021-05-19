@@ -240,7 +240,10 @@ class TokenList(Token):
                     if func(token):
                         return idx, token
         else:
-            for idx, token in enumerate(self.tokens[start:end], start=start):
+            if end is None:
+                end = len(self.tokens)
+            for idx in range(start, end):
+                token = self.tokens[idx]
                 for func in funcs:
                     if func(token):
                         return idx, token
