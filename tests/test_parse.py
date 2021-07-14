@@ -188,11 +188,16 @@ def test_placeholder(ph):
     assert p[0].ttype is T.Name.Placeholder
 
 
-@pytest.mark.parametrize('num', ['6.67428E-8', '1.988e33', '1e-12'])
-def test_scientific_numbers(num):
+@pytest.mark.parametrize('num, expected', [
+    ('6.67428E-8', T.Number.Float),
+    ('1.988e33', T.Number.Float),
+    ('1e-12', T.Number.Float),
+    ('e1', None),
+])
+def test_scientific_numbers(num, expected):
     p = sqlparse.parse(num)[0].tokens
     assert len(p) == 1
-    assert p[0].ttype is T.Number.Float
+    assert p[0].ttype is expected
 
 
 def test_single_quotes_are_strings():
@@ -336,7 +341,8 @@ def test_pprint():
         "|  |  `- 0 Name 'd0'",
         "|  |- 10 Punctuation ','",
         "|  |- 11 Whitespace ' '",
-        "|  `- 12 Float 'e0'",
+        "|  `- 12 Identifier 'e0'",
+        "|     `- 0 Name 'e0'",
         "|- 3 Whitespace ' '",
         "|- 4 Keyword 'from'",
         "|- 5 Whitespace ' '",

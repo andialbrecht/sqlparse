@@ -9,6 +9,7 @@ Enhancements
 Bug Fixes
 
 * Fix parsing of backticks (issue588).
+* Fix parsing of scientific number (issue399).
 
 
 Release 0.4.1 (Oct 08, 2020)

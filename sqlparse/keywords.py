@@ -62,7 +62,7 @@ SQL_REGEX = {
         (r'(?<=\.)[A-ZÀ-Ü]\w*', tokens.Name),  # .'Name'
         (r'[A-ZÀ-Ü]\w*(?=\()', tokens.Name),  # side effect: change kw to func
         (r'-?0x[\dA-F]+', tokens.Number.Hexadecimal),
-        (r'-?\d*(\.\d+)?E-?\d+', tokens.Number.Float),
+        (r'-?\d+(\.\d+)?E-?\d+', tokens.Number.Float),
         (r'(?![_A-ZÀ-Ü])-?(\d+(\.\d*)|\.\d+)(?![_A-ZÀ-Ü])',
          tokens.Number.Float),
         (r'(?![_A-ZÀ-Ü])-?\d+(?![_A-ZÀ-Ü])', tokens.Number.Integer),
