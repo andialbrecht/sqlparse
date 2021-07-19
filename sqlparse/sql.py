@@ -413,27 +413,28 @@ class Statement(TokenList):
         Whitespaces and comments at the beginning of the statement
         are ignored.
         """
-        first_token = self.token_first(skip_cm=True)
-        if first_token is None:
+        token = self.token_first(skip_cm=True)
+        if token is None:
             # An "empty" statement that either has not tokens at all
             # or only whitespace tokens.
             return 'UNKNOWN'
 
-        elif first_token.ttype in (T.Keyword.DML, T.Keyword.DDL):
-            return first_token.normalized
+        elif token.ttype in (T.Keyword.DML, T.Keyword.DDL):
+            return token.normalized
 
-        elif first_token.ttype == T.Keyword.CTE:
+        elif token.ttype == T.Keyword.CTE:
             # The WITH keyword should be followed by either an Identifier or
             # an IdentifierList containing the CTE definitions;  the actual
             # DML keyword (e.g. SELECT, INSERT) will follow next.
-            fidx = self.token_index(first_token)
-            tidx, token = self.token_next(fidx, skip_ws=True)
-            if isinstance(token, (Identifier, IdentifierList)):
-                _, dml_keyword = self.token_next(tidx, skip_ws=True)
+            tidx = self.token_index(token)
+            while tidx is not None:
+                tidx, token = self.token_next(tidx, skip_ws=True)
+                if isinstance(token, (Identifier, IdentifierList)):
+                    tidx, token = self.token_next(tidx, skip_ws=True)
 
-                if dml_keyword is not None \
-                        and dml_keyword.ttype == T.Keyword.DML:
-                    return dml_keyword.normalized
+                    if token is not None \
+                            and token.ttype == T.Keyword.DML:
+                        return token.normalized
 
         # Hmm, probably invalid syntax, so return unknown.
         return 'UNKNOWN'
