@@ -550,13 +550,14 @@ class Where(TokenList):
     M_OPEN = T.Keyword, 'WHERE'
     M_CLOSE = T.Keyword, (
         'ORDER BY', 'GROUP BY', 'LIMIT', 'UNION', 'UNION ALL', 'EXCEPT',
-        'HAVING', 'RETURNING', 'INTO')
+        'HAVING', 'RETURNING', 'INTO', 'INTERSECT')
 
 
 class Having(TokenList):
     """A HAVING clause."""
     M_OPEN = T.Keyword, 'HAVING'
-    M_CLOSE = T.Keyword, ('ORDER BY', 'LIMIT')
+    M_CLOSE = T.Keyword, ('ORDER BY', 'LIMIT', 'UNION', 'UNION ALL', 'EXCEPT',
+                          'RETURNING', 'INTO', 'INTERSECT')
 
 
 class Case(TokenList):
