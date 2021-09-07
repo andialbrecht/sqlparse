@@ -84,6 +84,23 @@ class TestFormat:
         res = sqlparse.format(sql, strip_comments=True)
         assert res == 'select (select 2)'
 
+    def test_strip_comments_preserves_linebreak(self):
+        sql = 'select * -- a comment\r\nfrom foo'
+        res = sqlparse.format(sql, strip_comments=True)
+        assert res == 'select *\nfrom foo'
+        sql = 'select * -- a comment\nfrom foo'
+        res = sqlparse.format(sql, strip_comments=True)
+        assert res == 'select *\nfrom foo'
+        sql = 'select * -- a comment\rfrom foo'
+        res = sqlparse.format(sql, strip_comments=True)
+        assert res == 'select *\nfrom foo'
+        sql = 'select * -- a comment\r\n\r\nfrom foo'
+        res = sqlparse.format(sql, strip_comments=True)
+        assert res == 'select *\n\nfrom foo'
+        sql = 'select * -- a comment\n\nfrom foo'
+        res = sqlparse.format(sql, strip_comments=True)
+        assert res == 'select *\n\nfrom foo'
+
     def test_strip_ws(self):
         f = lambda sql: sqlparse.format(sql, strip_whitespace=True)
         s = 'select\n* from      foo\n\twhere  ( 1 = 2 )\n'
