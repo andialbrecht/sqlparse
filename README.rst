@@ -67,8 +67,8 @@ sqlparse is licensed under the BSD license.
 Parts of the code are based on pygments written by Georg Brandl and others.
 pygments-Homepage: http://pygments.org/
 
-.. |buildstatus| image:: https://secure.travis-ci.org/andialbrecht/sqlparse.png?branch=master
-.. _buildstatus: https://travis-ci.org/#!/andialbrecht/sqlparse
+.. |buildstatus| image:: https://github.com/andialbrecht/sqlparse/actions/workflows/python-app.yml/badge.svg
+.. _buildstatus: https://github.com/andialbrecht/sqlparse/actions/workflows/python-app.yml
 .. |coverage| image:: https://codecov.io/gh/andialbrecht/sqlparse/branch/master/graph/badge.svg
 .. _coverage: https://codecov.io/gh/andialbrecht/sqlparse
 .. |docs| image:: https://readthedocs.org/projects/sqlparse/badge/?version=latest
