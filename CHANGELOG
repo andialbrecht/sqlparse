@@ -1,5 +1,14 @@
-Development Version
--------------------
+Release 0.4.2 (Sep 10, 2021)
+----------------------------
+
+Notable Changes
+
+* IMPORTANT: This release fixes a security vulnerability in the
+  strip comments filter. In this filter a regular expression that was
+  vulnerable to ReDOS (Regular Expression Denial of Service) was
+  used.
+  The vulnerability was discovered by @erik-krogh and @yoff from
+  GitHub Security Lab (GHSL). Thanks for reporting!
 
 Enhancements
 
