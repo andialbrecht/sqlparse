@@ -6,7 +6,7 @@ Notable Changes
 * IMPORTANT: This release fixes a security vulnerability in the
   strip comments filter. In this filter a regular expression that was
   vulnerable to ReDOS (Regular Expression Denial of Service) was
-  used.
+  used. See the security advisory for details: https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-p5w8-wqhj-9hhf
   The vulnerability was discovered by @erik-krogh and @yoff from
   GitHub Security Lab (GHSL). Thanks for reporting!
 
