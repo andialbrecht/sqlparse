@@ -335,9 +335,9 @@ def group_functions(tlist):
     has_create = False
     has_table = False
     for tmp_token in tlist.tokens:
-        if tmp_token.value == 'CREATE':
+        if tmp_token.value.upper() == 'CREATE':
             has_create = True
-        if tmp_token.value == 'TABLE':
+        if tmp_token.value.upper() == 'TABLE':
             has_table = True
     if has_create and has_table:
         return

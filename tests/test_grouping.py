@@ -655,3 +655,7 @@ def test_grouping_as_cte():
     assert p[0].get_alias() is None
     assert p[2].value == 'AS'
     assert p[4].value == 'WITH'
+
+def test_grouping_create_table():
+    p = sqlparse.parse("create table db.tbl (a string)")[0].tokens
+    assert p[4].value == "db.tbl"
