@@ -65,4 +65,4 @@ if __name__ == '__main__':
     """
 
     tables = ', '.join(extract_tables(sql))
-    print('Tables: {}'.format(tables))
+    print(f'Tables: {tables}')

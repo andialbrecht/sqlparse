@@ -41,7 +41,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'python-sqlparse'
-copyright = '{:%Y}, Andi Albrecht'.format(datetime.date.today())
+copyright = f'{datetime.date.today():%Y}, Andi Albrecht'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

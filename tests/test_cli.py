@@ -69,7 +69,7 @@ def test_stdout(filepath, load_file, capsys):
 
 def test_script():
     # Call with the --help option as a basic sanity check.
-    cmd = "{:s} -m sqlparse.cli --help".format(sys.executable)
+    cmd = f"{sys.executable:s} -m sqlparse.cli --help"
     assert subprocess.call(cmd.split()) == 0
 
 

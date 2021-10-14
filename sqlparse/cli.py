@@ -60,7 +60,7 @@ def create_parser():
         dest='keyword_case',
         choices=_CASE_CHOICES,
         help='change case of keywords, CHOICE is one of {}'.format(
-            ', '.join('"{}"'.format(x) for x in _CASE_CHOICES)))
+            ', '.join(f'"{x}"' for x in _CASE_CHOICES)))
 
     group.add_argument(
         '-i', '--identifiers',
@@ -68,7 +68,7 @@ def create_parser():
         dest='identifier_case',
         choices=_CASE_CHOICES,
         help='change case of identifiers, CHOICE is one of {}'.format(
-            ', '.join('"{}"'.format(x) for x in _CASE_CHOICES)))
+            ', '.join(f'"{x}"' for x in _CASE_CHOICES)))
 
     group.add_argument(
         '-l', '--language',
@@ -150,7 +150,7 @@ def create_parser():
 
 def _error(msg):
     """Print msg and optionally exit with return code exit_."""
-    sys.stderr.write('[ERROR] {}\n'.format(msg))
+    sys.stderr.write(f'[ERROR] {msg}\n')
     return 1
 
 
@@ -170,7 +170,7 @@ def main(args=None):
                 data = ''.join(f.readlines())
         except OSError as e:
             return _error(
-                'Failed to read {}: {}'.format(args.filename, e))
+                f'Failed to read {args.filename}: {e}')
 
     close_stream = False
     if args.outfile:
@@ -178,7 +178,7 @@ def main(args=None):
             stream = open(args.outfile, 'w', encoding=args.encoding)
             close_stream = True
         except OSError as e:
-            return _error('Failed to open {}: {}'.format(args.outfile, e))
+            return _error(f'Failed to open {args.outfile}: {e}')
     else:
         stream = sys.stdout
 
@@ -186,7 +186,7 @@ def main(args=None):
     try:
         formatter_opts = sqlparse.formatter.validate_options(formatter_opts)
     except SQLParseError as e:
-        return _error('Invalid options: {}'.format(e))
+        return _error(f'Invalid options: {e}')
 
     s = sqlparse.format(data, **formatter_opts)
     stream.write(s)
