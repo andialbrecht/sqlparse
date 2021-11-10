@@ -90,6 +90,7 @@ SQL_REGEX = {
          tokens.Keyword),
         (r"(AT|WITH')\s+TIME\s+ZONE\s+'[^']+'", tokens.Keyword.TZCast),
         (r'(NOT\s+)?(LIKE|ILIKE|RLIKE)\b', tokens.Operator.Comparison),
+        (r'(NOT\s+)?(REGEXP)\b', tokens.Operator.Comparison),
         (r'[0-9_A-ZÀ-Ü][_$#\w]*', is_keyword),
         (r'[;:()\[\],\.]', tokens.Punctuation),
         (r'[<>=~!]+', tokens.Operator.Comparison),
