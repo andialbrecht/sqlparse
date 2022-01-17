@@ -314,7 +314,7 @@ KEYWORDS = {
     'INCREMENT': tokens.Keyword,
     'INDEX': tokens.Keyword,
 
-    'INDITCATOR': tokens.Keyword,
+    'INDICATOR': tokens.Keyword,
     'INFIX': tokens.Keyword,
     'INHERITS': tokens.Keyword,
     'INITIAL': tokens.Keyword,
