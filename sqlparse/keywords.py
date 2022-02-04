@@ -16,6 +16,7 @@ def is_keyword(value):
             or KEYWORDS_ORACLE.get(val)
             or KEYWORDS_PLPGSQL.get(val)
             or KEYWORDS_HQL.get(val)
+            or KEYWORDS_MSSQL.get(val)
             or KEYWORDS.get(val, tokens.Name)), value
 
 
