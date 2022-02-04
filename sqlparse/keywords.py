@@ -721,7 +721,10 @@ KEYWORDS_COMMON = {
     'WHEN': tokens.Keyword,
     'MIN': tokens.Keyword,
     'MAX': tokens.Keyword,
+    'SUM': tokens.Keyword,
+    'MEDIAN': tokens.Keyword,
     'DISTINCT': tokens.Keyword,
+    'ROW_NUMBER': tokens.Keyword,
 }
 
 KEYWORDS_ORACLE = {
@@ -765,6 +768,7 @@ KEYWORDS_ORACLE = {
 
     'LAYER': tokens.Keyword,
     'LINK': tokens.Keyword,
+    'LISTAGG': tokens.Keyword,
     'LISTS': tokens.Keyword,
     'LOGFILE': tokens.Keyword,
 
@@ -817,6 +821,7 @@ KEYWORDS_ORACLE = {
     'SNAPSHOT': tokens.Keyword,
     'SORT': tokens.Keyword,
     'STATEMENT_ID': tokens.Keyword,
+    'STATS_MODE': tokens.Keyword,
     'STOP': tokens.Keyword,
     'SWITCH': tokens.Keyword,
 
@@ -955,4 +960,8 @@ KEYWORDS_HQL = {
     'EXIT': tokens.Keyword,
     'BREAK': tokens.Keyword,
     'LEAVE': tokens.Keyword,
+}
+
+KEYWORDS_MSSQL = {
+    'STRING_AGG': tokens.Keyword,
 }
