@@ -84,7 +84,7 @@ Bug Fixes
 * Remove support for parsing double slash comments introduced in
   0.3.0 (issue456) as it had some side-effects with other dialects and
   doesn't seem to be widely used (issue476).
-* Restrict detection of alias names to objects that acutally could
+* Restrict detection of alias names to objects that actually could
   have an alias (issue455, adopted some parts of pr509 by john-bodley).
 * Fix parsing of date/time literals (issue438, by vashek).
 * Fix initialization of TokenList (issue499, pr505 by john-bodley).
