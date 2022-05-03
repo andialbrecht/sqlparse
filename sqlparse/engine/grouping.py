@@ -341,12 +341,15 @@ def group_aliased(tlist):
 def group_functions(tlist):
     has_create = False
     has_table = False
+    has_as = False
     for tmp_token in tlist.tokens:
         if tmp_token.value == 'CREATE':
             has_create = True
         if tmp_token.value == 'TABLE':
             has_table = True
-    if has_create and has_table:
+        if tmp_token.value == 'AS':
+            has_as = True
+    if has_create and has_table and not has_as:
         return
 
     tidx, token = tlist.token_next_by(t=T.Name)
