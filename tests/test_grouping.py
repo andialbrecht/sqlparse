@@ -324,6 +324,11 @@ def test_grouping_alias_case():
     assert p.tokens[0].get_alias() == 'foo'
 
 
+def test_grouping_alias_ctas():
+    p = sqlparse.parse('CREATE TABLE tbl1 AS SELECT coalesce(t1.col1, 0) AS col1 FROM t1')[0]
+    assert p.tokens[10].get_alias() == 'col1'
+    assert isinstance(p.tokens[10].tokens[0], sql.Function)
+
 def test_grouping_subquery_no_parens():
     # Not totally sure if this is the right approach...
     # When a THEN clause contains a subquery w/o parenthesis around it *and*
