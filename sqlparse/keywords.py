@@ -241,6 +241,7 @@ KEYWORDS = {
     'DISABLE': tokens.Keyword,
     'DISCONNECT': tokens.Keyword,
     'DISPATCH': tokens.Keyword,
+    'DIV': tokens.Operator,
     'DO': tokens.Keyword,
     'DOMAIN': tokens.Keyword,
     'DYNAMIC': tokens.Keyword,

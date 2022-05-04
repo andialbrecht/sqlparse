@@ -132,6 +132,12 @@ def test_parse_nested_function():
     assert type(t[0]) is sql.Function
 
 
+def test_parse_div_operator():
+    p = sqlparse.parse('col1 DIV 5 AS div_col1')[0].tokens
+    assert p[0].tokens[0].tokens[2].ttype is T.Operator
+    assert p[0].get_alias() == 'div_col1'
+
+
 def test_quoted_identifier():
     t = sqlparse.parse('select x.y as "z" from foo')[0].tokens
     assert isinstance(t[2], sql.Identifier)
