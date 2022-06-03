@@ -67,4 +67,11 @@ def split(sql, encoding=None):
     :returns: A list of strings.
     """
     stack = engine.FilterStack()
-    return [str(stmt).strip() for stmt in stack.run(sql, encoding)]
+    result = [str(stmt).strip() for stmt in stack.run(sql, encoding)]
+
+    if len(result) > 0:
+        last_result = next(stack.run(result[-1], encoding))
+        if last_result.tokens[-1].ttype[0] == 'Comment':
+            result = result[0:-1]
+
+    return result
