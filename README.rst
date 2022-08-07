@@ -59,7 +59,7 @@ Documentation
    https://sqlparse.readthedocs.io/
 
 Online Demo
-  https://sqlformat.org/
+   https://sqlformat.org/
 
 
 sqlparse is licensed under the BSD license.
