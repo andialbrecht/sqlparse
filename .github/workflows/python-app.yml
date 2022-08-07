@@ -29,7 +29,7 @@ jobs:
         pip install codecov flake8 pytest pytest-cov
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Lint with flake8
-      run: flake8 sqlparse --count --max-complexity=31 --max-line-length=88 --show-source --statistics
+      run: flake8 sqlparse --count --max-complexity=31 --show-source --statistics
     - name: Test with pytest
       run: pytest --cov=sqlparse
     - name: Publish to codecov
