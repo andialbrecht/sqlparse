@@ -234,16 +234,16 @@ class TokenList(Token):
 
         if reverse:
             assert end is None
-            for idx in range(start - 2, -1, -1):
-                token = self.tokens[idx]
-                for func in funcs:
-                    if func(token):
-                        return idx, token
+            indexes = range(start - 2, -1, -1)
         else:
-            for idx, token in enumerate(self.tokens[start:end], start=start):
-                for func in funcs:
-                    if func(token):
-                        return idx, token
+            if end is None:
+                end = len(self.tokens)
+            indexes = range(start, end)
+        for idx in indexes:
+            token = self.tokens[idx]
+            for func in funcs:
+                if func(token):
+                    return idx, token
         return None, None
 
     def token_first(self, skip_ws=True, skip_cm=False):

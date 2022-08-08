@@ -4,6 +4,7 @@ python-sqlparse - Parse SQL statements
 |buildstatus|_
 |coverage|_
 |docs|_
+|packageversion|_
 
 .. docincludebegin
 
@@ -59,7 +60,7 @@ Documentation
    https://sqlparse.readthedocs.io/
 
 Online Demo
-  https://sqlformat.org/
+   https://sqlformat.org/
 
 
 sqlparse is licensed under the BSD license.
@@ -73,3 +74,5 @@ pygments-Homepage: http://pygments.org/
 .. _coverage: https://codecov.io/gh/andialbrecht/sqlparse
 .. |docs| image:: https://readthedocs.org/projects/sqlparse/badge/?version=latest
 .. _docs: https://sqlparse.readthedocs.io/en/latest/?badge=latest
+.. |packageversion| image:: https://img.shields.io/pypi/v/sqlparse?color=%2334D058&label=pypi%20package
+.. _packageversion: https://pypi.org/project/sqlparse
