@@ -1,6 +1,18 @@
 Development Version
 -------------------
 
+Enhancements
+
+* Add support for DIV operator (pr664, by chezou).
+* Add support for additional SPARK keywords (pr643, by mrmasterplan).
+* Avoid tokens copy (pr622, by living180).
+* Add REGEXP as a comparision (pr647, by PeterSandwich).
+
+Bug Fixes
+
+* Fix spelling of INDICATOR keyword (pr653, by ptld).
+* Fix formatting error in EXTRACT function (issue562, pr676, by ecederstrand).
+
 Other
 
 * Update github actions to test on Python 3.10 as well (pr661, by cclaus).
