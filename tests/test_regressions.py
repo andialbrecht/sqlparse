@@ -401,6 +401,15 @@ def test_issue489_tzcasts():
     assert p.tokens[-1].get_alias() == 'foo'
 
 
+def test_issue562_tzcasts():
+    # Test that whitespace between 'from' and 'bar' is retained
+    formatted = sqlparse.format(
+        'SELECT f(HOUR from bar AT TIME ZONE \'UTC\') from foo', reindent=True
+    )
+    assert formatted == \
+           'SELECT f(HOUR\n         from bar AT TIME ZONE \'UTC\')\nfrom foo'
+
+
 def test_as_in_parentheses_indents():
     # did raise NoneType has no attribute is_group in _process_parentheses
     formatted = sqlparse.format('(as foo)', reindent=True)
