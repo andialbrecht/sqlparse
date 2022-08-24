@@ -14,6 +14,7 @@ Bug Fixes
 
 * Fix spelling of INDICATOR keyword (pr653, by ptld).
 * Fix formatting error in EXTRACT function (issue562, issue670, pr676, by ecederstrand).
+* Fix bad parsing of create table statements that use lower case (issue217, pr642, by mrmasterplan).
 
 Other
 
