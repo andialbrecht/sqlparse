@@ -16,6 +16,7 @@ def is_keyword(value):
             or KEYWORDS_ORACLE.get(val)
             or KEYWORDS_PLPGSQL.get(val)
             or KEYWORDS_HQL.get(val)
+            or KEYWORDS_MSACCESS.get(val)
             or KEYWORDS.get(val, tokens.Name)), value
 
 
@@ -961,4 +962,9 @@ KEYWORDS_HQL = {
     'EXIT': tokens.Keyword,
     'BREAK': tokens.Keyword,
     'LEAVE': tokens.Keyword,
+}
+
+
+KEYWORDS_MSACCESS = {
+    'DISTINCTROW': tokens.Keyword,
 }
