@@ -8,6 +8,7 @@ Enhancements
 * Avoid tokens copy (pr622, by living180).
 * Add REGEXP as a comparision (pr647, by PeterSandwich).
 * Add DISTINCTROW keyword for MS Access (issue677).
+* Improve parsing of CREATE TABLE AS SELECT (pr662, by chezou).
 
 Bug Fixes
 
