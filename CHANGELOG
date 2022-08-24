@@ -12,7 +12,7 @@ Enhancements
 Bug Fixes
 
 * Fix spelling of INDICATOR keyword (pr653, by ptld).
-* Fix formatting error in EXTRACT function (issue562, pr676, by ecederstrand).
+* Fix formatting error in EXTRACT function (issue562, issue670, pr676, by ecederstrand).
 
 Other
 
