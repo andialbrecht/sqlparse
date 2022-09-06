@@ -11,6 +11,11 @@ from sqlparse import tokens
 
 
 def is_keyword(value):
+    """Checks for a keyword.
+
+    If the given value is in one of the KEYWORDS_* dictionary
+    it's considered a keyword. Otherwise tokens.Name is returned.
+    """
     val = value.upper()
     return (KEYWORDS_COMMON.get(val)
             or KEYWORDS_ORACLE.get(val)
@@ -57,7 +62,7 @@ SQL_REGEX = {
         # see issue #39
         # Spaces around period `schema . name` are valid identifier
         # TODO: Spaces before period not implemented
-        (r'[A-ZÀ-Ü]\w*(?=\s*\.)', tokens.Name),  # 'Name'   .
+        (r'[A-ZÀ-Ü]\w*(?=\s*\.)', tokens.Name),  # 'Name'.
         # FIXME(atronah): never match,
         # because `re.match` doesn't work with look-behind regexp feature
         (r'(?<=\.)[A-ZÀ-Ü]\w*', tokens.Name),  # .'Name'
@@ -92,6 +97,8 @@ SQL_REGEX = {
         (r"(AT|WITH')\s+TIME\s+ZONE\s+'[^']+'", tokens.Keyword.TZCast),
         (r'(NOT\s+)?(LIKE|ILIKE|RLIKE)\b', tokens.Operator.Comparison),
         (r'(NOT\s+)?(REGEXP)\b', tokens.Operator.Comparison),
+        # Check for keywords, also returns tokens.Name if regex matches
+        # but the match isn't a keyword.
         (r'[0-9_A-ZÀ-Ü][_$#\w]*', is_keyword),
         (r'[;:()\[\],\.]', tokens.Punctuation),
         (r'[<>=~!]+', tokens.Operator.Comparison),
