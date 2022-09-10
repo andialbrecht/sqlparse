@@ -148,6 +148,7 @@ def test_quoted_identifier():
 @pytest.mark.parametrize('name', [
     'foo', '_foo',  # issue175
     '1_data',  # valid MySQL table name, see issue337
+    '業者名稱',  # valid at least for SQLite3, see issue641
 ])
 def test_valid_identifier_names(name):
     t = sqlparse.parse(name)[0].tokens

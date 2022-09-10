@@ -16,6 +16,7 @@ Bug Fixes
 * Fix formatting error in EXTRACT function (issue562, issue670, pr676, by ecederstrand).
 * Fix bad parsing of create table statements that use lower case (issue217, pr642, by mrmasterplan).
 * Handle backtick as valid quote char (issue628, pr629, by codenamelxl).
+* Allow any unicode character as valid identifier name (issue641).
 
 Other
 
