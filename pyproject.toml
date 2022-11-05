@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "sqlparse"
+version = "0.4.3"
+description = "sqlparse is a non-validating SQL parser for Python."
+authors = ["None"]
+packages = [
+  { include = "sqlparse" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.2.0"
+pytest-cov = "^4.0.0"
+flake8 = "^5.0.4"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
