@@ -91,6 +91,11 @@ SQL_REGEX = {
         (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
         (r'GROUP\s+BY\b', tokens.Keyword),
         (r'ORDER\s+BY\b', tokens.Keyword),
+        (r'ZORDER\s+BY\b', tokens.Keyword),
+        (r'PARTITIONED\s+BY\b', tokens.Keyword),
+        (r'BLOOMFILTER\s+INDEX\b', tokens.Keyword),
+        (r'(DEEP|SHALLOW)\s+CLONE\b', tokens.Keyword),
+        (r'(MSCK|FSCK)\s+REPAIR\b', tokens.Keyword),
         (r'HANDLER\s+FOR\b', tokens.Keyword),
         (r'(LATERAL\s+VIEW\s+)'
          r'(EXPLODE|INLINE|PARSE_URL_TUPLE|POSEXPLODE|STACK)\b',
@@ -978,15 +983,19 @@ KEYWORDS_MSACCESS = {
 
 # Databricks Syntax
 KEYWORDS_DBX = {
+    'PARTITIONED': tokens.Keyword,
     'OPTIMIZE': tokens.Keyword,
     'ZORDER': tokens.Keyword,
     'VACUUM': tokens.Keyword,
-    'BLOOMFILTER INDEX': tokens.Keyword,
-    'SHALLOW CLONE': tokens.Keyword,
-    'DEEP CLONE': tokens.Keyword,
-    'PARTITIONED BY': tokens.Keyword,
+    'BLOOMFILTER': tokens.Keyword,
+    'SHALLOW': tokens.Keyword,
+    'DEEP': tokens.Keyword,
+    'CLONE': tokens.Keyword,
     'DETAIL': tokens.Keyword,
     'HISTORY': tokens.Keyword,
-    'MSCK REPAIR': tokens.Keyword,
-    'SYNC': tokens.Keyword
+    'MSCK': tokens.Keyword,
+    'REPAIR': tokens.Keyword,
+    'SYNC': tokens.Keyword,
+    'METADATA': tokens.Keyword,
+    'REFRESH': tokens.Keyword
 }
