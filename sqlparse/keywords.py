@@ -22,6 +22,7 @@ def is_keyword(value):
             or KEYWORDS_PLPGSQL.get(val)
             or KEYWORDS_HQL.get(val)
             or KEYWORDS_MSACCESS.get(val)
+            or KEYWORDS_DBX.get(val)
             or KEYWORDS.get(val, tokens.Name)), value
 
 
@@ -971,7 +972,21 @@ KEYWORDS_HQL = {
     'LEAVE': tokens.Keyword,
 }
 
-
 KEYWORDS_MSACCESS = {
     'DISTINCTROW': tokens.Keyword,
+}
+
+# Databricks Syntax
+KEYWORDS_DBX = {
+    'OPTIMIZE': tokens.Keyword,
+    'ZORDER': tokens.Keyword,
+    'VACUUM': tokens.Keyword,
+    'BLOOMFILTER INDEX': tokens.Keyword,
+    'SHALLOW CLONE': tokens.Keyword,
+    'DEEP CLONE': tokens.Keyword,
+    'PARTITIONED BY': tokens.Keyword,
+    'DETAIL': tokens.Keyword,
+    'HISTORY': tokens.Keyword,
+    'MSCK REPAIR': tokens.Keyword,
+    'SYNC': tokens.Keyword
 }
