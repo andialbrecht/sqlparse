@@ -22,6 +22,7 @@ def is_keyword(value):
             or KEYWORDS_PLPGSQL.get(val)
             or KEYWORDS_HQL.get(val)
             or KEYWORDS_MSACCESS.get(val)
+            or KEYWORDS_SPARK.get(val)
             or KEYWORDS.get(val, tokens.Name)), value
 
 
@@ -974,4 +975,21 @@ KEYWORDS_HQL = {
 
 KEYWORDS_MSACCESS = {
     'DISTINCTROW': tokens.Keyword,
+}
+
+
+# SPARK Syntax
+# see https://spark.apache.org/docs/latest/sql-ref-syntax.html
+KEYWORDS_SPARK ={
+    'BUCKETS': tokens.Keyword,
+    'CLUSTERED': tokens.Keyword,
+    'CSV': tokens.Keyword,
+    'DBPROPERTIES': tokens.Keyword,
+    'DELTA': tokens.Keyword,
+    'JDBC': tokens.Keyword,
+    'ORC': tokens.Keyword,
+    'PARQUET': tokens.Keyword,
+    'PARTITIONED': tokens.Keyword,
+    'SORTED': tokens.Keyword,
+    'TXT': tokens.Keyword,
 }
