@@ -13,19 +13,74 @@
 # and to allow some customizations.
 
 from io import TextIOBase
+from typing import List
 
-from sqlparse import tokens
-from sqlparse.keywords import SQL_REGEX
+from sqlparse import tokens, keywords
 from sqlparse.utils import consume
 
 
-class Lexer:
-    """Lexer
-    Empty class. Leaving for backwards-compatibility
-    """
+class _LexerSingletonMetaclass(type):
+    _lexer_instance = None
 
-    @staticmethod
-    def get_tokens(text, encoding=None):
+    def __call__(cls, *args, **kwargs):
+        if _LexerSingletonMetaclass._lexer_instance is None:
+            _LexerSingletonMetaclass._lexer_instance = super(
+                _LexerSingletonMetaclass, cls
+            ).__call__(*args, **kwargs)
+        return _LexerSingletonMetaclass._lexer_instance
+
+
+class Lexer(metaclass=_LexerSingletonMetaclass):
+    """The Lexer supports configurable syntax.
+    To add support for additional keywords, use the `add_keywords` method."""
+
+    _SQL_REGEX: keywords.SQL_REGEX_TYPE
+    _keywords: List[keywords.KEYWORDS_TYPE]
+
+    def default_initialization(self):
+        """Initialize the lexer with default dictionaries.
+        Useful if you need to revert custom syntax settings."""
+        self.clear()
+        self.set_SQL_REGEX(keywords.SQL_REGEX)
+        self.add_keywords(keywords.KEYWORDS_COMMON)
+        self.add_keywords(keywords.KEYWORDS_ORACLE)
+        self.add_keywords(keywords.KEYWORDS_PLPGSQL)
+        self.add_keywords(keywords.KEYWORDS_HQL)
+        self.add_keywords(keywords.KEYWORDS_MSACCESS)
+        self.add_keywords(keywords.KEYWORDS)
+
+    def __init__(self):
+        self.default_initialization()
+
+    def clear(self):
+        """Clear all syntax configurations.
+        Useful if you want to load a reduced set of syntax configurations."""
+        self._SQL_REGEX = []
+        self._keywords = []
+
+    def set_SQL_REGEX(self, SQL_REGEX: keywords.SQL_REGEX_TYPE):
+        """Set the list of regex that will parse the SQL."""
+        self._SQL_REGEX = SQL_REGEX
+
+    def add_keywords(self, keywords: keywords.KEYWORDS_TYPE):
+        """Add keyword dictionaries. Keywords are looked up in the same order
+        that dictionaries were added."""
+        self._keywords.append(keywords)
+
+    def is_keyword(self, value):
+        """Checks for a keyword.
+
+        If the given value is in one of the KEYWORDS_* dictionary
+        it's considered a keyword. Otherwise tokens.Name is returned.
+        """
+        val = value.upper()
+        for kwdict in self._keywords:
+            if val in kwdict:
+                return kwdict[val], value
+        else:
+            return tokens.Name, value
+
+    def get_tokens(self, text, encoding=None):
         """
         Return an iterable of (tokentype, value) pairs generated from
         `text`. If `unfiltered` is set to `True`, the filtering mechanism
@@ -48,24 +103,26 @@ class Lexer:
                 text = text.decode(encoding)
             else:
                 try:
-                    text = text.decode('utf-8')
+                    text = text.decode("utf-8")
                 except UnicodeDecodeError:
-                    text = text.decode('unicode-escape')
+                    text = text.decode("unicode-escape")
         else:
-            raise TypeError("Expected text or file-like object, got {!r}".
-                            format(type(text)))
+            raise TypeError(
+                "Expected text or file-like object, got {!r}"
+                .format(type(text))
+            )
 
         iterable = enumerate(text)
         for pos, char in iterable:
-            for rexmatch, action in SQL_REGEX:
+            for rexmatch, action in self._SQL_REGEX:
                 m = rexmatch(text, pos)
 
                 if not m:
                     continue
                 elif isinstance(action, tokens._TokenType):
                     yield action, m.group()
-                elif callable(action):
-                    yield action(m.group())
+                elif action is keywords.PROCESS_AS_KEYWORD:
+                    yield self.is_keyword(m.group())
 
                 consume(iterable, m.end() - pos - 1)
                 break

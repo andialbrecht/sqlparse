@@ -6,23 +6,17 @@
 # the BSD License: https://opensource.org/licenses/BSD-3-Clause
 
 import re
+from typing import Dict, List, Tuple, Callable, Union
 
 from sqlparse import tokens
 
+# object() only supports "is" and is useful as a marker
+PROCESS_AS_KEYWORD = object()
 
-def is_keyword(value):
-    """Checks for a keyword.
-
-    If the given value is in one of the KEYWORDS_* dictionary
-    it's considered a keyword. Otherwise tokens.Name is returned.
-    """
-    val = value.upper()
-    return (KEYWORDS_COMMON.get(val)
-            or KEYWORDS_ORACLE.get(val)
-            or KEYWORDS_PLPGSQL.get(val)
-            or KEYWORDS_HQL.get(val)
-            or KEYWORDS_MSACCESS.get(val)
-            or KEYWORDS.get(val, tokens.Name)), value
+SQL_REGEX_TYPE = List[
+    Tuple[Callable, Union[type(PROCESS_AS_KEYWORD), tokens._TokenType]]
+]
+KEYWORDS_TYPE = Dict[str, tokens._TokenType]
 
 
 SQL_REGEX = {
@@ -99,7 +93,7 @@ SQL_REGEX = {
         (r'(NOT\s+)?(REGEXP)\b', tokens.Operator.Comparison),
         # Check for keywords, also returns tokens.Name if regex matches
         # but the match isn't a keyword.
-        (r'[0-9_\w][_$#\w]*', is_keyword),
+        (r'[0-9_\w][_$#\w]*', PROCESS_AS_KEYWORD),
         (r'[;:()\[\],\.]', tokens.Punctuation),
         (r'[<>=~!]+', tokens.Operator.Comparison),
         (r'[+/@#%^&|^-]+', tokens.Operator),
