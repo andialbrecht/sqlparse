@@ -5,6 +5,7 @@ import pytest
 
 import sqlparse
 from sqlparse import sql, tokens as T
+from sqlparse.lexer import Lexer
 
 
 def test_parse_tokenize():
@@ -489,3 +490,45 @@ def test_parenthesis():
                                                     T.Newline,
                                                     T.Newline,
                                                     T.Punctuation]
+
+
+def test_configurable_syntax():
+    sql = """select * from foo BACON SPAM EGGS;"""
+    # sql="""select * from mydb.mytable BACON SPAM EGGS;"""
+    tokens = sqlparse.parse(sql)[0]
+
+    assert list(
+        (t.ttype, t.value) for t in tokens if t.ttype not in sqlparse.tokens.Whitespace
+    ) == [
+        (sqlparse.tokens.Keyword.DML, "select"),
+        (sqlparse.tokens.Wildcard, "*"),
+        (sqlparse.tokens.Keyword, "from"),
+        (None, "foo BACON"),
+        (None, "SPAM EGGS"),
+        (sqlparse.tokens.Punctuation, ";"),
+    ]
+
+    Lexer().add_keywords(
+        {
+            "BACON": sqlparse.tokens.Name.Builtin,
+            "SPAM": sqlparse.tokens.Keyword,
+            "EGGS": sqlparse.tokens.Keyword,
+        }
+    )
+
+    tokens = sqlparse.parse(sql)[0]
+
+    assert list(
+        (t.ttype, t.value) for t in tokens if t.ttype not in sqlparse.tokens.Whitespace
+    ) == [
+        (sqlparse.tokens.Keyword.DML, "select"),
+        (sqlparse.tokens.Wildcard, "*"),
+        (sqlparse.tokens.Keyword, "from"),
+        (None, "foo"),
+        (sqlparse.tokens.Name.Builtin, "BACON"),
+        (sqlparse.tokens.Keyword, "SPAM"),
+        (sqlparse.tokens.Keyword, "EGGS"),
+        (sqlparse.tokens.Punctuation, ";"),
+    ]
+    # reset the syntax for later tests.
+    Lexer().default_initialization()
