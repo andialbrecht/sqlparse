@@ -494,7 +494,6 @@ def test_parenthesis():
 
 def test_configurable_syntax():
     sql = """select * from foo BACON SPAM EGGS;"""
-    # sql="""select * from mydb.mytable BACON SPAM EGGS;"""
     tokens = sqlparse.parse(sql)[0]
 
     assert list(

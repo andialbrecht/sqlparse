@@ -6,17 +6,11 @@
 # the BSD License: https://opensource.org/licenses/BSD-3-Clause
 
 import re
-from typing import Dict, List, Tuple, Callable, Union
 
 from sqlparse import tokens
 
 # object() only supports "is" and is useful as a marker
 PROCESS_AS_KEYWORD = object()
-
-SQL_REGEX_TYPE = List[
-    Tuple[Callable, Union[type(PROCESS_AS_KEYWORD), tokens._TokenType]]
-]
-KEYWORDS_TYPE = Dict[str, tokens._TokenType]
 
 
 SQL_REGEX = {
