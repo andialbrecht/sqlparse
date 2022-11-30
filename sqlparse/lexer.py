@@ -13,7 +13,6 @@
 # and to allow some customizations.
 
 from io import TextIOBase
-from typing import List
 
 from sqlparse import tokens, keywords
 from sqlparse.utils import consume
@@ -33,9 +32,6 @@ class _LexerSingletonMetaclass(type):
 class Lexer(metaclass=_LexerSingletonMetaclass):
     """The Lexer supports configurable syntax.
     To add support for additional keywords, use the `add_keywords` method."""
-
-    _SQL_REGEX: keywords.SQL_REGEX_TYPE
-    _keywords: List[keywords.KEYWORDS_TYPE]
 
     def default_initialization(self):
         """Initialize the lexer with default dictionaries.
@@ -58,11 +54,11 @@ class Lexer(metaclass=_LexerSingletonMetaclass):
         self._SQL_REGEX = []
         self._keywords = []
 
-    def set_SQL_REGEX(self, SQL_REGEX: keywords.SQL_REGEX_TYPE):
+    def set_SQL_REGEX(self, SQL_REGEX):
         """Set the list of regex that will parse the SQL."""
         self._SQL_REGEX = SQL_REGEX
 
-    def add_keywords(self, keywords: keywords.KEYWORDS_TYPE):
+    def add_keywords(self, keywords):
         """Add keyword dictionaries. Keywords are looked up in the same order
         that dictionaries were added."""
         self._keywords.append(keywords)
