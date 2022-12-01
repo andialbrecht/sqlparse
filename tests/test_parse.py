@@ -491,12 +491,15 @@ def test_parenthesis():
                                                     T.Newline,
                                                     T.Punctuation]
 
+
 def test_configurable_keywords():
     sql = """select * from foo BACON SPAM EGGS;"""
     tokens = sqlparse.parse(sql)[0]
 
     assert list(
-        (t.ttype, t.value) for t in tokens if t.ttype not in sqlparse.tokens.Whitespace
+        (t.ttype, t.value)
+        for t in tokens
+        if t.ttype not in sqlparse.tokens.Whitespace
     ) == [
         (sqlparse.tokens.Keyword.DML, "select"),
         (sqlparse.tokens.Wildcard, "*"),
@@ -520,7 +523,9 @@ def test_configurable_keywords():
     Lexer().default_initialization()
 
     assert list(
-        (t.ttype, t.value) for t in tokens if t.ttype not in sqlparse.tokens.Whitespace
+        (t.ttype, t.value)
+        for t in tokens
+        if t.ttype not in sqlparse.tokens.Whitespace
     ) == [
         (sqlparse.tokens.Keyword.DML, "select"),
         (sqlparse.tokens.Wildcard, "*"),
@@ -539,7 +544,11 @@ def test_configurable_regex():
 
     my_regex = (r"ZORDER\s+BY\b", sqlparse.tokens.Keyword)
 
-    lex.set_SQL_REGEX(keywords.SQL_REGEX[:38] + [my_regex] + keywords.SQL_REGEX[38:])
+    lex.set_SQL_REGEX(
+        keywords.SQL_REGEX[:38]
+        + [my_regex]
+        + keywords.SQL_REGEX[38:]
+    )
     lex.add_keywords(keywords.KEYWORDS_COMMON)
     lex.add_keywords(keywords.KEYWORDS_ORACLE)
     lex.add_keywords(keywords.KEYWORDS_PLPGSQL)
@@ -553,5 +562,7 @@ def test_configurable_regex():
     Lexer().default_initialization()
 
     assert list(
-        (t.ttype, t.value) for t in tokens if t.ttype not in sqlparse.tokens.Whitespace
+        (t.ttype, t.value)
+        for t in tokens
+        if t.ttype not in sqlparse.tokens.Whitespace
     )[4] == (sqlparse.tokens.Keyword, "zorder by")
