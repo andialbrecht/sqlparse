@@ -1,7 +1,6 @@
 import pytest
 
 from sqlparse import tokens
-from sqlparse.keywords import SQL_REGEX
 from sqlparse.lexer import Lexer
 
 
