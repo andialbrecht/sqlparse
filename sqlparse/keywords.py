@@ -5,96 +5,92 @@
 # This module is part of python-sqlparse and is released under
 # the BSD License: https://opensource.org/licenses/BSD-3-Clause
 
-import re
-
 from sqlparse import tokens
 
 # object() only supports "is" and is useful as a marker
+# use this marker to specify that the given regex in SQL_REGEX
+# shall be processed further through a lookup in the KEYWORDS dictionaries
 PROCESS_AS_KEYWORD = object()
 
 
-SQL_REGEX = {
-    'root': [
-        (r'(--|# )\+.*?(\r\n|\r|\n|$)', tokens.Comment.Single.Hint),
-        (r'/\*\+[\s\S]*?\*/', tokens.Comment.Multiline.Hint),
+SQL_REGEX = [
+    (r'(--|# )\+.*?(\r\n|\r|\n|$)', tokens.Comment.Single.Hint),
+    (r'/\*\+[\s\S]*?\*/', tokens.Comment.Multiline.Hint),
 
-        (r'(--|# ).*?(\r\n|\r|\n|$)', tokens.Comment.Single),
-        (r'/\*[\s\S]*?\*/', tokens.Comment.Multiline),
+    (r'(--|# ).*?(\r\n|\r|\n|$)', tokens.Comment.Single),
+    (r'/\*[\s\S]*?\*/', tokens.Comment.Multiline),
 
-        (r'(\r\n|\r|\n)', tokens.Newline),
-        (r'\s+?', tokens.Whitespace),
+    (r'(\r\n|\r|\n)', tokens.Newline),
+    (r'\s+?', tokens.Whitespace),
 
-        (r':=', tokens.Assignment),
-        (r'::', tokens.Punctuation),
+    (r':=', tokens.Assignment),
+    (r'::', tokens.Punctuation),
 
-        (r'\*', tokens.Wildcard),
+    (r'\*', tokens.Wildcard),
 
-        (r"`(``|[^`])*`", tokens.Name),
-        (r"´(´´|[^´])*´", tokens.Name),
-        (r'((?<!\S)\$(?:[_A-ZÀ-Ü]\w*)?\$)[\s\S]*?\1', tokens.Literal),
+    (r"`(``|[^`])*`", tokens.Name),
+    (r"´(´´|[^´])*´", tokens.Name),
+    (r'((?<!\S)\$(?:[_A-ZÀ-Ü]\w*)?\$)[\s\S]*?\1', tokens.Literal),
 
-        (r'\?', tokens.Name.Placeholder),
-        (r'%(\(\w+\))?s', tokens.Name.Placeholder),
-        (r'(?<!\w)[$:?]\w+', tokens.Name.Placeholder),
+    (r'\?', tokens.Name.Placeholder),
+    (r'%(\(\w+\))?s', tokens.Name.Placeholder),
+    (r'(?<!\w)[$:?]\w+', tokens.Name.Placeholder),
 
-        (r'\\\w+', tokens.Command),
+    (r'\\\w+', tokens.Command),
 
-        # FIXME(andi): VALUES shouldn't be listed here
-        # see https://github.com/andialbrecht/sqlparse/pull/64
-        # AS and IN are special, it may be followed by a parenthesis, but
-        # are never functions, see issue183 and issue507
-        (r'(CASE|IN|VALUES|USING|FROM|AS)\b', tokens.Keyword),
+    # FIXME(andi): VALUES shouldn't be listed here
+    # see https://github.com/andialbrecht/sqlparse/pull/64
+    # AS and IN are special, it may be followed by a parenthesis, but
+    # are never functions, see issue183 and issue507
+    (r'(CASE|IN|VALUES|USING|FROM|AS)\b', tokens.Keyword),
 
-        (r'(@|##|#)[A-ZÀ-Ü]\w+', tokens.Name),
+    (r'(@|##|#)[A-ZÀ-Ü]\w+', tokens.Name),
 
-        # see issue #39
-        # Spaces around period `schema . name` are valid identifier
-        # TODO: Spaces before period not implemented
-        (r'[A-ZÀ-Ü]\w*(?=\s*\.)', tokens.Name),  # 'Name'.
-        # FIXME(atronah): never match,
-        # because `re.match` doesn't work with look-behind regexp feature
-        (r'(?<=\.)[A-ZÀ-Ü]\w*', tokens.Name),  # .'Name'
-        (r'[A-ZÀ-Ü]\w*(?=\()', tokens.Name),  # side effect: change kw to func
-        (r'-?0x[\dA-F]+', tokens.Number.Hexadecimal),
-        (r'-?\d+(\.\d+)?E-?\d+', tokens.Number.Float),
-        (r'(?![_A-ZÀ-Ü])-?(\d+(\.\d*)|\.\d+)(?![_A-ZÀ-Ü])',
-         tokens.Number.Float),
-        (r'(?![_A-ZÀ-Ü])-?\d+(?![_A-ZÀ-Ü])', tokens.Number.Integer),
-        (r"'(''|\\\\|\\'|[^'])*'", tokens.String.Single),
-        # not a real string literal in ANSI SQL:
-        (r'"(""|\\\\|\\"|[^"])*"', tokens.String.Symbol),
-        (r'(""|".*?[^\\]")', tokens.String.Symbol),
-        # sqlite names can be escaped with [square brackets]. left bracket
-        # cannot be preceded by word character or a right bracket --
-        # otherwise it's probably an array index
-        (r'(?<![\w\])])(\[[^\]\[]+\])', tokens.Name),
-        (r'((LEFT\s+|RIGHT\s+|FULL\s+)?(INNER\s+|OUTER\s+|STRAIGHT\s+)?'
-         r'|(CROSS\s+|NATURAL\s+)?)?JOIN\b', tokens.Keyword),
-        (r'END(\s+IF|\s+LOOP|\s+WHILE)?\b', tokens.Keyword),
-        (r'NOT\s+NULL\b', tokens.Keyword),
-        (r'NULLS\s+(FIRST|LAST)\b', tokens.Keyword),
-        (r'UNION\s+ALL\b', tokens.Keyword),
-        (r'CREATE(\s+OR\s+REPLACE)?\b', tokens.Keyword.DDL),
-        (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
-        (r'GROUP\s+BY\b', tokens.Keyword),
-        (r'ORDER\s+BY\b', tokens.Keyword),
-        (r'HANDLER\s+FOR\b', tokens.Keyword),
-        (r'(LATERAL\s+VIEW\s+)'
-         r'(EXPLODE|INLINE|PARSE_URL_TUPLE|POSEXPLODE|STACK)\b',
-         tokens.Keyword),
-        (r"(AT|WITH')\s+TIME\s+ZONE\s+'[^']+'", tokens.Keyword.TZCast),
-        (r'(NOT\s+)?(LIKE|ILIKE|RLIKE)\b', tokens.Operator.Comparison),
-        (r'(NOT\s+)?(REGEXP)\b', tokens.Operator.Comparison),
-        # Check for keywords, also returns tokens.Name if regex matches
-        # but the match isn't a keyword.
-        (r'[0-9_\w][_$#\w]*', PROCESS_AS_KEYWORD),
-        (r'[;:()\[\],\.]', tokens.Punctuation),
-        (r'[<>=~!]+', tokens.Operator.Comparison),
-        (r'[+/@#%^&|^-]+', tokens.Operator),
-    ]}
-
-FLAGS = re.IGNORECASE | re.UNICODE
-SQL_REGEX = [(re.compile(rx, FLAGS).match, tt) for rx, tt in SQL_REGEX['root']]
+    # see issue #39
+    # Spaces around period `schema . name` are valid identifier
+    # TODO: Spaces before period not implemented
+    (r'[A-ZÀ-Ü]\w*(?=\s*\.)', tokens.Name),  # 'Name'.
+    # FIXME(atronah): never match,
+    # because `re.match` doesn't work with look-behind regexp feature
+    (r'(?<=\.)[A-ZÀ-Ü]\w*', tokens.Name),  # .'Name'
+    (r'[A-ZÀ-Ü]\w*(?=\()', tokens.Name),  # side effect: change kw to func
+    (r'-?0x[\dA-F]+', tokens.Number.Hexadecimal),
+    (r'-?\d+(\.\d+)?E-?\d+', tokens.Number.Float),
+    (r'(?![_A-ZÀ-Ü])-?(\d+(\.\d*)|\.\d+)(?![_A-ZÀ-Ü])',
+     tokens.Number.Float),
+    (r'(?![_A-ZÀ-Ü])-?\d+(?![_A-ZÀ-Ü])', tokens.Number.Integer),
+    (r"'(''|\\\\|\\'|[^'])*'", tokens.String.Single),
+    # not a real string literal in ANSI SQL:
+    (r'"(""|\\\\|\\"|[^"])*"', tokens.String.Symbol),
+    (r'(""|".*?[^\\]")', tokens.String.Symbol),
+    # sqlite names can be escaped with [square brackets]. left bracket
+    # cannot be preceded by word character or a right bracket --
+    # otherwise it's probably an array index
+    (r'(?<![\w\])])(\[[^\]\[]+\])', tokens.Name),
+    (r'((LEFT\s+|RIGHT\s+|FULL\s+)?(INNER\s+|OUTER\s+|STRAIGHT\s+)?'
+     r'|(CROSS\s+|NATURAL\s+)?)?JOIN\b', tokens.Keyword),
+    (r'END(\s+IF|\s+LOOP|\s+WHILE)?\b', tokens.Keyword),
+    (r'NOT\s+NULL\b', tokens.Keyword),
+    (r'NULLS\s+(FIRST|LAST)\b', tokens.Keyword),
+    (r'UNION\s+ALL\b', tokens.Keyword),
+    (r'CREATE(\s+OR\s+REPLACE)?\b', tokens.Keyword.DDL),
+    (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
+    (r'GROUP\s+BY\b', tokens.Keyword),
+    (r'ORDER\s+BY\b', tokens.Keyword),
+    (r'HANDLER\s+FOR\b', tokens.Keyword),
+    (r'(LATERAL\s+VIEW\s+)'
+     r'(EXPLODE|INLINE|PARSE_URL_TUPLE|POSEXPLODE|STACK)\b',
+     tokens.Keyword),
+    (r"(AT|WITH')\s+TIME\s+ZONE\s+'[^']+'", tokens.Keyword.TZCast),
+    (r'(NOT\s+)?(LIKE|ILIKE|RLIKE)\b', tokens.Operator.Comparison),
+    (r'(NOT\s+)?(REGEXP)\b', tokens.Operator.Comparison),
+    # Check for keywords, also returns tokens.Name if regex matches
+    # but the match isn't a keyword.
+    (r'[0-9_\w][_$#\w]*', PROCESS_AS_KEYWORD),
+    (r'[;:()\[\],\.]', tokens.Punctuation),
+    (r'[<>=~!]+', tokens.Operator.Comparison),
+    (r'[+/@#%^&|^-]+', tokens.Operator),
+]
 
 KEYWORDS = {
     'ABORT': tokens.Keyword,

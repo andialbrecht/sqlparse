@@ -6,7 +6,7 @@
 # the BSD License: https://opensource.org/licenses/BSD-3-Clause
 
 """SQL Lexer"""
-
+import re
 # This code is based on the SqlLexer in pygments.
 # http://pygments.org/
 # It's separated from the rest of pygments to increase performance
@@ -56,7 +56,8 @@ class Lexer(metaclass=_LexerSingletonMetaclass):
 
     def set_SQL_REGEX(self, SQL_REGEX):
         """Set the list of regex that will parse the SQL."""
-        self._SQL_REGEX = SQL_REGEX
+        FLAGS = re.IGNORECASE | re.UNICODE
+        self._SQL_REGEX = [(re.compile(rx, FLAGS).match, tt) for rx, tt in SQL_REGEX]
 
     def add_keywords(self, keywords):
         """Add keyword dictionaries. Keywords are looked up in the same order

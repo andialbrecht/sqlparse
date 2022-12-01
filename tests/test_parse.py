@@ -1,5 +1,4 @@
 """Tests sqlparse.parse()."""
-import re
 from io import StringIO
 
 import pytest
@@ -538,10 +537,7 @@ def test_configurable_regex():
     lex = Lexer()
     lex.clear()
 
-    my_regex = (
-        re.compile(r"ZORDER\s+BY\b", keywords.FLAGS).match,
-        sqlparse.tokens.Keyword,
-    )
+    my_regex = (r"ZORDER\s+BY\b", sqlparse.tokens.Keyword)
 
     lex.set_SQL_REGEX(keywords.SQL_REGEX[:38] + [my_regex] + keywords.SQL_REGEX[38:])
     lex.add_keywords(keywords.KEYWORDS_COMMON)

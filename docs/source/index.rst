@@ -20,6 +20,7 @@ Contents
    api
    analyzing
    ui
+   extending
    changes
    license
    indices
