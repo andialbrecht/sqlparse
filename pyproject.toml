@@ -1,0 +1,70 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "sqlparse"
+description = "A non-validating SQL parser."
+authors = [{name = "Andi Albrecht", email = "albrecht.andi@gmail.com"}]
+readme = "README.rst"
+dynamic = ["version"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.5",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Database",
+    "Topic :: Software Development",
+]
+requires-python = ">=3.5"
+
+[project.urls]
+Home = "https://github.com/andialbrecht/sqlparse"
+Documentation = "https://sqlparse.readthedocs.io/"
+"Release Notes" = "https://sqlparse.readthedocs.io/en/latest/changes/"
+Source = "https://github.com/andialbrecht/sqlparse"
+Tracker = "https://github.com/andialbrecht/sqlparse/issues"
+
+[project.scripts]
+sqlformat = "sqlparse.__main__:main"
+
+[project.optional-dependencies]
+dev = [
+    "flake8",
+    "build",
+]
+test = [
+    "pytest",
+    "pytest-cov",
+]
+doc = [
+    "sphinx",
+]
+
+[tool.flit.sdist]
+include = [
+    "docs/source/",
+    "docs/sqlformat.1",
+    "docs/Makefile",
+    "tests/*.py", "tests/files/*.sql",
+    "LICENSE",
+    "TODO",
+    "AUTHORS",
+    "CHANGELOG",
+    "Makefile",
+    "tox.ini",
+]
+
+[tool.coverage.run]
+omit = ["sqlparse/__main__.py"]
