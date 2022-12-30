@@ -8,6 +8,10 @@ Bug Fixes
   comparison operator. That also follows the definition of reserved keywords
   for the major SQL syntax definitions.
 
+Other
+
+* sqlparse now uses pyproject.toml instead of setup.cfg (issue685).
+
 
 Release 0.4.3 (Sep 23, 2022)
 ----------------------------
