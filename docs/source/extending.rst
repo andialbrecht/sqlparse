@@ -45,7 +45,7 @@ a keyword to the lexer:
     from sqlparse.lexer import Lexer
 
     # get the lexer singleton object to configure it
-    lex = Lexer()
+    lex = Lexer.get_default_instance()
 
     # Clear the default configurations.
     # After this call, reg-exps and keyword dictionaries need to be loaded
