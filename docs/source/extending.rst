@@ -44,7 +44,12 @@ a keyword to the lexer:
     from sqlparse import keywords
     from sqlparse.lexer import Lexer
 
+    # get the lexer singleton object to configure it
     lex = Lexer()
+
+    # Clear the default configurations.
+    # After this call, reg-exps and keyword dictionaries need to be loaded
+    # to make the lexer functional again.
     lex.clear()
 
     my_regex = (r"ZORDER\s+BY\b", sqlparse.tokens.Keyword)
@@ -55,12 +60,17 @@ a keyword to the lexer:
         + [my_regex]
         + keywords.SQL_REGEX[38:]
     )
+
+    # add the default keyword dictionaries
     lex.add_keywords(keywords.KEYWORDS_COMMON)
     lex.add_keywords(keywords.KEYWORDS_ORACLE)
     lex.add_keywords(keywords.KEYWORDS_PLPGSQL)
     lex.add_keywords(keywords.KEYWORDS_HQL)
     lex.add_keywords(keywords.KEYWORDS_MSACCESS)
     lex.add_keywords(keywords.KEYWORDS)
+
+    # add a custom keyword dictionary
     lex.add_keywords({'BAR', sqlparse.tokens.Keyword})
 
+    # no configuration is passed here. The lexer is used as a singleton.
     sqlparse.parse("select * from foo zorder by bar;")

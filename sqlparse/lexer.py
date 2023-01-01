@@ -50,7 +50,9 @@ class Lexer(metaclass=_LexerSingletonMetaclass):
 
     def clear(self):
         """Clear all syntax configurations.
-        Useful if you want to load a reduced set of syntax configurations."""
+        Useful if you want to load a reduced set of syntax configurations.
+        After this call, reg-exps and keyword dictionaries need to be loaded
+        to make the lexer functional again."""
         self._SQL_REGEX = []
         self._keywords = []
 
