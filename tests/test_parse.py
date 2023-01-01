@@ -509,7 +509,7 @@ def test_configurable_keywords():
         (sqlparse.tokens.Punctuation, ";"),
     ]
 
-    Lexer().add_keywords(
+    Lexer.get_default_instance().add_keywords(
         {
             "BACON": sqlparse.tokens.Name.Builtin,
             "SPAM": sqlparse.tokens.Keyword,
@@ -520,7 +520,7 @@ def test_configurable_keywords():
     tokens = sqlparse.parse(sql)[0]
 
     # reset the syntax for later tests.
-    Lexer().default_initialization()
+    Lexer.get_default_instance().default_initialization()
 
     assert list(
         (t.ttype, t.value)
@@ -539,7 +539,7 @@ def test_configurable_keywords():
 
 
 def test_configurable_regex():
-    lex = Lexer()
+    lex = Lexer.get_default_instance()
     lex.clear()
 
     my_regex = (r"ZORDER\s+BY\b", sqlparse.tokens.Keyword)
@@ -559,7 +559,7 @@ def test_configurable_regex():
     tokens = sqlparse.parse("select * from foo zorder by bar;")[0]
 
     # reset the syntax for later tests.
-    Lexer().default_initialization()
+    Lexer.get_default_instance().default_initialization()
 
     assert list(
         (t.ttype, t.value)
