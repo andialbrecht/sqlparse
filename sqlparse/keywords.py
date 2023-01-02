@@ -77,6 +77,14 @@ SQL_REGEX = [
     (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
     (r'GROUP\s+BY\b', tokens.Keyword),
     (r'ORDER\s+BY\b', tokens.Keyword),
+    (r'ZORDER\s+BY\b', tokens.Keyword),
+    (r'PARTITIONED\s+BY\b', tokens.Keyword),
+    (r'SORTED\s+BY\b', tokens.Keyword),
+    (r'CLUSTERED\s+BY\b', tokens.Keyword),
+    (r'WITH\s+DBPROPERTIES\b', tokens.Keyword),
+    (r'BLOOMFILTER\s+INDEX\b', tokens.Keyword),
+    (r'(DEEP|SHALLOW)\s+CLONE\b', tokens.Keyword),
+    (r'(MSCK|FSCK)\s+REPAIR\b', tokens.Keyword),
     (r'HANDLER\s+FOR\b', tokens.Keyword),
     (r'(LATERAL\s+VIEW\s+)'
      r'(EXPLODE|INLINE|PARSE_URL_TUPLE|POSEXPLODE|STACK)\b',
@@ -958,4 +966,24 @@ KEYWORDS_HQL = {
 
 KEYWORDS_MSACCESS = {
     'DISTINCTROW': tokens.Keyword,
+}
+
+# Databricks & SparkSQL Syntax
+# see https://docs.databricks.com/sql/language-manual/index.html
+# see https://spark.apache.org/docs/latest/sql-ref-syntax.html
+KEYWORDS_DBX = {
+    'BLOOMFILTER': tokens.Keyword,
+    'BUCKETS': tokens.Keyword,
+    'DBPROPERTIES': tokens.Keyword,
+    'DETAIL': tokens.Keyword,
+    'HISTORY': tokens.Keyword,
+    'METADATA': tokens.Keyword,
+    'MSCK': tokens.Keyword,
+    'OPTIMIZE': tokens.Keyword,
+    'PARTITIONS': tokens.Keyword,
+    'REFRESH': tokens.Keyword,
+    'REPAIR': tokens.Keyword,
+    'SYNC': tokens.Keyword,
+    'VACUUM': tokens.Keyword,
+    'ZORDER': tokens.Keyword
 }

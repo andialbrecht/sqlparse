@@ -62,6 +62,7 @@ class Lexer:
         self.add_keywords(keywords.KEYWORDS_PLPGSQL)
         self.add_keywords(keywords.KEYWORDS_HQL)
         self.add_keywords(keywords.KEYWORDS_MSACCESS)
+        self.add_keywords(keywords.KEYWORDS_DBX)
         self.add_keywords(keywords.KEYWORDS)
 
     def clear(self):

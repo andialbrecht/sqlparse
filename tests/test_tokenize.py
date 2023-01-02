@@ -189,19 +189,21 @@ def test_parse_identifiers(s):
     assert str(token) == s
     assert isinstance(token, sql.Identifier)
 
-
-def test_parse_group_by():
-    p = sqlparse.parse('GROUP BY')[0]
+    
+@pytest.mark.parametrize('s', [
+    'GROUP BY',
+    'ORDER BY',
+    'ZORDER BY',
+    'PARTITIONED BY',
+    'SORTED BY',
+    'CLUSTERED BY'
+])
+def test_parse_by_statements(s):
+    p = sqlparse.parse(s)[0]
     assert len(p.tokens) == 1
     assert p.tokens[0].ttype is T.Keyword
 
-
-def test_parse_order_by():
-    p = sqlparse.parse('ORDER BY')[0]
-    assert len(p.tokens) == 1
-    assert p.tokens[0].ttype is T.Keyword
-
-
+    
 def test_parse_window_as():
     p = sqlparse.parse('WINDOW w AS')[0]
     assert len(p.tokens) == 5
