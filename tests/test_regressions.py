@@ -427,3 +427,12 @@ def test_splitting_at_and_backticks_issue588():
         'grant foo to user1@`myhost`; grant bar to user1@`myhost`;')
     assert len(splitted) == 2
     assert splitted[-1] == 'grant bar to user1@`myhost`;'
+
+
+def test_comment_between_cte_clauses_issue632():
+    p, = sqlparse.parse("""
+        WITH foo AS (),
+             -- A comment before baz subquery
+             baz AS ()
+        SELECT * FROM baz;""")
+    assert p.get_type() == "SELECT"
