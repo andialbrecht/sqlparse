@@ -959,3 +959,35 @@ KEYWORDS_HQL = {
 KEYWORDS_MSACCESS = {
     'DISTINCTROW': tokens.Keyword,
 }
+
+
+KEYWORDS_SNOWFLAKE = {    
+    'ACCOUNT': tokens.Keyword,
+    'GSCLUSTER': tokens.Keyword,
+    'ISSUE': tokens.Keyword,
+    'ORGANIZATION': tokens.Keyword,
+    'PIVOT': tokens.Keyword,
+    'QUALIFY': tokens.Keyword,
+    'REGEXP': tokens.Keyword,
+    'RLIKE': tokens.Keyword,
+    'SAMPLE': tokens.Keyword,
+    'TRY_CAST': tokens.Keyword,
+    'UNPIVOT': tokens.Keyword,
+
+    'VARIANT': tokens.Name.Builtin,
+}
+
+
+KEYWORDS_BIGQUERY = {
+    'ASSERT_ROWS_MODIFIED': tokens.Keyword,
+    'DEFINE': tokens.Keyword,
+    'ENUM': tokens.Keyword,
+    'HASH': tokens.Keyword,
+    'LOOKUP': tokens.Keyword,
+    'PRECEDING': tokens.Keyword,
+    'PROTO': tokens.Keyword,
+    'RESPECT': tokens.Keyword,
+    'TABLESAMPLE': tokens.Keyword,
+
+    'BIGNUMERIC': tokens.Name.Builtin,
+}
