@@ -4,7 +4,8 @@ from io import StringIO
 import pytest
 
 import sqlparse
-from sqlparse import sql, tokens as T
+from sqlparse import sql, tokens as T, keywords
+from sqlparse.lexer import Lexer
 
 
 def test_parse_tokenize():
@@ -489,3 +490,79 @@ def test_parenthesis():
                                                     T.Newline,
                                                     T.Newline,
                                                     T.Punctuation]
+
+
+def test_configurable_keywords():
+    sql = """select * from foo BACON SPAM EGGS;"""
+    tokens = sqlparse.parse(sql)[0]
+
+    assert list(
+        (t.ttype, t.value)
+        for t in tokens
+        if t.ttype not in sqlparse.tokens.Whitespace
+    ) == [
+        (sqlparse.tokens.Keyword.DML, "select"),
+        (sqlparse.tokens.Wildcard, "*"),
+        (sqlparse.tokens.Keyword, "from"),
+        (None, "foo BACON"),
+        (None, "SPAM EGGS"),
+        (sqlparse.tokens.Punctuation, ";"),
+    ]
+
+    Lexer.get_default_instance().add_keywords(
+        {
+            "BACON": sqlparse.tokens.Name.Builtin,
+            "SPAM": sqlparse.tokens.Keyword,
+            "EGGS": sqlparse.tokens.Keyword,
+        }
+    )
+
+    tokens = sqlparse.parse(sql)[0]
+
+    # reset the syntax for later tests.
+    Lexer.get_default_instance().default_initialization()
+
+    assert list(
+        (t.ttype, t.value)
+        for t in tokens
+        if t.ttype not in sqlparse.tokens.Whitespace
+    ) == [
+        (sqlparse.tokens.Keyword.DML, "select"),
+        (sqlparse.tokens.Wildcard, "*"),
+        (sqlparse.tokens.Keyword, "from"),
+        (None, "foo"),
+        (sqlparse.tokens.Name.Builtin, "BACON"),
+        (sqlparse.tokens.Keyword, "SPAM"),
+        (sqlparse.tokens.Keyword, "EGGS"),
+        (sqlparse.tokens.Punctuation, ";"),
+    ]
+
+
+def test_configurable_regex():
+    lex = Lexer.get_default_instance()
+    lex.clear()
+
+    my_regex = (r"ZORDER\s+BY\b", sqlparse.tokens.Keyword)
+
+    lex.set_SQL_REGEX(
+        keywords.SQL_REGEX[:38]
+        + [my_regex]
+        + keywords.SQL_REGEX[38:]
+    )
+    lex.add_keywords(keywords.KEYWORDS_COMMON)
+    lex.add_keywords(keywords.KEYWORDS_ORACLE)
+    lex.add_keywords(keywords.KEYWORDS_PLPGSQL)
+    lex.add_keywords(keywords.KEYWORDS_HQL)
+    lex.add_keywords(keywords.KEYWORDS_MSACCESS)
+    lex.add_keywords(keywords.KEYWORDS)
+
+    tokens = sqlparse.parse("select * from foo zorder by bar;")[0]
+
+    # reset the syntax for later tests.
+    Lexer.get_default_instance().default_initialization()
+
+    assert list(
+        (t.ttype, t.value)
+        for t in tokens
+        if t.ttype not in sqlparse.tokens.Whitespace
+    )[4] == (sqlparse.tokens.Keyword, "zorder by")

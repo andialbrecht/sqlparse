@@ -5,17 +5,20 @@ name: Python application
 
 on:
   push:
-    branches: [ master ]
+    branches:
+    - master
   pull_request:
     branches: [ master ]
+  schedule:
+    - cron: '0 12 * * *'
 
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04  # keep it on 20.04 to have Python 3.5 and 3.6 available
     strategy:
       matrix:
-        python-version: ["3.5", "3.6", "3.7", "3.8", "3.9", "3.10", "3.11-dev"]
+        python-version: ["3.5", "3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "3.12-dev"]
 
     steps:
     - uses: actions/checkout@v3
@@ -25,9 +28,9 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install codecov flake8 pytest pytest-cov
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        python -m pip install --upgrade pip flit
+        flit install --deps=develop
+        pip install codecov
     - name: Lint with flake8
       run: flake8 sqlparse --count --max-complexity=31 --show-source --statistics
     - name: Test with pytest
