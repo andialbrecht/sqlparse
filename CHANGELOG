@@ -1,12 +1,22 @@
 Development Version
 -------------------
 
+Notable Changes
+
+* IMPORTANT: This release fixes a security vulnerability in the
+  parser where a regular expression vulnerable to ReDOS (Regular
+  Expression Denial of Service) was used. See the security advisory
+  for details: https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-rrm6-wvj7-cwh2
+  The vulnerability was discovered by @erik-krogh from GitHub
+  Security Lab (GHSL). Thanks for reporting!
+
 Bug Fixes
 
 * Revert a change from 0.4.0 that changed IN to be a comparison (issue694).
   The primary expectation is that IN is treated as a keyword and not as a
   comparison operator. That also follows the definition of reserved keywords
   for the major SQL syntax definitions.
+* Fix regular expressions for string parsing.
 
 Other
 

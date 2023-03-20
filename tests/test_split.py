@@ -18,8 +18,8 @@ def test_split_semicolon():
 
 
 def test_split_backslash():
-    stmts = sqlparse.parse(r"select '\\'; select '\''; select '\\\'';")
-    assert len(stmts) == 3
+    stmts = sqlparse.parse("select '\'; select '\'';")
+    assert len(stmts) == 2
 
 
 @pytest.mark.parametrize('fn', ['function.sql',
