@@ -86,7 +86,7 @@ SQL_REGEX = [
     (r'(NOT\s+)?(REGEXP)\b', tokens.Operator.Comparison),
     # Check for keywords, also returns tokens.Name if regex matches
     # but the match isn't a keyword.
-    (r'[0-9_\w][_$#\w]*', PROCESS_AS_KEYWORD),
+    (r'\w[$#\w]*', PROCESS_AS_KEYWORD),
     (r'[;:()\[\],\.]', tokens.Punctuation),
     (r'[<>=~!]+', tokens.Operator.Comparison),
     (r'[+/@#%^&|^-]+', tokens.Operator),
