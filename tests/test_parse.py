@@ -566,3 +566,35 @@ def test_configurable_regex():
         for t in tokens
         if t.ttype not in sqlparse.tokens.Whitespace
     )[4] == (sqlparse.tokens.Keyword, "zorder by")
+
+
+def test_custom_lexer():
+    lex = Lexer()
+    my_regex = (r"ZORDER\s+BY\b", sqlparse.tokens.Keyword)
+
+    lex.set_SQL_REGEX(
+        keywords.SQL_REGEX[:38]
+        + [my_regex]
+        + keywords.SQL_REGEX[38:]
+    )
+    lex.add_keywords(keywords.KEYWORDS_COMMON)
+    lex.add_keywords(keywords.KEYWORDS_ORACLE)
+    lex.add_keywords(keywords.KEYWORDS_PLPGSQL)
+    lex.add_keywords(keywords.KEYWORDS_HQL)
+    lex.add_keywords(keywords.KEYWORDS_MSACCESS)
+    lex.add_keywords(keywords.KEYWORDS)
+
+    tokens = sqlparse.parse("select * from foo zorder by bar;", lexer=lex)[0]
+    assert list(
+        (t.ttype, t.value)
+        for t in tokens
+        if t.ttype not in sqlparse.tokens.Whitespace
+    )[4] == (sqlparse.tokens.Keyword, "zorder by")
+
+    # Should not impact the parse who has a default configuration
+    tokens = sqlparse.parse("select * from foo forder by bar;")[0]
+    assert list(
+        (t.ttype, t.value)
+        for t in tokens
+        if t.ttype not in sqlparse.tokens.Whitespace
+    )[4] != (sqlparse.tokens.Keyword, "zorder by")

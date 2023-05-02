@@ -25,6 +25,9 @@ class Lexer:
 
     _default_intance = None
 
+    def __init__(self):
+        self.clear()
+
     # Development notes:
     # - This class is prepared to be able to support additional SQL dialects
     #   in the future by adding additional functions that take the place of
@@ -146,10 +149,11 @@ class Lexer:
                 yield tokens.Error, char
 
 
-def tokenize(sql, encoding=None):
+def tokenize(sql, encoding=None, custom_lexer=None):
     """Tokenize sql.
 
     Tokenize *sql* using the :class:`Lexer` and return a 2-tuple stream
     of ``(token type, value)`` items.
     """
-    return Lexer.get_default_instance().get_tokens(sql, encoding)
+    lexer = Lexer.get_default_instance() if custom_lexer is None else custom_lexer
+    return lexer.get_tokens(sql, encoding)
