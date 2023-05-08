@@ -285,7 +285,6 @@ KEYWORDS = {
     'GLOBAL': tokens.Keyword,
     'GO': tokens.Keyword,
     'GOTO': tokens.Keyword,
-    'GRANT': tokens.Keyword,
     'GRANTED': tokens.Keyword,
     'GROUPING': tokens.Keyword,
 
@@ -575,7 +574,6 @@ KEYWORDS = {
     'TRIGGER_SCHEMA': tokens.Keyword,
     'TRIM': tokens.Keyword,
     'TRUE': tokens.Keyword,
-    'TRUNCATE': tokens.Keyword,
     'TRUSTED': tokens.Keyword,
     'TYPE': tokens.Keyword,
 
@@ -682,6 +680,8 @@ KEYWORDS_COMMON = {
     'DROP': tokens.Keyword.DDL,
     'CREATE': tokens.Keyword.DDL,
     'ALTER': tokens.Keyword.DDL,
+    'GRANT': tokens.Keyword.DDL,
+    'TRUNCATE': tokens.Keyword.DDL,
 
     'WHERE': tokens.Keyword,
     'FROM': tokens.Keyword,
