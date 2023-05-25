@@ -959,3 +959,9 @@ KEYWORDS_HQL = {
 KEYWORDS_MSACCESS = {
     'DISTINCTROW': tokens.Keyword,
 }
+
+# SNOWFLAKE Syntax
+KEYWORDS_SNFL = {
+    'STAGE': tokens.Keyword,
+    (r'EXTERNAL\s+TABLE\b', tokens.Keyword),
+}
