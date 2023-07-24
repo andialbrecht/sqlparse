@@ -43,8 +43,6 @@ sqlformat = "sqlparse.__main__:main"
 dev = [
     "flake8",
     "build",
-    "virtualenv<20.22.0",   # 20.22.0 dropped Python 3.6 support
-    "tox<4.5.0",  # >=4.5.0 requires virtualenv>=20.22
 ]
 test = [
     "pytest",
@@ -52,6 +50,10 @@ test = [
 ]
 doc = [
     "sphinx",
+]
+tox = [
+    "virtualenv<20.22.0",   # 20.22.0 dropped Python 3.6 support
+    "tox<4.5.0",  # >=4.5.0 requires virtualenv>=20.22
 ]
 
 [tool.flit.sdist]
