@@ -16,7 +16,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.5",
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
@@ -28,7 +27,7 @@ classifiers = [
     "Topic :: Database",
     "Topic :: Software Development",
 ]
-requires-python = ">=3.5"
+requires-python = ">=3.6"
 
 [project.urls]
 Home = "https://github.com/andialbrecht/sqlparse"

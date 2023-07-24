@@ -11,7 +11,7 @@ python-sqlparse - Parse SQL statements
 sqlparse is a non-validating SQL parser for Python.
 It provides support for parsing, splitting and formatting SQL statements.
 
-The module is compatible with Python 3.5+ and released under the terms of the
+The module is compatible with Python 3.6+ and released under the terms of the
 `New BSD license <https://opensource.org/licenses/BSD-3-Clause>`_.
 
 Visit the project page at https://github.com/andialbrecht/sqlparse for

@@ -1,7 +1,9 @@
 Development Version
 -------------------
 
-Nothing yet.
+Notable Changes
+
+* Drop support for Python 3.5.
 
 
 Release 0.4.4 (Apr 18, 2023)
