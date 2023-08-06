@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Discussions
+    url: https://github.com/andialbrecht/sqlparse/discussions
+    about: Please ask questions and start more general discussions here
