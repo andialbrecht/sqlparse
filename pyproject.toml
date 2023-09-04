@@ -41,6 +41,7 @@ sqlformat = "sqlparse.__main__:main"
 
 [project.optional-dependencies]
 dev = [
+    "importlib_metadata<5; python_version <= '3.7'",
     "flake8",
     "build",
 ]
