@@ -20,29 +20,31 @@ __version__ = '0.5.0.dev0'
 __all__ = ['engine', 'filters', 'formatter', 'sql', 'tokens', 'cli']
 
 
-def parse(sql, encoding=None):
+def parse(sql, encoding=None, lexer=None):
     """Parse sql and return a list of statements.
 
     :param sql: A string containing one or more SQL statements.
     :param encoding: The encoding of the statement (optional).
+    :param lexer: A custom SQL query lexer (optional).
     :returns: A tuple of :class:`~sqlparse.sql.Statement` instances.
     """
-    return tuple(parsestream(sql, encoding))
+    return tuple(parsestream(sql, encoding=encoding, lexer=lexer))
 
 
-def parsestream(stream, encoding=None):
+def parsestream(stream, encoding=None, lexer=None):
     """Parses sql statements from file-like object.
 
     :param stream: A file-like object.
     :param encoding: The encoding of the stream contents (optional).
+    :param lexer: A custom SQL query lexer (optional).
     :returns: A generator of :class:`~sqlparse.sql.Statement` instances.
     """
     stack = engine.FilterStack()
     stack.enable_grouping()
-    return stack.run(stream, encoding)
+    return stack.run(stream, encoding=encoding, custom_lexer=lexer)
 
 
-def format(sql, encoding=None, **options):
+def format(sql, encoding=None, lexer=None, **options):
     """Format *sql* according to *options*.
 
     Available options are documented in :ref:`formatting`.
@@ -56,15 +58,16 @@ def format(sql, encoding=None, **options):
     options = formatter.validate_options(options)
     stack = formatter.build_filter_stack(stack, options)
     stack.postprocess.append(filters.SerializerUnicode())
-    return ''.join(stack.run(sql, encoding))
+    return ''.join(stack.run(sql, encoding=encoding, custom_lexer=lexer))
 
 
-def split(sql, encoding=None):
+def split(sql, encoding=None, lexer=None):
     """Split *sql* into single statements.
 
     :param sql: A string containing one or more SQL statements.
     :param encoding: The encoding of the statement (optional).
+    :param lexer: A custom SQL query lexer (optional).
     :returns: A list of strings.
     """
     stack = engine.FilterStack()
-    return [str(stmt).strip() for stmt in stack.run(sql, encoding)]
+    return [str(stmt).strip() for stmt in stack.run(sql, encoding=encoding, custom_lexer=lexer)]
