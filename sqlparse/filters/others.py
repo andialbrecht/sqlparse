@@ -25,7 +25,7 @@ class StripCommentsFilter:
             # Note: The actual value for a line break is replaced by \n
             # in SerializerUnicode which will be executed in the
             # postprocessing state.
-            m = re.search(r'((\r|\n)+) *$', token.value)
+            m = re.search(r'([\r\n]+) *$', token.value)
             if m is not None:
                 return sql.Token(T.Whitespace.Newline, m.groups()[0])
             else:
