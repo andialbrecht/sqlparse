@@ -4,6 +4,7 @@ Development Version
 Notable Changes
 
 * Drop support for Python 3.5.
+* Python 3.12 is now supported (pr725, by hugovk).
 
 
 Release 0.4.4 (Apr 18, 2023)
