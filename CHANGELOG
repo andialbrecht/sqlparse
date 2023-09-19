@@ -6,6 +6,10 @@ Notable Changes
 * Drop support for Python 3.5.
 * Python 3.12 is now supported (pr725, by hugovk).
 
+Bug Fixes
+
+* Ignore dunder attributes when creating Tokens (issue672).
+
 
 Release 0.4.4 (Apr 18, 2023)
 ----------------------------

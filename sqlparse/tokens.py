@@ -19,6 +19,9 @@ class _TokenType(tuple):
         return item is not None and (self is item or item[:len(self)] == self)
 
     def __getattr__(self, name):
+        # don't mess with dunder
+        if name.startswith('__'):
+            return super().__getattr__(self, name)
         new = _TokenType(self + (name,))
         setattr(self, name, new)
         new.parent = self

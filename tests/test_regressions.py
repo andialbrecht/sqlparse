@@ -1,3 +1,5 @@
+import copy
+
 import pytest
 
 import sqlparse
@@ -436,3 +438,9 @@ def test_comment_between_cte_clauses_issue632():
              baz AS ()
         SELECT * FROM baz;""")
     assert p.get_type() == "SELECT"
+
+
+def test_copy_issue672():
+    p = sqlparse.parse('select * from foo')[0]
+    copied = copy.deepcopy(p)
+    assert str(p) == str(copied)
