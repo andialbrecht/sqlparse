@@ -102,7 +102,7 @@ class TestFormat:
         assert res == 'select *\n\nfrom foo'
 
     def test_strip_ws(self):
-        f = lambda sql: sqlparse.format(sql, strip_whitespace=True)
+        def f(sql): return sqlparse.format(sql, strip_whitespace=True)
         s = 'select\n* from      foo\n\twhere  ( 1 = 2 )\n'
         assert f(s) == 'select * from foo where (1 = 2)'
         s = 'select -- foo\nfrom    bar\n'
@@ -115,7 +115,7 @@ class TestFormat:
 
     def test_preserve_ws(self):
         # preserve at least one whitespace after subgroups
-        f = lambda sql: sqlparse.format(sql, strip_whitespace=True)
+        def f(sql): return sqlparse.format(sql, strip_whitespace=True)
         s = 'select\n* /* foo */  from bar '
         assert f(s) == 'select * /* foo */ from bar'
 
@@ -128,7 +128,7 @@ class TestFormat:
         s3 = "SELECT some_column LIKE 'value\\'\r' WHERE id = 1\r"
         s4 = "SELECT some_column LIKE 'value\\\\\\'\r' WHERE id = 1\r\n"
 
-        f = lambda x: sqlparse.format(x)
+        def f(x): return sqlparse.format(x)
 
         # Because of the use of
         assert f(s1) == "SELECT some_column LIKE 'value\r'"
@@ -140,8 +140,7 @@ class TestFormat:
 
 class TestFormatReindentAligned:
     @staticmethod
-    def formatter(sql):
-        return sqlparse.format(sql, reindent_aligned=True)
+    def formatter(sql): return sqlparse.format(sql, reindent_aligned=True)
 
     def test_basic(self):
         sql = """
@@ -354,7 +353,7 @@ class TestFormatReindent:
             sqlparse.format('foo', reindent=True, comma_first='foo')
 
     def test_stmts(self):
-        f = lambda sql: sqlparse.format(sql, reindent=True)
+        def f(sql): return sqlparse.format(sql, reindent=True)
         s = 'select foo; select bar'
         assert f(s) == 'select foo;\n\nselect bar'
         s = 'select foo'
@@ -363,7 +362,7 @@ class TestFormatReindent:
         assert f(s) == 'select foo; -- test\n\nselect bar'
 
     def test_keywords(self):
-        f = lambda sql: sqlparse.format(sql, reindent=True)
+        def f(sql): return sqlparse.format(sql, reindent=True)
         s = 'select * from foo union select * from bar;'
         assert f(s) == '\n'.join([
             'select *',
@@ -375,7 +374,7 @@ class TestFormatReindent:
     def test_keywords_between(self):
         # issue 14
         # don't break AND after BETWEEN
-        f = lambda sql: sqlparse.format(sql, reindent=True)
+        def f(sql): return sqlparse.format(sql, reindent=True)
         s = 'and foo between 1 and 2 and bar = 3'
         assert f(s) == '\n'.join([
             '',
@@ -383,7 +382,7 @@ class TestFormatReindent:
             'and bar = 3'])
 
     def test_parenthesis(self):
-        f = lambda sql: sqlparse.format(sql, reindent=True)
+        def f(sql): return sqlparse.format(sql, reindent=True)
         s = 'select count(*) from (select * from foo);'
         assert f(s) == '\n'.join([
             'select count(*)',
@@ -397,7 +396,7 @@ class TestFormatReindent:
         assert f("select f(\n\n\n  1  \n\n\n)") == 'select f(1)'
 
     def test_where(self):
-        f = lambda sql: sqlparse.format(sql, reindent=True)
+        def f(sql): return sqlparse.format(sql, reindent=True)
         s = 'select * from foo where bar = 1 and baz = 2 or bzz = 3;'
         assert f(s) == '\n'.join([
             'select *',
@@ -415,7 +414,7 @@ class TestFormatReindent:
             '       or bzz = 3);'])
 
     def test_join(self):
-        f = lambda sql: sqlparse.format(sql, reindent=True)
+        def f(sql): return sqlparse.format(sql, reindent=True)
         s = 'select * from foo join bar on 1 = 2'
         assert f(s) == '\n'.join([
             'select *',
@@ -438,7 +437,7 @@ class TestFormatReindent:
             'straight_join bar on 1 = 2'])
 
     def test_identifier_list(self):
-        f = lambda sql: sqlparse.format(sql, reindent=True)
+        def f(sql): return sqlparse.format(sql, reindent=True)
         s = 'select foo, bar, baz from table1, table2 where 1 = 2'
         assert f(s) == '\n'.join([
             'select foo,',
@@ -455,7 +454,7 @@ class TestFormatReindent:
             '     b'])
 
     def test_identifier_list_with_wrap_after(self):
-        f = lambda sql: sqlparse.format(sql, reindent=True, wrap_after=14)
+        def f(sql): return sqlparse.format(sql, reindent=True, wrap_after=14)
         s = 'select foo, bar, baz from table1, table2 where 1 = 2'
         assert f(s) == '\n'.join([
             'select foo, bar,',
@@ -464,7 +463,7 @@ class TestFormatReindent:
             'where 1 = 2'])
 
     def test_identifier_list_comment_first(self):
-        f = lambda sql: sqlparse.format(sql, reindent=True, comma_first=True)
+        def f(sql): return sqlparse.format(sql, reindent=True, comma_first=True)
         # not the 3: It cleans up whitespace too!
         s = 'select foo, bar, baz from table where foo in (1, 2,3)'
         assert f(s) == '\n'.join([
@@ -477,7 +476,7 @@ class TestFormatReindent:
             '            , 3)'])
 
     def test_identifier_list_with_functions(self):
-        f = lambda sql: sqlparse.format(sql, reindent=True)
+        def f(sql): return sqlparse.format(sql, reindent=True)
         s = ("select 'abc' as foo, coalesce(col1, col2)||col3 as bar,"
              "col3 from my_table")
         assert f(s) == '\n'.join([
@@ -487,7 +486,7 @@ class TestFormatReindent:
             "from my_table"])
 
     def test_long_identifier_list_with_functions(self):
-        f = lambda sql: sqlparse.format(sql, reindent=True, wrap_after=30)
+        def f(sql): return sqlparse.format(sql, reindent=True, wrap_after=30)
         s = ("select 'abc' as foo, json_build_object('a',  a,"
              "'b', b, 'c', c, 'd', d, 'e', e) as col2"
              "col3 from my_table")
@@ -499,7 +498,7 @@ class TestFormatReindent:
             "from my_table"])
 
     def test_case(self):
-        f = lambda sql: sqlparse.format(sql, reindent=True)
+        def f(sql): return sqlparse.format(sql, reindent=True)
         s = 'case when foo = 1 then 2 when foo = 3 then 4 else 5 end'
         assert f(s) == '\n'.join([
             'case',
@@ -509,7 +508,7 @@ class TestFormatReindent:
             'end'])
 
     def test_case2(self):
-        f = lambda sql: sqlparse.format(sql, reindent=True)
+        def f(sql): return sqlparse.format(sql, reindent=True)
         s = 'case(foo) when bar = 1 then 2 else 3 end'
         assert f(s) == '\n'.join([
             'case(foo)',
@@ -519,7 +518,7 @@ class TestFormatReindent:
 
     def test_nested_identifier_list(self):
         # issue4
-        f = lambda sql: sqlparse.format(sql, reindent=True)
+        def f(sql): return sqlparse.format(sql, reindent=True)
         s = '(foo as bar, bar1, bar2 as bar3, b4 as b5)'
         assert f(s) == '\n'.join([
             '(foo as bar,',
@@ -529,7 +528,7 @@ class TestFormatReindent:
 
     def test_duplicate_linebreaks(self):
         # issue3
-        f = lambda sql: sqlparse.format(sql, reindent=True)
+        def f(sql): return sqlparse.format(sql, reindent=True)
         s = 'select c1 -- column1\nfrom foo'
         assert f(s) == '\n'.join([
             'select c1 -- column1',
@@ -553,7 +552,7 @@ class TestFormatReindent:
 
     def test_keywordfunctions(self):
         # issue36
-        f = lambda sql: sqlparse.format(sql, reindent=True)
+        def f(sql): return sqlparse.format(sql, reindent=True)
         s = 'select max(a) b, foo, bar'
         assert f(s) == '\n'.join([
             'select max(a) b,',
@@ -562,7 +561,7 @@ class TestFormatReindent:
 
     def test_identifier_and_functions(self):
         # issue45
-        f = lambda sql: sqlparse.format(sql, reindent=True)
+        def f(sql): return sqlparse.format(sql, reindent=True)
         s = 'select foo.bar, nvl(1) from dual'
         assert f(s) == '\n'.join([
             'select foo.bar,',
@@ -571,7 +570,7 @@ class TestFormatReindent:
 
     def test_insert_values(self):
         # issue 329
-        f = lambda sql: sqlparse.format(sql, reindent=True)
+        def f(sql): return sqlparse.format(sql, reindent=True)
         s = 'insert into foo values (1, 2)'
         assert f(s) == '\n'.join([
             'insert into foo',
@@ -591,8 +590,7 @@ class TestFormatReindent:
             '       (3, 4),',
             '       (5, 6)'])
 
-        f = lambda sql: sqlparse.format(sql, reindent=True,
-                                        comma_first=True)
+        def f(sql): return sqlparse.format(sql, reindent=True, comma_first=True)
         s = 'insert into foo values (1, 2)'
         assert f(s) == '\n'.join([
             'insert into foo',
@@ -616,17 +614,17 @@ class TestFormatReindent:
 class TestOutputFormat:
     def test_python(self):
         sql = 'select * from foo;'
-        f = lambda sql: sqlparse.format(sql, output_format='python')
+        def f(sql): return sqlparse.format(sql, output_format='python')
         assert f(sql) == "sql = 'select * from foo;'"
-        f = lambda sql: sqlparse.format(sql, output_format='python',
-                                        reindent=True)
+        def f(sql): return sqlparse.format(sql, output_format='python', reindent=True)
         assert f(sql) == '\n'.join([
             "sql = ('select * '",
             "       'from foo;')"])
 
     def test_python_multiple_statements(self):
         sql = 'select * from foo; select 1 from dual'
-        f = lambda sql: sqlparse.format(sql, output_format='python')
+        def f(sql):
+            return sqlparse.format(sql, output_format='python')
         assert f(sql) == '\n'.join([
             "sql = 'select * from foo; '",
             "sql2 = 'select 1 from dual'"])
@@ -634,8 +632,9 @@ class TestOutputFormat:
     @pytest.mark.xfail(reason="Needs fixing")
     def test_python_multiple_statements_with_formatting(self):
         sql = 'select * from foo; select 1 from dual'
-        f = lambda sql: sqlparse.format(sql, output_format='python',
-                                        reindent=True)
+        def f(sql): return sqlparse.format(sql, output_format='python', reindent=True)
+        from pprint import pprint
+        pprint(f(sql))
         assert f(sql) == '\n'.join([
             "sql = ('select * '",
             "       'from foo;')",
@@ -644,10 +643,9 @@ class TestOutputFormat:
 
     def test_php(self):
         sql = 'select * from foo;'
-        f = lambda sql: sqlparse.format(sql, output_format='php')
+        def f(sql): return sqlparse.format(sql, output_format='php')
         assert f(sql) == '$sql = "select * from foo;";'
-        f = lambda sql: sqlparse.format(sql, output_format='php',
-                                        reindent=True)
+        def f(sql): return sqlparse.format(sql, output_format='php', reindent=True)
         assert f(sql) == '\n'.join([
             '$sql  = "select * ";',
             '$sql .= "from foo;";'])
@@ -655,7 +653,7 @@ class TestOutputFormat:
     def test_sql(self):
         # "sql" is an allowed option but has no effect
         sql = 'select * from foo;'
-        f = lambda sql: sqlparse.format(sql, output_format='sql')
+        def f(sql): return sqlparse.format(sql, output_format='sql')
         assert f(sql) == 'select * from foo;'
 
     def test_invalid_option(self):
