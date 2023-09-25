@@ -1,6 +1,3 @@
-# PyCharm
-.idea/
-
 *.py[co]
 docs/build
 dist/
@@ -11,12 +8,5 @@ MANIFEST
 .cache/
 *.egg-info/
 htmlcov/
-extras/appengine/sqlparse
-extras/appengine/lib/
-extras/py3k/sqlparse
-extras/py3k/tests
-extras/py3k/sqlparse.diff
-extras/py3k/tests.diff
 coverage.xml
-*.class
 .pytest_cache
