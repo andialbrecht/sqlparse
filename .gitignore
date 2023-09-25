@@ -1,5 +1,7 @@
 # PyCharm
 .idea/
+# VS Code
+.vscode/
 
 *.py[co]
 docs/build
@@ -9,6 +11,10 @@ MANIFEST
 .coverage
 .tox/
 .cache/
+.venv/
+venv/
+env/
+.env/
 *.egg-info/
 htmlcov/
 extras/appengine/sqlparse
