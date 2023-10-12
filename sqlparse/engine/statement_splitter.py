@@ -54,7 +54,7 @@ class StatementSplitter:
         if unified == 'BEGIN':
             self._begin_depth += 1
             if self._is_create:
-                # FIXME(andi): This makes no sense.
+                # FIXME(andi): This makes no sense.  ## this comment neither
                 return 1
             return 0
 
