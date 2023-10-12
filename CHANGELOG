@@ -6,6 +6,11 @@ Notable Changes
 * Drop support for Python 3.5.
 * Python 3.12 is now supported (pr725, by hugovk).
 
+Enhancements:
+
+* Splitting statements now allows to remove the semicolon at the end.
+  Some database backends love statements without semicolon (issue742).
+
 Bug Fixes
 
 * Ignore dunder attributes when creating Tokens (issue672).

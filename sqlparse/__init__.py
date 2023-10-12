@@ -59,12 +59,14 @@ def format(sql, encoding=None, **options):
     return ''.join(stack.run(sql, encoding))
 
 
-def split(sql, encoding=None):
+def split(sql, encoding=None, strip_semicolon=False):
     """Split *sql* into single statements.
 
     :param sql: A string containing one or more SQL statements.
     :param encoding: The encoding of the statement (optional).
+    :param strip_semicolon: If True, remove trainling semicolons
+        (default: False).
     :returns: A list of strings.
     """
-    stack = engine.FilterStack()
+    stack = engine.FilterStack(strip_semicolon=strip_semicolon)
     return [str(stmt).strip() for stmt in stack.run(sql, encoding)]
