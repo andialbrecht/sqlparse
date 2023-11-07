@@ -247,6 +247,14 @@ def test_grouping_identifier_list_with_order():
     assert str(p.tokens[0].tokens[3]) == '2 desc'
 
 
+def test_grouping_nested_identifier_with_order():
+    # issue745
+    p = sqlparse.parse('(a desc)')[0]
+    assert isinstance(p.tokens[0], sql.Parenthesis)
+    assert isinstance(p.tokens[0].tokens[1], sql.Identifier)
+    assert str(p.tokens[0].tokens[1]) == 'a desc'
+
+
 def test_grouping_where():
     s = 'select * from foo where bar = 1 order by id desc'
     p = sqlparse.parse(s)[0]
