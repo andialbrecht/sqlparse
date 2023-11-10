@@ -227,7 +227,7 @@ class TokenList(Token):
     def _token_matching(self, funcs, start=0, end=None, reverse=False):
         """next token that match functions"""
         if start is None:
-            return None
+            return None, None
 
         if not isinstance(funcs, (list, tuple)):
             funcs = (funcs,)
