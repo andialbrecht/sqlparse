@@ -114,6 +114,7 @@ def test_tokenlist_token_matching():
     assert x.token_matching([lambda t: t.ttype is T.Keyword], 0) == t1
     assert x.token_matching([lambda t: t.ttype is T.Punctuation], 0) == t2
     assert x.token_matching([lambda t: t.ttype is T.Keyword], 1) is None
+    assert x.token_matching([lambda t: t.ttype is T.Keyword], None) is None
 
 
 def test_stream_simple():
