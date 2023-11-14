@@ -619,12 +619,13 @@ class Function(NameAliasMixin, TokenList):
     def get_parameters(self):
         """Return a list of parameters."""
         parenthesis = self.tokens[-1]
+        result = []
         for token in parenthesis.tokens:
             if isinstance(token, IdentifierList):
                 return token.get_identifiers()
-            elif imt(token, i=(Function, Identifier), t=T.Literal):
-                return [token, ]
-        return []
+            elif imt(token, i=(Function, Identifier, TypedLiteral), t=T.Literal):
+                result.append(token)
+        return result
 
 
 class Begin(TokenList):
