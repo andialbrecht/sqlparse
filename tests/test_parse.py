@@ -133,6 +133,11 @@ def test_parse_nested_function():
     assert type(t[0]) is sql.Function
 
 
+def test_parse_casted_params():
+    t = sqlparse.parse("foo(DATE '2023-11-14', TIMESTAMP '2023-11-15')")[0].tokens[0].get_parameters()
+    assert len(t) == 2
+
+
 def test_parse_div_operator():
     p = sqlparse.parse('col1 DIV 5 AS div_col1')[0].tokens
     assert p[0].tokens[0].tokens[2].ttype is T.Operator
