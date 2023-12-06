@@ -70,7 +70,7 @@ a keyword to the lexer:
     lex.add_keywords(keywords.KEYWORDS)
 
     # add a custom keyword dictionary
-    lex.add_keywords({'BAR', sqlparse.tokens.Keyword})
+    lex.add_keywords({'BAR': sqlparse.tokens.Keyword})
 
     # no configuration is passed here. The lexer is used as a singleton.
     sqlparse.parse("select * from foo zorder by bar;")
