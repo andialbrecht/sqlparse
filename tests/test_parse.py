@@ -180,6 +180,14 @@ def test_psql_quotation_marks():
     $PROC_2$ LANGUAGE plpgsql;""")
     assert len(t) == 2
 
+    # operators are valid infront of dollar quoted strings
+    t = sqlparse.split("""UPDATE SET foo =$$bar;SELECT bar$$""")
+    assert len(t) == 1
+    
+    # identifiers must be separated by whitespace
+    t = sqlparse.split("""UPDATE SET foo TO$$bar;SELECT bar$$""")
+    assert len(t) == 2
+
 
 def test_double_precision_is_builtin():
     s = 'DOUBLE PRECISION'
