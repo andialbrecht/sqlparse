@@ -14,6 +14,7 @@ Enhancements:
 Bug Fixes
 
 * Ignore dunder attributes when creating Tokens (issue672).
+* Allow operators to precede dollar-quoted strings (issue763).
 
 
 Release 0.4.4 (Apr 18, 2023)
