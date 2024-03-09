@@ -579,3 +579,64 @@ def test_configurable_regex():
         for t in tokens
         if t.ttype not in sqlparse.tokens.Whitespace
     )[4] == (sqlparse.tokens.Keyword, "zorder by")
+
+
+def test_spark_schema_create():
+    s = """CREATE SCHEMA IF NOT EXISTS database_name
+    COMMENT "my database comment"
+    LOCATION "/mnt/path/to/db"
+    WITH DBPROPERTIES (property_name=property_value) ;
+    """
+
+    tokens = sqlparse.parse(s)[0].tokens
+
+    token_values = [(t.value, t.ttype) for t in tokens if t.ttype not in (None, T.Whitespace, T.Text.Whitespace.Newline)]
+
+    assert token_values == [('CREATE', T.Keyword.DDL),
+                            ('SCHEMA', T.Keyword),
+                            ('IF', T.Keyword),
+                            ('NOT', T.Keyword),
+                            ('EXISTS', T.Keyword),
+                            ('COMMENT', T.Keyword),
+                            ('LOCATION', T.Keyword),
+                            ('WITH DBPROPERTIES', T.Keyword),
+                            (';', T.Punctuation)]
+
+
+def test_spark_table_create():
+    s = """CREATE TABLE IF NOT EXISTS database_name.table_identifier
+    (
+        col_name1 int COMMENT "woah, cool column",
+        b string
+    )
+    USING DELTA
+    OPTIONS ( key1=val1, key2=val2 )
+    PARTITIONED BY ( col_name1  )
+    CLUSTERED BY ( b )
+    SORTED BY ( col_name1  DESC )
+    INTO 4 BUCKETS
+    LOCATION "/mnt/path/to/db/tbl"
+    COMMENT "nice table"
+    TBLPROPERTIES ( key1=val1, key2=val2  )
+    """
+
+    tokens = sqlparse.parse(s)[0].tokens
+
+    token_values = [(t.value, t.ttype) for t in tokens if t.ttype not in (None, T.Whitespace, T.Text.Whitespace.Newline)]
+
+    assert token_values == [('CREATE', T.Keyword.DDL),
+                            ('TABLE', T.Keyword),
+                            ('IF', T.Keyword),
+                            ('NOT', T.Keyword),
+                            ('EXISTS', T.Keyword),
+                            ('USING', T.Keyword),
+                            ('OPTIONS', T.Keyword),
+                            ('PARTITIONED BY', T.Keyword),
+                            ('CLUSTERED BY', T.Keyword),
+                            ('SORTED BY', T.Keyword),
+                            ('INTO', T.Keyword),
+                            ('4', T.Literal.Number.Integer),
+                            ('BUCKETS', T.Keyword),
+                            ('LOCATION', T.Keyword),
+                            ('COMMENT', T.Keyword),
+                            ('TBLPROPERTIES', T.Keyword)]

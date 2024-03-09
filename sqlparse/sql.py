@@ -551,7 +551,7 @@ class Where(TokenList):
     M_OPEN = T.Keyword, 'WHERE'
     M_CLOSE = T.Keyword, (
         'ORDER BY', 'GROUP BY', 'LIMIT', 'UNION', 'UNION ALL', 'EXCEPT',
-        'HAVING', 'RETURNING', 'INTO')
+        'HAVING', 'RETURNING', 'INTO', 'ZORDER BY')
 
 
 class Having(TokenList):
