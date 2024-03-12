@@ -77,7 +77,7 @@ def group_typecasts(tlist):
     def match(token):
         return token.match(T.Punctuation, '::')
 
-    def valid(token):
+    def valid(token, idx):
         return token is not None
 
     def post(tlist, pidx, tidx, nidx):
@@ -91,10 +91,10 @@ def group_tzcasts(tlist):
     def match(token):
         return token.ttype == T.Keyword.TZCast
 
-    def valid_prev(token):
+    def valid_prev(token, idx):
         return token is not None
 
-    def valid_next(token):
+    def valid_next(token, idx):
         return token is not None and (
             token.is_whitespace
             or token.match(T.Keyword, 'AS')
@@ -119,13 +119,13 @@ def group_typed_literal(tlist):
     def match_to_extend(token):
         return isinstance(token, sql.TypedLiteral)
 
-    def valid_prev(token):
+    def valid_prev(token, idx):
         return token is not None
 
-    def valid_next(token):
+    def valid_next(token, idx):
         return token is not None and token.match(*sql.TypedLiteral.M_CLOSE)
 
-    def valid_final(token):
+    def valid_final(token, idx):
         return token is not None and token.match(*sql.TypedLiteral.M_EXTEND)
 
     def post(tlist, pidx, tidx, nidx):
@@ -141,12 +141,12 @@ def group_period(tlist):
     def match(token):
         return token.match(T.Punctuation, '.')
 
-    def valid_prev(token):
+    def valid_prev(token, idx):
         sqlcls = sql.SquareBrackets, sql.Identifier
         ttypes = T.Name, T.String.Symbol
         return imt(token, i=sqlcls, t=ttypes)
 
-    def valid_next(token):
+    def valid_next(token, idx):
         # issue261, allow invalid next token
         return True
 
@@ -166,10 +166,10 @@ def group_as(tlist):
     def match(token):
         return token.is_keyword and token.normalized == 'AS'
 
-    def valid_prev(token):
+    def valid_prev(token, idx):
         return token.normalized == 'NULL' or not token.is_keyword
 
-    def valid_next(token):
+    def valid_next(token, idx):
         ttypes = T.DML, T.DDL, T.CTE
         return not imt(token, t=ttypes) and token is not None
 
@@ -183,7 +183,7 @@ def group_assignment(tlist):
     def match(token):
         return token.match(T.Assignment, ':=')
 
-    def valid(token):
+    def valid(token, idx):
         return token is not None and token.ttype not in (T.Keyword,)
 
     def post(tlist, pidx, tidx, nidx):
@@ -202,9 +202,9 @@ def group_comparison(tlist):
     ttypes = T_NUMERICAL + T_STRING + T_NAME
 
     def match(token):
-        return token.ttype == T.Operator.Comparison
+        return imt(token, t=(T.Operator.Comparison), m=(T.Keyword, 'LIKE'))
 
-    def valid(token):
+    def valid(token, idx):
         if imt(token, t=ttypes, i=sqlcls):
             return True
         elif token and token.is_keyword and token.normalized == 'NULL':
@@ -215,7 +215,22 @@ def group_comparison(tlist):
     def post(tlist, pidx, tidx, nidx):
         return pidx, nidx
 
-    valid_prev = valid_next = valid
+    def valid_next(token, idx):
+        return valid(token, idx)
+
+    def valid_prev(token, idx):
+        # https://dev.mysql.com/doc/refman/8.0/en/create-table-like.html
+        # LIKE is usually a comparator, except when used in
+        # `CREATE TABLE x LIKE y` statements, Check if we are
+        # constructing a table - otherwise assume it is indeed a comparator
+        two_tokens_back_idx = idx - 3
+        if two_tokens_back_idx >= 0:
+            _, two_tokens_back = tlist.token_next(two_tokens_back_idx)
+            if imt(two_tokens_back, m=(T.Keyword, 'TABLE')):
+                return False
+
+        return valid(token, idx)
+
     _group(tlist, sql.Comparison, match,
            valid_prev, valid_next, post, extend=False)
 
@@ -237,10 +252,10 @@ def group_arrays(tlist):
     def match(token):
         return isinstance(token, sql.SquareBrackets)
 
-    def valid_prev(token):
+    def valid_prev(token, idx):
         return imt(token, i=sqlcls, t=ttypes)
 
-    def valid_next(token):
+    def valid_next(token, idx):
         return True
 
     def post(tlist, pidx, tidx, nidx):
@@ -258,7 +273,7 @@ def group_operator(tlist):
     def match(token):
         return imt(token, t=(T.Operator, T.Wildcard))
 
-    def valid(token):
+    def valid(token, idx):
         return imt(token, i=sqlcls, t=ttypes) \
             or (token and token.match(
                 T.Keyword,
@@ -283,7 +298,7 @@ def group_identifier_list(tlist):
     def match(token):
         return token.match(T.Punctuation, ',')
 
-    def valid(token):
+    def valid(token, idx):
         return imt(token, i=sqlcls, m=m_role, t=ttypes)
 
     def post(tlist, pidx, tidx, nidx):
@@ -431,8 +446,8 @@ def group(stmt):
 
 
 def _group(tlist, cls, match,
-           valid_prev=lambda t: True,
-           valid_next=lambda t: True,
+           valid_prev=lambda t, idx: True,
+           valid_next=lambda t, idx: True,
            post=None,
            extend=True,
            recurse=True
@@ -454,7 +469,7 @@ def _group(tlist, cls, match,
 
         if match(token):
             nidx, next_ = tlist.token_next(tidx)
-            if prev_ and valid_prev(prev_) and valid_next(next_):
+            if prev_ and valid_prev(prev_, pidx) and valid_next(next_, nidx):
                 from_idx, to_idx = post(tlist, pidx, tidx, nidx)
                 grp = tlist.group_tokens(cls, from_idx, to_idx, extend=extend)
 

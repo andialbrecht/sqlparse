@@ -444,3 +444,18 @@ def test_copy_issue672():
     p = sqlparse.parse('select * from foo')[0]
     copied = copy.deepcopy(p)
     assert str(p) == str(copied)
+
+
+def test_copy_issue543():
+    tokens = sqlparse.parse('create table tab1.b like tab2')[0].tokens
+    assert [(t.ttype, t.value) for t in tokens if t.ttype != T.Whitespace] == \
+        [
+         (T.DDL, 'create'),
+         (T.Keyword, 'table'),
+         (None, 'tab1.b'),
+         (T.Keyword, 'like'),
+         (None, 'tab2')
+        ]
+
+    comparison = sqlparse.parse('a LIKE "b"')[0].tokens[0]
+    assert isinstance(comparison, sql.Comparison)
