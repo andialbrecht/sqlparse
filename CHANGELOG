@@ -3,7 +3,7 @@ Development Version
 
 Notable Changes
 
-* Drop support for Python 3.5.
+* Drop support for Python 3.5, 3.6, and 3.7.
 * Python 3.12 is now supported (pr725, by hugovk).
 
 Enhancements:

@@ -15,25 +15,24 @@ on:
 jobs:
   test:
     name: Run tests on ${{ matrix.py }}
-    runs-on: ubuntu-20.04  # keep it on 20.04 to have Python 3.6 available
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         py:
+          - "3.13-dev"
           - "3.12"
           - "3.11"
           - "3.10"
           - "3.9"
           - "3.8"
-          - "3.7"
-          - "3.6"
+          - "pypy-3.10"
           - "pypy-3.9"
           - "pypy-3.8"
-          - "pypy-3.7"
 
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.py }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.py }}
         allow-prereleases: true
@@ -47,4 +46,4 @@ jobs:
     - name: Test with pytest
       run: pytest --cov=sqlparse
     - name: Publish to codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
