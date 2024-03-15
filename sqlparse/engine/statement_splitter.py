@@ -99,7 +99,12 @@ class StatementSplitter:
             self.tokens.append(sql.Token(ttype, value))
 
             # Check if we get the end of a statement
-            if self.level <= 0 and ttype is T.Punctuation and value == ';':
+            # Issue762: Allow GO (or "GO 2") as statement splitter.
+            # When implementing a language toggle, it's not only to add
+            # keywords it's also to change some rules, like this splitting
+            # rule.
+            if (self.level <= 0 and ttype is T.Punctuation and value == ';') \
+                    or (ttype is T.Keyword and value.split()[0] == 'GO'):
                 self.consume_ws = True
 
         # Yield pending statement (if any)

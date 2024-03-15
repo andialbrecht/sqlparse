@@ -78,6 +78,7 @@ SQL_REGEX = [
     (r'GROUP\s+BY\b', tokens.Keyword),
     (r'ORDER\s+BY\b', tokens.Keyword),
     (r'HANDLER\s+FOR\b', tokens.Keyword),
+    (r'GO(\s\d+)\b', tokens.Keyword),
     (r'(LATERAL\s+VIEW\s+)'
      r'(EXPLODE|INLINE|PARSE_URL_TUPLE|POSEXPLODE|STACK)\b',
      tokens.Keyword),

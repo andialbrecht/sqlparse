@@ -194,3 +194,12 @@ def test_split_strip_semicolon_procedure(load_file):
     assert len(stmts) == 2
     assert stmts[0].endswith('end')
     assert stmts[1].endswith('end')
+
+@pytest.mark.parametrize('sql, num', [
+    ('USE foo;\nGO\nSELECT 1;\nGO', 4),
+    ('SELECT * FROM foo;\nGO', 2),
+    ('USE foo;\nGO 2\nSELECT 1;', 3)
+])
+def test_split_go(sql, num):  # issue762
+    stmts = sqlparse.split(sql)
+    assert len(stmts) == num
