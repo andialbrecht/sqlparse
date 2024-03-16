@@ -18,6 +18,7 @@ Bug Fixes
 * Ignore dunder attributes when creating Tokens (issue672).
 * Allow operators to precede dollar-quoted strings (issue763).
 * Fix parsing of nested order clauses (issue745, pr746 by john-bodley).
+* Thread-safe initialization of Lexer class (issue730).
 
 
 Release 0.4.4 (Apr 18, 2023)

@@ -7,6 +7,7 @@
 
 """SQL Lexer"""
 import re
+from threading import Lock
 
 # This code is based on the SqlLexer in pygments.
 # http://pygments.org/
@@ -24,19 +25,20 @@ class Lexer:
     To add support for additional keywords, use the `add_keywords` method."""
 
     _default_instance = None
+    _lock = Lock()
 
     # Development notes:
     # - This class is prepared to be able to support additional SQL dialects
     #   in the future by adding additional functions that take the place of
-    #   the function default_initialization()
+    #   the function default_initialization().
     # - The lexer class uses an explicit singleton behavior with the
     #   instance-getter method get_default_instance(). This mechanism has
     #   the advantage that the call signature of the entry-points to the
     #   sqlparse library are not affected. Also, usage of sqlparse in third
-    #   party code does not need to be adapted. On the other hand, singleton
-    #   behavior is not thread safe, and the current implementation does not
-    #   easily allow for multiple SQL dialects to be parsed in the same
-    #   process. Such behavior can be supported in the future by passing a
+    #   party code does not need to be adapted. On the other hand, the current
+    #   implementation does not easily allow for multiple SQL dialects to be
+    #   parsed in the same process.
+    #   Such behavior can be supported in the future by passing a
     #   suitably initialized lexer object as an additional parameter to the
     #   entry-point functions (such as `parse`). Code will need to be written
     #   to pass down and utilize such an object. The current implementation
@@ -47,9 +49,10 @@ class Lexer:
     def get_default_instance(cls):
         """Returns the lexer instance used internally
         by the sqlparse core functions."""
-        if cls._default_instance is None:
-            cls._default_instance = cls()
-            cls._default_instance.default_initialization()
+        with cls._lock:
+            if cls._default_instance is None:
+                cls._default_instance = cls()
+                cls._default_instance.default_initialization()
         return cls._default_instance
 
     def default_initialization(self):
