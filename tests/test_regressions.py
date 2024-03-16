@@ -444,3 +444,9 @@ def test_copy_issue672():
     p = sqlparse.parse('select * from foo')[0]
     copied = copy.deepcopy(p)
     assert str(p) == str(copied)
+
+
+def test_primary_key_issue740():
+    p = sqlparse.parse('PRIMARY KEY')[0]
+    assert len(p.tokens) == 1
+    assert p.tokens[0].ttype == T.Keyword

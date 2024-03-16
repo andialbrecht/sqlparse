@@ -23,7 +23,8 @@ Bug Fixes
 * Fix parsing of nested order clauses (issue745, pr746 by john-bodley).
 * Thread-safe initialization of Lexer class (issue730).
 * Classify TRUNCATE as DDL and GRANT/REVOKE as DCL keywords (based on pr719
-  by josuc1, thanks for bringing this up!)
+  by josuc1, thanks for bringing this up!).
+* Fix parsing of PRIMARY KEY (issue740).
 
 
 Release 0.4.4 (Apr 18, 2023)

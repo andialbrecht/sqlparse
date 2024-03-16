@@ -77,6 +77,7 @@ SQL_REGEX = [
     (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
     (r'GROUP\s+BY\b', tokens.Keyword),
     (r'ORDER\s+BY\b', tokens.Keyword),
+    (r'PRIMARY\s+KEY\b', tokens.Keyword),
     (r'HANDLER\s+FOR\b', tokens.Keyword),
     (r'GO(\s\d+)\b', tokens.Keyword),
     (r'(LATERAL\s+VIEW\s+)'
