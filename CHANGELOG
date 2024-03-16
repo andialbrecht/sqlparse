@@ -13,6 +13,7 @@ Enhancements:
 * Support TypedLiterals in get_parameters (pr649, by Khrol).
 * Improve splitting of Transact SQL when using GO keyword (issue762).
 * Support for some JSON operators (issue682).
+* Improve formatting of statements containing JSON operators (issue542).
 
 Bug Fixes
 
