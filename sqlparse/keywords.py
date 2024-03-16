@@ -486,7 +486,6 @@ KEYWORDS = {
     'ROUTINE_CATALOG': tokens.Keyword,
     'ROUTINE_NAME': tokens.Keyword,
     'ROUTINE_SCHEMA': tokens.Keyword,
-    'ROW': tokens.Keyword,
     'ROWS': tokens.Keyword,
     'ROW_COUNT': tokens.Keyword,
     'RULE': tokens.Keyword,
@@ -827,6 +826,11 @@ KEYWORDS_ORACLE = {
 
     'UNLIMITED': tokens.Keyword,
     'UNLOCK': tokens.Keyword,
+}
+
+# MySQL
+KEYWORDS_MYSQL = {
+    'ROW': tokens.Keyword,
 }
 
 # PostgreSQL Syntax

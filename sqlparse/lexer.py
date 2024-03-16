@@ -62,6 +62,7 @@ class Lexer:
         self.set_SQL_REGEX(keywords.SQL_REGEX)
         self.add_keywords(keywords.KEYWORDS_COMMON)
         self.add_keywords(keywords.KEYWORDS_ORACLE)
+        self.add_keywords(keywords.KEYWORDS_MYSQL)
         self.add_keywords(keywords.KEYWORDS_PLPGSQL)
         self.add_keywords(keywords.KEYWORDS_HQL)
         self.add_keywords(keywords.KEYWORDS_MSACCESS)
