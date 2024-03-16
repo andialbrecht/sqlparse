@@ -12,6 +12,7 @@ Enhancements:
   Some database backends love statements without semicolon (issue742).
 * Support TypedLiterals in get_parameters (pr649, by Khrol).
 * Improve splitting of Transact SQL when using GO keyword (issue762).
+* Support for some JSON operators (issue682).
 
 Bug Fixes
 

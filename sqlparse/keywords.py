@@ -89,6 +89,8 @@ SQL_REGEX = [
     # but the match isn't a keyword.
     (r'\w[$#\w]*', PROCESS_AS_KEYWORD),
     (r'[;:()\[\],\.]', tokens.Punctuation),
+    # JSON operators
+    (r'(\->>?|#>>?|@>|<@|\?\|?|\?&|\-|#\-)', tokens.Operator),
     (r'[<>=~!]+', tokens.Operator.Comparison),
     (r'[+/@#%^&|^-]+', tokens.Operator),
 ]

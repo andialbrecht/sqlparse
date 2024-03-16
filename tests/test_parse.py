@@ -579,3 +579,17 @@ def test_configurable_regex():
         for t in tokens
         if t.ttype not in sqlparse.tokens.Whitespace
     )[4] == (sqlparse.tokens.Keyword, "zorder by")
+
+
+@pytest.mark.parametrize('sql', [
+    '->', '->>', '#>', '#>>',
+    '@>', '<@',
+    # leaving ? out for now, they're somehow ambiguous as placeholders
+    # '?', '?|', '?&',
+    '||', '-', '#-'
+])
+def test_json_operators(sql):
+    p = sqlparse.parse(sql)
+    assert len(p) == 1
+    assert len(p[0].tokens) == 1
+    assert p[0].tokens[0].ttype == sqlparse.tokens.Operator
