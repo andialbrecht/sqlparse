@@ -69,8 +69,8 @@ def test_stdout(filepath, load_file, capsys):
 
 def test_script():
     # Call with the --help option as a basic sanity check.
-    cmd = "{:s} -m sqlparse.cli --help".format(sys.executable)
-    assert subprocess.call(cmd.split()) == 0
+    cmd = [sys.executable, '-m', 'sqlparse.cli', '--help']
+    assert subprocess.call(cmd) == 0
 
 
 @pytest.mark.parametrize('fpath, encoding', (

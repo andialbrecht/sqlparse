@@ -39,11 +39,11 @@ jobs:
         check-latest: true
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip flit
+        python -m pip install --upgrade pip hatch
         flit install --deps=develop
     - name: Lint with flake8
-      run: flake8 sqlparse --count --max-complexity=31 --show-source --statistics
-    - name: Test with pytest
-      run: pytest --cov=sqlparse
+      run: hatch run flake8
+    - name: Test with pytest and coverage
+      run: hatch run cov
     - name: Publish to codecov
       uses: codecov/codecov-action@v4
