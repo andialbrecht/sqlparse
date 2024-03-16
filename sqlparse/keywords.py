@@ -968,7 +968,7 @@ KEYWORDS_MSACCESS = {
 }
 
 
-KEYWORDS_SNOWFLAKE = {    
+KEYWORDS_SNOWFLAKE = {
     'ACCOUNT': tokens.Keyword,
     'GSCLUSTER': tokens.Keyword,
     'ISSUE': tokens.Keyword,
