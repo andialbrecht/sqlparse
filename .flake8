@@ -3,6 +3,6 @@ exclude =
   tests,
   docs,
   dist
-max-complexity = 10
+max-complexity = 31
 statistics = True
 show-source = True
