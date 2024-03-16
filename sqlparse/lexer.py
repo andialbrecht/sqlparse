@@ -23,7 +23,7 @@ class Lexer:
     """The Lexer supports configurable syntax.
     To add support for additional keywords, use the `add_keywords` method."""
 
-    _default_intance = None
+    _default_instance = None
 
     # Development notes:
     # - This class is prepared to be able to support additional SQL dialects
@@ -47,10 +47,10 @@ class Lexer:
     def get_default_instance(cls):
         """Returns the lexer instance used internally
         by the sqlparse core functions."""
-        if cls._default_intance is None:
-            cls._default_intance = cls()
-            cls._default_intance.default_initialization()
-        return cls._default_intance
+        if cls._default_instance is None:
+            cls._default_instance = cls()
+            cls._default_instance.default_initialization()
+        return cls._default_instance
 
     def default_initialization(self):
         """Initialize the lexer with default dictionaries.
