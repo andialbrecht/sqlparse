@@ -26,6 +26,10 @@ Bug Fixes
   by josuc1, thanks for bringing this up!).
 * Fix parsing of PRIMARY KEY (issue740).
 
+Other
+
+* Optimize performance of matching function (pr799, by admachainz).
+
 
 Release 0.4.4 (Apr 18, 2023)
 ----------------------------
