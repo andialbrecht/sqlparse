@@ -8,6 +8,7 @@
 """SQL formatter"""
 
 from sqlparse import filters
+from sqlparse.constants import OutputFormats
 from sqlparse.exceptions import SQLParseError
 
 
@@ -186,9 +187,9 @@ def build_filter_stack(stack, options):
     # Serializer
     if options.get('output_format'):
         frmt = options['output_format']
-        if frmt.lower() == 'php':
+        if frmt.lower() == OutputFormats.PHP.value:
             fltr = filters.OutputPHPFilter()
-        elif frmt.lower() == 'python':
+        elif frmt.lower() == OutputFormats.PYTHON.value:
             fltr = filters.OutputPythonFilter()
         else:
             fltr = None
