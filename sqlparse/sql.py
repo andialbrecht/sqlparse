@@ -36,26 +36,17 @@ class NameAliasMixin:
             return self._get_first_name(reverse=True)
 
 
-class Token:
-    """Base class for all other classes in this module.
+class TokenBase:
+    """Base class for ``Token`` and ``TokenList``.
 
-    It represents a single token and has two instance attributes:
-    ``value`` is the unchanged value of the token and ``ttype`` is
-    the type of the token.
+    It has a single instance attribute, ``parent``, which if not ``None``
+    represents the ``TokenList`` that contains this token.
     """
 
-    __slots__ = ('value', 'ttype', 'parent', 'normalized', 'is_keyword',
-                 'is_group', 'is_whitespace')
+    __slots__ = 'parent'
 
-    def __init__(self, ttype, value):
-        value = str(value)
-        self.value = value
-        self.ttype = ttype
+    def __init__(self):
         self.parent = None
-        self.is_group = False
-        self.is_keyword = ttype in T.Keyword
-        self.is_whitespace = self.ttype in T.Whitespace
-        self.normalized = value.upper() if self.is_keyword else value
 
     def __str__(self):
         return self.value
@@ -72,18 +63,11 @@ class Token:
         return "<{cls} {q}{value}{q} at 0x{id:2X}>".format(
             id=id(self), **locals())
 
-    def _get_repr_name(self):
-        return str(self.ttype).split('.')[-1]
-
     def _get_repr_value(self):
         raw = str(self)
         if len(raw) > 7:
             raw = raw[:6] + '...'
         return re.sub(r'\s+', ' ', raw)
-
-    def flatten(self):
-        """Resolve subgroups."""
-        yield self
 
     def match(self, ttype, values, regex=False):
         """Checks whether the token matches the given arguments.
@@ -146,7 +130,39 @@ class Token:
         return False
 
 
-class TokenList(Token):
+class Token(TokenBase):
+    """"A single token.
+
+    It has five additional instance attributes:
+        ``value`` is the unchanged value of the token
+        ``ttype`` is the type of the token
+        ``normalized`` is the value of the token, converted to uppercase if it
+            is a keyword
+        ``is_keyword`` is a boolean indicating if the token is a keyword
+        ``is_whitespace`` is a boolean indicating if the token is whitespace
+    """
+    __slots__ = ('value', 'ttype', 'normalized', 'is_keyword', 'is_whitespace')
+
+    is_group = False
+
+    def __init__(self, ttype, value):
+        super().__init__()
+        value = str(value)
+        self.value = value
+        self.ttype = ttype
+        self.is_keyword = ttype in T.Keyword
+        self.is_whitespace = ttype in T.Whitespace
+        self.normalized = value.upper() if self.is_keyword else value
+
+    def _get_repr_name(self):
+        return str(self.ttype).split('.')[-1]
+
+    def flatten(self):
+        """Resolve subgroups."""
+        yield self
+
+
+class TokenList(TokenBase):
     """A group of tokens.
 
     It has an additional instance attribute ``tokens`` which holds a
@@ -155,14 +171,23 @@ class TokenList(Token):
 
     __slots__ = 'tokens'
 
+    is_group = True
+    ttype = None
+    is_keyword = False
+    is_whitespace = False
+
     def __init__(self, tokens=None):
+        super().__init__()
         self.tokens = tokens or []
         [setattr(token, 'parent', self) for token in self.tokens]
-        super().__init__(None, str(self))
-        self.is_group = True
 
-    def __str__(self):
+    @property
+    def value(self):
         return ''.join(token.value for token in self.flatten())
+
+    @property
+    def normalized(self):
+        return self.value
 
     # weird bug
     # def __len__(self):
@@ -322,7 +347,6 @@ class TokenList(Token):
             grp = start
             grp.tokens.extend(subtokens)
             del self.tokens[start_idx + 1:end_idx]
-            grp.value = str(start)
         else:
             subtokens = self.tokens[start_idx:end_idx]
             grp = grp_cls(subtokens)
