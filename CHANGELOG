@@ -3,7 +3,7 @@ Development Version
 
 Notable Changes
 
-* Drop support for Python 3.5.
+* Drop support for Python 3.5, 3.6, and 3.7.
 * Python 3.12 is now supported (pr725, by hugovk).
 
 Enhancements:
@@ -11,12 +11,24 @@ Enhancements:
 * Splitting statements now allows to remove the semicolon at the end.
   Some database backends love statements without semicolon (issue742).
 * Support TypedLiterals in get_parameters (pr649, by Khrol).
+* Improve splitting of Transact SQL when using GO keyword (issue762).
+* Support for some JSON operators (issue682).
+* Improve formatting of statements containing JSON operators (issue542).
+* Support for BigQuery and Snowflake keywords (pr699, by griffatrasgo).
 
 Bug Fixes
 
 * Ignore dunder attributes when creating Tokens (issue672).
 * Allow operators to precede dollar-quoted strings (issue763).
 * Fix parsing of nested order clauses (issue745, pr746 by john-bodley).
+* Thread-safe initialization of Lexer class (issue730).
+* Classify TRUNCATE as DDL and GRANT/REVOKE as DCL keywords (based on pr719
+  by josuc1, thanks for bringing this up!).
+* Fix parsing of PRIMARY KEY (issue740).
+
+Other
+
+* Optimize performance of matching function (pr799, by admachainz).
 
 
 Release 0.4.4 (Apr 18, 2023)

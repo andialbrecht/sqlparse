@@ -77,7 +77,9 @@ SQL_REGEX = [
     (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
     (r'GROUP\s+BY\b', tokens.Keyword),
     (r'ORDER\s+BY\b', tokens.Keyword),
+    (r'PRIMARY\s+KEY\b', tokens.Keyword),
     (r'HANDLER\s+FOR\b', tokens.Keyword),
+    (r'GO(\s\d+)\b', tokens.Keyword),
     (r'(LATERAL\s+VIEW\s+)'
      r'(EXPLODE|INLINE|PARSE_URL_TUPLE|POSEXPLODE|STACK)\b',
      tokens.Keyword),
@@ -89,6 +91,8 @@ SQL_REGEX = [
     # but the match isn't a keyword.
     (r'\w[$#\w]*', PROCESS_AS_KEYWORD),
     (r'[;:()\[\],\.]', tokens.Punctuation),
+    # JSON operators
+    (r'(\->>?|#>>?|@>|<@|\?\|?|\?&|\-|#\-)', tokens.Operator),
     (r'[<>=~!]+', tokens.Operator.Comparison),
     (r'[+/@#%^&|^-]+', tokens.Operator),
 ]
@@ -286,7 +290,6 @@ KEYWORDS = {
     'GLOBAL': tokens.Keyword,
     'GO': tokens.Keyword,
     'GOTO': tokens.Keyword,
-    'GRANT': tokens.Keyword,
     'GRANTED': tokens.Keyword,
     'GROUPING': tokens.Keyword,
 
@@ -475,7 +478,6 @@ KEYWORDS = {
     'RETURNED_SQLSTATE': tokens.Keyword,
     'RETURNING': tokens.Keyword,
     'RETURNS': tokens.Keyword,
-    'REVOKE': tokens.Keyword,
     'RIGHT': tokens.Keyword,
     'ROLE': tokens.Keyword,
     'ROLLBACK': tokens.Keyword.DML,
@@ -484,7 +486,6 @@ KEYWORDS = {
     'ROUTINE_CATALOG': tokens.Keyword,
     'ROUTINE_NAME': tokens.Keyword,
     'ROUTINE_SCHEMA': tokens.Keyword,
-    'ROW': tokens.Keyword,
     'ROWS': tokens.Keyword,
     'ROW_COUNT': tokens.Keyword,
     'RULE': tokens.Keyword,
@@ -576,7 +577,6 @@ KEYWORDS = {
     'TRIGGER_SCHEMA': tokens.Keyword,
     'TRIM': tokens.Keyword,
     'TRUE': tokens.Keyword,
-    'TRUNCATE': tokens.Keyword,
     'TRUSTED': tokens.Keyword,
     'TYPE': tokens.Keyword,
 
@@ -683,6 +683,9 @@ KEYWORDS_COMMON = {
     'DROP': tokens.Keyword.DDL,
     'CREATE': tokens.Keyword.DDL,
     'ALTER': tokens.Keyword.DDL,
+    'TRUNCATE': tokens.Keyword.DDL,
+    'GRANT': tokens.Keyword.DCL,
+    'REVOKE': tokens.Keyword.DCL,
 
     'WHERE': tokens.Keyword,
     'FROM': tokens.Keyword,
@@ -827,6 +830,11 @@ KEYWORDS_ORACLE = {
     'UNLOCK': tokens.Keyword,
 }
 
+# MySQL
+KEYWORDS_MYSQL = {
+    'ROW': tokens.Keyword,
+}
+
 # PostgreSQL Syntax
 KEYWORDS_PLPGSQL = {
     'CONFLICT': tokens.Keyword,
@@ -959,4 +967,36 @@ KEYWORDS_HQL = {
 
 KEYWORDS_MSACCESS = {
     'DISTINCTROW': tokens.Keyword,
+}
+
+
+KEYWORDS_SNOWFLAKE = {
+    'ACCOUNT': tokens.Keyword,
+    'GSCLUSTER': tokens.Keyword,
+    'ISSUE': tokens.Keyword,
+    'ORGANIZATION': tokens.Keyword,
+    'PIVOT': tokens.Keyword,
+    'QUALIFY': tokens.Keyword,
+    'REGEXP': tokens.Keyword,
+    'RLIKE': tokens.Keyword,
+    'SAMPLE': tokens.Keyword,
+    'TRY_CAST': tokens.Keyword,
+    'UNPIVOT': tokens.Keyword,
+
+    'VARIANT': tokens.Name.Builtin,
+}
+
+
+KEYWORDS_BIGQUERY = {
+    'ASSERT_ROWS_MODIFIED': tokens.Keyword,
+    'DEFINE': tokens.Keyword,
+    'ENUM': tokens.Keyword,
+    'HASH': tokens.Keyword,
+    'LOOKUP': tokens.Keyword,
+    'PRECEDING': tokens.Keyword,
+    'PROTO': tokens.Keyword,
+    'RESPECT': tokens.Keyword,
+    'TABLESAMPLE': tokens.Keyword,
+
+    'BIGNUMERIC': tokens.Name.Builtin,
 }

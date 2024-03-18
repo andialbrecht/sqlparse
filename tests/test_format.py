@@ -722,3 +722,10 @@ def test_format_right_margin_invalid_option(right_margin):
 def test_format_right_margin():
     # TODO: Needs better test, only raises exception right now
     sqlparse.format('foo', right_margin="79")
+
+
+def test_format_json_ops():  # issue542
+    formatted = sqlparse.format(
+        "select foo->'bar', foo->'bar';", reindent=True)
+    expected = "select foo->'bar',\n       foo->'bar';"
+    assert formatted == expected

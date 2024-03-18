@@ -4,9 +4,7 @@ dist/
 build/
 MANIFEST
 .coverage
-.tox/
 .cache/
 *.egg-info/
 htmlcov/
-coverage.xml
 .pytest_cache

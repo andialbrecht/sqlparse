@@ -86,20 +86,23 @@ def imt(token, i=None, m=None, t=None):
     :param t: TokenType or Tuple/List of TokenTypes
     :return:  bool
     """
-    clss = i
-    types = [t, ] if t and not isinstance(t, list) else t
-    mpatterns = [m, ] if m and not isinstance(m, list) else m
-
     if token is None:
         return False
-    elif clss and isinstance(token, clss):
+    if i and isinstance(token, i):
         return True
-    elif mpatterns and any(token.match(*pattern) for pattern in mpatterns):
-        return True
-    elif types and any(token.ttype in ttype for ttype in types):
-        return True
-    else:
-        return False
+    if m:
+        if isinstance(m, list):
+            if any(token.match(*pattern) for pattern in m):
+                return True
+        elif token.match(*m):
+            return True
+    if t:
+        if isinstance(t, list):
+            if any(token.ttype in ttype for ttype in t):
+                return True
+        elif token.ttype in t:
+            return True
+    return False
 
 
 def consume(iterator, n):

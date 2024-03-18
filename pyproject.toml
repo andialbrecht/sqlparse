@@ -1,6 +1,6 @@
 [build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "sqlparse"
@@ -16,8 +16,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -28,7 +26,7 @@ classifiers = [
     "Topic :: Database",
     "Topic :: Software Development",
 ]
-requires-python = ">=3.6"
+requires-python = ">=3.8"
 
 [project.urls]
 Home = "https://github.com/andialbrecht/sqlparse"
@@ -42,35 +40,63 @@ sqlformat = "sqlparse.__main__:main"
 
 [project.optional-dependencies]
 dev = [
-    "importlib_metadata<5; python_version <= '3.7'",
-    "flake8",
+    "hatch",
     "build",
-]
-test = [
-    "pytest",
-    "pytest-cov",
 ]
 doc = [
     "sphinx",
 ]
-tox = [
-    "virtualenv<20.22.0",   # 20.22.0 dropped Python 3.6 support
-    "tox<4.5.0",  # >=4.5.0 requires virtualenv>=20.22
-]
 
-[tool.flit.sdist]
-include = [
-    "docs/source/",
-    "docs/sqlformat.1",
-    "docs/Makefile",
-    "tests/*.py", "tests/files/*.sql",
-    "LICENSE",
-    "TODO",
-    "AUTHORS",
-    "CHANGELOG",
-    "Makefile",
-    "tox.ini",
+[tool.hatch.version]
+path = "sqlparse/__init__.py"
+
+[tool.hatch.envs.default]
+dependencies = [
+    "coverage[toml]>=6.5",
+    "pytest",
+    # switch to ruff, but fix problems first
+    # but check defaults!
+    # https://hatch.pypa.io/1.9/config/static-analysis/#default-settings
+    "flake8",
 ]
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+test-cov = "coverage run -m pytest {args:tests}"
+cov-report = [
+    "- coverage combine",
+    "coverage report",
+]
+cov = [
+    "test-cov",
+    "cov-report",
+]
+check = "flake8 sqlparse/"
+
+[[tool.hatch.envs.all.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+[tool.hatch.envs.types]
+dependencies = [
+    "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:sqlparse tests}"
 
 [tool.coverage.run]
-omit = ["sqlparse/__main__.py"]
+source_pkgs = ["sqlparse", "tests"]
+branch = true
+parallel = true
+omit = [
+    "sqlparse/__main__.py",
+]
+
+[tool.coverage.paths]
+sqlparse = ["sqlparse"]
+tests = ["tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "no cov",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
