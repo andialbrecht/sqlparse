@@ -450,3 +450,18 @@ def test_primary_key_issue740():
     p = sqlparse.parse('PRIMARY KEY')[0]
     assert len(p.tokens) == 1
     assert p.tokens[0].ttype == T.Keyword
+
+
+def test_like_grouping_issue543():
+    tokens = sqlparse.parse('create table tab1.b like tab2')[0].tokens
+    assert [(t.ttype, t.value) for t in tokens if t.ttype != T.Whitespace] == \
+        [
+         (T.DDL, 'create'),
+         (T.Keyword, 'table'),
+         (None, 'tab1.b'),
+         (T.Keyword, 'like'),
+         (None, 'tab2')
+        ]
+
+    comparison = sqlparse.parse('a LIKE "b"')[0].tokens[0]
+    assert isinstance(comparison, sql.Comparison)

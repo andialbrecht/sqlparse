@@ -498,7 +498,10 @@ def test_comparison_with_strings(operator):
     assert p.tokens[0].right.ttype == T.String.Single
 
 
-def test_like_and_ilike_comparison():
+@pytest.mark.parametrize('operator', (
+    'LIKE', 'NOT LIKE', 'ILIKE', 'NOT ILIKE',  'RLIKE', 'NOT RLIKE'
+))
+def test_like_and_ilike_comparison(operator):
     def validate_where_clause(where_clause, expected_tokens):
         assert len(where_clause.tokens) == len(expected_tokens)
         for where_token, expected_token in zip(where_clause, expected_tokens):
@@ -513,22 +516,22 @@ def test_like_and_ilike_comparison():
                 assert (isinstance(where_token, expected_ttype)
                         and re.match(expected_value, where_token.value))
 
-    [p1] = sqlparse.parse("select * from mytable where mytable.mycolumn LIKE 'expr%' limit 5;")
+    [p1] = sqlparse.parse(f"select * from mytable where mytable.mycolumn {operator} 'expr%' limit 5;")
     [p1_where] = [token for token in p1 if isinstance(token, sql.Where)]
     validate_where_clause(p1_where, [
         (T.Keyword, "where"),
         (T.Whitespace, None),
-        (sql.Comparison, r"mytable.mycolumn LIKE.*"),
+        (sql.Comparison, f"mytable.mycolumn {operator}.*"),
         (T.Whitespace, None),
     ])
 
     [p2] = sqlparse.parse(
-        "select * from mytable where mycolumn NOT ILIKE '-expr' group by othercolumn;")
+        f"select * from mytable where mycolumn {operator} '-expr' group by othercolumn;")
     [p2_where] = [token for token in p2 if isinstance(token, sql.Where)]
     validate_where_clause(p2_where, [
         (T.Keyword, "where"),
         (T.Whitespace, None),
-        (sql.Comparison, r"mycolumn NOT ILIKE.*"),
+        (sql.Comparison, f"mycolumn {operator}.*"),
         (T.Whitespace, None),
     ])
 

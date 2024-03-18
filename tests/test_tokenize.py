@@ -209,10 +209,10 @@ def test_parse_window_as():
 
 
 @pytest.mark.parametrize('s', (
-    "LIKE", "ILIKE", "NOT LIKE", "NOT ILIKE",
+    "ILIKE", "NOT LIKE", "NOT ILIKE",
     "NOT   LIKE", "NOT    ILIKE",
 ))
-def test_like_and_ilike_parsed_as_comparisons(s):
+def test_likeish_but_not_like_parsed_as_comparisons(s):
     p = sqlparse.parse(s)[0]
     assert len(p.tokens) == 1
     assert p.tokens[0].ttype == T.Operator.Comparison
