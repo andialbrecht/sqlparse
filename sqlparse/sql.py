@@ -554,6 +554,11 @@ class Where(TokenList):
         'HAVING', 'RETURNING', 'INTO')
 
 
+class Over(TokenList):
+    """An OVER clause."""
+    M_OPEN = T.Keyword, 'OVER'
+
+
 class Having(TokenList):
     """A HAVING clause."""
     M_OPEN = T.Keyword, 'HAVING'
