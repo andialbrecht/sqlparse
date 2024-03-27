@@ -392,6 +392,14 @@ def test_grouping_function():
     p = sqlparse.parse('foo(null, bar)')[0]
     assert isinstance(p.tokens[0], sql.Function)
     assert len(list(p.tokens[0].get_parameters())) == 2
+    p = sqlparse.parse('foo(5) over win1')[0]
+    assert isinstance(p.tokens[0], sql.Function)
+    assert len(list(p.tokens[0].get_parameters())) == 1
+    assert isinstance(p.tokens[0].get_window(), sql.Identifier)
+    p = sqlparse.parse('foo(5) over (PARTITION BY c1)')[0]
+    assert isinstance(p.tokens[0], sql.Function)
+    assert len(list(p.tokens[0].get_parameters())) == 1
+    assert isinstance(p.tokens[0].get_window(), sql.Parenthesis)
 
 
 def test_grouping_function_not_in():

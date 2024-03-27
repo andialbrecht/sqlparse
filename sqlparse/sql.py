@@ -623,7 +623,7 @@ class Function(NameAliasMixin, TokenList):
 
     def get_parameters(self):
         """Return a list of parameters."""
-        parenthesis = self.tokens[-1]
+        parenthesis = self.token_next_by(i=Parenthesis)[1]
         result = []
         for token in parenthesis.tokens:
             if isinstance(token, IdentifierList):
@@ -632,6 +632,13 @@ class Function(NameAliasMixin, TokenList):
                      t=T.Literal):
                 result.append(token)
         return result
+
+    def get_window(self):
+        """Return the window if it exists."""
+        over_clause = self.token_next_by(i=Over)
+        if not over_clause:
+            return None
+        return over_clause[1].tokens[-1]
 
 
 class Begin(TokenList):
