@@ -1,9 +1,11 @@
 import copy
+import sys
 
 import pytest
 
 import sqlparse
 from sqlparse import sql, tokens as T
+from sqlparse.exceptions import SQLParseError
 
 
 def test_issue9():
@@ -450,3 +452,16 @@ def test_primary_key_issue740():
     p = sqlparse.parse('PRIMARY KEY')[0]
     assert len(p.tokens) == 1
     assert p.tokens[0].ttype == T.Keyword
+
+
+@pytest.fixture
+def limit_recursion():
+    curr_limit = sys.getrecursionlimit()
+    sys.setrecursionlimit(70)
+    yield
+    sys.setrecursionlimit(curr_limit)
+
+
+def test_max_recursion(limit_recursion):
+    with pytest.raises(SQLParseError):
+        sqlparse.parse('[' * 100 + ']' * 100)

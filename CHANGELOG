@@ -5,6 +5,11 @@ Notable Changes
 
 * Drop support for Python 3.5, 3.6, and 3.7.
 * Python 3.12 is now supported (pr725, by hugovk).
+* IMPORTANT: Fixes a potential denial of service attack (DOS) due to recursion
+  error for deeply nested statements. Instead of recursion error a generic
+  SQLParseError is raised. See the security advisory for details:
+  https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-2m57-hf25-phgg
+  The vulnerability was discovered by @uriyay-jfrog. Thanks for reporting!
 
 Enhancements:
 

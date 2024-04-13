@@ -10,6 +10,7 @@
 import re
 
 from sqlparse import tokens as T
+from sqlparse.exceptions import SQLParseError
 from sqlparse.utils import imt, remove_quotes
 
 
@@ -209,11 +210,14 @@ class TokenList(Token):
 
         This method is recursively called for all child tokens.
         """
-        for token in self.tokens:
-            if token.is_group:
-                yield from token.flatten()
-            else:
-                yield token
+        try:
+            for token in self.tokens:
+                if token.is_group:
+                    yield from token.flatten()
+                else:
+                    yield token
+        except RecursionError as err:
+            raise SQLParseError('Maximum recursion depth exceeded') from err
 
     def get_sublists(self):
         for token in self.tokens:
