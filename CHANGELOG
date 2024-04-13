@@ -15,6 +15,7 @@ Enhancements:
 * Support for some JSON operators (issue682).
 * Improve formatting of statements containing JSON operators (issue542).
 * Support for BigQuery and Snowflake keywords (pr699, by griffatrasgo).
+* Support parsing of OVER clause (issue701, pr768 by r33s3n6).
 
 Bug Fixes
 
