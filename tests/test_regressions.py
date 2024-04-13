@@ -457,11 +457,11 @@ def test_primary_key_issue740():
 @pytest.fixture
 def limit_recursion():
     curr_limit = sys.getrecursionlimit()
-    sys.setrecursionlimit(70)
+    sys.setrecursionlimit(100)
     yield
     sys.setrecursionlimit(curr_limit)
 
 
 def test_max_recursion(limit_recursion):
     with pytest.raises(SQLParseError):
-        sqlparse.parse('[' * 100 + ']' * 100)
+        sqlparse.parse('[' * 1000 + ']' * 1000)
