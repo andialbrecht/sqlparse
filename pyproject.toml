@@ -31,7 +31,7 @@ requires-python = ">=3.8"
 [project.urls]
 Home = "https://github.com/andialbrecht/sqlparse"
 Documentation = "https://sqlparse.readthedocs.io/"
-"Release Notes" = "https://sqlparse.readthedocs.io/en/latest/changes/"
+"Release Notes" = "https://sqlparse.readthedocs.io/en/latest/changes.html"
 Source = "https://github.com/andialbrecht/sqlparse"
 Tracker = "https://github.com/andialbrecht/sqlparse/issues"
 
