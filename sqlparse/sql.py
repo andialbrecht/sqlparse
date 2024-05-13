@@ -46,7 +46,7 @@ class Token:
     """
 
     __slots__ = ('value', 'ttype', 'parent', 'normalized', 'is_keyword',
-                 'is_group', 'is_whitespace')
+                 'is_group', 'is_whitespace', 'is_newline')
 
     def __init__(self, ttype, value):
         value = str(value)
@@ -56,6 +56,7 @@ class Token:
         self.is_group = False
         self.is_keyword = ttype in T.Keyword
         self.is_whitespace = self.ttype in T.Whitespace
+        self.is_newline = self.ttype in T.Newline
         self.normalized = value.upper() if self.is_keyword else value
 
     def __str__(self):

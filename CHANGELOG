@@ -1,7 +1,13 @@
 Development Version
 -------------------
 
-Nothing yet.
+Bug Fixes
+
+* The strip comments filter was a bit greedy and removed too much
+  whitespace (issue772).
+  Note: In some cases you might want to add `strip_whitespace=True` where you
+  previously used just `strip_comments=True`. `strip_comments` did some of the
+  work that `strip_whitespace` should do.
 
 
 Release 0.5.0 (Apr 13, 2024)

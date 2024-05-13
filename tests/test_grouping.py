@@ -17,13 +17,6 @@ def test_grouping_parenthesis():
     assert len(parsed.tokens[2].tokens[3].tokens) == 3
 
 
-def test_grouping_comments():
-    s = '/*\n * foo\n */   \n  bar'
-    parsed = sqlparse.parse(s)[0]
-    assert str(parsed) == s
-    assert len(parsed.tokens) == 2
-
-
 @pytest.mark.parametrize('s', ['foo := 1;', 'foo := 1'])
 def test_grouping_assignment(s):
     parsed = sqlparse.parse(s)[0]

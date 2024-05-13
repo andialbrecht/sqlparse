@@ -73,15 +73,15 @@ class TestFormat:
         assert res == 'select'
         sql = '/* sql starts here */ select'
         res = sqlparse.format(sql, strip_comments=True)
-        assert res == 'select'
+        assert res == ' select'  # note whitespace is preserved, see issue 772
         sql = '/*\n * sql starts here\n */\nselect'
         res = sqlparse.format(sql, strip_comments=True)
         assert res == 'select'
         sql = 'select (/* sql starts here */ select 2)'
-        res = sqlparse.format(sql, strip_comments=True)
+        res = sqlparse.format(sql, strip_comments=True, strip_whitespace=True)
         assert res == 'select (select 2)'
         sql = 'select (/* sql /* starts here */ select 2)'
-        res = sqlparse.format(sql, strip_comments=True)
+        res = sqlparse.format(sql, strip_comments=True, strip_whitespace=True)
         assert res == 'select (select 2)'
 
     def test_strip_comments_preserves_linebreak(self):
@@ -100,6 +100,11 @@ class TestFormat:
         sql = 'select * -- a comment\n\nfrom foo'
         res = sqlparse.format(sql, strip_comments=True)
         assert res == 'select *\n\nfrom foo'
+        
+    def test_strip_comments_preserves_whitespace(self):
+        sql = 'SELECT 1/*bar*/ AS foo'  # see issue772
+        res = sqlparse.format(sql, strip_comments=True)
+        assert res == 'SELECT 1 AS foo'
 
     def test_strip_ws(self):
         f = lambda sql: sqlparse.format(sql, strip_whitespace=True)
