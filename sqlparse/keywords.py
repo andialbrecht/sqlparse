@@ -45,6 +45,9 @@ SQL_REGEX = [
     (r'(CASE|IN|VALUES|USING|FROM|AS)\b', tokens.Keyword),
 
     (r'(@|##|#)[A-ZÀ-Ü]\w+', tokens.Name),
+    (r'[\u4e00-\u9fa5]+', tokens.Name),  # 'Chinese Name'
+    (r'[\u0800-\u4e00]+', tokens.Name),  # 'Japanese Name'
+    (r'[\uac00-\ud7ff]+', tokens.Name),  # 'Korean Name'
 
     # see issue #39
     # Spaces around period `schema . name` are valid identifier
