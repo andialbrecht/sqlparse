@@ -1,6 +1,11 @@
 Development Version
 -------------------
 
+Enhancements
+
+* New "compact" option for formatter. If set, the formatter tries to produce
+  a more compact output by avoiding some line breaks (issue783).
+
 Bug Fixes
 
 * The strip comments filter was a bit greedy and removed too much
@@ -23,7 +28,7 @@ Notable Changes
   https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-2m57-hf25-phgg
   The vulnerability was discovered by @uriyay-jfrog. Thanks for reporting!
 
-Enhancements:
+Enhancements
 
 * Splitting statements now allows to remove the semicolon at the end.
   Some database backends love statements without semicolon (issue742).

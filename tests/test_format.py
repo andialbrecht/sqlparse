@@ -734,3 +734,14 @@ def test_format_json_ops():  # issue542
         "select foo->'bar', foo->'bar';", reindent=True)
     expected = "select foo->'bar',\n       foo->'bar';"
     assert formatted == expected
+    
+    
+@pytest.mark.parametrize('sql, expected_normal, expected_compact', [
+    ('case when foo then 1 else bar end',
+     'case\n    when foo then 1\n    else bar\nend',
+     'case when foo then 1 else bar end')])
+def test_compact(sql, expected_normal, expected_compact):  # issue783
+    formatted_normal = sqlparse.format(sql, reindent=True)
+    formatted_compact = sqlparse.format(sql, reindent=True, compact=True)
+    assert formatted_normal == expected_normal
+    assert formatted_compact == expected_compact

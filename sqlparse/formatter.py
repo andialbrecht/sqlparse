@@ -115,6 +115,11 @@ def validate_options(options):
     if comma_first not in [True, False]:
         raise SQLParseError('comma_first requires a boolean value')
     options['comma_first'] = comma_first
+    
+    compact = options.get('compact', False)
+    if compact not in [True, False]:
+        raise SQLParseError('compact requires a boolean value')
+    options['compact'] = compact
 
     right_margin = options.get('right_margin')
     if right_margin is not None:
@@ -171,7 +176,8 @@ def build_filter_stack(stack, options):
                 indent_after_first=options['indent_after_first'],
                 indent_columns=options['indent_columns'],
                 wrap_after=options['wrap_after'],
-                comma_first=options['comma_first']))
+                comma_first=options['comma_first'],
+                compact=options['compact'],))
 
     if options.get('reindent_aligned', False):
         stack.enable_grouping()
