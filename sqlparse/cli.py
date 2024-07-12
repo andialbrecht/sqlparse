@@ -138,14 +138,14 @@ def create_parser():
         default=False,
         type=bool,
         help='Insert linebreak before comma (default False)')
-    
+
     group.add_argument(
         '--compact',
         dest='compact',
         default=False,
         type=bool,
         help='Try to produce more compact output (default False)')
-    
+
     group.add_argument(
         '--encoding',
         dest='encoding',

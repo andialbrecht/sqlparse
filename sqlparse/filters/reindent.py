@@ -200,8 +200,7 @@ class ReindentFilter:
                     str_cond = ''.join(str(x) for x in cond or [])
                     str_value = ''.join(str(x) for x in value)
                     end_pos = self.offset + 1 + len(str_cond) + len(str_value)
-                    if (not self.compact 
-                        and end_pos > self.wrap_after):
+                    if (not self.compact and end_pos > self.wrap_after):
                         token = value[0] if cond is None else cond[0]
                         tlist.insert_before(token, self.nl())
 

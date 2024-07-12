@@ -11,7 +11,7 @@ from sqlparse import filters
 from sqlparse.exceptions import SQLParseError
 
 
-def validate_options(options):
+def validate_options(options):  # noqa: C901
     """Validates options."""
     kwcase = options.get('keyword_case')
     if kwcase not in [None, 'upper', 'lower', 'capitalize']:
@@ -115,7 +115,7 @@ def validate_options(options):
     if comma_first not in [True, False]:
         raise SQLParseError('comma_first requires a boolean value')
     options['comma_first'] = comma_first
-    
+
     compact = options.get('compact', False)
     if compact not in [True, False]:
         raise SQLParseError('compact requires a boolean value')
