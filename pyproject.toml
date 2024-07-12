@@ -60,7 +60,7 @@ dependencies = [
     "flake8",
 ]
 [tool.hatch.envs.default.scripts]
-test = "pytest {args:tests}"
+unittest = "pytest {args:tests}"
 test-cov = "coverage run -m pytest {args:tests}"
 cov-report = [
     "- coverage combine",
@@ -71,6 +71,7 @@ cov = [
     "cov-report",
 ]
 check = "flake8 sqlparse/"
+test = ["check", "unittest"]
 
 [[tool.hatch.envs.all.matrix]]
 python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
