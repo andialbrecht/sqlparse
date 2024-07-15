@@ -23,5 +23,5 @@ clean:
 release:
 	@rm -rf dist/
 	python -m build
-	twine upload --sign --identity E0B84F81 dist/*
+	hatch publish
 	@echo "Reminder: Add release on github https://github.com/andialbrecht/sqlparse/releases"
