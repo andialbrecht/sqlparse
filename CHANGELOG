@@ -13,11 +13,11 @@ Bug Fixes
   Note: In some cases you might want to add `strip_whitespace=True` where you
   previously used just `strip_comments=True`. `strip_comments` did some of the
   work that `strip_whitespace` should do.
-
 * Fix error when splitting statements that contain multiple CASE clauses
   within a BEGIN block (issue784).
-
 * Fix whitespace removal with nested expressions (issue782).
+* Fix parsing and formatting of ORDER clauses containing NULLS FIRST or
+  NULLS LAST (issue532).
 
 
 Release 0.5.0 (Apr 13, 2024)

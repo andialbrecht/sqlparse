@@ -169,11 +169,16 @@ def test_parse_endifloop(s):
     assert p.tokens[0].ttype is T.Keyword
 
 
-@pytest.mark.parametrize('s', ['NULLS FIRST', 'NULLS LAST'])
-def test_parse_nulls(s):  # issue487
+@pytest.mark.parametrize('s', [
+    'ASC', 'DESC',
+    'NULLS FIRST', 'NULLS LAST',
+    'ASC NULLS FIRST', 'ASC NULLS LAST',
+    'DESC NULLS FIRST', 'DESC NULLS LAST',
+])
+def test_parse_order(s):  # issue487
     p = sqlparse.parse(s)[0]
     assert len(p.tokens) == 1
-    assert p.tokens[0].ttype is T.Keyword
+    assert p.tokens[0].ttype is T.Keyword.Order
 
 
 @pytest.mark.parametrize('s', [
