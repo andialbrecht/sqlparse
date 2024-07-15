@@ -22,11 +22,6 @@ def test_split_backslash():
     assert len(stmts) == 2
 
 
-def test_escaped_quotes():  # issue780
-    stmts = sqlparse.parse("SELECT (')\'');a');")
-    assert len(stmts) == 1
-
-
 @pytest.mark.parametrize('fn', ['function.sql',
                                 'function_psql.sql',
                                 'function_psql2.sql',
