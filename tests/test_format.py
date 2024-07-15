@@ -100,7 +100,7 @@ class TestFormat:
         sql = 'select * -- a comment\n\nfrom foo'
         res = sqlparse.format(sql, strip_comments=True)
         assert res == 'select *\n\nfrom foo'
-        
+
     def test_strip_comments_preserves_whitespace(self):
         sql = 'SELECT 1/*bar*/ AS foo'  # see issue772
         res = sqlparse.format(sql, strip_comments=True)
@@ -734,8 +734,8 @@ def test_format_json_ops():  # issue542
         "select foo->'bar', foo->'bar';", reindent=True)
     expected = "select foo->'bar',\n       foo->'bar';"
     assert formatted == expected
-    
-    
+
+
 @pytest.mark.parametrize('sql, expected_normal, expected_compact', [
     ('case when foo then 1 else bar end',
      'case\n    when foo then 1\n    else bar\nend',
@@ -745,3 +745,10 @@ def test_compact(sql, expected_normal, expected_compact):  # issue783
     formatted_compact = sqlparse.format(sql, reindent=True, compact=True)
     assert formatted_normal == expected_normal
     assert formatted_compact == expected_compact
+
+
+def test_strip_ws_removes_trailing_ws_in_groups():  # issue782
+    formatted = sqlparse.format('( where foo = bar  ) from',
+                                strip_whitespace=True)
+    expected = '(where foo = bar) from'
+    assert formatted == expected
