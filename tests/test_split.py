@@ -203,3 +203,8 @@ def test_split_strip_semicolon_procedure(load_file):
 def test_split_go(sql, num):  # issue762
     stmts = sqlparse.split(sql)
     assert len(stmts) == num
+
+
+def test_split_multiple_case_in_begin(load_file):  # issue784
+    stmts = sqlparse.split(load_file('multiple_case_in_begin.sql'))
+    assert len(stmts) == 1
