@@ -1,7 +1,9 @@
 Development Version
 -------------------
 
-Nothing yet.
+Bug Fixes
+
+* EXTENSION is now recognized as a keyword (issue785).
 
 
 Release 0.5.1 (Jul 15, 2024)
