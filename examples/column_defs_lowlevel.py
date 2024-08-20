@@ -27,7 +27,7 @@ def extract_definitions(token_list):
             if par_level == 0:
                 break
             else:
-                par_level += 1
+                par_level -= 1
         elif token.match(sqlparse.tokens.Punctuation, ','):
             if tmp:
                 definitions.append(tmp)
