@@ -91,13 +91,13 @@ def imt(token, i=None, m=None, t=None):
     if i and isinstance(token, i):
         return True
     if m:
-        if isinstance(m, list):
+        if isinstance(m, (tuple, list)):
             if any(token.match(*pattern) for pattern in m):
                 return True
         elif token.match(*m):
             return True
     if t:
-        if isinstance(t, list):
+        if isinstance(t, (tuple, list)):
             if any(token.ttype in ttype for ttype in t):
                 return True
         elif token.ttype in t:
