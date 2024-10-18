@@ -45,10 +45,10 @@ class Token:
     the type of the token.
     """
 
-    __slots__ = ('value', 'ttype', 'parent', 'normalized', 'is_keyword',
-                 'is_group', 'is_whitespace', 'is_newline')
+    __slots__ = ('value', 'ttype', 'parent', 'pos', 'length', 'normalized',
+                 'is_keyword', 'is_group', 'is_whitespace', 'is_newline')
 
-    def __init__(self, ttype, value):
+    def __init__(self, ttype, value, pos=None):
         value = str(value)
         self.value = value
         self.ttype = ttype
@@ -58,6 +58,11 @@ class Token:
         self.is_whitespace = self.ttype in T.Whitespace
         self.is_newline = self.ttype in T.Newline
         self.normalized = value.upper() if self.is_keyword else value
+
+        # TokenList overrides these with @property getters
+        if not hasattr(self, 'pos'):
+            self.pos = pos
+            self.length = len(value)
 
     def __str__(self):
         return self.value
@@ -162,6 +167,20 @@ class TokenList(Token):
         [setattr(token, 'parent', self) for token in self.tokens]
         super().__init__(None, str(self))
         self.is_group = True
+
+    @property
+    def pos(self):
+        if len(self.tokens) > 0:
+            return self.tokens[0].pos
+
+    @property
+    def length(self):
+        if len(self.tokens) > 0:
+            first, last = self.tokens[0], self.tokens[-1]
+            if first.pos is not None and last.pos is not None:
+                return last.length + (last.pos - first.pos)
+
+        return len(str(self))
 
     def __str__(self):
         return ''.join(token.value for token in self.flatten())
