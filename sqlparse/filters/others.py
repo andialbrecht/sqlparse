@@ -15,9 +15,9 @@ class StripCommentsFilter:
 
     @staticmethod
     def _process(tlist):
-        def get_next_comment():
+        def get_next_comment(idx=-1):
             # TODO(andi) Comment types should be unified, see related issue38
-            return tlist.token_next_by(i=sql.Comment, t=T.Comment)
+            return tlist.token_next_by(i=sql.Comment, t=T.Comment, idx=idx)
 
         def _get_insert_token(token):
             """Returns either a whitespace or the line breaks from token."""
@@ -31,15 +31,35 @@ class StripCommentsFilter:
             else:
                 return sql.Token(T.Whitespace, ' ')
 
+        sql_hints = (T.Comment.Multiline.Hint, T.Comment.Single.Hint)
         tidx, token = get_next_comment()
         while token:
+            # skipping token remove if token is a SQL-Hint. issue262
+            is_sql_hint = False
+            if token.ttype in sql_hints:
+                is_sql_hint = True
+            elif isinstance(token, sql.Comment):
+                comment_tokens = token.tokens
+                if len(comment_tokens) > 0:
+                    if comment_tokens[0].ttype in sql_hints:
+                        is_sql_hint = True
+
+            if is_sql_hint:
+                # using current index as start index to search next token for
+                # preventing infinite loop in cases when token type is a
+                # "SQL-Hint"and has to be skipped
+                tidx, token = get_next_comment(idx=tidx)
+                continue
+
             pidx, prev_ = tlist.token_prev(tidx, skip_ws=False)
             nidx, next_ = tlist.token_next(tidx, skip_ws=False)
             # Replace by whitespace if prev and next exist and if they're not
             # whitespaces. This doesn't apply if prev or next is a parenthesis.
-            if (prev_ is None or next_ is None
-                    or prev_.is_whitespace or prev_.match(T.Punctuation, '(')
-                    or next_.is_whitespace or next_.match(T.Punctuation, ')')):
+            if (
+                prev_ is None or next_ is None
+                or prev_.is_whitespace or prev_.match(T.Punctuation, '(')
+                or next_.is_whitespace or next_.match(T.Punctuation, ')')
+            ):
                 # Insert a whitespace to ensure the following SQL produces
                 # a valid SQL (see #425).
                 if prev_ is not None and not prev_.match(T.Punctuation, '('):
@@ -48,7 +68,10 @@ class StripCommentsFilter:
             else:
                 tlist.tokens[tidx] = _get_insert_token(token)
 
-            tidx, token = get_next_comment()
+            # using current index as start index to search next token for
+            # preventing infinite loop in cases when token type is a
+            # "SQL-Hint"and has to be skipped
+            tidx, token = get_next_comment(idx=tidx)
 
     def process(self, stmt):
         [self.process(sgroup) for sgroup in stmt.get_sublists()]
