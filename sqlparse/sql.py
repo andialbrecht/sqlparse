@@ -53,16 +53,13 @@ class Token:
         self.value = value
         self.ttype = ttype
         self.parent = None
+        self.pos = pos
+        self.length = len(value)
         self.is_group = False
         self.is_keyword = ttype in T.Keyword
         self.is_whitespace = self.ttype in T.Whitespace
         self.is_newline = self.ttype in T.Newline
         self.normalized = value.upper() if self.is_keyword else value
-
-        # TokenList overrides these with @property getters
-        if not hasattr(self, 'pos'):
-            self.pos = pos
-            self.length = len(value)
 
     def __str__(self):
         return self.value
@@ -181,6 +178,13 @@ class TokenList(Token):
                 return last.length + (last.pos - first.pos)
 
         return len(str(self))
+
+    # this is a bit of a hack to avoid problems with the super constructor
+    # trying to set these attributes, which we want to compute dynamically
+    @pos.setter
+    def pos(self, value): ...
+    @length.setter
+    def length(self, value): ...
 
     def __str__(self):
         return ''.join(token.value for token in self.flatten())
