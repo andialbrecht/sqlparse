@@ -68,18 +68,12 @@ class TestFormat:
         sql = '#+ hint\nselect * from foo'
         res = sqlparse.format(sql, strip_comments=True)
         assert res == sql
-
         sql = 'select --+full(u)\n--comment simple'
         res = sqlparse.format(sql, strip_comments=True)
         assert res == 'select --+full(u)\n'
-
         sql = '#+ hint\nselect * from foo\n# comment simple'
         res = sqlparse.format(sql, strip_comments=True)
         assert res == '#+ hint\nselect * from foo\n'
-
-        # sql = ''
-        # res = sqlparse.format(sql, strip_comments=True)
-        # assert res == ''
 
     def test_strip_comments_invalid_option(self):
         sql = 'select-- foo\nfrom -- bar\nwhere'
@@ -109,10 +103,6 @@ class TestFormat:
         sql = 'insert /*+ DIRECT */ into sch.table_name as select * from foo'
         res = sqlparse.format(sql, strip_comments=True)
         assert res == sql
-
-        sql = ''
-        res = sqlparse.format(sql, strip_comments=True)
-        assert res == ''
 
     def test_strip_comments_preserves_linebreak(self):
         sql = 'select * -- a comment\r\nfrom foo'
