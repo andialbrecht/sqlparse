@@ -34,7 +34,7 @@ class StripCommentsFilter:
         sql_hints = (T.Comment.Multiline.Hint, T.Comment.Single.Hint)
         tidx, token = get_next_comment()
         while token:
-            # skipping token remove if token is a SQL hint
+            # skipping token remove if token is a SQL-Hint. issue262
             is_sql_hint = False
             if token.ttype in sql_hints:
                 is_sql_hint = True
