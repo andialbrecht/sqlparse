@@ -61,19 +61,6 @@ class TestFormat:
               'from foo--comment\nf'
         res = sqlparse.format(sql, strip_comments=True)
         assert res == 'select a\nfrom foo\nf'
-        # SQL-Hints have to be preserved
-        sql = 'select --+full(u)'
-        res = sqlparse.format(sql, strip_comments=True)
-        assert res == sql
-        sql = '#+ hint\nselect * from foo'
-        res = sqlparse.format(sql, strip_comments=True)
-        assert res == sql
-        sql = 'select --+full(u)\n--comment simple'
-        res = sqlparse.format(sql, strip_comments=True)
-        assert res == 'select --+full(u)\n'
-        sql = '#+ hint\nselect * from foo\n# comment simple'
-        res = sqlparse.format(sql, strip_comments=True)
-        assert res == '#+ hint\nselect * from foo\n'
 
     def test_strip_comments_invalid_option(self):
         sql = 'select-- foo\nfrom -- bar\nwhere'
@@ -96,13 +83,6 @@ class TestFormat:
         sql = 'select (/* sql /* starts here */ select 2)'
         res = sqlparse.format(sql, strip_comments=True, strip_whitespace=True)
         assert res == 'select (select 2)'
-        # SQL-Hints have to be preserved
-        sql = 'SELECT /*+cluster(T)*/* FROM T_EEE T where A >:1'
-        res = sqlparse.format(sql, strip_comments=True)
-        assert res == sql
-        sql = 'insert /*+ DIRECT */ into sch.table_name as select * from foo'
-        res = sqlparse.format(sql, strip_comments=True)
-        assert res == sql
 
     def test_strip_comments_preserves_linebreak(self):
         sql = 'select * -- a comment\r\nfrom foo'
@@ -125,6 +105,26 @@ class TestFormat:
         sql = 'SELECT 1/*bar*/ AS foo'  # see issue772
         res = sqlparse.format(sql, strip_comments=True)
         assert res == 'SELECT 1 AS foo'
+
+    def test_strip_comments_preserves_hint(self):
+        sql = 'select --+full(u)'
+        res = sqlparse.format(sql, strip_comments=True)
+        assert res == sql
+        sql = '#+ hint\nselect * from foo'
+        res = sqlparse.format(sql, strip_comments=True)
+        assert res == sql
+        sql = 'select --+full(u)\n--comment simple'
+        res = sqlparse.format(sql, strip_comments=True)
+        assert res == 'select --+full(u)\n'
+        sql = '#+ hint\nselect * from foo\n# comment simple'
+        res = sqlparse.format(sql, strip_comments=True)
+        assert res == '#+ hint\nselect * from foo\n'
+        sql = 'SELECT /*+cluster(T)*/* FROM T_EEE T where A >:1'
+        res = sqlparse.format(sql, strip_comments=True)
+        assert res == sql
+        sql = 'insert /*+ DIRECT */ into sch.table_name as select * from foo'
+        res = sqlparse.format(sql, strip_comments=True)
+        assert res == sql
 
     def test_strip_ws(self):
         f = lambda sql: sqlparse.format(sql, strip_whitespace=True)

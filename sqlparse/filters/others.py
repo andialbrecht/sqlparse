@@ -47,7 +47,7 @@ class StripCommentsFilter:
             if is_sql_hint:
                 # using current index as start index to search next token for
                 # preventing infinite loop in cases when token type is a
-                # "SQL-Hint"and has to be skipped
+                # "SQL-Hint" and has to be skipped
                 tidx, token = get_next_comment(idx=tidx)
                 continue
 
@@ -70,7 +70,7 @@ class StripCommentsFilter:
 
             # using current index as start index to search next token for
             # preventing infinite loop in cases when token type is a
-            # "SQL-Hint"and has to be skipped
+            # "SQL-Hint" and has to be skipped
             tidx, token = get_next_comment(idx=tidx)
 
     def process(self, stmt):
