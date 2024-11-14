@@ -4,6 +4,7 @@ Development Version
 Bug Fixes
 
 * EXTENSION is now recognized as a keyword (issue785).
+* SQL hints are not removed when removing comments (issue262, by skryzh).
 
 
 Release 0.5.1 (Jul 15, 2024)
