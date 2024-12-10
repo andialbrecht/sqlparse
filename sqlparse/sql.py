@@ -44,14 +44,16 @@ class Token:
     the type of the token.
     """
 
-    __slots__ = ('value', 'ttype', 'parent', 'normalized', 'is_keyword',
-                 'is_group', 'is_whitespace', 'is_newline')
+    __slots__ = ('value', 'ttype', 'parent', 'pos', 'length', 'normalized',
+                 'is_keyword', 'is_group', 'is_whitespace', 'is_newline')
 
-    def __init__(self, ttype, value):
+    def __init__(self, ttype, value, pos=None):
         value = str(value)
         self.value = value
         self.ttype = ttype
         self.parent = None
+        self.pos = pos
+        self.length = len(value)
         self.is_group = False
         self.is_keyword = ttype in T.Keyword
         self.is_whitespace = self.ttype in T.Whitespace
@@ -161,6 +163,27 @@ class TokenList(Token):
         [setattr(token, 'parent', self) for token in self.tokens]
         super().__init__(None, str(self))
         self.is_group = True
+
+    @property
+    def pos(self):
+        if len(self.tokens) > 0:
+            return self.tokens[0].pos
+
+    @property
+    def length(self):
+        if len(self.tokens) > 0:
+            first, last = self.tokens[0], self.tokens[-1]
+            if first.pos is not None and last.pos is not None:
+                return last.length + (last.pos - first.pos)
+
+        return len(str(self))
+
+    # this is a bit of a hack to avoid problems with the super constructor
+    # trying to set these attributes, which we want to compute dynamically
+    @pos.setter
+    def pos(self, value): ...
+    @length.setter
+    def length(self, value): ...
 
     def __str__(self):
         return ''.join(token.value for token in self.flatten())
