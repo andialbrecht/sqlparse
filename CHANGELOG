@@ -1,7 +1,11 @@
 Development Version
 -------------------
 
-Nothing yet.
+Bug Fixes
+
+* This version introduces a more generalized handling of potential denial of
+  service attack (DOS) due to recursion errors for deeply nested statements.
+  Brought up and fixed by @living180. Thanks a lot!
 
 
 Release 0.5.2 (Nov 14, 2024)
