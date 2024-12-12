@@ -89,14 +89,14 @@ class Token:
     def match(self, ttype, values, regex=False):
         """Checks whether the token matches the given arguments.
 
-        *ttype* is a token type. If this token doesn't match the given token
-        type.
-        *values* is a list of possible values for this token. The values
-        are OR'ed together so if only one of the values matches ``True``
-        is returned. Except for keyword tokens the comparison is
-        case-sensitive. For convenience it's OK to pass in a single string.
-        If *regex* is ``True`` (default is ``False``) the given values are
-        treated as regular expressions.
+        *ttype* is a token type as defined in `sqlparse.tokens`. If it does
+        not match, ``False`` is returned.
+        *values* is a list of possible values for this token. For match to be
+        considered valid, the token value needs to be in this list. For tokens
+        of type ``Keyword`` the comparison is case-insensitive. For
+        convenience, a single value can be given passed as a string.
+        If *regex* is ``True``, the given values are treated as regular
+        expressions. Partial matches are allowed. Defaults to ``False``.
         """
         type_matched = self.ttype is ttype
         if not type_matched or values is None:
@@ -106,7 +106,7 @@ class Token:
             values = (values,)
 
         if regex:
-            # TODO: Add test for regex with is_keyboard = false
+            # TODO: Add test for regex with is_keyword = false
             flag = re.IGNORECASE if self.is_keyword else 0
             values = (re.compile(v, flag) for v in values)
 
