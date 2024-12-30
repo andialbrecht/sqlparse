@@ -64,7 +64,7 @@ def split(sql, encoding=None, strip_semicolon=False):
 
     :param sql: A string containing one or more SQL statements.
     :param encoding: The encoding of the statement (optional).
-    :param strip_semicolon: If True, remove trainling semicolons
+    :param strip_semicolon: If True, remove trailing semicolons
         (default: False).
     :returns: A list of strings.
     """
