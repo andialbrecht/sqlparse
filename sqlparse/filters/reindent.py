@@ -97,7 +97,7 @@ class ReindentFilter:
             tidx, token = tlist.token_next_by(t=ttypes, idx=tidx)
 
     def _process(self, tlist):
-        func_name = '_process_{cls}'.format(cls=type(tlist).__name__)
+        func_name = f'_process_{type(tlist).__name__}'
         func = getattr(self, func_name.lower(), self._process_default)
         func(tlist)
 

@@ -81,7 +81,7 @@ class StripCommentsFilter:
 
 class StripWhitespaceFilter:
     def _stripws(self, tlist):
-        func_name = '_stripws_{cls}'.format(cls=type(tlist).__name__)
+        func_name = f'_stripws_{type(tlist).__name__}'
         func = getattr(self, func_name.lower(), self._stripws_default)
         func(tlist)
 

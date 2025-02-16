@@ -150,7 +150,7 @@ def test_stream_error():
     'INNER JOIN',
     'LEFT INNER JOIN'])
 def test_parse_join(expr):
-    p = sqlparse.parse('{} foo'.format(expr))[0]
+    p = sqlparse.parse(f'{expr} foo')[0]
     assert len(p.tokens) == 3
     assert p.tokens[0].ttype is T.Keyword
 
