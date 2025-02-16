@@ -189,8 +189,7 @@ class TokenList(Token):
             pre = '`- ' if last else '|- '
 
             q = '"' if value.startswith("'") and value.endswith("'") else "'"
-            print(f"{_pre}{pre}{idx} {cls} {q}{value}{q}"
-                  , file=f)
+            print(f"{_pre}{pre}{idx} {cls} {q}{value}{q}", file=f)
 
             if token.is_group and (max_depth is None or depth < max_depth):
                 parent_pre = '   ' if last else '|  '
