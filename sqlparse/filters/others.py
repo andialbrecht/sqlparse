@@ -65,6 +65,7 @@ class StripCommentsFilter:
                 if prev_ is not None and not prev_.match(T.Punctuation, '('):
                     tlist.tokens.insert(tidx, _get_insert_token(token))
                 tlist.tokens.remove(token)
+                tidx -= 1
             else:
                 tlist.tokens[tidx] = _get_insert_token(token)
 
