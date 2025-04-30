@@ -839,6 +839,8 @@ KEYWORDS_PLPGSQL = {
     'CONFLICT': tokens.Keyword,
     'WINDOW': tokens.Keyword,
     'PARTITION': tokens.Keyword,
+    'ATTACH': tokens.Keyword,
+    'DETACH': tokens.Keyword,
     'OVER': tokens.Keyword,
     'PERFORM': tokens.Keyword,
     'NOTICE': tokens.Keyword,
