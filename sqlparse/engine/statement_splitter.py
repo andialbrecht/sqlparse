@@ -16,9 +16,8 @@ class StatementSplitter:
 
     def _reset(self):
         """Set the filter attributes to its default values"""
-        self._in_declare = False
-        self._in_case = False
-        self._is_create = False
+        self._case_depth = 0
+        self._stmt_start = True
         self._begin_depth = 0
 
         self.consume_ws = False
@@ -33,6 +32,10 @@ class StatementSplitter:
             return 1
         elif ttype is T.Punctuation and value == ')':
             return -1
+        elif ttype is T.Punctuation and value == ';' and self._stmt_start:
+                self._begin_depth = max(0, self._begin_depth - 1)
+                self._begin_depth -= 1
+                return -1
         elif ttype not in T.Keyword:  # if normal token return
             return 0
 
@@ -41,40 +44,30 @@ class StatementSplitter:
         # returning
         unified = value.upper()
 
-        # three keywords begin with CREATE, but only one of them is DDL
-        # DDL Create though can contain more words such as "or replace"
-        if ttype is T.Keyword.DDL and unified.startswith('CREATE'):
-            self._is_create = True
-            return 0
-
-        # can have nested declare inside of being...
-        if unified == 'DECLARE' and self._is_create and self._begin_depth == 0:
-            self._in_declare = True
+        if unified == 'BEGIN' and not self._stmt_start:
+            self._begin_depth += 1
             return 1
 
-        if unified == 'BEGIN':
-            self._begin_depth += 1
-            if self._is_create:
-                # FIXME(andi): This makes no sense.  ## this comment neither
-                return 1
-            return 0
+        if self._stmt_start:
+            self._stmt_start = False
 
         # BEGIN and CASE/WHEN both end with END
         if unified == 'END':
-            if not self._in_case:
+            if not self._case_depth:
                 self._begin_depth = max(0, self._begin_depth - 1)
             else:
-                self._in_case = False
+                self._case_depth = max(0, self._case_depth - 1)
             return -1
 
-        if (unified in ('IF', 'FOR', 'WHILE', 'CASE')
-                and self._is_create and self._begin_depth > 0):
+        if unified in ('IF', 'FOR', 'WHILE', 'CASE'):
             if unified == 'CASE':
-                self._in_case = True
-            return 1
+                self._case_depth += 1
+            if self._begin_depth > 0:
+                return 1
 
-        if unified in ('END IF', 'END FOR', 'END WHILE'):
-            return -1
+        if unified in ('END IF', 'END FOR', 'END WHILE', 'END CASE'):
+            if self._begin_depth > 0:
+                return -1
 
         # Default
         return 0
@@ -84,6 +77,7 @@ class StatementSplitter:
         EOS_TTYPE = T.Whitespace, T.Comment.Single
 
         # Run over all stream tokens
+        sb = ""
         for ttype, value in stream:
             # Yield token if we finished a statement and there's no whitespaces
             # It will count newline token as a non whitespace. In this context

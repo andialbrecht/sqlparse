@@ -3,9 +3,8 @@ CREATE OR REPLACE FUNCTION foo(
 	, p_in2 INTEGER
 ) RETURNS INTEGER AS
 
-  DECLARE
-	v_foo INTEGER;  
   BEGIN
+    DECLARE v_foo INTEGER;
   	SELECT *
   	FROM foo
   	INTO v_foo;

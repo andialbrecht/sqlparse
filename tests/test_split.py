@@ -22,8 +22,7 @@ def test_split_backslash():
     assert len(stmts) == 2
 
 
-@pytest.mark.parametrize('fn', ['function.sql',
-                                'function_psql.sql',
+@pytest.mark.parametrize('fn', ['function_psql.sql',
                                 'function_psql2.sql',
                                 'function_psql3.sql',
                                 'function_psql4.sql'])
@@ -31,6 +30,11 @@ def test_split_create_function(load_file, fn):
     sql = load_file(fn)
     stmts = sqlparse.parse(sql)
     assert len(stmts) == 1
+    assert str(stmts[0]) == sql
+
+    # Check that the parser doesn't get in an incorrect state after the first split
+    stmts = sqlparse.parse(sql + sql)
+    assert len(stmts) == 2
     assert str(stmts[0]) == sql
 
 
@@ -50,17 +54,59 @@ def test_split_dashcomments_eol(s):
     assert len(stmts) == 1
 
 
-def test_split_begintag(load_file):
-    sql = load_file('begintag.sql')
+def test_split_begincommit_1(load_file):
+    sql = load_file('begincommit_1.sql')
     stmts = sqlparse.parse(sql)
     assert len(stmts) == 3
     assert ''.join(str(q) for q in stmts) == sql
 
 
-def test_split_begintag_2(load_file):
-    sql = load_file('begintag_2.sql')
+def test_split_begincommit_2(load_file):
+    sql = load_file('begincommit_2.sql')
+    stmts = sqlparse.parse(sql)
+    assert len(stmts) == 8
+    assert ''.join(str(q) for q in stmts) == sql
+
+
+def test_split_beginend_1(load_file):
+    sql = load_file('beginend_1.sql')
     stmts = sqlparse.parse(sql)
     assert len(stmts) == 1
+    assert ''.join(str(q) for q in stmts) == sql
+
+
+def test_split_beginend_2(load_file):
+    sql = load_file('beginend_2.sql')
+    stmts = sqlparse.parse(sql)
+    assert len(stmts) == 1
+    assert ''.join(str(q) for q in stmts) == sql
+
+
+def test_split_beginend_3(load_file):
+    sql = load_file('beginend_3.sql')
+    stmts = sqlparse.parse(sql)
+    assert len(stmts) == 1
+    assert ''.join(str(q) for q in stmts) == sql
+
+
+def test_split_beginend_with_double_case_when_1(load_file):
+    sql = load_file('beginend_with_double_case_when_1.sql')
+    stmts = sqlparse.parse(sql)
+    assert len(stmts) == 2
+    assert ''.join(str(q) for q in stmts) == sql
+
+
+def test_split_beginend_with_double_case_when_2(load_file):
+    sql = load_file('beginend_with_double_case_when_2.sql')
+    stmts = sqlparse.parse(sql)
+    assert len(stmts) == 2
+    assert ''.join(str(q) for q in stmts) == sql
+
+
+def test_split_beginend_with_double_case_when_3(load_file):
+    sql = load_file('beginend_with_double_case_when_3.sql')
+    stmts = sqlparse.parse(sql)
+    assert len(stmts) == 2
     assert ''.join(str(q) for q in stmts) == sql
 
 

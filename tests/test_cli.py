@@ -60,8 +60,8 @@ def test_invalid_outfile(filepath, capsys):
 
 
 def test_stdout(filepath, load_file, capsys):
-    path = filepath('begintag.sql')
-    expected = load_file('begintag.sql')
+    path = filepath('begincommit_1.sql')
+    expected = load_file('begincommit_1.sql')
     sqlparse.cli.main([path])
     out, _ = capsys.readouterr()
     assert out == expected
