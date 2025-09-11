@@ -2,7 +2,7 @@ User Interfaces
 ===============
 
 ``sqlformat``
-  The ``sqlformat`` command line script ist distributed with the module.
+  The ``sqlformat`` command line script is distributed with the module.
   Run :command:`sqlformat --help` to list available options and for usage
   hints.
 
