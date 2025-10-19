@@ -87,7 +87,7 @@ SQL_REGEX = [
      tokens.Keyword),
     (r"(AT|WITH')\s+TIME\s+ZONE\s+'[^']+'", tokens.Keyword.TZCast),
     (r'(NOT\s+)?(LIKE|ILIKE|RLIKE)\b', tokens.Operator.Comparison),
-    (r'(NOT\s+)?(REGEXP)\b', tokens.Operator.Comparison),
+    (r'(NOT\s+)?(REGEXP)(\s+(BINARY))?\b', tokens.Operator.Comparison),
     # Check for keywords, also returns tokens.Name if regex matches
     # but the match isn't a keyword.
     (r'\w[$#\w]*', PROCESS_AS_KEYWORD),
