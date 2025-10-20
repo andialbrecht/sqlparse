@@ -550,8 +550,8 @@ def test_configurable_keywords():
         (sqlparse.tokens.Punctuation, ";"),
     ]
 
+
 def test_regexp():
-    # issue 369
     s = "column REGEXP '.+static.+'"
     stmts = sqlparse.parse(s)
 
@@ -565,8 +565,8 @@ def test_regexp():
     assert stmts[0].tokens[4].ttype == T.Literal.String.Single
     assert stmts[0].tokens[4].value == "'.+static.+'"
 
+
 def test_regexp_binary():
-    # issue 369
     s = "column REGEXP BINARY '.+static.+'"
     stmts = sqlparse.parse(s)
 
@@ -579,7 +579,8 @@ def test_regexp_binary():
 
     assert stmts[0].tokens[4].ttype == T.Literal.String.Single
     assert stmts[0].tokens[4].value == "'.+static.+'"
-    
+
+
 def test_configurable_regex():
     lex = Lexer.get_default_instance()
     lex.clear()
