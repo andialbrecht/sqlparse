@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-#
 # Copyright (C) 2009-2020 the sqlparse authors and contributors
 # <see AUTHORS file>
 #
