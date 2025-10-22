@@ -550,8 +550,8 @@ class Where(TokenList):
     """A WHERE clause."""
     M_OPEN = T.Keyword, 'WHERE'
     M_CLOSE = T.Keyword, (
-        'ORDER BY', 'GROUP BY', 'LIMIT', 'UNION', 'UNION ALL', 'EXCEPT', 'INTERSECT',
-        'HAVING', 'RETURNING', 'INTO')
+        'ORDER BY', 'GROUP BY', 'LIMIT', 'UNION', 'UNION ALL', 'EXCEPT',
+        'INTERSECT', 'HAVING', 'RETURNING', 'INTO')
 
 
 class Over(TokenList):
