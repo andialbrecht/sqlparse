@@ -48,6 +48,13 @@ def create_parser():
         help='write output to FILE (defaults to stdout)')
 
     parser.add_argument(
+        '-w', '--write',
+        dest='write',
+        action='store_true',
+        default=False,
+        help='rewrite file')
+
+    parser.add_argument(
         '--version',
         action='version',
         version=sqlparse.__version__)
@@ -180,12 +187,13 @@ def main(args=None):
                 f'Failed to read {args.filename}: {e}')
 
     close_stream = False
-    if args.outfile:
+    if args.outfile or args.write:
+        out_file_name = args.outfile if args.outfile else args.filename
         try:
-            stream = open(args.outfile, 'w', encoding=args.encoding)
+            stream = open(out_file_name, 'w', encoding=args.encoding)
             close_stream = True
         except OSError as e:
-            return _error(f'Failed to open {args.outfile}: {e}')
+            return _error(f'Failed to open {out_file_name}: {e}')
     else:
         stream = sys.stdout
 
