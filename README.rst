@@ -47,6 +47,17 @@ Quick Start
    [<DML 'select' at 0x7f22c5e15368>, <Whitespace ' ' at 0x7f22c5e153b0>, <Wildcard '*' … ]
    >>>
 
+Using in pre-commit for format SQL files
+-----
+
+.. code-block::
+  - repo: https://github.com/andialbrecht/sqlparse
+    rev: "0.5.3"
+    hooks:
+      - id: sqlformat
+        args: [--keywords, "upper", "--identifiers", "lower", --compact, "True", "--reindent", "--write"]
+        files: '.*\.sql$'
+
 Links
 -----
 

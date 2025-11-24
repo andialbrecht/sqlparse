@@ -1,0 +1,5 @@
+- id: sqlformat
+  name: sqlformat
+  description: Format SQL files
+  entry: sqlformat
+  language: python
