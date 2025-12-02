@@ -2,6 +2,7 @@
 
 import pytest
 import sqlparse
+from sqlparse.exceptions import RecursionLimitError
 import time
 
 
@@ -33,32 +34,30 @@ class TestDoSPrevention:
         assert "SELECT" in result.upper(), "SQL should be properly formatted"
 
     def test_deeply_nested_groups_limited(self):
-        """Test that deeply nested groups don't cause stack overflow."""
-        # Create deeply nested parentheses
+        """Test that deeply nested groups raise RecursionLimitError."""
+        # Create deeply nested parentheses (exceeds MAX_GROUPING_DEPTH of 100)
         sql = "SELECT " + "(" * 200 + "1" + ")" * 200
 
-        # Should not raise RecursionError
-        result = sqlparse.format(sql, reindent=True)
-        assert "SELECT" in result
-        assert "1" in result
+        # Should raise RecursionLimitError, not RecursionError
+        with pytest.raises(RecursionLimitError) as exc_info:
+            sqlparse.format(sql, reindent=True)
+
+        assert "Maximum grouping depth exceeded" in str(exc_info.value)
 
     def test_very_large_token_list_limited(self):
-        """Test that very large token lists are handled gracefully."""
-        # Create a SQL with many identifiers
+        """Test that very large token lists raise RecursionLimitError."""
+        # Create a SQL with many identifiers (exceeds MAX_GROUPING_TOKENS of 10000)
         identifiers = []
         for i in range(15000):  # More than MAX_GROUPING_TOKENS
             identifiers.append(f"col{i}")
 
         sql = f"SELECT {', '.join(identifiers)} FROM table1"
 
-        # Should complete without hanging
-        start_time = time.time()
-        result = sqlparse.format(sql, reindent=True)
-        execution_time = time.time() - start_time
+        # Should raise RecursionLimitError
+        with pytest.raises(RecursionLimitError) as exc_info:
+            sqlparse.format(sql, reindent=True)
 
-        assert execution_time < 10.0, f"Parsing took too long: {execution_time:.2f}s"
-        assert "SELECT" in result
-        assert "FROM" in result
+        assert "Maximum token count exceeded" in str(exc_info.value)
 
     def test_normal_sql_still_works(self):
         """Test that normal SQL still works correctly after DoS protections."""
@@ -99,3 +98,25 @@ class TestDoSPrevention:
         assert "IN" in result
         assert "1," in result  # First tuple should be there
         assert "200" in result  # Last tuple should be there
+
+    def test_reasonable_nesting_works(self):
+        """Test that reasonable nesting depth still works."""
+        # Create 50 nested parentheses (well under MAX_GROUPING_DEPTH of 100)
+        sql = "SELECT " + "(" * 50 + "1" + ")" * 50
+
+        result = sqlparse.format(sql, reindent=True)
+        assert "SELECT" in result
+        assert "1" in result
+
+    def test_exception_can_be_caught(self):
+        """Test that RecursionLimitError can be caught and handled."""
+        sql = "SELECT " + "(" * 200 + "1" + ")" * 200
+
+        try:
+            sqlparse.format(sql, reindent=True)
+            assert False, "Should have raised RecursionLimitError"
+        except RecursionLimitError as e:
+            # Verify exception has useful information
+            assert "Maximum grouping depth exceeded" in str(e)
+            assert "100" in str(e)  # The limit value
+            assert "complex or deeply nested" in str(e)

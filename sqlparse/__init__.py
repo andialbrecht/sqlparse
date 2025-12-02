@@ -16,10 +16,12 @@ from sqlparse import engine
 from sqlparse import tokens
 from sqlparse import filters
 from sqlparse import formatter
+from sqlparse.exceptions import SQLParseError, RecursionLimitError
 
 
 __version__ = "0.5.5.dev0"
-__all__ = ["engine", "filters", "formatter", "sql", "tokens", "cli"]
+__all__ = ["engine", "filters", "formatter", "sql", "tokens", "cli",
+           "SQLParseError", "RecursionLimitError"]
 
 
 def parse(

@@ -10,3 +10,11 @@
 
 class SQLParseError(Exception):
     """Base class for exceptions in this module."""
+
+
+class RecursionLimitError(SQLParseError):
+    """Raised when recursion or token limits are exceeded during parsing.
+
+    This exception is raised as a protection against DoS attacks when parsing
+    extremely complex or deeply nested SQL queries.
+    """
