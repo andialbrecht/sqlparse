@@ -14,16 +14,16 @@ def test_tokenize_simple():
     assert isinstance(stream, types.GeneratorType)
     tokens = list(stream)
     assert len(tokens) == 8
-    assert len(tokens[0]) == 2
-    assert tokens[0] == (T.Keyword.DML, 'select')
-    assert tokens[-1] == (T.Punctuation, ';')
+    assert len(tokens[0]) == 3
+    assert tokens[0] == (T.Keyword.DML, 'select', 0)
+    assert tokens[-1] == (T.Punctuation, ';', 17)
 
 
 def test_tokenize_backticks():
     s = '`foo`.`bar`'
     tokens = list(lexer.tokenize(s))
     assert len(tokens) == 3
-    assert tokens[0] == (T.Name, '`foo`')
+    assert tokens[0] == (T.Name, '`foo`', 0)
 
 
 @pytest.mark.parametrize('s', ['foo\nbar\n', 'foo\rbar\r',

@@ -106,14 +106,14 @@ class Lexer:
 
     def get_tokens(self, text, encoding=None):
         """
-        Return an iterable of (tokentype, value) pairs generated from
+        Return an iterable of (tokentype, value, pos) tuples generated from
         `text`. If `unfiltered` is set to `True`, the filtering mechanism
         is bypassed even if filters are defined.
 
         Also preprocess the text, i.e. expand tabs and strip it if
         wanted and applies registered filters.
 
-        Split ``text`` into (tokentype, text) pairs.
+        Split ``text`` into (tokentype, text, pos) tuples.
 
         ``stack`` is the initial stack (default: ``['root']``)
         """
@@ -142,20 +142,20 @@ class Lexer:
                 if not m:
                     continue
                 elif isinstance(action, tokens._TokenType):
-                    yield action, m.group()
+                    yield action, m.group(), pos
                 elif action is keywords.PROCESS_AS_KEYWORD:
-                    yield self.is_keyword(m.group())
+                    yield (*self.is_keyword(m.group()), pos)
 
                 consume(iterable, m.end() - pos - 1)
                 break
             else:
-                yield tokens.Error, char
+                yield tokens.Error, char, pos
 
 
 def tokenize(sql, encoding=None):
     """Tokenize sql.
 
-    Tokenize *sql* using the :class:`Lexer` and return a 2-tuple stream
-    of ``(token type, value)`` items.
+    Tokenize *sql* using the :class:`Lexer` and return a 3-tuple stream
+    of ``(token type, value, pos)`` items.
     """
     return Lexer.get_default_instance().get_tokens(sql, encoding)
