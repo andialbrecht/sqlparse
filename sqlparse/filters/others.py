@@ -92,6 +92,9 @@ class StripWhitespaceFilter:
         is_first_char = True
         for token in tlist.tokens:
             if token.is_whitespace:
+                # Replace tabs with spaces
+                token.value = token.value.replace('\t', ' ')
+                # Then normalize whitespace (collapse multiple spaces)
                 token.value = '' if last_was_ws or is_first_char else ' '
             last_was_ws = token.is_whitespace
             is_first_char = False
