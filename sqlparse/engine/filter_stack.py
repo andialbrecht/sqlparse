@@ -20,6 +20,7 @@ class FilterStack:
         self.stmtprocess = []
         self.postprocess = []
         self._grouping = False
+        self.lexer = lexer
         if strip_semicolon:
             self.stmtprocess.append(StripTrailingSemicolonFilter())
 
@@ -28,7 +29,7 @@ class FilterStack:
 
     def run(self, sql, encoding=None):
         try:
-            stream = lexer.tokenize(sql, encoding)
+            stream = self.lexer.tokenize(sql, encoding)
             # Process token stream
             for filter_ in self.preprocess:
                 stream = filter_.process(stream)
