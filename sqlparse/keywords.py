@@ -467,6 +467,7 @@ KEYWORDS = {
     'RELATIVE': tokens.Keyword,
     'RENAME': tokens.Keyword,
     'REPEATABLE': tokens.Keyword,
+    'REFRESH': tokens.Keyword,
     'RESET': tokens.Keyword,
     'RESOURCE': tokens.Keyword,
     'RESTART': tokens.Keyword,
