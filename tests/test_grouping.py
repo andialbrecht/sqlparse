@@ -417,6 +417,8 @@ def test_statement_get_type():
     assert f(' update foo').get_type() == 'UPDATE'
     assert f('\nupdate foo').get_type() == 'UPDATE'
     assert f('foo').get_type() == 'UNKNOWN'
+    # Test REFRESH keyword detection (issue #797)
+    assert f('REFRESH MATERIALIZED VIEW order_summary').get_type() == 'REFRESH'
 
 
 def test_identifier_with_operators():
