@@ -245,3 +245,33 @@ def test_cli_commands():
     p = sqlparse.parse('\\copy')[0]
     assert len(p.tokens) == 1
     assert p.tokens[0].ttype == T.Command
+
+
+def test_escaped_backslash_in_string():
+    # issue814 - Escaped backslashes in string literals
+    sql = r"SELECT '\\\\', '\\\\'"
+    tokens = list(lexer.tokenize(sql))
+    # Should have: SELECT, space, string, comma, space, string
+    assert len(tokens) == 6
+    assert tokens[0] == (T.Keyword.DML, 'SELECT')
+    assert tokens[1] == (T.Whitespace, ' ')
+    # The string contains two backslashes in the SQL, which is represented
+    # as 4 backslashes in the Python raw string
+    assert tokens[2] == (T.Literal.String.Single, "'\\\\\\\\'")
+    assert tokens[3] == (T.Punctuation, ',')
+    assert tokens[4] == (T.Whitespace, ' ')
+    assert tokens[5] == (T.Literal.String.Single, "'\\\\\\\\'")
+
+
+def test_escaped_quote_in_string():
+    # Test that escaped quotes still work
+    sql = r"SELECT 'it''s a test'"
+    tokens = list(lexer.tokenize(sql))
+    assert tokens[2] == (T.Literal.String.Single, "'it''s a test'")
+
+
+def test_backslash_escaped_quote_in_string():
+    # Test backslash-escaped quotes
+    sql = r"SELECT 'it\'s a test'"
+    tokens = list(lexer.tokenize(sql))
+    assert tokens[2] == (T.Literal.String.Single, "'it\\'s a test'")
