@@ -21,18 +21,21 @@ class AlignedIndentFilter:
                    'UNION', 'VALUES',
                    'SET', 'BETWEEN', 'EXCEPT')
 
-    def __init__(self, char=' ', n='\n'):
+    def __init__(self, char=' ', n='\n', indent_width=None):
         self.n = n
         self.offset = 0
         self.indent = 0
         self.char = char
         self._max_kwd_len = len('select')
+        # indent_width allows customizing the indentation width
+        # Default is 2 + len('select') for backward compatibility
+        self._indent_width = indent_width if indent_width is not None else 2 + self._max_kwd_len
 
     def nl(self, offset=1):
         # offset = 1 represent a single space after SELECT
         offset = -len(offset) if not isinstance(offset, int) else offset
         # add two for the space and parenthesis
-        indent = self.indent * (2 + self._max_kwd_len)
+        indent = self.indent * self._indent_width
 
         return sql.Token(T.Whitespace, self.n + self.char * (
             self._max_kwd_len + offset + indent + self.offset))
