@@ -11,7 +11,7 @@ install the module system-wide run
 
 .. code-block:: bash
 
-   $ tar cvfz python-sqlparse-VERSION.tar.gz
+   $ tar xvfz python-sqlparse-VERSION.tar.gz
    $ cd python-sqlparse/
    $ sudo python setup.py install
 
