@@ -59,9 +59,9 @@ SQL_REGEX = [
     (r'(?![_A-ZÀ-Ü])-?(\d+(\.\d*)|\.\d+)(?![_A-ZÀ-Ü])',
      tokens.Number.Float),
     (r'(?![_A-ZÀ-Ü])-?\d+(?![_A-ZÀ-Ü])', tokens.Number.Integer),
-    (r"'(''|\\'|[^'])*'", tokens.String.Single),
+    (r"'(''|\\\\|\\'|[^'])*'", tokens.String.Single),
     # not a real string literal in ANSI SQL:
-    (r'"(""|\\"|[^"])*"', tokens.String.Symbol),
+    (r'"(""|\\\\|\\"|[^"])*"', tokens.String.Symbol),
     (r'(""|".*?[^\\]")', tokens.String.Symbol),
     # sqlite names can be escaped with [square brackets]. left bracket
     # cannot be preceded by word character or a right bracket --
