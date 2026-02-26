@@ -80,10 +80,12 @@ class StatementSplitter:
                 self._in_case = False
             return -1
 
-        if (unified in ('IF', 'FOR', 'WHILE', 'CASE')
+        if unified == 'CASE':
+            self._in_case = True
+            return 1
+
+        if (unified in ('IF', 'FOR', 'WHILE')
                 and self._is_create and self._begin_depth > 0):
-            if unified == 'CASE':
-                self._in_case = True
             return 1
 
         if unified in ('END IF', 'END FOR', 'END WHILE'):
