@@ -284,3 +284,34 @@ TRANSACTION;"""
     assert stmts[1].startswith('DELETE')
     assert stmts[2].startswith('INSERT')
     assert stmts[3] == 'END\nTRANSACTION;'
+
+
+def test_splitlevel_case_end():
+    # CASE in a plain SELECT did not increment the level, but its matching END
+    # decremented it unconditionally. This led to levels being wrong after the
+    # CASE WHEN ... END block.
+    s = sqlparse.engine.statement_splitter.StatementSplitter()
+    level = s.level
+
+    token_stream = [
+        (sqlparse.tokens.Keyword.DML, 'SELECT'),
+        (sqlparse.tokens.Keyword,     'CASE'),
+        (sqlparse.tokens.Keyword,     'WHEN'),
+        (sqlparse.tokens.Name,        'foo'),
+        (sqlparse.tokens.Keyword,     'THEN'),
+        (sqlparse.tokens.Number,      '1'),
+        (sqlparse.tokens.Keyword,     'END'),
+        (sqlparse.tokens.Keyword,     'FROM'),
+        (sqlparse.tokens.Name,        't'),
+    ]
+
+    for ttype, value in token_stream:
+        level += s._change_splitlevel(ttype, value)
+
+    assert level == 0
+
+    # This issue could lead to incorrectly treating a semicolon inside a text
+    # literal as a statement terminator and incorrectly splitting the query.
+    assert len(sqlparse.parse(
+        "SELECT CASE WHEN 1 THEN 2 END, test IN ('foo \\', 'foo;') FROM t"
+    )) == 1
