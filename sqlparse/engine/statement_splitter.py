@@ -26,12 +26,69 @@ class StatementSplitter:
         self.tokens = []
         self.level = 0
 
+    def _handle_nested_block(self, unified):
+        """Check for nested loop or control structures inside a block"""
+        if unified == 'FOR':
+            self._unconfirmed_start = 'FOR'
+            return 0
+        if unified == 'WHILE':
+            self._unconfirmed_start = 'WHILE'
+            return 0
+        if unified in ('LOOP', 'DO'):
+            if self._unconfirmed_start in ('FOR', 'WHILE'):
+                self._block_stack.append(self._unconfirmed_start)
+                self._unconfirmed_start = None
+                return 1
+            if unified == 'LOOP':
+                self._block_stack.append('LOOP')
+                return 1
+        if unified in ('IF', 'CASE'):
+            self._block_stack.append(unified)
+            return 1
+        return None
+
+    def _handle_closing_keyword(self, unified):
+        """Handle closing keywords for blocks"""
+        if unified == 'END IF':
+            if self._block_stack and self._block_stack[-1] == 'IF':
+                self._block_stack.pop()
+                return -1
+        elif unified == 'END FOR':
+            if self._block_stack and self._block_stack[-1] == 'FOR':
+                self._block_stack.pop()
+                return -1
+        elif unified == 'END WHILE':
+            if self._block_stack and self._block_stack[-1] == 'WHILE':
+                self._block_stack.pop()
+                return -1
+        elif unified == 'END LOOP':
+            if (self._block_stack and
+                    self._block_stack[-1] in ('LOOP', 'FOR', 'WHILE')):
+                self._block_stack.pop()
+                return -1
+        elif unified == 'END CASE':
+            if self._block_stack and self._block_stack[-1] == 'CASE':
+                self._block_stack.pop()
+                return -1
+        elif unified == 'END':
+            if self._block_stack:
+                self._block_stack.pop()
+            return -1
+        return 0
+
     def _change_splitlevel(self, ttype, value):
         """Get the new split level (increase, decrease or remain equal)"""
 
         # Semicolon resets unconfirmed loop starters
+        # and handles standalone BEGIN;
         if ttype is T.Punctuation and value == ';':
             self._unconfirmed_start = None
+            if self._seen_begin:
+                self._seen_begin = False
+                if self._block_stack and self._block_stack[-1] == 'BEGIN':
+                    self._block_stack.pop()
+                    return -1
+            return 0
 
         # parenthesis increase/decrease a level
         if ttype is T.Punctuation and value == '(':
@@ -83,65 +140,12 @@ class StatementSplitter:
 
         # Inside a block, check for nested loop or control structures
         if 'BEGIN' in self._block_stack:
-            if unified == 'FOR':
-                self._unconfirmed_start = 'FOR'
-                return 0
-            elif unified == 'WHILE':
-                self._unconfirmed_start = 'WHILE'
-                return 0
-            elif unified == 'LOOP':
-                if self._unconfirmed_start in ('FOR', 'WHILE'):
-                    self._block_stack.append(self._unconfirmed_start)
-                    self._unconfirmed_start = None
-                    return 1
-                else:
-                    self._block_stack.append('LOOP')
-                    return 1
-            elif unified == 'DO':
-                if self._unconfirmed_start in ('FOR', 'WHILE'):
-                    self._block_stack.append(self._unconfirmed_start)
-                    self._unconfirmed_start = None
-                    return 1
-            elif unified == 'IF':
-                self._block_stack.append('IF')
-                return 1
-            elif unified == 'CASE':
-                self._block_stack.append('CASE')
-                return 1
+            res = self._handle_nested_block(unified)
+            if res is not None:
+                return res
 
         # Handle closing keywords
-        if unified == 'END IF':
-            if self._block_stack and self._block_stack[-1] == 'IF':
-                self._block_stack.pop()
-                return -1
-        elif unified == 'END FOR':
-            if self._block_stack and self._block_stack[-1] == 'FOR':
-                self._block_stack.pop()
-                return -1
-        elif unified == 'END WHILE':
-            if self._block_stack and self._block_stack[-1] == 'WHILE':
-                self._block_stack.pop()
-                return -1
-        elif unified == 'END LOOP':
-            if self._block_stack and self._block_stack[-1] in ('LOOP', 'FOR', 'WHILE'):
-                self._block_stack.pop()
-                return -1
-        elif unified == 'END CASE':
-            if self._block_stack and self._block_stack[-1] == 'CASE':
-                self._block_stack.pop()
-                return -1
-        elif unified == 'END':
-            if self._block_stack:
-                if self._block_stack[-1] in ('CASE', 'BEGIN'):
-                    self._block_stack.pop()
-                    return -1
-                else:
-                    self._block_stack.pop()
-                    return -1
-            else:
-                return -1
-
-        return 0
+        return self._handle_closing_keyword(unified)
 
     def process(self, stream):
         """Process the stream"""
@@ -173,12 +177,6 @@ class StatementSplitter:
             # Issue809: Ignore semicolons inside BEGIN...END blocks, but handle
             # standalone BEGIN; as a transaction statement
             if ttype is T.Punctuation and value == ';':
-                # If we just saw BEGIN; then this is a transaction BEGIN,
-                # not a BEGIN...END block, so decrement depth
-                if self._seen_begin:
-                    if self._block_stack and self._block_stack[-1] == 'BEGIN':
-                        self._block_stack.pop()
-                        self.level = max(0, self.level - 1)
                 self._seen_begin = False
                 # Split on semicolon if not inside a BEGIN...END block
                 if self.level <= 0 and 'BEGIN' not in self._block_stack:
