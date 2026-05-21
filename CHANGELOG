@@ -1,7 +1,9 @@
 Development Version
 -------------------
 
-Nothing yet.
+Bug Fixes
+
+* Fix statement splitting (issue845).
 
 
 Release 0.5.5 (Dec 19, 2025)

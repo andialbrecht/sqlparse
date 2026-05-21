@@ -69,7 +69,7 @@ SQL_REGEX = [
     (r'(?<![\w\])])(\[[^\]\[]+\])', tokens.Name),
     (r'((LEFT\s+|RIGHT\s+|FULL\s+)?(INNER\s+|OUTER\s+|STRAIGHT\s+)?'
      r'|(CROSS\s+|NATURAL\s+)?)?JOIN\b', tokens.Keyword),
-    (r'END(\s+IF|\s+LOOP|\s+WHILE)?\b', tokens.Keyword),
+    (r'END(\s+IF|\s+LOOP|\s+WHILE|\s+FOR|\s+CASE)?\b', tokens.Keyword),
     (r'IF\s+(NOT\s+)?EXISTS\b', tokens.Keyword),
     (r'NOT\s+NULL\b', tokens.Keyword),
     (r'(ASC|DESC)(\s+NULLS\s+(FIRST|LAST))?\b', tokens.Keyword.Order),
