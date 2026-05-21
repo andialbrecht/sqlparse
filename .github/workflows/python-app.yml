@@ -53,7 +53,7 @@ jobs:
 
     - name: Run lint (Python 3.11 only)
       if: matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
-      run: uv run --group dev flake8 sqlparse/
+      run: uv run --group dev ruff check sqlparse/
 
     - name: Generate coverage report (Python 3.11 only)
       if: matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'

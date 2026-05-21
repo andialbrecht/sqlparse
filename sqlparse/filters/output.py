@@ -5,7 +5,8 @@
 # This module is part of python-sqlparse and is released under
 # the BSD License: https://opensource.org/licenses/BSD-3-Clause
 
-from sqlparse import sql, tokens as T
+from sqlparse import sql
+from sqlparse import tokens as T
 
 
 class OutputFilter:
@@ -21,7 +22,7 @@ class OutputFilter:
     def process(self, stmt):
         self.count += 1
         if self.count > 1:
-            varname = '{f.varname}{f.count}'.format(f=self)
+            varname = f'{self.varname}{self.count}'
         else:
             varname = self.varname
 

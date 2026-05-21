@@ -8,18 +8,12 @@
 """Parse SQL statements."""
 
 # Setup namespace
-from typing import Any, Generator, IO, List, Optional, Tuple, Union
+from typing import IO, Any, Generator, List, Optional, Tuple, Union
 
-from sqlparse import sql
-from sqlparse import cli
-from sqlparse import engine
-from sqlparse import tokens
-from sqlparse import filters
-from sqlparse import formatter
-
+from sqlparse import cli, engine, filters, formatter, sql, tokens
 
 __version__ = "0.5.6.dev0"
-__all__ = ["engine", "filters", "formatter", "sql", "tokens", "cli"]
+__all__ = ["cli", "engine", "filters", "formatter", "sql", "tokens"]
 
 
 def parse(

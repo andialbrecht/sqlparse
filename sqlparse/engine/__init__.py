@@ -10,7 +10,7 @@ from sqlparse.engine.filter_stack import FilterStack
 from sqlparse.engine.statement_splitter import StatementSplitter
 
 __all__ = [
-    'grouping',
     'FilterStack',
     'StatementSplitter',
+    'grouping',
 ]

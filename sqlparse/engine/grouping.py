@@ -8,7 +8,7 @@
 from sqlparse import sql
 from sqlparse import tokens as T
 from sqlparse.exceptions import SQLParseError
-from sqlparse.utils import recurse, imt
+from sqlparse.utils import imt, recurse
 
 # Maximum recursion depth for grouping operations to prevent DoS attacks
 # Set to None to disable limit (not recommended for untrusted input)
@@ -234,12 +234,7 @@ def group_comparison(tlist):
         return token.ttype == T.Operator.Comparison
 
     def valid(token):
-        if imt(token, t=ttypes, i=sqlcls):
-            return True
-        elif token and token.is_keyword and token.normalized == 'NULL':
-            return True
-        else:
-            return False
+        return bool(imt(token, t=ttypes, i=sqlcls) or (token and token.is_keyword and token.normalized == 'NULL'))
 
     def post(tlist, pidx, tidx, nidx):
         return pidx, nidx

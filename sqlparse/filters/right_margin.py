@@ -7,7 +7,8 @@
 
 import re
 
-from sqlparse import sql, tokens as T
+from sqlparse import sql
+from sqlparse import tokens as T
 
 
 # FIXME: Doesn't work

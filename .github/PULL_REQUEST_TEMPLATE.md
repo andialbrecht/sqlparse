@@ -4,7 +4,7 @@ Before submitting your pull request please have a look at the
 following checklist:
 
 - [ ] ran the tests (`pytest`)
-- [ ] all style issues addressed (`flake8`)
+- [ ] all style issues addressed (`ruff`)
 - [ ] your changes are covered by tests
 - [ ] your changes are documented, if needed
 

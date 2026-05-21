@@ -44,8 +44,16 @@ class Token:
     the type of the token.
     """
 
-    __slots__ = ('value', 'ttype', 'parent', 'normalized', 'is_keyword',
-                 'is_group', 'is_whitespace', 'is_newline')
+    __slots__ = (
+        'is_group',
+        'is_keyword',
+        'is_newline',
+        'is_whitespace',
+        'normalized',
+        'parent',
+        'ttype',
+        'value',
+    )
 
     def __init__(self, ttype, value):
         value = str(value)
@@ -110,10 +118,7 @@ class Token:
             flag = re.IGNORECASE if self.is_keyword else 0
             values = (re.compile(v, flag) for v in values)
 
-            for pattern in values:
-                if pattern.search(self.normalized):
-                    return True
-            return False
+            return any(pattern.search(self.normalized) for pattern in values)
 
         if self.is_keyword:
             values = (v.upper() for v in values)
@@ -267,7 +272,7 @@ class TokenList(Token):
 
     def token_not_matching(self, funcs, idx):
         funcs = (funcs,) if not isinstance(funcs, (list, tuple)) else funcs
-        funcs = [lambda tk: not func(tk) for func in funcs]
+        funcs = [lambda tk, func=func: not func(tk) for func in funcs]
         return self._token_matching(funcs, idx)
 
     def token_matching(self, funcs, idx):
@@ -583,10 +588,7 @@ class Case(TokenList):
 
         for token in self.tokens:
             # Set mode from the current statement
-            if token.match(T.Keyword, 'CASE'):
-                continue
-
-            elif skip_ws and token.ttype in T.Whitespace:
+            if token.match(T.Keyword, 'CASE') or (skip_ws and token.ttype in T.Whitespace):
                 continue
 
             elif token.match(T.Keyword, 'WHEN'):

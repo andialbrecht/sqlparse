@@ -19,7 +19,7 @@ test:
 	uv run --group dev --python 3.14 pytest tests/
 
 lint:
-	uv run --group dev flake8 sqlparse/
+	uv run --group dev ruff check sqlparse/
 
 coverage:
 	uv run --group dev coverage run -m pytest tests/

@@ -18,7 +18,7 @@ This project uses `uv` for dependency and environment management. Common command
 - Using Makefile: `make test`
 
 ### Linting
-- `uv run --group dev flake8 sqlparse/` or `make lint`
+- `uv run --group dev ruff check sqlparse/` or `make lint`
 
 ### Coverage
 - `make coverage` (runs tests with coverage and shows report)

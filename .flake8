@@ -1,8 +1,0 @@
-[flake8]
-exclude =
-  tests,
-  docs,
-  dist
-max-complexity = 31
-statistics = True
-show-source = True

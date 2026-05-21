@@ -73,8 +73,44 @@ exclude_lines = [
 dev = [
     "pytest",
     "coverage",
-    "flake8",
+    "ruff",
     "build",
     "sphinx",
 ]
+
+[tool.ruff]
+target-version = "py38"
+exclude = [
+    "dist",
+    "docs",
+    "tests",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "F",    # Pyflakes
+    "W",    # pycodestyle warnings
+    "C90",  # mccabe complexity
+    "B",    # flake8-bugbear (bugs/design issues)
+    "I",    # isort (import sorting)
+    "UP",   # pyupgrade (modern python syntax)
+    "SIM",  # flake8-simplify (simpler code)
+    "RUF",  # Ruff-specific rules
+]
+ignore = [
+    "RUF001",  # Ambiguous unicode character (acute accent is used intentionally for quoting)
+    "RUF012",  # Mutable default value for class attribute (used for SQL matching patterns)
+    "B904",    # raise ... from ... (not required for simple custom exceptions)
+    "E501",    # Line too long (managed by formatting choices rather than strict rules)
+    "SIM108",  # Use ternary operator instead of if-else block (traditional if-else is preferred for readability)
+    "RUF005",  # Consider iterable unpacking instead of concatenation
+    "RUF059",  # Unused unpacked variables (retains standard unpacking signatures)
+    "SIM102",  # Nested if statements (sometimes preferred for logic separation)
+    "SIM115",  # Use a context manager for opening files (CLI streams are opened dynamically)
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 31
+
 
