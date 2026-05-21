@@ -69,67 +69,12 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "if TYPE_CHECKING:",
 ]
+[dependency-groups]
+dev = [
+    "pytest",
+    "coverage",
+    "flake8",
+    "build",
+    "sphinx",
+]
 
-[tool.pixi.workspace]
-channels = ["conda-forge"]
-platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
-
-[tool.pixi.pypi-dependencies]
-sqlparse = { path = ".", editable = true }
-
-[tool.pixi.feature.test.dependencies]
-pytest = "*"
-coverage = "*"
-flake8 = "*"
-
-[tool.pixi.feature.test.pypi-dependencies]
-sqlparse = { path = ".", editable = true }
-
-[tool.pixi.feature.py38.dependencies]
-python = "3.8.*"
-
-[tool.pixi.feature.py39.dependencies]
-python = "3.9.*"
-
-[tool.pixi.feature.py310.dependencies]
-python = "3.10.*"
-
-[tool.pixi.feature.py311.dependencies]
-python = "3.11.*"
-
-[tool.pixi.feature.py312.dependencies]
-python = "3.12.*"
-
-[tool.pixi.feature.py313.dependencies]
-python = "3.13.*"
-
-[tool.pixi.feature.py314.dependencies]
-python = "3.14.*"
-
-
-[tool.pixi.environments]
-default = { solve-group = "default" }
-dev = { features = ["dev"], solve-group = "default" }
-doc = { features = ["doc"], solve-group = "default" }
-py38 = { features = ["test", "py38"], solve-group = "py38" }
-py39 = { features = ["test", "py39"], solve-group = "py39" }
-py310 = { features = ["test", "py310"], solve-group = "py310" }
-py311 = { features = ["test", "py311"], solve-group = "py311" }
-py312 = { features = ["test", "py312"], solve-group = "py312" }
-py313 = { features = ["test", "py313"], solve-group = "py313" }
-py314 = { features = ["test", "py314"], solve-group = "py314" }
-
-[tool.pixi.tasks]
-test-py38 = "pixi run -e py38 pytest tests/"
-test-py39 = "pixi run -e py39 pytest tests/"
-test-py310 = "pixi run -e py310 pytest tests/"
-test-py311 = "pixi run -e py311 pytest tests/"
-test-py312 = "pixi run -e py312 pytest tests/"
-test-py313 = "pixi run -e py313 pytest tests/"
-test-py314 = "pixi run -e py314 pytest tests/"
-test-all = { depends-on = ["test-py38", "test-py39", "test-py310", "test-py311", "test-py312", "test-py313", "test-py314"] }
-lint = "pixi run -e py311 flake8 sqlparse/"
-coverage = "coverage run -m pytest tests/"
-coverage-combine = "coverage combine"
-coverage-report = "coverage report"
-coverage-xml = "coverage xml"

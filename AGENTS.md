@@ -8,17 +8,17 @@ sqlparse is a non-validating SQL parser for Python that provides support for par
 
 ## Development Commands
 
-This project uses `pixi` for dependency and environment management. Common commands:
+This project uses `uv` for dependency and environment management. Common commands:
 
 ### Testing
-- Run all tests across Python versions: `pixi run test-all`
-- Run tests for specific Python version: `pixi run -e py311 pytest tests/`
-- Run single test file: `pixi run -e py311 pytest tests/test_format.py`
-- Run specific test: `pixi run -e py311 pytest tests/test_format.py::test_name`
+- Run all tests across Python versions: `make test`
+- Run tests for specific Python version: `uv run --group dev --python 3.11 pytest tests/`
+- Run single test file: `uv run --group dev --python 3.11 pytest tests/test_format.py`
+- Run specific test: `uv run --group dev --python 3.11 pytest tests/test_format.py::test_name`
 - Using Makefile: `make test`
 
 ### Linting
-- `pixi run lint` or `make lint`
+- `uv run --group dev flake8 sqlparse/` or `make lint`
 
 ### Coverage
 - `make coverage` (runs tests with coverage and shows report)

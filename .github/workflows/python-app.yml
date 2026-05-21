@@ -1,4 +1,4 @@
-# This workflow will install Python dependencies, run tests and lint using pixi
+# This workflow will install Python dependencies, run tests and lint using uv
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
 name: Python application
@@ -19,46 +19,49 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - python-version: "py38"
+          - python-version: "3.8"
             os: ubuntu-latest
-          - python-version: "py39"
+          - python-version: "3.9"
             os: ubuntu-latest
-          - python-version: "py310"
+          - python-version: "3.10"
             os: ubuntu-latest
-          - python-version: "py311"
+          - python-version: "3.11"
             os: ubuntu-latest
-          - python-version: "py312"
+          - python-version: "3.12"
             os: ubuntu-latest
-          - python-version: "py313"
+          - python-version: "3.13"
             os: ubuntu-latest
-          - python-version: "py314"
+          - python-version: "3.14"
             os: ubuntu-latest
           # Test on additional platforms for Python 3.11
-          - python-version: "py311"
+          - python-version: "3.11"
             os: macos-latest
-          - python-version: "py311"
+          - python-version: "3.11"
             os: windows-latest
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Setup pixi
-      uses: prefix-dev/setup-pixi@v0.8.1
+    - name: Setup uv
+      uses: astral-sh/setup-uv@v5
       with:
-        pixi-version: v0.55.0
-        cache: true
+        enable-cache: true
+        python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies and run tests
-      run: pixi run test-${{ matrix.python-version }}
+      run: uv run --group dev pytest tests/
 
     - name: Run lint (Python 3.11 only)
-      if: matrix.python-version == 'py311' && matrix.os == 'ubuntu-latest'
-      run: pixi run lint
+      if: matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
+      run: uv run --group dev flake8 sqlparse/
 
     - name: Generate coverage report (Python 3.11 only)
-      if: matrix.python-version == 'py311' && matrix.os == 'ubuntu-latest'
-      run: pixi run -e py311 coverage && pixi run -e py311 coverage-combine && pixi run -e py311 coverage-xml
+      if: matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
+      run: |
+        uv run --group dev coverage run -m pytest tests/
+        uv run --group dev coverage combine
+        uv run --group dev coverage xml
 
     - name: Publish to codecov
-      if: matrix.python-version == 'py311' && matrix.os == 'ubuntu-latest'
+      if: matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
       uses: codecov/codecov-action@v4
