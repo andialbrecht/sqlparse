@@ -10,8 +10,6 @@ help:
 	@sed -n '/^[a-zA-Z0-9_.]*:/s/:.*//p' <Makefile | sort
 
 test:
-	uv run --group dev --python 3.8 pytest tests/
-	uv run --group dev --python 3.9 pytest tests/
 	uv run --group dev --python 3.10 pytest tests/
 	uv run --group dev --python 3.11 pytest tests/
 	uv run --group dev --python 3.12 pytest tests/

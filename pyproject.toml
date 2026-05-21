@@ -16,8 +16,6 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -27,8 +25,8 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
     "Topic :: Database",
     "Topic :: Software Development",
-]
-requires-python = ">=3.8"
+ ]
+requires-python = ">=3.10"
 
 [project.urls]
 Home = "https://github.com/andialbrecht/sqlparse"
@@ -79,7 +77,7 @@ dev = [
 ]
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py310"
 exclude = [
     "dist",
     "docs",

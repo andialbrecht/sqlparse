@@ -1,9 +1,20 @@
 Development Version
 -------------------
 
+Notable Changes
+
+* Drop support for Python 3.8 and 3.9. Python 3.10+ is now required.
+* Migrate project dependencies and environment management from `pixi` to `uv`.
+* Replace `flake8` with `ruff` for code checking and linting.
+
+Enhancements
+
+* Modernize type annotations in top-level API functions using PEP 585 and PEP 604 syntax.
+
 Bug Fixes
 
 * Fix statement splitting (issue845).
+* Fix a late-binding closure bug in `TokenList.token_not_matching`.
 
 
 Release 0.5.5 (Dec 19, 2025)

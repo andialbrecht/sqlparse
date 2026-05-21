@@ -4,7 +4,7 @@ This file provides guidance to Agents when working with code in this repository.
 
 ## Project Overview
 
-sqlparse is a non-validating SQL parser for Python that provides support for parsing, splitting, and formatting SQL statements. It's compatible with Python 3.8+ and supports multiple SQL dialects (Oracle, MySQL, PostgreSQL/PL/pgSQL, HQL, MS Access, Snowflake, BigQuery).
+sqlparse is a non-validating SQL parser for Python that provides support for parsing, splitting, and formatting SQL statements. It's compatible with Python 3.10+ and supports multiple SQL dialects (Oracle, MySQL, PostgreSQL/PL/pgSQL, HQL, MS Access, Snowflake, BigQuery).
 
 ## Development Commands
 
