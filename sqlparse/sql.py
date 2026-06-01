@@ -164,7 +164,7 @@ class TokenList(Token):
     def __init__(self, tokens=None):
         self.tokens = tokens or []
         [setattr(token, 'parent', self) for token in self.tokens]
-        super().__init__(None, str(self))
+        super().__init__(None, ''.join(token.value for token in self.tokens))
         self.is_group = True
 
     def __str__(self):
@@ -327,7 +327,7 @@ class TokenList(Token):
             grp = start
             grp.tokens.extend(subtokens)
             del self.tokens[start_idx + 1:end_idx]
-            grp.value = str(start)
+            grp.value += ''.join(token.value for token in subtokens)
         else:
             subtokens = self.tokens[start_idx:end_idx]
             grp = grp_cls(subtokens)
