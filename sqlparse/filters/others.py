@@ -98,12 +98,18 @@ class StripWhitespaceFilter:
             is_first_char = False
 
     def _stripws_identifierlist(self, tlist):
-        # Removes newlines before commas, see issue140
-        last_nl = None
+        # Removes whitespace before commas, see issue140. All consecutive
+        # whitespace tokens before a comma are removed so that the result is
+        # stable when the formatter is applied to its own output (issue140
+        # only handled a single preceding whitespace token, which left a
+        # stray space when the comma was preceded by multiple whitespace
+        # tokens, e.g. ``a  ,  b``).
+        last_ws = []
         for token in list(tlist.tokens):
-            if last_nl and token.ttype is T.Punctuation and token.value == ',':
-                tlist.tokens.remove(last_nl)
-            last_nl = token if token.is_whitespace else None
+            if last_ws and token.ttype is T.Punctuation and token.value == ',':
+                for ws in last_ws:
+                    tlist.tokens.remove(ws)
+            last_ws = last_ws + [token] if token.is_whitespace else []
 
             # next_ = tlist.token_next(token, skip_ws=False)
             # if (next_ and not next_.is_whitespace and
