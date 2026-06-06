@@ -491,6 +491,27 @@ class TestFormatReindent:
             'from a,',
             '     b'])
 
+    def test_identifier_list_whitespace_before_comma(self):
+        # issue140 only removed a single whitespace token before a comma, so
+        # input with multiple whitespace tokens before a comma left a stray
+        # space (``a ,``) which made formatting non-idempotent. All whitespace
+        # before a comma must be removed.
+        f = lambda sql: sqlparse.format(sql, reindent=True)
+        expected = '\n'.join([
+            'select a,',
+            '       b',
+            'from t'])
+        for s in (
+            'select a  ,  b from t',   # multiple spaces before comma
+            'select a   , b from t',   # several spaces before comma
+            'select a\t\t, b from t',  # tabs before comma
+            'select a \n , b from t',  # newline + space before comma
+        ):
+            formatted = f(s)
+            assert formatted == expected
+            # formatting must be idempotent
+            assert f(formatted) == formatted
+
     def test_identifier_list_with_wrap_after(self):
         f = lambda sql: sqlparse.format(sql, reindent=True, wrap_after=14)
         s = 'select foo, bar, baz from table1, table2 where 1 = 2'
