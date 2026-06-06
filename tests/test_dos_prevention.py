@@ -50,6 +50,34 @@ class TestDoSPrevention:
         with pytest.raises(SQLParseError, match="Maximum number of tokens exceeded"):
             sqlparse.format(sql, reindent=True)
 
+    def test_nested_paren_within_cap_under_1s(self):
+        """Reaching MAX_GROUPING_DEPTH must not require multi-second CPU.
+
+        Before the TokenList.__init__ fix, a 1 KB payload of 500 nested
+        parens took ~1.3 s and a 2 KB payload of 1000 nested parens took
+        ~11 s before the depth cap raised SQLParseError, because each
+        TokenList materialised its ``value`` via ``str(self)`` which
+        recursed over the full subtree (O(n * depth)).
+        """
+        sql = 'SELECT ' + '(' * 1000 + '1' + ')' * 1000
+        t0 = time.perf_counter()
+        with pytest.raises(SQLParseError, match='Maximum grouping depth'):
+            sqlparse.parse(sql)
+        dt = time.perf_counter() - t0
+        assert dt < 1.0, f'parse took {dt:.2f}s, expected sub-second'
+
+    def test_nested_case_within_cap_under_1s(self):
+        """Same invariant as nested parentheses, exercised via CASE WHEN."""
+        case = '1'
+        for i in range(400):
+            case = f'CASE WHEN x={i} THEN {case} ELSE NULL END'
+        sql = f'SELECT {case} FROM t'
+        t0 = time.perf_counter()
+        with pytest.raises(SQLParseError, match='Maximum grouping depth'):
+            sqlparse.parse(sql)
+        dt = time.perf_counter() - t0
+        assert dt < 1.0, f'parse took {dt:.2f}s, expected sub-second'
+
     def test_normal_sql_still_works(self):
         """Test that normal SQL still works correctly after DoS protections."""
         sql = """

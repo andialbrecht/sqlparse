@@ -7,6 +7,24 @@ Notable Changes
 * Migrate project dependencies and environment management from `pixi` to `uv`.
 * Replace `flake8` with `ruff` for code checking and linting.
 
+Security Fixes
+
+* Fix uncontrolled CPU consumption in ``TokenList`` grouping (CWE-1333,
+  patches by alhudz and tonghuaroot, pr848).  Two independent
+  quadratic behaviours were fixed:
+
+  - ``TokenList.__init__`` called ``str(self)`` which recursively flattened
+    the entire token subtree on every group construction.  Deeply nested SQL
+    (parentheses, CASE WHEN, subqueries) therefore costs O(n·depth) CPU
+    before the depth cap fires — a ~2 KB payload could pin a worker for 10+
+    seconds.  Fix: join children's already-cached ``value`` fields directly,
+    reducing per-node cost to O(len(tokens)).
+
+  - ``group_tokens()`` recomputed ``grp.value = str(start)`` on every extend
+    step, re-scanning the entire growing group each time.  Wide flat queries
+    (e.g. SELECT with thousands of columns) therefore cost O(N²) in the
+    number of columns.  Fix: append only the newly added tokens' values.
+
 Enhancements
 
 * Modernize type annotations in top-level API functions using PEP 585 and PEP 604 syntax.
