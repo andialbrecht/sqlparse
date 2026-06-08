@@ -307,7 +307,7 @@ class TokenList(Token):
     def token_index(self, token, start=0):
         """Return list index of token."""
         start = start if isinstance(start, int) else self.token_index(start)
-        return start + self.tokens[start:].index(token)
+        return self.tokens.index(token, start)
 
     def group_tokens(self, grp_cls, start, end, include_end=True,
                      extend=False):
