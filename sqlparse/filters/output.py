@@ -31,9 +31,63 @@ class OutputFilter:
         return stmt
 
 
+def _generate_assignment_header(varname, has_nl, count, quote_char, assign_op='='):
+    """Generate the variable assignment header tokens.
+
+    Yields the tokens that start a variable assignment line:
+        varname = '   (Python)
+        varname  = "   (PHP)
+
+    Args:
+        varname: Variable name string
+        has_nl: Whether the SQL has newlines
+        count: Statement count (for blank line before subsequent statements)
+        quote_char: Single quote (') for Python, double quote (") for PHP
+        assign_op: Assignment operator ('=' or '.=')
+    """
+    if count > 1:
+        yield sql.Token(T.Whitespace, '\n')
+    yield sql.Token(T.Name, varname)
+    yield sql.Token(T.Whitespace, ' ')
+    yield sql.Token(T.Operator, assign_op)
+    yield sql.Token(T.Whitespace, ' ')
+    yield sql.Token(T.Text, quote_char)
+
+
+def _generate_continuation_header(varname, quote_char, assign_op='=', indent_padding=0):
+    """Generate the continuation line header tokens after a newline.
+
+    Yields the tokens for a continuation line when the SQL has newlines:
+        '     (Python - with optional indent padding)
+        varname .= "  (PHP)
+
+    Args:
+        varname: Variable name string
+        quote_char: Quote character for the new line
+        assign_op: Assignment operator for continuation ('=' or '.=')
+        indent_padding: Number of spaces for Python-style continuation padding
+    """
+    yield sql.Token(T.Text, f' {quote_char}')
+    yield sql.Token(T.Whitespace, '\n')
+    if assign_op == '.=':
+        # PHP-style: re-assign with .=
+        yield sql.Token(T.Name, varname)
+        yield sql.Token(T.Whitespace, ' ')
+        yield sql.Token(T.Operator, '.=')
+        yield sql.Token(T.Whitespace, ' ')
+    else:
+        # Python-style: continuation with padding
+        yield sql.Token(T.Whitespace, ' ' * indent_padding)
+    yield sql.Token(T.Text, quote_char)
+
+
 class OutputPythonFilter(OutputFilter):
+    _quote_char = "'"
+    _escape_char = "'"
+    _escape_replacement = "\\'"
+
     def _process(self, stream, varname, has_nl):
-        # SQL query assignation to varname
+        # Variable assignment header (without trailing quote — we add it below)
         if self.count > 1:
             yield sql.Token(T.Whitespace, '\n')
         yield sql.Token(T.Name, varname)
@@ -42,82 +96,83 @@ class OutputPythonFilter(OutputFilter):
         yield sql.Token(T.Whitespace, ' ')
         if has_nl:
             yield sql.Token(T.Operator, '(')
-        yield sql.Token(T.Text, "'")
 
-        # Print the tokens on the quote
+        yield sql.Token(T.Text, self._quote_char)
+
+        # Print the tokens within the quote
+        continuation_padding = len(varname) + 4
         for token in stream:
-            # Token is a new line separator
             if token.is_whitespace and '\n' in token.value:
-                # Close quote and add a new line
-                yield sql.Token(T.Text, " '")
-                yield sql.Token(T.Whitespace, '\n')
+                # Close current quote and start continuation line
+                yield from _generate_continuation_header(
+                    varname, self._quote_char, '=',
+                    indent_padding=continuation_padding)
 
-                # Quote header on secondary lines
-                yield sql.Token(T.Whitespace, ' ' * (len(varname) + 4))
-                yield sql.Token(T.Text, "'")
-
-                # Indentation
+                # Indentation after the newline
                 after_lb = token.value.split('\n', 1)[1]
                 if after_lb:
                     yield sql.Token(T.Whitespace, after_lb)
                 continue
 
-            # Token has escape chars
-            elif "'" in token.value:
-                token.value = token.value.replace("'", "\\'")
+            # Escape the quote character within token values
+            if self._escape_char in token.value:
+                token.value = token.value.replace(
+                    self._escape_char, self._escape_replacement)
 
-            # Put the token
             yield sql.Token(T.Text, token.value)
 
         # Close quote
-        yield sql.Token(T.Text, "'")
+        yield sql.Token(T.Text, self._quote_char)
         if has_nl:
             yield sql.Token(T.Operator, ')')
 
 
 class OutputPHPFilter(OutputFilter):
     varname_prefix = '$'
+    _quote_char = '"'
+    _escape_char = '"'
+    _escape_replacement = '\\"'
 
     def _process(self, stream, varname, has_nl):
-        # SQL query assignation to varname (quote header)
+        # Variable assignment header
         if self.count > 1:
             yield sql.Token(T.Whitespace, '\n')
         yield sql.Token(T.Name, varname)
         yield sql.Token(T.Whitespace, ' ')
         if has_nl:
+            # Extra space for alignment with continuation .= lines
             yield sql.Token(T.Whitespace, ' ')
         yield sql.Token(T.Operator, '=')
         yield sql.Token(T.Whitespace, ' ')
-        yield sql.Token(T.Text, '"')
+        yield sql.Token(T.Text, self._quote_char)
 
-        # Print the tokens on the quote
+        # Print the tokens within the quote
         for token in stream:
-            # Token is a new line separator
             if token.is_whitespace and '\n' in token.value:
-                # Close quote and add a new line
+                # Close current quote with semicolon and start continuation
                 yield sql.Token(T.Text, ' ";')
                 yield sql.Token(T.Whitespace, '\n')
 
-                # Quote header on secondary lines
+                # PHP continuation line: $varname .= "
                 yield sql.Token(T.Name, varname)
                 yield sql.Token(T.Whitespace, ' ')
                 yield sql.Token(T.Operator, '.=')
                 yield sql.Token(T.Whitespace, ' ')
-                yield sql.Token(T.Text, '"')
+                yield sql.Token(T.Text, self._quote_char)
 
-                # Indentation
+                # Indentation after the newline
                 after_lb = token.value.split('\n', 1)[1]
                 if after_lb:
                     yield sql.Token(T.Whitespace, after_lb)
                 continue
 
-            # Token has escape chars
-            elif '"' in token.value:
-                token.value = token.value.replace('"', '\\"')
+            # Escape the quote character within token values
+            if self._escape_char in token.value:
+                token.value = token.value.replace(
+                    self._escape_char, self._escape_replacement)
 
-            # Put the token
             yield sql.Token(T.Text, token.value)
 
         # Close quote
-        yield sql.Token(T.Text, '"')
+        yield sql.Token(T.Text, self._quote_char)
         yield sql.Token(T.Punctuation, ';')

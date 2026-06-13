@@ -78,13 +78,18 @@ def recurse(*cls):
     return wrap
 
 
-def imt(token, i=None, m=None, t=None):
-    """Helper function to simplify comparisons Instance, Match and TokenType
-    :param token:
-    :param i: Class or Tuple/List of Classes
-    :param m: Tuple of TokenType & Value. Can be list of Tuple for multiple
-    :param t: TokenType or Tuple/List of TokenTypes
-    :return:  bool
+def token_matches(token, i=None, m=None, t=None):
+    """Check if a token matches the given criteria.
+
+    Tests a token against Instance, Match, and/or TokenType criteria.
+    Returns True if any criterion matches.
+
+    :param token: The token to test
+    :param i: Class or Tuple/List of Classes to check isinstance against
+    :param m: Tuple of (TokenType, Value) to match via token.match().
+              Can be a list of tuples for multiple patterns.
+    :param t: TokenType or Tuple/List of TokenTypes to check membership via 'in'
+    :return: bool
     """
     if token is None:
         return False
@@ -103,6 +108,10 @@ def imt(token, i=None, m=None, t=None):
         elif token.ttype in t:
             return True
     return False
+
+
+# Backward-compatible alias: imt() was the original name
+imt = token_matches
 
 
 def consume(iterator, n):
