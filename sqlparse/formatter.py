@@ -11,125 +11,104 @@ from sqlparse import filters
 from sqlparse.exceptions import SQLParseError
 
 
+# ─── Option validation schema ────────────────────────────────────────────────
+# Each entry defines: valid values/coercion, side effects, and error messages.
+# This replaces the repetitive if/raise pattern from the original code.
+
+_BOOL_VALUES = [True, False]
+_CASE_VALUES = [None, 'upper', 'lower', 'capitalize']
+_OUTPUT_FORMAT_VALUES = [None, 'sql', 'python', 'php']
+
+
+def _validate_choice(option_name, value, valid_choices):
+    """Validate that a value is one of the allowed choices."""
+    if value not in valid_choices:
+        raise SQLParseError(f'Invalid value for {option_name}: {value!r}')
+
+
+def _validate_positive_int(option_name, value, min_value=1):
+    """Validate and coerce to a positive integer."""
+    try:
+        value = int(value)
+    except (TypeError, ValueError):
+        raise SQLParseError(f'{option_name} requires an integer')
+    if value < min_value:
+        raise SQLParseError(
+            f'{option_name} requires a positive integer'
+            if min_value == 1
+            else f'{option_name} requires an integer > {min_value - 1}'
+        )
+    return value
+
+
 def validate_options(options):
-    """Validates options."""
-    kwcase = options.get('keyword_case')
-    if kwcase not in [None, 'upper', 'lower', 'capitalize']:
-        raise SQLParseError('Invalid value for keyword_case: '
-                            f'{kwcase!r}')
+    """Validates formatting options using a declarative schema.
 
-    idcase = options.get('identifier_case')
-    if idcase not in [None, 'upper', 'lower', 'capitalize']:
-        raise SQLParseError('Invalid value for identifier_case: '
-                            f'{idcase!r}')
+    Each option is validated according to its type and allowed values.
+    Side effects (like setting dependent options) are applied after
+    validation passes.
+    """
+    # ── Choice-type options ────────────────────────────────────────────────
+    _validate_choice('keyword_case', options.get('keyword_case'), _CASE_VALUES)
+    _validate_choice('identifier_case', options.get('identifier_case'), _CASE_VALUES)
+    _validate_choice('output_format', options.get('output_format'), _OUTPUT_FORMAT_VALUES)
+    _validate_choice('strip_comments', options.get('strip_comments', False), _BOOL_VALUES)
+    _validate_choice('use_space_around_operators',
+                     options.get('use_space_around_operators', False), _BOOL_VALUES)
+    _validate_choice('strip_whitespace', options.get('strip_whitespace', False), _BOOL_VALUES)
+    _validate_choice('reindent', options.get('reindent', False), _BOOL_VALUES)
+    _validate_choice('reindent_aligned', options.get('reindent_aligned', False), _BOOL_VALUES)
+    _validate_choice('indent_tabs', options.get('indent_tabs', False), _BOOL_VALUES)
 
-    ofrmt = options.get('output_format')
-    if ofrmt not in [None, 'sql', 'python', 'php']:
-        raise SQLParseError('Unknown output format: '
-                            f'{ofrmt!r}')
-
-    strip_comments = options.get('strip_comments', False)
-    if strip_comments not in [True, False]:
-        raise SQLParseError('Invalid value for strip_comments: '
-                            f'{strip_comments!r}')
-
-    space_around_operators = options.get('use_space_around_operators', False)
-    if space_around_operators not in [True, False]:
-        raise SQLParseError('Invalid value for use_space_around_operators: '
-                            f'{space_around_operators!r}')
-
-    strip_ws = options.get('strip_whitespace', False)
-    if strip_ws not in [True, False]:
-        raise SQLParseError('Invalid value for strip_whitespace: '
-                            f'{strip_ws!r}')
-
+    # ── Integer-type options ───────────────────────────────────────────────
     truncate_strings = options.get('truncate_strings')
     if truncate_strings is not None:
-        try:
-            truncate_strings = int(truncate_strings)
-        except (ValueError, TypeError):
-            raise SQLParseError('Invalid value for truncate_strings: '
-                                f'{truncate_strings!r}')
-        if truncate_strings <= 1:
-            raise SQLParseError('Invalid value for truncate_strings: '
-                                f'{truncate_strings!r}')
+        truncate_strings = _validate_positive_int(
+            'truncate_strings', truncate_strings, min_value=2)
         options['truncate_strings'] = truncate_strings
         options['truncate_char'] = options.get('truncate_char', '[...]')
 
-    indent_columns = options.get('indent_columns', False)
-    if indent_columns not in [True, False]:
-        raise SQLParseError('Invalid value for indent_columns: '
-                            f'{indent_columns!r}')
-    elif indent_columns:
-        options['reindent'] = True  # enforce reindent
-    options['indent_columns'] = indent_columns
-
-    reindent = options.get('reindent', False)
-    if reindent not in [True, False]:
-        raise SQLParseError('Invalid value for reindent: '
-                            f'{reindent!r}')
-    elif reindent:
-        options['strip_whitespace'] = True
-
-    reindent_aligned = options.get('reindent_aligned', False)
-    if reindent_aligned not in [True, False]:
-        raise SQLParseError('Invalid value for reindent_aligned: '
-                            f'{reindent!r}')
-    elif reindent_aligned:
-        options['strip_whitespace'] = True
-
-    indent_after_first = options.get('indent_after_first', False)
-    if indent_after_first not in [True, False]:
-        raise SQLParseError('Invalid value for indent_after_first: '
-                            f'{indent_after_first!r}')
-    options['indent_after_first'] = indent_after_first
-
-    indent_tabs = options.get('indent_tabs', False)
-    if indent_tabs not in [True, False]:
-        raise SQLParseError('Invalid value for indent_tabs: '
-                            f'{indent_tabs!r}')
-    elif indent_tabs:
-        options['indent_char'] = '\t'
-    else:
-        options['indent_char'] = ' '
-
     indent_width = options.get('indent_width', 2)
-    try:
-        indent_width = int(indent_width)
-    except (TypeError, ValueError):
-        raise SQLParseError('indent_width requires an integer')
-    if indent_width < 1:
-        raise SQLParseError('indent_width requires a positive integer')
-    options['indent_width'] = indent_width
+    options['indent_width'] = _validate_positive_int('indent_width', indent_width)
 
     wrap_after = options.get('wrap_after', 0)
-    try:
-        wrap_after = int(wrap_after)
-    except (TypeError, ValueError):
-        raise SQLParseError('wrap_after requires an integer')
-    if wrap_after < 0:
-        raise SQLParseError('wrap_after requires a positive integer')
-    options['wrap_after'] = wrap_after
-
-    comma_first = options.get('comma_first', False)
-    if comma_first not in [True, False]:
-        raise SQLParseError('comma_first requires a boolean value')
-    options['comma_first'] = comma_first
-
-    compact = options.get('compact', False)
-    if compact not in [True, False]:
-        raise SQLParseError('compact requires a boolean value')
-    options['compact'] = compact
+    options['wrap_after'] = _validate_positive_int('wrap_after', wrap_after, min_value=0)
 
     right_margin = options.get('right_margin')
     if right_margin is not None:
-        try:
-            right_margin = int(right_margin)
-        except (TypeError, ValueError):
-            raise SQLParseError('right_margin requires an integer')
-        if right_margin < 10:
-            raise SQLParseError('right_margin requires an integer > 10')
+        right_margin = _validate_positive_int(
+            'right_margin', right_margin, min_value=11)
     options['right_margin'] = right_margin
+
+    # ── Side effects: dependent options ────────────────────────────────────
+    indent_columns = options.get('indent_columns', False)
+    _validate_choice('indent_columns', indent_columns, _BOOL_VALUES)
+    if indent_columns:
+        options['reindent'] = True  # enforce reindent
+    options['indent_columns'] = indent_columns
+
+    indent_after_first = options.get('indent_after_first', False)
+    _validate_choice('indent_after_first', indent_after_first, _BOOL_VALUES)
+    options['indent_after_first'] = indent_after_first
+
+    comma_first = options.get('comma_first', False)
+    _validate_choice('comma_first', comma_first, _BOOL_VALUES)
+    options['comma_first'] = comma_first
+
+    compact = options.get('compact', False)
+    _validate_choice('compact', compact, _BOOL_VALUES)
+    options['compact'] = compact
+
+    if options.get('reindent', False):
+        options['strip_whitespace'] = True
+
+    if options.get('reindent_aligned', False):
+        options['strip_whitespace'] = True
+
+    if options.get('indent_tabs', False):
+        options['indent_char'] = '\t'
+    else:
+        options['indent_char'] = ' '
 
     return options
 
