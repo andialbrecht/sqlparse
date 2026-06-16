@@ -359,6 +359,7 @@ KEYWORDS = {
     # 'M': tokens.Keyword,
     'MAP': tokens.Keyword,
     'MATCH': tokens.Keyword,
+    'MATERIALIZED': tokens.Keyword,
     'MAXEXTENTS': tokens.Keyword,
     'MAXVALUE': tokens.Keyword,
     'MESSAGE_LENGTH': tokens.Keyword,
