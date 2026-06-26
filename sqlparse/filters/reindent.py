@@ -91,16 +91,10 @@ class ReindentFilter:
             if prev_ and prev_.is_whitespace:
                 del tlist.tokens[pidx]
                 tidx -= 1
-            # only break if it's not the first token
-            if prev_:
-                # Check that there is actual non-whitespace content before
-                # this keyword.  If all preceding tokens are whitespace
-                # (e.g. inter-statement blank lines that process() already
-                # handles), skip -- otherwise we double-count the separator.
-                _, before = tlist.token_prev(tidx, skip_ws=True)
-                if before is not None:
-                    tlist.insert_before(tidx, self.nl())
-                    tidx += 1
+            _, before = tlist.token_prev(tidx, skip_ws=True)
+            if before is not None:
+                tlist.insert_before(tidx, self.nl())
+                tidx += 1
             tidx, token = tlist.token_next_by(t=ttypes, idx=tidx)
 
     def _process(self, tlist):
