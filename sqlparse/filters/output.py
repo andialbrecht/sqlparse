@@ -62,9 +62,11 @@ class OutputPythonFilter(OutputFilter):
                     yield sql.Token(T.Whitespace, after_lb)
                 continue
 
-            # Token has escape chars
-            elif "'" in token.value:
-                token.value = token.value.replace("'", "\\'")
+            # Escape backslashes before quotes so a backslash preceding a
+            # quote cannot break out of the generated string literal
+            # (GHSA-3496-9g83-7v6x).
+            else:
+                token.value = token.value.replace('\\', '\\\\').replace("'", "\\'")
 
             # Put the token
             yield sql.Token(T.Text, token.value)
@@ -111,9 +113,11 @@ class OutputPHPFilter(OutputFilter):
                     yield sql.Token(T.Whitespace, after_lb)
                 continue
 
-            # Token has escape chars
-            elif '"' in token.value:
-                token.value = token.value.replace('"', '\\"')
+            # Escape backslashes before quotes so a backslash preceding a
+            # quote cannot break out of the generated string literal
+            # (GHSA-3496-9g83-7v6x).
+            else:
+                token.value = token.value.replace('\\', '\\\\').replace('"', '\\"')
 
             # Put the token
             yield sql.Token(T.Text, token.value)

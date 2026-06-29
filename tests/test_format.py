@@ -689,6 +689,22 @@ class TestOutputFormat:
             '$sql  = "select * ";',
             '$sql .= "from foo;";'])
 
+    def test_python_escapes_backslashes(self):
+        # GHSA-3496-9g83-7v6x: backslashes must be escaped before quotes so
+        # crafted SQL cannot break out of the generated Python string literal.
+        # SQL  select '\foo\'  -> each \ doubled, each ' escaped.
+        sql = "select '\\foo\\'"
+        f = lambda sql: sqlparse.format(sql, output_format='python')
+        assert f(sql) == "sql = 'select \\'\\\\foo\\\\\\''"
+
+    def test_php_escapes_backslashes(self):
+        # GHSA-3496-9g83-7v6x: PHP double-quoted output must escape backslashes
+        # before quotes; a backslash before a quote otherwise closes the string.
+        # SQL  select '\foo\'  -> each \ doubled (single quotes need no escaping).
+        sql = "select '\\foo\\'"
+        f = lambda sql: sqlparse.format(sql, output_format='php')
+        assert f(sql) == '$sql = "select \'\\\\foo\\\\\'";'
+
     def test_sql(self):
         # "sql" is an allowed option but has no effect
         sql = 'select * from foo;'

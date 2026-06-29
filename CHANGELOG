@@ -25,6 +25,9 @@ Security Fixes
     (e.g. SELECT with thousands of columns) therefore cost O(N²) in the
     number of columns.  Fix: append only the newly added tokens' values.
 
+* Escape backslashes in the ``python`` and ``php`` output formats to prevent
+  string-literal breakout (CWE-94, GHSA-3496-9g83-7v6x, reported by 7thParkk).
+
 Enhancements
 
 * Modernize type annotations in top-level API functions using PEP 585 and PEP 604 syntax.
