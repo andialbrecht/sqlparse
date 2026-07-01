@@ -132,8 +132,16 @@ class Lexer:
         else:
             raise TypeError(f"Expected text or file-like object, got {type(text)!r}")
 
+        delimited_spans = keywords.find_delimited_spans(text)
+
         iterable = enumerate(text)
         for pos, char in iterable:
+            if pos in delimited_spans:
+                end, ttype = delimited_spans[pos]
+                yield ttype, text[pos:end]
+                consume(iterable, end - pos - 1)
+                continue
+
             for rexmatch, action in self._SQL_REGEX:
                 m = rexmatch(text, pos)
 

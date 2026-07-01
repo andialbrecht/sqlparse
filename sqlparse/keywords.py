@@ -5,7 +5,10 @@
 # This module is part of python-sqlparse and is released under
 # the BSD License: https://opensource.org/licenses/BSD-3-Clause
 
+import re
+
 from sqlparse import tokens
+from sqlparse.utils import _DelimiterOccurrence, resolve_paired_delimiters
 
 # object() only supports "is" and is useful as a marker
 # use this marker to specify that the given regex in SQL_REGEX
@@ -13,12 +16,64 @@ from sqlparse import tokens
 PROCESS_AS_KEYWORD = object()
 
 
+# Dollar-quoted literals (`$tag$...$tag$`) and multiline comments
+# (`/*...*/`, `/*+...*/`) used to be matched with per-position regexes
+# using a lazy dot-all quantifier (`[\s\S]*?`) terminated by a
+# backreference or a literal delimiter. Applied at every text position by
+# the lexer loop below, that shape is O(n^2) on adversarial input with
+# many unclosed openers, since each failed attempt re-scans to the end of
+# the remaining text (GHSA-prg7-hcfm-mfcr). They are resolved instead in
+# a single linear pass by find_delimited_spans().
+_DOLLAR_QUOTE_DELIM = re.compile(r'\$(?:[_A-ZÀ-Ü]\w*)?\$', re.IGNORECASE | re.UNICODE)
+_DOLLAR_QUOTE_OPENER_OK = re.compile(r'(?<![\w"$])', re.UNICODE)
+_COMMENT_HINT_OPEN = re.compile(r'/\*\+')
+_COMMENT_OPEN = re.compile(r'/\*(?!\+)')
+_COMMENT_CLOSE = re.compile(r'\*/')
+
+
+def find_delimited_spans(text):
+    """Locate dollar-quoted literals and multiline comments in `text`.
+
+    Returns a dict mapping each span's start offset to
+    (end offset, token type).
+    """
+    has_dollar = '$' in text
+    # A comment can only ever open on "/*"; without it "*/" alone can
+    # never pair with anything, so gating on "/*" alone is sufficient to
+    # skip all three comment-related regex passes below.
+    has_comment_open = '/*' in text
+    if not has_dollar and not has_comment_open:
+        return {}
+
+    occurrences = []
+    if has_dollar:
+        for m in _DOLLAR_QUOTE_DELIM.finditer(text):
+            tag = m.group()
+            can_open = _DOLLAR_QUOTE_OPENER_OK.match(text, m.start()) is not None
+            occurrences.append(
+                _DelimiterOccurrence(m.start(), m.end(), tag, can_open, True, tokens.Literal))
+    if has_comment_open:
+        for m in _COMMENT_HINT_OPEN.finditer(text):
+            occurrences.append(_DelimiterOccurrence(
+                m.start(), m.end(), 'C', True, False,
+                tokens.Comment.Multiline.Hint))
+        for m in _COMMENT_OPEN.finditer(text):
+            occurrences.append(_DelimiterOccurrence(
+                m.start(), m.end(), 'C', True, False,
+                tokens.Comment.Multiline))
+        for m in _COMMENT_CLOSE.finditer(text):
+            occurrences.append(
+                _DelimiterOccurrence(m.start(), m.end(), 'C', False, True, None))
+    occurrences.sort(key=lambda occ: occ.start)
+
+    spans = resolve_paired_delimiters(occurrences)
+    return {start: (end, ttype) for start, end, ttype in spans}
+
+
 SQL_REGEX = [
     (r'(--|# )\+.*?(\r\n|\r|\n|$)', tokens.Comment.Single.Hint),
-    (r'/\*\+[\s\S]*?\*/', tokens.Comment.Multiline.Hint),
 
     (r'(--|# ).*?(\r\n|\r|\n|$)', tokens.Comment.Single),
-    (r'/\*[\s\S]*?\*/', tokens.Comment.Multiline),
 
     (r'(\r\n|\r|\n)', tokens.Newline),
     (r'\s+?', tokens.Whitespace),
@@ -30,7 +85,6 @@ SQL_REGEX = [
 
     (r"`(``|[^`])*`", tokens.Name),
     (r"´(´´|[^´])*´", tokens.Name),
-    (r'((?<![\w\"\$])\$(?:[_A-ZÀ-Ü]\w*)?\$)[\s\S]*?\1', tokens.Literal),
 
     (r'\?', tokens.Name.Placeholder),
     (r'%(\(\w+\))?s', tokens.Name.Placeholder),
