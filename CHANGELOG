@@ -33,6 +33,8 @@ Bug Fixes
 
 * Fix statement splitting (issue845).
 * Fix a late-binding closure bug in `TokenList.token_not_matching`.
+* Preserve trailing whitespace after the final ``;`` so that
+  ``str(parse(sql)) == sql`` holds for input ending in a newline.
 
 
 Release 0.5.5 (Dec 19, 2025)
