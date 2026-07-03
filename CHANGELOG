@@ -33,6 +33,9 @@ Bug Fixes
 
 * Fix statement splitting (issue845).
 * Fix a late-binding closure bug in `TokenList.token_not_matching`.
+* Recognize ``ROW_FORMAT`` as a keyword so that ``ALTER TABLE ... ROW_FORMAT=...``
+  no longer merges the table name and the option into a single identifier
+  (issue773).
 
 
 Release 0.5.5 (Dec 19, 2025)
