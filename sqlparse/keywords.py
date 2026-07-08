@@ -49,7 +49,7 @@ SQL_REGEX = [
     # see issue #39
     # Spaces around period `schema . name` are valid identifier
     # TODO: Spaces before period not implemented
-    (r'[A-ZÀ-Ü]\w*(?=\s*\.)', tokens.Name),  # 'Name'.
+    (r'[A-ZÀ-Ü]\w*(?=\s*\.(?!\d))', tokens.Name),  # 'Name'.
     # FIXME(atronah): never match,
     # because `re.match` doesn't work with look-behind regexp feature
     (r'(?<=\.)[A-ZÀ-Ü]\w*', tokens.Name),  # .'Name'

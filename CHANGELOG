@@ -33,6 +33,8 @@ Bug Fixes
 
 * Fix statement splitting (issue845).
 * Fix a late-binding closure bug in `TokenList.token_not_matching`.
+* Fix keyword before a leading-dot float being lexed as a name, e.g. in
+  ``BETWEEN .03 AND .06`` (issue601).
 
 
 Release 0.5.5 (Dec 19, 2025)

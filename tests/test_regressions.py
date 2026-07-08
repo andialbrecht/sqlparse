@@ -465,3 +465,16 @@ def limit_recursion():
 def test_max_recursion(limit_recursion):
     with pytest.raises(SQLParseError):
         sqlparse.parse('[' * 1000 + ']' * 1000)
+
+
+def test_between_leading_dot_float_issue601():
+    # a leading-dot float must not turn the preceding word into a Name
+    # by mistaking the decimal point for a qualified-name separator
+    p = sqlparse.parse('a between .03 and .06')[0]
+    tokens = [t for t in p.flatten() if not t.is_whitespace]
+    assert tokens[1].ttype is T.Keyword
+    assert tokens[1].value == 'between'
+    assert tokens[2].ttype is T.Number.Float
+    assert tokens[3].ttype is T.Keyword
+    assert tokens[3].value == 'and'
+    assert tokens[4].ttype is T.Number.Float
