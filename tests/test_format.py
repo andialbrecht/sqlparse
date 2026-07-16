@@ -784,3 +784,14 @@ def test_strip_ws_removes_trailing_ws_in_groups():  # issue782
                                 strip_whitespace=True)
     expected = '(where foo = bar) from'
     assert formatted == expected
+
+
+def test_aligned_indent_case_without_end():
+    # A malformed CASE with no standalone END keyword (e.g. "case,end", which
+    # groups as an IdentifierList) must not crash the aligned-indent filter.
+    assert sqlparse.format('case,end', reindent_aligned=True) == 'case,end'
+    # A well-formed CASE is still aligned across its branches.
+    formatted = sqlparse.format(
+        'select case when 1 then 2 else 3 end from t', reindent_aligned=True)
+    assert 'when 1 then 2' in formatted
+    assert 'else 3' in formatted

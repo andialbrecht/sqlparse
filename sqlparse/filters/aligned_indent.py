@@ -70,7 +70,11 @@ class AlignedIndentFilter:
         cases = tlist.get_cases(skip_ws=True)
         # align the end as well
         end_token = tlist.token_next_by(m=(T.Keyword, 'END'))[1]
-        cases.append((None, [end_token]))
+        # A malformed CASE (e.g. "case,end", which groups as an IdentifierList)
+        # has no standalone END keyword; skip the end alignment rather than
+        # appending a (None, [None]) entry that later crashes insert_before.
+        if end_token is not None:
+            cases.append((None, [end_token]))
 
         condition_width = [len(' '.join(map(str, cond))) if cond else 0
                            for cond, _ in cases]
