@@ -784,3 +784,14 @@ def test_strip_ws_removes_trailing_ws_in_groups():  # issue782
                                 strip_whitespace=True)
     expected = '(where foo = bar) from'
     assert formatted == expected
+
+
+def test_strip_ws_degenerate_parenthesis_group():
+    # "(::)" is grouped as a single Identifier, so the enclosing Parenthesis
+    # holds too few tokens for the whitespace stripper to index its inner
+    # edges. Formatting must not raise IndexError.
+    assert sqlparse.format('(::)', strip_whitespace=True) == '(::)'
+    assert sqlparse.format('( :: )', reindent=True) == '( :: )'
+    assert sqlparse.format('count(::)', strip_whitespace=True) == 'count(::)'
+    # Normal parentheses still have their inner whitespace stripped.
+    assert sqlparse.format('( a )', strip_whitespace=True) == '(a)'
