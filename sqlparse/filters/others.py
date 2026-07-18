@@ -112,13 +112,15 @@ class StripWhitespaceFilter:
         return self._stripws_default(tlist)
 
     def _stripws_parenthesis(self, tlist):
-        while tlist.tokens[1].is_whitespace:
+        # Short groups (e.g. "(::)") lack open/body/close slots for inner ws pops.
+        while len(tlist.tokens) > 2 and tlist.tokens[1].is_whitespace:
             tlist.tokens.pop(1)
-        while tlist.tokens[-2].is_whitespace:
+        while len(tlist.tokens) > 2 and tlist.tokens[-2].is_whitespace:
             tlist.tokens.pop(-2)
-        if tlist.tokens[-2].is_group:
+        if len(tlist.tokens) > 2 and tlist.tokens[-2].is_group:
             # save to remove the last whitespace
-            while tlist.tokens[-2].tokens[-1].is_whitespace:
+            while (tlist.tokens[-2].tokens
+                   and tlist.tokens[-2].tokens[-1].is_whitespace):
                 tlist.tokens[-2].tokens.pop(-1)
         self._stripws_default(tlist)
 
