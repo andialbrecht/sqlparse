@@ -18,8 +18,11 @@ class NameAliasMixin:
 
     def get_real_name(self):
         """Returns the real name (object name) of this identifier."""
-        # a.b
-        dot_idx, _ = self.token_next_by(m=(T.Punctuation, '.'))
+        # a.b.c -> real name is the component after the *last* dot
+        dot_idx = None
+        for idx, tok in enumerate(self.tokens):
+            if tok.match(T.Punctuation, '.'):
+                dot_idx = idx
         return self._get_first_name(dot_idx, real_name=True)
 
     def get_alias(self):
