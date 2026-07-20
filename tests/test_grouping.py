@@ -393,6 +393,10 @@ def test_grouping_function():
     assert isinstance(p.tokens[0], sql.Function)
     assert len(list(p.tokens[0].get_parameters())) == 1
     assert isinstance(p.tokens[0].get_window(), sql.Parenthesis)
+    # A function without an OVER clause has no window.
+    p = sqlparse.parse('foo(5)')[0]
+    assert isinstance(p.tokens[0], sql.Function)
+    assert p.tokens[0].get_window() is None
 
 
 def test_grouping_function_not_in():
