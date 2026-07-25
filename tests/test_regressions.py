@@ -477,6 +477,18 @@ def test_materialized_view_issue752():
     assert formatted == 'CREATE MATERIALIZED VIEW v AS SELECT 1'
 
 
+def test_token_matching_none_idx_issue747():
+    # token_matching (and other helpers) delegate to _token_matching, which
+    # used to return a bare None when given a None start index. Callers then
+    # tried to subscript that None and crashed with a TypeError. A None index
+    # should simply yield "no match".
+    p = sqlparse.parse('SELECT id FROM table')[0]
+    assert p.token_matching(
+        [lambda tk: isinstance(tk, sql.Token)], None) is None
+    assert p._token_matching(lambda tk: True, None) == (None, None)
+    assert p.token_not_matching([lambda tk: False], None) == (None, None)
+
+
 @pytest.fixture
 def limit_recursion():
     curr_limit = sys.getrecursionlimit()
