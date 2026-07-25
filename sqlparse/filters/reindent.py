@@ -27,25 +27,65 @@ class ReindentFilter:
         self._last_stmt = None
         self._last_func = None
 
-    def _flatten_up_to_token(self, token):
-        """Yields all tokens up to token but excluding current."""
-        if token.is_group:
-            token = next(token.flatten())
-
-        for t in self._curr_stmt.flatten():
-            if t == token:
-                break
-            yield t
-
     @property
     def leading_ws(self):
         return self.offset + self.indent * self.width
 
+    def _current_line_len(self, token):
+        """Returns the width of what's already emitted on *token*'s line.
+
+        The tokens preceding *token* are visited last one first, so the walk
+        stops at the line break that starts the current line.  Rebuilding the
+        statement prefix from its start instead made every caller
+        O(statement), and the callers running once per group (tuple lists,
+        identifier lists) quadratic in the number of groups -- a CPU
+        exhaustion vector (GHSA-cfqr-cjx5-5jcm).  The walk is inlined and
+        counts characters rather than collecting them: both matter, since a
+        line without any break still has to be measured token by token.
+        """
+        length = 0
+        node = token
+        while node is not self._curr_stmt and node.parent is not None:
+            parent = node.parent
+            # ``Token`` doesn't implement ``__eq__``, so ``index()`` is an
+            # identity lookup and safe against tokens sharing a value.
+            stack = parent.tokens[:parent.tokens.index(node)]
+            while stack:
+                prev_ = stack.pop()
+                if prev_.is_group:
+                    stack.extend(prev_.tokens)
+                    continue
+
+                value = prev_.value
+                size = len(value)
+                if not size:
+                    continue
+                lines = value.splitlines()
+                if len(lines) == 1 and len(lines[0]) == size:
+                    # No break in here.  ``splitlines()`` hands back the value
+                    # itself in that case, so this costs a scan but no copy --
+                    # which is what keeps a long break-free line affordable.
+                    length += size
+                    continue
+
+                # ``value`` holds the break that starts the current line.  The
+                # sentinel keeps a trailing break from collapsing, so ``lines``
+                # always has one entry more than the number of breaks.
+                lines = (value + '.').splitlines()
+                tail = len(lines[-1]) - 1 + length
+                if tail:
+                    return tail
+                # Nothing but a break to our right, and ``splitlines()`` drops
+                # that empty line -- so the line to measure is the one before.
+                if len(lines) > 2:
+                    return len(lines[-2])
+                length = len(lines[0])
+            node = parent
+        return length
+
     def _get_offset(self, token):
-        raw = ''.join(map(str, self._flatten_up_to_token(token)))
-        line = (raw or '\n').splitlines()[-1]
         # Now take current offset into account and return relative offset.
-        return len(line) - len(self.char * self.leading_ws)
+        return self._current_line_len(token) - len(self.char * self.leading_ws)
 
     def nl(self, offset=0):
         return sql.Token(

@@ -36,6 +36,11 @@ Security Fixes
     (e.g. SELECT with thousands of columns) therefore cost O(N²) in the
     number of columns.  Fix: append only the newly added tokens' values.
 
+* Fix uncontrolled CPU consumption when reindenting long tuple lists
+  (CWE-1333, GHSA-cfqr-cjx5-5jcm).  ``ReindentFilter._get_offset()`` rebuilt
+  the statement prefix from its start on every call, making ``format()`` with
+  ``reindent=True`` O(N²) in the number of tuples.  Fix: measure the current
+  line by walking backwards from the token.  Output is unchanged.
 * Fix quadratic CPU consumption in ``group_comments`` on comment-only input
   (CVE-2026-71491, GHSA-f2ff-p2ww-7p4p, reported by sanktjodel).
 
