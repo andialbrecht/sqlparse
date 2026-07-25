@@ -381,7 +381,7 @@ def group_functions(tlist):
             has_create = True
         if tmp_token.value.upper() == 'TABLE':
             has_table = True
-        if tmp_token.value == 'AS':
+        if tmp_token.value.upper() == 'AS':
             has_as = True
     if has_create and has_table and not has_as:
         return

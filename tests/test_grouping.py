@@ -344,6 +344,14 @@ def test_grouping_alias_ctas():
     assert p.tokens[10].get_alias() == 'col1'
     assert isinstance(p.tokens[10].tokens[0], sql.Function)
 
+
+def test_grouping_alias_ctas_lowercase_as():
+    # 'as' is case-insensitive; a lowercase keyword in CREATE TABLE ... AS
+    # SELECT must not disable function grouping in the SELECT body.
+    p = sqlparse.parse('create table tbl1 as select coalesce(t1.col1, 0) as col1 from t1')[0]
+    assert p.tokens[10].get_alias() == 'col1'
+    assert isinstance(p.tokens[10].tokens[0], sql.Function)
+
 def test_grouping_subquery_no_parens():
     # Not totally sure if this is the right approach...
     # When a THEN clause contains a subquery w/o parenthesis around it *and*
