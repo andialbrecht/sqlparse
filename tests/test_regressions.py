@@ -454,6 +454,21 @@ def test_primary_key_issue740():
     assert p.tokens[0].ttype == T.Keyword
 
 
+def test_alter_table_row_format_issue773():
+    # ROW_FORMAT is a keyword (like ENGINE), so it must not be absorbed into
+    # the preceding table name as if it were an alias.
+    p = sqlparse.parse('ALTER TABLE mytable ROW_FORMAT=Dynamic')[0]
+    row_format = p.token_next_by(m=(T.Keyword, 'ROW_FORMAT'))[1]
+    assert row_format is not None
+    # The table name should be parsed as a standalone identifier.
+    assert isinstance(p.tokens[4], sql.Identifier)
+    assert p.tokens[4].get_real_name() == 'mytable'
+    assert p.tokens[4].get_alias() is None
+    # Sanity check: ENGINE (already a keyword) behaves the same way.
+    e = sqlparse.parse('ALTER TABLE mytable ENGINE=InnoDB')[0]
+    assert e.tokens[4].get_real_name() == 'mytable'
+
+
 def test_materialized_view_issue752():
     p = sqlparse.parse('CREATE MATERIALIZED VIEW v AS SELECT 1')[0]
     assert p.tokens[2].ttype == T.Keyword

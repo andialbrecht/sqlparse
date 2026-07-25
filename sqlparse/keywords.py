@@ -489,6 +489,7 @@ KEYWORDS = {
     'ROUTINE_SCHEMA': tokens.Keyword,
     'ROWS': tokens.Keyword,
     'ROW_COUNT': tokens.Keyword,
+    'ROW_FORMAT': tokens.Keyword,
     'RULE': tokens.Keyword,
 
     'SAVE_POINT': tokens.Keyword,
