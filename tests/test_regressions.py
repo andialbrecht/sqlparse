@@ -477,6 +477,34 @@ def test_materialized_view_issue752():
     assert formatted == 'CREATE MATERIALIZED VIEW v AS SELECT 1'
 
 
+@pytest.mark.parametrize('sql', [
+    'a BETWEEN .03 AND .06',
+    'a between .03 and .06',
+])
+def test_between_leading_dot_float_issue601(sql):
+    # A keyword followed by a float literal written without a leading zero
+    # (e.g. ``.03``) must not be reclassified as an identifier because of the
+    # following period.  BETWEEN has to stay a keyword and the literals have to
+    # remain standalone number tokens.
+    p = sqlparse.parse(sql)[0]
+    kw = p.token_next_by(m=(T.Keyword, 'BETWEEN'))[1]
+    assert kw is not None
+    floats = list(p.flatten())
+    floats = [t for t in floats if t.ttype is T.Number.Float]
+    assert [t.value for t in floats] == ['.03', '.06']
+    # 'and' must remain a keyword too, not be absorbed into an identifier.
+    assert p.token_next_by(m=(T.Keyword, 'AND'))[1] is not None
+
+
+def test_keyword_before_qualified_name_still_grouped():
+    # Regression guard for issue #601 fix: member access such as
+    # ``schema.name`` (with or without surrounding spaces) must keep working.
+    for stmt in ('select foo.bar', 'select foo . bar', 'select a.b.c'):
+        p = sqlparse.parse(stmt)[0]
+        ident = p.token_next_by(i=sql.Identifier)[1]
+        assert ident is not None
+
+
 @pytest.fixture
 def limit_recursion():
     curr_limit = sys.getrecursionlimit()

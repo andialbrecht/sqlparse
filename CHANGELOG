@@ -41,6 +41,10 @@ Bug Fixes
 * Recognize ``MATERIALIZED`` as a keyword so it is parsed and formatted
   consistently in ``CREATE MATERIALIZED VIEW`` statements (issue752).
 * Fix ``get_real_name`` for names with more than two dotted parts (issue332).
+* Keep a keyword such as ``BETWEEN`` from being reclassified as an identifier
+  when it is followed by a float literal written without a leading zero
+  (e.g. ``x BETWEEN .03 AND .06``), so the bounds are parsed as number tokens
+  (issue601).
 
 
 Release 0.5.5 (Dec 19, 2025)
