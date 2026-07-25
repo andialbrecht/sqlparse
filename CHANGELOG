@@ -41,6 +41,9 @@ Bug Fixes
 * Recognize ``MATERIALIZED`` as a keyword so it is parsed and formatted
   consistently in ``CREATE MATERIALIZED VIEW`` statements (issue752).
 * Fix ``get_real_name`` for names with more than two dotted parts (issue332).
+* Fix ``TypeError`` in ``TokenList.token_matching`` (and other
+  ``_token_matching`` callers) when passed a ``None`` index; a ``None`` index
+  now yields "no match" instead of crashing (issue747).
 
 
 Release 0.5.5 (Dec 19, 2025)
