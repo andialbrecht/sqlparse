@@ -469,6 +469,14 @@ def test_alter_table_row_format_issue773():
     assert e.tokens[4].get_real_name() == 'mytable'
 
 
+def test_materialized_view_issue752():
+    p = sqlparse.parse('CREATE MATERIALIZED VIEW v AS SELECT 1')[0]
+    assert p.tokens[2].ttype == T.Keyword
+    formatted = sqlparse.format('create materialized view v as select 1',
+                                keyword_case='upper')
+    assert formatted == 'CREATE MATERIALIZED VIEW v AS SELECT 1'
+
+
 @pytest.fixture
 def limit_recursion():
     curr_limit = sys.getrecursionlimit()

@@ -36,6 +36,8 @@ Bug Fixes
 * Recognize ``ROW_FORMAT`` as a keyword so that ``ALTER TABLE ... ROW_FORMAT=...``
   no longer merges the table name and the option into a single identifier
   (issue773).
+* Recognize ``MATERIALIZED`` as a keyword so it is parsed and formatted
+  consistently in ``CREATE MATERIALIZED VIEW`` statements (issue752).
 
 
 Release 0.5.5 (Dec 19, 2025)
