@@ -35,6 +35,12 @@ Bug Fixes
 * Fix a late-binding closure bug in `TokenList.token_not_matching`.
 * Fix function grouping being skipped in ``CREATE TABLE ... AS SELECT``
   statements when the ``as`` keyword is lowercase.
+* Recognize ``ROW_FORMAT`` as a keyword so that ``ALTER TABLE ... ROW_FORMAT=...``
+  no longer merges the table name and the option into a single identifier
+  (issue773).
+* Recognize ``MATERIALIZED`` as a keyword so it is parsed and formatted
+  consistently in ``CREATE MATERIALIZED VIEW`` statements (issue752).
+* Fix ``get_real_name`` for names with more than two dotted parts (issue332).
 
 
 Release 0.5.5 (Dec 19, 2025)
