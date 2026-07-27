@@ -44,6 +44,7 @@ dev = [
 ]
 doc = [
     "sphinx",
+    "furo",
 ]
 
 [tool.hatch.version]
@@ -74,6 +75,7 @@ dev = [
     "ruff",
     "build",
     "sphinx",
+    "furo",
 ]
 
 [tool.ruff]
