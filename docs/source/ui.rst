@@ -18,7 +18,7 @@ To use it, add the following to your ``.pre-commit-config.yaml``:
 
    repos:
      - repo: https://github.com/andialbrecht/sqlparse
-       rev: 0.5.4  # Replace with the version you want to use
+       rev: 0.5.5  # Replace with the version you want to use
        hooks:
          - id: sqlformat
 
@@ -30,19 +30,20 @@ To customize formatting options, override the ``args`` parameter:
 
    repos:
      - repo: https://github.com/andialbrecht/sqlparse
-       rev: 0.5.4
+       rev: 0.5.5
        hooks:
          - id: sqlformat
            args: [--in-place, --reindent, --keywords, upper, --identifiers, lower]
 
 .. important::
 
-   When overriding ``args``, you **must include** ``--in-place`` as the first
-   argument, otherwise the hook will not modify your files.
+   When overriding ``args``, you **must include** ``--in-place``, otherwise
+   :command:`sqlformat` writes to stdout and the hook leaves your files
+   unchanged.
 
 Common formatting options include:
 
-* ``--in-place``: Required - modify files in-place (always include this!)
+* ``--in-place``: Required - modify files in-place (always include this)
 * ``--reindent`` or ``-r``: Reindent statements
 * ``--keywords upper`` or ``-k upper``: Convert keywords to uppercase
 * ``--identifiers lower`` or ``-i lower``: Convert identifiers to lowercase
@@ -64,10 +65,7 @@ it manually on all files:
 
    pre-commit run sqlformat --all-files
 
-``sqlformat.appspot.com``
-  An example `Google App Engine <https://cloud.google.com/appengine/>`_
-  application that exposes the formatting features using a web front-end.
-  See https://sqlformat.org/ for details.
-  The source for this application is available from a source code check out
-  of the :mod:`sqlparse` module (see :file:`extras/appengine`).
+``sqlformat.org``
+  A web front-end that exposes the formatting features of :mod:`sqlparse`
+  online. See https://sqlformat.org/.
 

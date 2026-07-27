@@ -5,21 +5,14 @@ Introduction
 Download & Installation
 -----------------------
 
-The latest released version can be obtained from the `Python Package
-Index (PyPI) <https://pypi.org/project/sqlparse/>`_. To extract and
-install the module system-wide run
-
-.. code-block:: bash
-
-   $ tar cvfz python-sqlparse-VERSION.tar.gz
-   $ cd python-sqlparse/
-   $ sudo python setup.py install
-
-Alternatively you can install :mod:`sqlparse` using :command:`pip`:
+Install :mod:`sqlparse` from the `Python Package Index (PyPI)
+<https://pypi.org/project/sqlparse/>`_ using :command:`pip`:
 
 .. code-block:: bash
 
    $ pip install sqlparse
+
+:mod:`sqlparse` requires Python 3.10 or later and has no dependencies.
 
 
 Getting Started
@@ -37,7 +30,7 @@ statements into a list of single statements using :meth:`~sqlparse.split`:
   >>> import sqlparse
   >>> sql = 'select * from foo; select * from bar;'
   >>> sqlparse.split(sql)
-  [u'select * from foo; ', u'select * from bar;']
+  ['select * from foo;', 'select * from bar;']
 
 The end of a statement is identified by the occurrence of a semicolon.
 Semicolons within certain SQL constructs like ``BEGIN ... END`` blocks
@@ -52,8 +45,8 @@ SQL statements can be beautified by using the :meth:`~sqlparse.format` function.
   SELECT *
   FROM foo
   WHERE id IN
-    (SELECT id
-     FROM bar);
+      (SELECT id
+       FROM bar);
 
 In this case all keywords in the given SQL are uppercased and the
 indentation is changed to make it more readable. Read :ref:`formatting` for
@@ -86,21 +79,21 @@ Sub-tokens are stored in this attribute.
 
   >>> stmt = parsed[0]  # grab the Statement object
   >>> stmt.tokens
-  (<DML 'select' at 0x9b63c34>,
-   <Whitespace ' ' at 0x9b63e8c>,
-   <Operator '*' at 0x9b63e64>,
-   <Whitespace ' ' at 0x9b63c5c>,
-   <Keyword 'from' at 0x9b63c84>,
-   <Whitespace ' ' at 0x9b63cd4>,
-   <Identifier '"somes...' at 0x9b5c62c>,
-   <Whitespace ' ' at 0x9b63f04>,
-   <Where 'where ...' at 0x9b5caac>)
+  [<DML 'select' at 0x7f6b8c1b5f40>,
+   <Whitespace ' ' at 0x7f6b8c1b5fa0>,
+   <Wildcard '*' at 0x7f6b8c1b6000>,
+   <Whitespace ' ' at 0x7f6b8c1b6060>,
+   <Keyword 'from' at 0x7f6b8c1b60c0>,
+   <Whitespace ' ' at 0x7f6b8c1b6120>,
+   <Identifier '"somes...' at 0x7f6b8c1a89d0>,
+   <Whitespace ' ' at 0x7f6b8c1b6180>,
+   <Where 'where ...' at 0x7f6b8c1a8a40>]
 
 Each object can be converted back to a string at any time:
 
 .. code-block:: python
 
-   >>> str(stmt)  # str(stmt) for Python 3
+   >>> str(stmt)
    'select * from "someschema"."mytable" where id = 1'
    >>> str(stmt.tokens[-1])  # or just the WHERE part
    'where id = 1'
@@ -115,24 +108,25 @@ To check out the latest sources of this module run
 
 .. code-block:: bash
 
-   $ git clone git://github.com/andialbrecht/sqlparse.git
+   $ git clone https://github.com/andialbrecht/sqlparse.git
 
+:mod:`sqlparse` is tested under Python 3.10+ and PyPy. Tests are run
+automatically for each commit and pull request on `GitHub Actions
+<https://github.com/andialbrecht/sqlparse/actions>`_.
 
-to check out the latest sources from the repository.
-
-:mod:`sqlparse` is currently tested under Python 3.5+ and PyPy. Tests are
-automatically run on each commit and for each pull request on Travis:
-https://travis-ci.org/andialbrecht/sqlparse
-
-Make sure to run the test suite before sending a pull request by running
+The project uses `uv <https://docs.astral.sh/uv/>`_ to manage dependencies
+and environments. Make sure to run the test suite before sending a pull
+request:
 
 .. code-block:: bash
 
-   $ tox
+   $ make test
 
-It's ok, if :command:`tox` doesn't find all interpreters listed
-above. Ideally a Python 2 and a Python 3 version should be tested
-locally.
+To check the code for style issues run
+
+.. code-block:: bash
+
+   $ make lint
 
 Please file bug reports and feature requests on the project site at
 https://github.com/andialbrecht/sqlparse/issues/new.

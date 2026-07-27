@@ -58,6 +58,18 @@ The :meth:`~sqlparse.format` function accepts the following keyword arguments.
 ``indent_width``
   The width of the indentation, defaults to 2.
 
+``indent_after_first``
+  If ``True`` the indentation is added after the first line of a statement,
+  for example after ``SELECT``.
+
+``indent_columns``
+  If ``True`` all columns are indented by ``indent_width`` instead of the
+  length of the preceding keyword.
+
+``strip_whitespace``
+  If ``True`` repeated whitespace is collapsed into single spaces. This is
+  implied by ``reindent`` and ``reindent_aligned``.
+
 ``wrap_after``
   The column limit (in characters) for wrapping comma-separated lists. If unspecified, it
   puts every item in the list on its own line.
