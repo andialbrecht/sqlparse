@@ -6,9 +6,22 @@
 python-sqlparse
 ===============
 
-.. include:: ../../README.rst
-   :start-after: docincludebegin
-   :end-before: Links
+.. NOTE: This section duplicates the introduction from ../../README.md.
+   It used to be included from README.rst directly. The README is Markdown
+   now, so the text is kept in sync manually until the docs are migrated to
+   Markdown as well.
+
+A non-validating SQL parser for Python. Split scripts into statements, format
+them, and walk their token tree.
+
+sqlparse tokenizes SQL text and groups the parts it recognizes into a tree of
+statements, clauses, identifiers and expressions. It accepts any input without
+validating it, and makes no assumptions about a particular SQL dialect, so
+vendor extensions and templated SQL parse too. It is a building block for
+formatters, linters, editors and query analysis tools.
+
+Requires Python 3.10+. Licensed under the
+`New BSD license <https://opensource.org/licenses/BSD-3-Clause>`_.
 
 Contents
 --------

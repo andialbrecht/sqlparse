@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "sqlparse"
 description = "A non-validating SQL parser."
 authors = [{name = "Andi Albrecht", email = "albrecht.andi@gmail.com"}]
-readme = "README.rst"
+readme = "README.md"
 dynamic = ["version"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
