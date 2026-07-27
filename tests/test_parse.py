@@ -457,6 +457,17 @@ def test_non_ascii():
     assert statement._pprint_tree() is None
 
 
+def test_non_utf8_bytes_preserve_escapes():
+    # Non-UTF-8 bytes fall back to a single-byte decode and must not have
+    # backslash escape sequences evaluated (unicode-escape would turn
+    # "\\x41" into "A" and "\\n" into a newline), which desyncs the parsed
+    # token stream from the raw bytes the database receives.
+    s = b"SELECT '\\x41', '\\n' \xff"
+    stmts = sqlparse.parse(s)
+    assert len(stmts) == 1
+    assert str(stmts[0]) == "SELECT '\\x41', '\\n' \xff"
+
+
 def test_get_real_name():
     # issue 369
     s = "update a t set t.b=1"
