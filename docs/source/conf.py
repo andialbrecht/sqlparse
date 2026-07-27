@@ -40,7 +40,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'python-sqlparse'
+project = 'sqlparse'
 copyright = '{:%Y}, Andi Albrecht'.format(datetime.date.today())
 
 # The version info for the project you're documenting, acts as replacement for
