@@ -285,6 +285,33 @@ TRANSACTION;"""
     assert stmts[2].startswith('INSERT')
     assert stmts[3] == 'END\nTRANSACTION;'
 
+# https://github.com/andialbrecht/sqlparse/issues/843
+def test_split_begin_read_write():
+    # Redshift BEGIN READ WRITE should not be treated as a block start
+    sql = """BEGIN READ WRITE;
+DELETE FROM schema.table_a USING table_a_temp
+WHERE schema.table_a.id = table_a_temp.id;
+INSERT INTO schema.table_a SELECT * FROM table_a_temp;
+END TRANSACTION;"""
+    stmts = sqlparse.split(sql)
+    assert len(stmts) == 4
+    assert stmts[0] == 'BEGIN READ WRITE;'
+    assert stmts[1].startswith('DELETE')
+    assert stmts[2].startswith('INSERT')
+    assert stmts[3] == 'END TRANSACTION;'
+
+
+# https://github.com/andialbrecht/sqlparse/issues/843
+def test_split_begin_isolation_level_read_only():
+    sql = """BEGIN ISOLATION LEVEL SERIALIZABLE READ ONLY;
+SELECT 1;
+END TRANSACTION;"""
+    stmts = sqlparse.split(sql)
+    assert len(stmts) == 3
+    assert stmts[0] == 'BEGIN ISOLATION LEVEL SERIALIZABLE READ ONLY;'
+    assert stmts[1] == 'SELECT 1;'
+    assert stmts[2] == 'END TRANSACTION;'
+
 
 def test_split_anonymous_begin_end_for():  # issue845 Case 1
     sql = """
@@ -372,5 +399,3 @@ def test_split_standalone_for_update():
     assert len(stmts) == 2
     assert stmts[0] == "SELECT * FROM foo FOR UPDATE;"
     assert stmts[1] == "SELECT 3;"
-
-
