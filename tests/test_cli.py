@@ -120,3 +120,87 @@ def test_encoding(filepath, capsys):
     sqlparse.cli.main([path, '--encoding=cp1251'])
     out, _ = capsys.readouterr()
     assert out == expected
+
+
+def test_cli_multiple_files_with_inplace(tmpdir):
+    """Test CLI with multiple files and --in-place flag."""
+    # Create test files
+    file1 = tmpdir.join("test1.sql")
+    file1.write("select   *   from   foo")
+    file2 = tmpdir.join("test2.sql")
+    file2.write("select   *   from   bar")
+
+    # Run sqlformat with --in-place
+    result = sqlparse.cli.main([str(file1), str(file2), '--in-place', '--reindent'])
+
+    assert result == 0
+    # Files should be modified in-place
+    assert "select" in file1.read()
+    assert "select" in file2.read()
+
+
+def test_cli_multiple_files_without_inplace_fails(tmpdir, capsys):
+    """Test that multiple files require --in-place flag."""
+    file1 = tmpdir.join("test1.sql")
+    file1.write("select * from foo")
+    file2 = tmpdir.join("test2.sql")
+    file2.write("select * from bar")
+
+    result = sqlparse.cli.main([str(file1), str(file2)])
+
+    assert result != 0  # Should fail
+    _, err = capsys.readouterr()
+    assert "Multiple files require --in-place flag" in err
+
+
+def test_cli_inplace_with_stdin_fails(capsys):
+    """Test that --in-place flag cannot be used with stdin."""
+    result = sqlparse.cli.main(['-', '--in-place'])
+    assert result != 0  # Should fail
+    _, err = capsys.readouterr()
+    assert "Cannot use --in-place with stdin" in err
+
+
+def test_cli_outfile_with_multiple_files_fails(tmpdir, capsys):
+    """Test that -o cannot be used with multiple files."""
+    file1 = tmpdir.join("test1.sql")
+    file1.write("select * from foo")
+    file2 = tmpdir.join("test2.sql")
+    file2.write("select * from bar")
+    out = tmpdir.join("out.sql")
+
+    result = sqlparse.cli.main([str(file1), str(file2), '-o', str(out)])
+    assert result != 0  # Should fail
+    _, err = capsys.readouterr()
+    assert "Cannot use -o/--outfile with multiple files" in err
+
+
+def test_cli_single_file_inplace(tmpdir):
+    """Test --in-place flag with a single file."""
+    test_file = tmpdir.join("test.sql")
+    test_file.write("select   *   from   foo")
+
+    result = sqlparse.cli.main([str(test_file), '--in-place', '--keywords', 'upper'])
+
+    assert result == 0
+    content = test_file.read()
+    assert "SELECT" in content
+
+
+def test_cli_error_handling_continues(tmpdir, capsys):
+    """Test that errors in one file don't stop processing of others."""
+    file1 = tmpdir.join("test1.sql")
+    file1.write("select * from foo")
+    # file2 doesn't exist - it will cause an error
+    file3 = tmpdir.join("test3.sql")
+    file3.write("select * from baz")
+
+    result = sqlparse.cli.main([str(file1), str(tmpdir.join("nonexistent.sql")),
+                               str(file3), '--in-place'])
+
+    # Should return error code but still process valid files
+    assert result != 0
+    assert "select * from foo" in file1.read()
+    assert "select * from baz" in file3.read()
+    _, err = capsys.readouterr()
+    assert "Failed to read" in err

@@ -1,0 +1,8 @@
+- id: sqlformat
+  name: sqlformat
+  description: Format SQL files using sqlparse
+  entry: sqlformat
+  language: python
+  types: [sql]
+  args: [--in-place, --reindent]
+  minimum_pre_commit_version: '2.9.0'

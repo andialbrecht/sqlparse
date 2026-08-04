@@ -466,6 +466,24 @@ def test_get_real_name():
     assert 't' == stmts[0].tokens[2].get_alias()
 
 
+def test_get_real_name_multi_part_dotted():
+    # issue 332: for a fully-qualified name the real name is the component
+    # after the *last* dot, not an intermediate one.
+    ident = sqlparse.parse("db.schema.tbl.col")[0].tokens[0]
+    assert 'col' == ident.get_real_name()
+    assert 'col' == ident.get_name()
+    # the parent object still anchors on the first dot
+    assert 'db' == ident.get_parent_name()
+
+    aliased = sqlparse.parse("x.y.z AS w")[0].tokens[0]
+    assert 'z' == aliased.get_real_name()
+    assert 'w' == aliased.get_alias()
+
+    # two-part names and function calls stay correct
+    assert 'b' == sqlparse.parse("a.b")[0].tokens[0].get_real_name()
+    assert 'func' == sqlparse.parse("mydb.sch.func(1)")[0].tokens[0].get_real_name()
+
+
 def test_from_subquery():
     # issue 446
     s = 'from(select 1)'
@@ -549,6 +567,36 @@ def test_configurable_keywords():
         (sqlparse.tokens.Keyword, "EGGS"),
         (sqlparse.tokens.Punctuation, ";"),
     ]
+
+
+def test_regexp():
+    s = "column REGEXP '.+static.+'"
+    stmts = sqlparse.parse(s)
+
+    assert len(stmts) == 1
+    assert stmts[0].tokens[0].ttype == T.Keyword
+    assert stmts[0].tokens[0].value == "column"
+    
+    assert stmts[0].tokens[2].ttype == T.Comparison
+    assert stmts[0].tokens[2].value == "REGEXP"
+
+    assert stmts[0].tokens[4].ttype == T.Literal.String.Single
+    assert stmts[0].tokens[4].value == "'.+static.+'"
+
+
+def test_regexp_binary():
+    s = "column REGEXP BINARY '.+static.+'"
+    stmts = sqlparse.parse(s)
+
+    assert len(stmts) == 1
+    assert stmts[0].tokens[0].ttype == T.Keyword
+    assert stmts[0].tokens[0].value == "column"
+    
+    assert stmts[0].tokens[2].ttype == T.Comparison
+    assert stmts[0].tokens[2].value == "REGEXP BINARY"
+
+    assert stmts[0].tokens[4].ttype == T.Literal.String.Single
+    assert stmts[0].tokens[4].value == "'.+static.+'"
 
 
 def test_configurable_regex():

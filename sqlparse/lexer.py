@@ -7,16 +7,15 @@
 
 """SQL Lexer"""
 import re
-from threading import Lock
 
 # This code is based on the SqlLexer in pygments.
 # http://pygments.org/
 # It's separated from the rest of pygments to increase performance
 # and to allow some customizations.
-
 from io import TextIOBase
+from threading import Lock
 
-from sqlparse import tokens, keywords
+from sqlparse import keywords, tokens
 from sqlparse.utils import consume
 
 
@@ -131,8 +130,7 @@ class Lexer:
                 except UnicodeDecodeError:
                     text = text.decode('unicode-escape')
         else:
-            raise TypeError("Expected text or file-like object, got {!r}".
-                            format(type(text)))
+            raise TypeError(f"Expected text or file-like object, got {type(text)!r}")
 
         iterable = enumerate(text)
         for pos, char in iterable:

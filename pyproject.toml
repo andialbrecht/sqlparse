@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "sqlparse"
 description = "A non-validating SQL parser."
 authors = [{name = "Andi Albrecht", email = "albrecht.andi@gmail.com"}]
-readme = "README.rst"
+readme = "README.md"
 dynamic = ["version"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -16,17 +16,17 @@ classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
     "Topic :: Database",
     "Topic :: Software Development",
-]
-requires-python = ">=3.8"
+ ]
+requires-python = ">=3.10"
 
 [project.urls]
 Home = "https://github.com/andialbrecht/sqlparse"
@@ -40,47 +40,15 @@ sqlformat = "sqlparse.__main__:main"
 
 [project.optional-dependencies]
 dev = [
-    "hatch",
     "build",
 ]
 doc = [
     "sphinx",
+    "furo",
 ]
 
 [tool.hatch.version]
 path = "sqlparse/__init__.py"
-
-[tool.hatch.envs.default]
-dependencies = [
-    "coverage[toml]>=6.5",
-    "pytest",
-    # switch to ruff, but fix problems first
-    # but check defaults!
-    # https://hatch.pypa.io/1.9/config/static-analysis/#default-settings
-    "flake8",
-]
-[tool.hatch.envs.default.scripts]
-test = "pytest {args:tests}"
-test-cov = "coverage run -m pytest {args:tests}"
-cov-report = [
-    "- coverage combine",
-    "coverage report",
-]
-cov = [
-    "test-cov",
-    "cov-report",
-]
-check = "flake8 sqlparse/"
-
-[[tool.hatch.envs.all.matrix]]
-python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
-
-[tool.hatch.envs.types]
-dependencies = [
-    "mypy>=1.0.0",
-]
-[tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:sqlparse tests}"
 
 [tool.coverage.run]
 source_pkgs = ["sqlparse", "tests"]
@@ -100,3 +68,49 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "if TYPE_CHECKING:",
 ]
+[dependency-groups]
+dev = [
+    "pytest",
+    "coverage",
+    "ruff",
+    "build",
+    "sphinx",
+    "furo",
+]
+
+[tool.ruff]
+target-version = "py310"
+exclude = [
+    "dist",
+    "docs",
+    "tests",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "F",    # Pyflakes
+    "W",    # pycodestyle warnings
+    "C90",  # mccabe complexity
+    "B",    # flake8-bugbear (bugs/design issues)
+    "I",    # isort (import sorting)
+    "UP",   # pyupgrade (modern python syntax)
+    "SIM",  # flake8-simplify (simpler code)
+    "RUF",  # Ruff-specific rules
+]
+ignore = [
+    "RUF001",  # Ambiguous unicode character (acute accent is used intentionally for quoting)
+    "RUF012",  # Mutable default value for class attribute (used for SQL matching patterns)
+    "B904",    # raise ... from ... (not required for simple custom exceptions)
+    "E501",    # Line too long (managed by formatting choices rather than strict rules)
+    "SIM108",  # Use ternary operator instead of if-else block (traditional if-else is preferred for readability)
+    "RUF005",  # Consider iterable unpacking instead of concatenation
+    "RUF059",  # Unused unpacked variables (retains standard unpacking signatures)
+    "SIM102",  # Nested if statements (sometimes preferred for logic separation)
+    "SIM115",  # Use a context manager for opening files (CLI streams are opened dynamically)
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 31
+
+

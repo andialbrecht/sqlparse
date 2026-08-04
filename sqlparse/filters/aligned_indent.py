@@ -5,8 +5,9 @@
 # This module is part of python-sqlparse and is released under
 # the BSD License: https://opensource.org/licenses/BSD-3-Clause
 
-from sqlparse import sql, tokens as T
-from sqlparse.utils import offset, indent
+from sqlparse import sql
+from sqlparse import tokens as T
+from sqlparse.utils import indent, offset
 
 
 class AlignedIndentFilter:
@@ -127,7 +128,7 @@ class AlignedIndentFilter:
                 self._process(sgroup)
 
     def _process(self, tlist):
-        func_name = '_process_{cls}'.format(cls=type(tlist).__name__)
+        func_name = f'_process_{type(tlist).__name__}'
         func = getattr(self, func_name.lower(), self._process_default)
         func(tlist)
 

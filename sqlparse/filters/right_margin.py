@@ -7,7 +7,8 @@
 
 import re
 
-from sqlparse import sql, tokens as T
+from sqlparse import sql
+from sqlparse import tokens as T
 
 
 # FIXME: Doesn't work
@@ -37,7 +38,7 @@ class RightMarginFilter:
                         indent = match.group()
                     else:
                         indent = ''
-                    yield sql.Token(T.Whitespace, '\n{}'.format(indent))
+                    yield sql.Token(T.Whitespace, f'\n{indent}')
                     self.line = indent
                 self.line += val
             yield token

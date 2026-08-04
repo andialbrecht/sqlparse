@@ -5,14 +5,15 @@
 # This module is part of python-sqlparse and is released under
 # the BSD License: https://opensource.org/licenses/BSD-3-Clause
 
-from sqlparse import sql, tokens as T
-from sqlparse.utils import offset, indent
+from sqlparse import sql
+from sqlparse import tokens as T
+from sqlparse.utils import indent, offset
 
 
 class ReindentFilter:
     def __init__(self, width=2, char=' ', wrap_after=0, n='\n',
                  comma_first=False, indent_after_first=False,
-                 indent_columns=False):
+                 indent_columns=False, compact=False):
         self.n = n
         self.width = width
         self.char = char
@@ -21,6 +22,7 @@ class ReindentFilter:
         self.wrap_after = wrap_after
         self.comma_first = comma_first
         self.indent_columns = indent_columns
+        self.compact = compact
         self._curr_stmt = None
         self._last_stmt = None
         self._last_func = None
@@ -97,7 +99,7 @@ class ReindentFilter:
             tidx, token = tlist.token_next_by(t=ttypes, idx=tidx)
 
     def _process(self, tlist):
-        func_name = '_process_{cls}'.format(cls=type(tlist).__name__)
+        func_name = f'_process_{type(tlist).__name__}'
         func = getattr(self, func_name.lower(), self._process_default)
         func(tlist)
 
@@ -197,15 +199,19 @@ class ReindentFilter:
         with offset(self, self._get_offset(tlist[0])):
             with offset(self, self._get_offset(first)):
                 for cond, value in iterable:
-                    token = value[0] if cond is None else cond[0]
-                    tlist.insert_before(token, self.nl())
+                    str_cond = ''.join(str(x) for x in cond or [])
+                    str_value = ''.join(str(x) for x in value)
+                    end_pos = self.offset + 1 + len(str_cond) + len(str_value)
+                    if (not self.compact and end_pos > self.wrap_after):
+                        token = value[0] if cond is None else cond[0]
+                        tlist.insert_before(token, self.nl())
 
                 # Line breaks on group level are done. let's add an offset of
                 # len "when ", "then ", "else "
                 with offset(self, len("WHEN ")):
                     self._process_default(tlist)
             end_idx, end = tlist.token_next_by(m=sql.Case.M_CLOSE)
-            if end_idx is not None:
+            if end_idx is not None and not self.compact:
                 tlist.insert_before(end_idx, self.nl())
 
     def _process_values(self, tlist):

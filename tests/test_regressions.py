@@ -159,9 +159,9 @@ def test_parse_sql_with_binary():
     # See https://github.com/andialbrecht/sqlparse/pull/88
     # digest = '|ËêplL4¡høN{'
     digest = '\x82|\xcb\x0e\xea\x8aplL4\xa1h\x91\xf8N{'
-    sql = "select * from foo where bar = '{}'".format(digest)
+    sql = f"select * from foo where bar = '{digest}'"
     formatted = sqlparse.format(sql, reindent=True)
-    tformatted = "select *\nfrom foo\nwhere bar = '{}'".format(digest)
+    tformatted = f"select *\nfrom foo\nwhere bar = '{digest}'"
     assert formatted == tformatted
 
 
@@ -336,9 +336,9 @@ def test_issue315_utf8_by_default():
         '\x9b\xb2.'
         '\xec\x82\xac\xeb\x9e\x91\xed\x95\xb4\xec\x9a\x94'
     )
-    sql = "select * from foo where bar = '{}'".format(digest)
+    sql = f"select * from foo where bar = '{digest}'"
     formatted = sqlparse.format(sql, reindent=True)
-    tformatted = "select *\nfrom foo\nwhere bar = '{}'".format(digest)
+    tformatted = f"select *\nfrom foo\nwhere bar = '{digest}'"
     assert formatted == tformatted
 
 
@@ -452,6 +452,57 @@ def test_primary_key_issue740():
     p = sqlparse.parse('PRIMARY KEY')[0]
     assert len(p.tokens) == 1
     assert p.tokens[0].ttype == T.Keyword
+
+
+def test_alter_table_row_format_issue773():
+    # ROW_FORMAT is a keyword (like ENGINE), so it must not be absorbed into
+    # the preceding table name as if it were an alias.
+    p = sqlparse.parse('ALTER TABLE mytable ROW_FORMAT=Dynamic')[0]
+    row_format = p.token_next_by(m=(T.Keyword, 'ROW_FORMAT'))[1]
+    assert row_format is not None
+    # The table name should be parsed as a standalone identifier.
+    assert isinstance(p.tokens[4], sql.Identifier)
+    assert p.tokens[4].get_real_name() == 'mytable'
+    assert p.tokens[4].get_alias() is None
+    # Sanity check: ENGINE (already a keyword) behaves the same way.
+    e = sqlparse.parse('ALTER TABLE mytable ENGINE=InnoDB')[0]
+    assert e.tokens[4].get_real_name() == 'mytable'
+
+
+def test_materialized_view_issue752():
+    p = sqlparse.parse('CREATE MATERIALIZED VIEW v AS SELECT 1')[0]
+    assert p.tokens[2].ttype == T.Keyword
+    formatted = sqlparse.format('create materialized view v as select 1',
+                                keyword_case='upper')
+    assert formatted == 'CREATE MATERIALIZED VIEW v AS SELECT 1'
+
+
+@pytest.mark.parametrize('sql', [
+    'a BETWEEN .03 AND .06',
+    'a between .03 and .06',
+])
+def test_between_leading_dot_float_issue601(sql):
+    # A keyword followed by a float literal written without a leading zero
+    # (e.g. ``.03``) must not be reclassified as an identifier because of the
+    # following period.  BETWEEN has to stay a keyword and the literals have to
+    # remain standalone number tokens.
+    p = sqlparse.parse(sql)[0]
+    kw = p.token_next_by(m=(T.Keyword, 'BETWEEN'))[1]
+    assert kw is not None
+    floats = list(p.flatten())
+    floats = [t for t in floats if t.ttype is T.Number.Float]
+    assert [t.value for t in floats] == ['.03', '.06']
+    # 'and' must remain a keyword too, not be absorbed into an identifier.
+    assert p.token_next_by(m=(T.Keyword, 'AND'))[1] is not None
+
+
+def test_keyword_before_qualified_name_still_grouped():
+    # Regression guard for issue #601 fix: member access such as
+    # ``schema.name`` (with or without surrounding spaces) must keep working.
+    for stmt in ('select foo.bar', 'select foo . bar', 'select a.b.c'):
+        p = sqlparse.parse(stmt)[0]
+        ident = p.token_next_by(i=sql.Identifier)[1]
+        assert ident is not None
 
 
 @pytest.fixture

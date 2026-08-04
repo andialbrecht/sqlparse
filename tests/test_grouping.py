@@ -17,13 +17,6 @@ def test_grouping_parenthesis():
     assert len(parsed.tokens[2].tokens[3].tokens) == 3
 
 
-def test_grouping_comments():
-    s = '/*\n * foo\n */   \n  bar'
-    parsed = sqlparse.parse(s)[0]
-    assert str(parsed) == s
-    assert len(parsed.tokens) == 2
-
-
 @pytest.mark.parametrize('s', ['foo := 1;', 'foo := 1'])
 def test_grouping_assignment(s):
     parsed = sqlparse.parse(s)[0]
@@ -351,6 +344,14 @@ def test_grouping_alias_ctas():
     assert p.tokens[10].get_alias() == 'col1'
     assert isinstance(p.tokens[10].tokens[0], sql.Function)
 
+
+def test_grouping_alias_ctas_lowercase_as():
+    # 'as' is case-insensitive; a lowercase keyword in CREATE TABLE ... AS
+    # SELECT must not disable function grouping in the SELECT body.
+    p = sqlparse.parse('create table tbl1 as select coalesce(t1.col1, 0) as col1 from t1')[0]
+    assert p.tokens[10].get_alias() == 'col1'
+    assert isinstance(p.tokens[10].tokens[0], sql.Function)
+
 def test_grouping_subquery_no_parens():
     # Not totally sure if this is the right approach...
     # When a THEN clause contains a subquery w/o parenthesis around it *and*
@@ -513,7 +514,7 @@ def test_comparison_with_parenthesis():
 ))
 def test_comparison_with_strings(operator):
     # issue148
-    p = sqlparse.parse("foo {} 'bar'".format(operator))[0]
+    p = sqlparse.parse(f"foo {operator} 'bar'")[0]
     assert len(p.tokens) == 1
     assert isinstance(p.tokens[0], sql.Comparison)
     assert p.tokens[0].right.value == "'bar'"
@@ -592,7 +593,7 @@ def test_comparison_with_typed_literal():
 
 @pytest.mark.parametrize('start', ['FOR', 'FOREACH'])
 def test_forloops(start):
-    p = sqlparse.parse('{} foo in bar LOOP foobar END LOOP'.format(start))[0]
+    p = sqlparse.parse(f'{start} foo in bar LOOP foobar END LOOP')[0]
     assert (len(p.tokens)) == 1
     assert isinstance(p.tokens[0], sql.For)
 

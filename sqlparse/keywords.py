@@ -49,7 +49,11 @@ SQL_REGEX = [
     # see issue #39
     # Spaces around period `schema . name` are valid identifier
     # TODO: Spaces before period not implemented
-    (r'[A-ZÀ-Ü]\w*(?=\s*\.)', tokens.Name),  # 'Name'.
+    # The negative lookahead ``(?!\d)`` keeps a following floating point
+    # literal such as ``.03`` from being mistaken for a member access, so a
+    # preceding keyword (e.g. ``BETWEEN``) is not reclassified as a name.
+    # See issue #601.
+    (r'[A-ZÀ-Ü]\w*(?=\s*\.(?!\d))', tokens.Name),  # 'Name'.
     # FIXME(atronah): never match,
     # because `re.match` doesn't work with look-behind regexp feature
     (r'(?<=\.)[A-ZÀ-Ü]\w*', tokens.Name),  # .'Name'
@@ -69,9 +73,12 @@ SQL_REGEX = [
     (r'(?<![\w\])])(\[[^\]\[]+\])', tokens.Name),
     (r'((LEFT\s+|RIGHT\s+|FULL\s+)?(INNER\s+|OUTER\s+|STRAIGHT\s+)?'
      r'|(CROSS\s+|NATURAL\s+)?)?JOIN\b', tokens.Keyword),
-    (r'END(\s+IF|\s+LOOP|\s+WHILE)?\b', tokens.Keyword),
+    (r'END(\s+IF|\s+LOOP|\s+WHILE|\s+FOR|\s+CASE)?\b', tokens.Keyword),
+    (r'IF\s+(NOT\s+)?EXISTS\b', tokens.Keyword),
     (r'NOT\s+NULL\b', tokens.Keyword),
-    (r'NULLS\s+(FIRST|LAST)\b', tokens.Keyword),
+    (r'(ASC|DESC)(\s+NULLS\s+(FIRST|LAST))?\b', tokens.Keyword.Order),
+    (r'(ASC|DESC)\b', tokens.Keyword.Order),
+    (r'NULLS\s+(FIRST|LAST)\b', tokens.Keyword.Order),
     (r'UNION\s+ALL\b', tokens.Keyword),
     (r'CREATE(\s+OR\s+REPLACE)?\b', tokens.Keyword.DDL),
     (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
@@ -85,7 +92,7 @@ SQL_REGEX = [
      tokens.Keyword),
     (r"(AT|WITH')\s+TIME\s+ZONE\s+'[^']+'", tokens.Keyword.TZCast),
     (r'(NOT\s+)?(LIKE|ILIKE|RLIKE)\b', tokens.Operator.Comparison),
-    (r'(NOT\s+)?(REGEXP)\b', tokens.Operator.Comparison),
+    (r'(NOT\s+)?(REGEXP)(\s+(BINARY))?\b', tokens.Operator.Comparison),
     # Check for keywords, also returns tokens.Name if regex matches
     # but the match isn't a keyword.
     (r'\w[$#\w]*', PROCESS_AS_KEYWORD),
@@ -114,7 +121,6 @@ KEYWORDS = {
     'ANY': tokens.Keyword,
     'ARRAYLEN': tokens.Keyword,
     'ARE': tokens.Keyword,
-    'ASC': tokens.Keyword.Order,
     'ASENSITIVE': tokens.Keyword,
     'ASSERTION': tokens.Keyword,
     'ASSIGNMENT': tokens.Keyword,
@@ -227,7 +233,6 @@ KEYWORDS = {
     'DELIMITER': tokens.Keyword,
     'DELIMITERS': tokens.Keyword,
     'DEREF': tokens.Keyword,
-    'DESC': tokens.Keyword.Order,
     'DESCRIBE': tokens.Keyword,
     'DESCRIPTOR': tokens.Keyword,
     'DESTROY': tokens.Keyword,
@@ -358,6 +363,7 @@ KEYWORDS = {
     # 'M': tokens.Keyword,
     'MAP': tokens.Keyword,
     'MATCH': tokens.Keyword,
+    'MATERIALIZED': tokens.Keyword,
     'MAXEXTENTS': tokens.Keyword,
     'MAXVALUE': tokens.Keyword,
     'MESSAGE_LENGTH': tokens.Keyword,
@@ -487,6 +493,7 @@ KEYWORDS = {
     'ROUTINE_SCHEMA': tokens.Keyword,
     'ROWS': tokens.Keyword,
     'ROW_COUNT': tokens.Keyword,
+    'ROW_FORMAT': tokens.Keyword,
     'RULE': tokens.Keyword,
 
     'SAVE_POINT': tokens.Keyword,
@@ -839,6 +846,8 @@ KEYWORDS_PLPGSQL = {
     'CONFLICT': tokens.Keyword,
     'WINDOW': tokens.Keyword,
     'PARTITION': tokens.Keyword,
+    'ATTACH': tokens.Keyword,
+    'DETACH': tokens.Keyword,
     'OVER': tokens.Keyword,
     'PERFORM': tokens.Keyword,
     'NOTICE': tokens.Keyword,
@@ -846,6 +855,7 @@ KEYWORDS_PLPGSQL = {
     'INHERIT': tokens.Keyword,
     'INDEXES': tokens.Keyword,
     'ON_ERROR_STOP': tokens.Keyword,
+    'EXTENSION': tokens.Keyword,
 
     'BYTEA': tokens.Keyword,
     'BIGSERIAL': tokens.Keyword,

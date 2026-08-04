@@ -8,3 +8,4 @@ MANIFEST
 *.egg-info/
 htmlcov/
 .pytest_cache
+.venv/

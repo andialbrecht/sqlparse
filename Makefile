@@ -10,10 +10,24 @@ help:
 	@sed -n '/^[a-zA-Z0-9_.]*:/s/:.*//p' <Makefile | sort
 
 test:
-	tox
+	uv run --group dev --python 3.10 pytest tests/
+	uv run --group dev --python 3.11 pytest tests/
+	uv run --group dev --python 3.12 pytest tests/
+	uv run --group dev --python 3.13 pytest tests/
+	uv run --group dev --python 3.14 pytest tests/
+
+lint:
+	uv run --group dev ruff check sqlparse/
 
 coverage:
-	pytest --cov=sqlparse --cov-report=html --cov-report=term
+	uv run --group dev coverage run -m pytest tests/
+	uv run --group dev coverage combine
+	uv run --group dev coverage report
+
+coverage-xml:
+	uv run --group dev coverage run -m pytest tests/
+	uv run --group dev coverage combine
+	uv run --group dev coverage xml
 
 clean:
 	$(PYTHON) setup.py clean
@@ -23,5 +37,5 @@ clean:
 release:
 	@rm -rf dist/
 	python -m build
-	twine upload --sign --identity E0B84F81 dist/*
+	hatch publish
 	@echo "Reminder: Add release on github https://github.com/andialbrecht/sqlparse/releases"

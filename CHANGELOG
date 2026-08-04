@@ -1,7 +1,133 @@
 Development Version
 -------------------
 
-Nothing yet.
+Notable Changes
+
+* Drop support for Python 3.8 and 3.9. Python 3.10+ is now required.
+* Migrate project dependencies and environment management from `pixi` to `uv`.
+* Replace `flake8` with `ruff` for code checking and linting.
+
+Security Fixes
+
+* Fix uncontrolled CPU consumption in ``TokenList`` grouping (CWE-1333,
+  patches by alhudz and tonghuaroot, pr848).  Two independent
+  quadratic behaviours were fixed:
+
+  - ``TokenList.__init__`` called ``str(self)`` which recursively flattened
+    the entire token subtree on every group construction.  Deeply nested SQL
+    (parentheses, CASE WHEN, subqueries) therefore costs O(n·depth) CPU
+    before the depth cap fires — a ~2 KB payload could pin a worker for 10+
+    seconds.  Fix: join children's already-cached ``value`` fields directly,
+    reducing per-node cost to O(len(tokens)).
+
+  - ``group_tokens()`` recomputed ``grp.value = str(start)`` on every extend
+    step, re-scanning the entire growing group each time.  Wide flat queries
+    (e.g. SELECT with thousands of columns) therefore cost O(N²) in the
+    number of columns.  Fix: append only the newly added tokens' values.
+
+Enhancements
+
+* Modernize type annotations in top-level API functions using PEP 585 and PEP 604 syntax.
+
+Bug Fixes
+
+* Fix statement splitting (issue845).
+* Fix a late-binding closure bug in `TokenList.token_not_matching`.
+* Fix function grouping being skipped in ``CREATE TABLE ... AS SELECT``
+  statements when the ``as`` keyword is lowercase.
+* Recognize ``ROW_FORMAT`` as a keyword so that ``ALTER TABLE ... ROW_FORMAT=...``
+  no longer merges the table name and the option into a single identifier
+  (issue773).
+* Recognize ``MATERIALIZED`` as a keyword so it is parsed and formatted
+  consistently in ``CREATE MATERIALIZED VIEW`` statements (issue752).
+* Fix ``get_real_name`` for names with more than two dotted parts (issue332).
+* Keep a keyword such as ``BETWEEN`` from being reclassified as an identifier
+  when it is followed by a float literal written without a leading zero
+  (e.g. ``x BETWEEN .03 AND .06``), so the bounds are parsed as number tokens
+  (issue601).
+
+
+Release 0.5.5 (Dec 19, 2025)
+----------------------------
+
+Bug Fixes
+
+* Fix DoS protection to raise SQLParseError instead of silently returning None
+  when grouping limits are exceeded (issue827).
+* Fix splitting of BEGIN TRANSACTION statements (issue826).
+
+
+Release 0.5.4 (Nov 28, 2025)
+----------------------------
+
+Enhancements
+
+* Add support for Python 3.14.
+* Add type annotations to top-level API functions and include py.typed marker
+  for PEP 561 compliance, enabling type checking with mypy and other tools
+  (issue756).
+* Add pre-commit hook support. sqlparse can now be used as a pre-commit hook
+  to automatically format SQL files. The CLI now supports multiple files and
+  an `--in-place` flag for in-place editing (issue537).
+* Add `ATTACH` and `DETACH` to PostgreSQL keywords (pr808).
+* Add `INTERSECT` to close keywords in WHERE clause (pr820).
+* Support `REGEXP BINARY` comparison operator (pr817).
+
+Bug Fixes
+
+* Add additional protection against denial of service attacks when parsing
+  very large lists of tuples. This enhances the existing recursion protections
+  with configurable limits for token processing to prevent DoS through
+  algorithmic complexity attacks. The new limits (MAX_GROUPING_DEPTH=100,
+  MAX_GROUPING_TOKENS=10000) can be adjusted or disabled (by setting to None)
+  if needed for legitimate large SQL statements.
+* Remove shebang from cli.py and remove executable flag (pr818).
+* Fix strip_comments not removing all comments when input contains only
+  comments (issue801, pr803 by stropysh).
+* Fix splitting statements with IF EXISTS/IF NOT EXISTS inside BEGIN...END
+  blocks (issue812).
+* Fix splitting on semicolons inside BEGIN...END blocks (issue809).
+
+
+Release 0.5.3 (Dez 10, 2024)
+----------------------------
+
+Bug Fixes
+
+* This version introduces a more generalized handling of potential denial of
+  service attack (DOS) due to recursion errors for deeply nested statements.
+  Brought up and fixed by @living180. Thanks a lot!
+
+
+Release 0.5.2 (Nov 14, 2024)
+----------------------------
+
+Bug Fixes
+
+* EXTENSION is now recognized as a keyword (issue785).
+* SQL hints are not removed when removing comments (issue262, by skryzh).
+
+
+Release 0.5.1 (Jul 15, 2024)
+----------------------------
+
+Enhancements
+
+* New "compact" option for formatter. If set, the formatter tries to produce
+  a more compact output by avoiding some line breaks (issue783).
+
+Bug Fixes
+
+* The strip comments filter was a bit greedy and removed too much
+  whitespace (issue772).
+  Note: In some cases you might want to add `strip_whitespace=True` where you
+  previously used just `strip_comments=True`. `strip_comments` did some of the
+  work that `strip_whitespace` should do.
+* Fix error when splitting statements that contain multiple CASE clauses
+  within a BEGIN block (issue784).
+* Fix whitespace removal with nested expressions (issue782).
+* Fix parsing and formatting of ORDER clauses containing NULLS FIRST or
+  NULLS LAST (issue532).
 
 
 Release 0.5.0 (Apr 13, 2024)
@@ -17,7 +143,7 @@ Notable Changes
   https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-2m57-hf25-phgg
   The vulnerability was discovered by @uriyay-jfrog. Thanks for reporting!
 
-Enhancements:
+Enhancements
 
 * Splitting statements now allows to remove the semicolon at the end.
   Some database backends love statements without semicolon (issue742).

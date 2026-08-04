@@ -3,6 +3,7 @@ Extending :mod:`sqlparse`
 
 .. module:: sqlparse
    :synopsis: Extending parsing capability of sqlparse.
+   :no-index:
 
 The :mod:`sqlparse` module uses a sql grammar that was tuned through usage and numerous
 PR to fit a broad range of SQL syntaxes, but it cannot cater to every given case since
@@ -31,7 +32,13 @@ leaving parts out, or by making up your own master list.
 
 See the expected types of the arguments by inspecting their structure in
 ``sqlparse.keywords``.
-(For compatibility with python 3.4, this library does not use type-hints.)
+
+.. important::
+
+   ``.clear()`` removes *all* keyword dictionaries. Any dictionary that is
+   not added back afterwards is no longer recognized, so make sure to re-add
+   every dictionary you rely on. The full default set is listed in
+   ``Lexer.default_initialization()``.
 
 The following example adds support for the expression ``ZORDER BY``, and adds ``BAR`` as
 a keyword to the lexer:
@@ -64,9 +71,12 @@ a keyword to the lexer:
     # add the default keyword dictionaries
     lex.add_keywords(keywords.KEYWORDS_COMMON)
     lex.add_keywords(keywords.KEYWORDS_ORACLE)
+    lex.add_keywords(keywords.KEYWORDS_MYSQL)
     lex.add_keywords(keywords.KEYWORDS_PLPGSQL)
     lex.add_keywords(keywords.KEYWORDS_HQL)
     lex.add_keywords(keywords.KEYWORDS_MSACCESS)
+    lex.add_keywords(keywords.KEYWORDS_SNOWFLAKE)
+    lex.add_keywords(keywords.KEYWORDS_BIGQUERY)
     lex.add_keywords(keywords.KEYWORDS)
 
     # add a custom keyword dictionary
