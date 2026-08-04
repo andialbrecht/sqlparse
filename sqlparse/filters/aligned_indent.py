@@ -89,11 +89,12 @@ class AlignedIndentFilter:
     def _next_token(self, tlist, idx=-1):
         split_words = T.Keyword, self.split_words, True
         tidx, token = tlist.token_next_by(m=split_words, idx=idx)
-        # treat "BETWEEN x and y" as a single statement
-        if token and token.normalized == 'BETWEEN':
-            tidx, token = self._next_token(tlist, tidx)
+        # Skip chained BETWEEN ... AND pairs iteratively to avoid
+        # RecursionError on inputs with many BETWEEN clauses.
+        while token and token.normalized == 'BETWEEN':
+            tidx, token = tlist.token_next_by(m=split_words, idx=tidx)
             if token and token.normalized == 'AND':
-                tidx, token = self._next_token(tlist, tidx)
+                tidx, token = tlist.token_next_by(m=split_words, idx=tidx)
         return tidx, token
 
     def _split_kwds(self, tlist):
