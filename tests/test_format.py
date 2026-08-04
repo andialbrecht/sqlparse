@@ -784,3 +784,24 @@ def test_strip_ws_removes_trailing_ws_in_groups():  # issue782
                                 strip_whitespace=True)
     expected = '(where foo = bar) from'
     assert formatted == expected
+
+
+def test_format_chained_between_and():
+    """Chained BETWEEN...AND pairs must not cause RecursionError.
+
+    _next_token in ReindentFilter and AlignedIndentFilter previously
+    used recursion to skip BETWEEN...AND pairs. With ~1000 pairs
+    (8000 tokens, under MAX_GROUPING_TOKENS) this exceeded Python's
+    recursion limit.
+    """
+    parts = ["x"]
+    for i in range(1000):
+        parts.append(f"BETWEEN {i} AND {i + 1}")
+    sql = "SELECT * FROM t WHERE " + " ".join(parts)
+
+    result = sqlparse.format(sql, reindent=True)
+    assert "SELECT" in result
+    assert "BETWEEN" in result
+
+    result_aligned = sqlparse.format(sql, reindent_aligned=True)
+    assert "SELECT" in result_aligned

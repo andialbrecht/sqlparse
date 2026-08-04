@@ -1,4 +1,4 @@
-# This workflow will install Python dependencies, run tests and lint using uv
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
 name: Python application
@@ -8,56 +8,41 @@ on:
     branches:
     - master
   pull_request:
+    branches: [ master ]
   schedule:
     - cron: '0 12 * * *'
 
 jobs:
   test:
-    name: Run tests on Python ${{ matrix.python-version }}
-    runs-on: ${{ matrix.os }}
+    name: Run tests on ${{ matrix.py }}
+    runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
-        include:
-          - python-version: "3.10"
-            os: ubuntu-latest
-          - python-version: "3.11"
-            os: ubuntu-latest
-          - python-version: "3.12"
-            os: ubuntu-latest
-          - python-version: "3.13"
-            os: ubuntu-latest
-          - python-version: "3.14"
-            os: ubuntu-latest
-          # Test on additional platforms for Python 3.11
-          - python-version: "3.11"
-            os: macos-latest
-          - python-version: "3.11"
-            os: windows-latest
+        py:
+          #- "3.13-dev"
+          - "3.12"
+          - "3.11"
+          - "3.10"
+          - "3.9"
+          - "3.8"
+          - "pypy-3.10"
+          - "pypy-3.9"
+          - "pypy-3.8"
 
     steps:
     - uses: actions/checkout@v4
-
-    - name: Setup uv
-      uses: astral-sh/setup-uv@v5
+    - name: Set up Python ${{ matrix.py }}
+      uses: actions/setup-python@v5
       with:
-        enable-cache: true
-        python-version: ${{ matrix.python-version }}
-
-    - name: Install dependencies and run tests
-      run: uv run --group dev pytest tests/
-
-    - name: Run lint (Python 3.11 only)
-      if: matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
-      run: uv run --group dev ruff check sqlparse/
-
-    - name: Generate coverage report (Python 3.11 only)
-      if: matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
+        python-version: ${{ matrix.py }}
+        allow-prereleases: true
+        check-latest: true
+    - name: Install dependencies
       run: |
-        uv run --group dev coverage run -m pytest tests/
-        uv run --group dev coverage combine
-        uv run --group dev coverage xml
-
+        python -m pip install --upgrade pip hatch
+    - name: Lint with flake8
+      run: hatch run flake8
+    - name: Test with pytest and coverage
+      run: hatch run cov
     - name: Publish to codecov
-      if: matrix.python-version == '3.11' && matrix.os == 'ubuntu-latest'
       uses: codecov/codecov-action@v4

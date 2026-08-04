@@ -59,11 +59,12 @@ class ReindentFilter:
         m_split = T.Keyword, split_words, True
         tidx, token = tlist.token_next_by(m=m_split, idx=idx)
 
-        if token and token.normalized == 'BETWEEN':
-            tidx, token = self._next_token(tlist, tidx)
-
+        # Skip chained BETWEEN ... AND pairs iteratively to avoid
+        # RecursionError on inputs with many BETWEEN clauses.
+        while token and token.normalized == 'BETWEEN':
+            tidx, token = tlist.token_next_by(m=m_split, idx=tidx)
             if token and token.normalized == 'AND':
-                tidx, token = self._next_token(tlist, tidx)
+                tidx, token = tlist.token_next_by(m=m_split, idx=tidx)
 
         return tidx, token
 
