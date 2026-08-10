@@ -26,7 +26,7 @@ Security Fixes
     number of columns.  Fix: append only the newly added tokens' values.
 
 * Escape backslashes in the ``python`` and ``php`` output formats to prevent
-  string-literal breakout (CWE-94, GHSA-3496-9g83-7v6x, reported by 7thParkk).
+  string-literal breakout (CVE-2026-59894, GHSA-3496-9g83-7v6x, reported by 7thParkk).
 
 Enhancements
 
