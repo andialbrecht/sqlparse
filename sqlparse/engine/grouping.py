@@ -334,9 +334,14 @@ def group_comments(tlist):
     while token:
         eidx, end = tlist.token_not_matching(
             lambda tk: imt(tk, t=T.Comment) or tk.is_newline, idx=tidx)
-        if end is not None:
-            eidx, end = tlist.token_prev(eidx, skip_ws=False)
-            tlist.group_tokens(sql.Comment, tidx, eidx)
+        if end is None:
+            # From tidx onward everything is comment/newline: there is no
+            # terminator to group against, and every later start would hit
+            # the same dead end. Stop instead of re-scanning the tail once
+            # per remaining comment token (which is O(n**2)).
+            break
+        eidx, end = tlist.token_prev(eidx, skip_ws=False)
+        tlist.group_tokens(sql.Comment, tidx, eidx)
 
         tidx, token = tlist.token_next_by(t=T.Comment, idx=tidx)
 

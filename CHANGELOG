@@ -25,6 +25,9 @@ Security Fixes
     (e.g. SELECT with thousands of columns) therefore cost O(N²) in the
     number of columns.  Fix: append only the newly added tokens' values.
 
+* Fix quadratic CPU consumption in ``group_comments`` on comment-only input
+  (CVE-2026-71491, GHSA-f2ff-p2ww-7p4p, reported by sanktjodel).
+
 * Escape backslashes in the ``python`` and ``php`` output formats to prevent
   string-literal breakout (CVE-2026-59894, GHSA-3496-9g83-7v6x, reported by 7thParkk).
 
