@@ -13,7 +13,7 @@ from typing import IO, Any
 
 from sqlparse import cli, engine, filters, formatter, sql, tokens
 
-__version__ = "0.6.0"
+__version__ = "0.6.1.dev0"
 __all__ = ["cli", "engine", "filters", "formatter", "sql", "tokens"]
 
 
