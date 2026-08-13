@@ -254,6 +254,27 @@ def group_identifier(tlist):
         tidx, token = tlist.token_next_by(t=ttypes, idx=tidx)
 
 
+@recurse(sql.Identifier)
+def group_identifier_role(tlist):
+    # ROLE is a non-reserved keyword, so it may also be a column name. When it
+    # appears as a member of an identifier list (i.e. flanked by a comma) wrap
+    # it in an Identifier, matching the neighbouring plain names, so consumers
+    # such as ``get_identifiers()`` see a uniform Identifier rather than a bare
+    # keyword token. Outside of a list (e.g. ``CREATE ROLE r``) there is no
+    # adjacent comma, so it keeps its keyword role. See issue #798.
+    m_role = T.Keyword, 'ROLE'
+    tidx, token = tlist.token_next_by(m=m_role)
+    while token:
+        _, prev_ = tlist.token_prev(tidx)
+        _, next_ = tlist.token_next(tidx)
+        in_list = (prev_ is not None and prev_.match(T.Punctuation, ',')) or (
+            next_ is not None and next_.match(T.Punctuation, ',')
+        )
+        if in_list:
+            tlist.group_tokens(sql.Identifier, tidx, tidx)
+        tidx, token = tlist.token_next_by(m=m_role, idx=tidx)
+
+
 @recurse(sql.Over)
 def group_over(tlist):
     tidx, token = tlist.token_next_by(m=sql.Over.M_OPEN)
@@ -457,6 +478,7 @@ def group(stmt):
         group_period,
         group_arrays,
         group_identifier,
+        group_identifier_role,
         group_order,
         group_typecasts,
         group_tzcasts,
