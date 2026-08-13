@@ -10,16 +10,17 @@ Notable Changes
 Security Fixes
 
 * Fix uncontrolled CPU consumption (ReDoS) in the lexer's handling of
-  dollar-quoted literals and multiline comments (CWE-1333,
-  GHSA-prg7-hcfm-mfcr, reported by EQSTLab).  Three regexes used a lazy
-  dot-all quantifier (``[\s\S]*?``) terminated by a backreference or a
-  literal delimiter, applied at every text position by the lexer loop;
-  unclosed openers therefore forced a full rescan of the remaining input
-  per opener, costing O(n²) CPU on crafted SQL with many unique unmatched
-  ``$tag$`` or ``/*`` openers.  Fix: resolve delimiter pairs in a single
-  linear pass instead of re-scanning per opener.
+  dollar-quoted literals and multiline comments (CVE-2026-59893,
+  GHSA-prg7-hcfm-mfcr, reported by EQSTLab, min8282, 7thpark).
+  Three regexes used a lazy dot-all quantifier (``[\s\S]*?``) terminated
+  by a backreference or a literal delimiter, applied at every text position
+  by the lexer loop; unclosed openers therefore forced a full rescan of
+  the remaining input per opener, costing O(n²) CPU on crafted SQL with
+  many unique unmatched ``$tag$`` or ``/*`` openers.
+  Fix: resolve delimiter pairs in a single linear pass instead of
+  re-scanning per opener.
 
-* Fix uncontrolled CPU consumption in ``TokenList`` grouping (CWE-1333,
+* Fix uncontrolled CPU consumption in ``TokenList`` grouping (CVE-2026-54284,
   patches by alhudz and tonghuaroot, pr848).  Two independent
   quadratic behaviours were fixed:
 
