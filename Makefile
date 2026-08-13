@@ -19,6 +19,12 @@ test:
 lint:
 	uv run --group dev ruff check sqlparse/
 
+benchmark:
+	@for bench in benchmarks/bench_*.py; do \
+		uv run --group dev python $$bench || exit 1; \
+		echo; \
+	done
+
 coverage:
 	uv run --group dev coverage run -m pytest tests/
 	uv run --group dev coverage combine
