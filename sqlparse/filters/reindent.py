@@ -179,26 +179,30 @@ class ReindentFilter:
         if not tlist.within(sql.Function) and not tlist.within(sql.Values):
             with offset(self, num_offset):
                 position = 0
+                # Walk the identifiers in order and keep a cursor into the
+                # token list so token_index() doesn't rescan from the start on
+                # every insertion (that made wide lists O(n^2)).
+                last_idx = 0
                 for token in identifiers:
                     # Add 1 for the "," separator
                     position += len(token.value) + 1
                     if position > (self.wrap_after - self.offset):
                         adjust = 0
+                        tidx = tlist.token_index(token, last_idx)
                         if self.comma_first:
                             adjust = -2
-                            _, comma = tlist.token_prev(
-                                tlist.token_index(token))
+                            tidx, comma = tlist.token_prev(tidx)
                             if comma is None:
                                 continue
-                            token = comma
-                        tlist.insert_before(token, self.nl(offset=adjust))
+                        tlist.insert_before(tidx, self.nl(offset=adjust))
+                        last_idx = tidx
                         if self.comma_first:
                             _, ws = tlist.token_next(
-                                tlist.token_index(token), skip_ws=False)
+                                tidx + 1, skip_ws=False)
                             if (ws is not None
                                     and ws.ttype is not T.Text.Whitespace):
                                 tlist.insert_after(
-                                    token, sql.Token(T.Whitespace, ' '))
+                                    tidx + 1, sql.Token(T.Whitespace, ' '))
                         position = 0
         else:
             # ensure whitespace
