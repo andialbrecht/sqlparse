@@ -5,9 +5,46 @@
 # This module is part of python-sqlparse and is released under
 # the BSD License: https://opensource.org/licenses/BSD-3-Clause
 
+import re
+
 from sqlparse import sql
 from sqlparse import tokens as T
 from sqlparse.utils import indent, offset
+
+# The line boundaries str.splitlines() recognizes. Used only to tell whether a
+# token value can possibly affect the line count, never to split.
+HAS_LINE_BREAK = re.compile('[\n\r\v\f\x1c\x1d\x1e\x85\u2028\u2029]')
+
+
+class _Unreachable(Exception):
+    """*token* is not reachable from *group* by walking parents."""
+
+
+def _tokens_before(group, token):
+    """Yields the tokens of *group* that precede *token*, closest one first.
+
+    Groups are yielded whole rather than descended into, so ``str()`` on the
+    result still spells the preceding text but does not visit a leaf that the
+    caller may not need to look at.
+    """
+    # Record where *token* sits inside each of its ancestors, up to *group*.
+    ancestry = []
+    node = token
+    while node is not group:
+        parent = node.parent
+        try:
+            ancestry.append((parent.tokens, parent.tokens.index(node)))
+        except (AttributeError, ValueError):
+            # *token* is not reachable from *group* -- StripCommentsFilter, for
+            # one, splices in a replacement token whose parent is unset. The
+            # backwards walk cannot answer this, so say so and let the caller
+            # fall back to flattening the statement.
+            raise _Unreachable from None
+        node = parent
+
+    for siblings, tidx in ancestry:
+        for idx in range(tidx - 1, -1, -1):
+            yield siblings[idx]
 
 
 class ReindentFilter:
@@ -41,9 +78,51 @@ class ReindentFilter:
     def leading_ws(self):
         return self.offset + self.indent * self.width
 
+    def _preceding_line(self, token):
+        """Returns the last line of the text preceding *token*."""
+        if (type(self)._flatten_up_to_token is not _ORIG_FLATTEN_UP_TO_TOKEN
+                or '_flatten_up_to_token' in vars(self)):
+            # _flatten_up_to_token has been replaced -- by a subclass, on this
+            # class, or on this instance. Honour the replacement rather than the
+            # equivalent-but-faster walk below.
+            raw = ''.join(map(str, self._flatten_up_to_token(token)))
+            return (raw or '\n').splitlines()[-1]
+
+        if token.is_group:
+            token = next(token.flatten())
+
+        # Only the final line of the preceding text is ever used, so walk
+        # backwards from *token* and stop once the text collected is guaranteed
+        # to contain that whole line. Re-flattening the entire statement on
+        # every call is what made reindenting quadratic in the token count.
+        #
+        # Two line boundaries are needed rather than one, because splitlines()
+        # ignores a *trailing* boundary: "a\nb\n" ends on the line "b", so a
+        # token ending in a break does not start a fresh line. Stopping after
+        # the third token that holds a boundary guarantees two boundaries even
+        # in the worst case, where a "\r\n" is split across a token edge and so
+        # counts only once.
+        chunks = []
+        breaks = 0
+        try:
+            for t in _tokens_before(self._curr_stmt, token):
+                value = str(t)
+                chunks.append(value)
+                if HAS_LINE_BREAK.search(value):
+                    breaks += 1
+                    if breaks == 3:
+                        break
+        except _Unreachable:
+            # A token spliced in without a parent (StripCommentsFilter does
+            # this) cannot be located by walking parents. Flatten instead.
+            raw = ''.join(map(str, self._flatten_up_to_token(token)))
+            return (raw or '\n').splitlines()[-1]
+        chunks.reverse()
+
+        return (''.join(chunks) or '\n').splitlines()[-1]
+
     def _get_offset(self, token):
-        raw = ''.join(map(str, self._flatten_up_to_token(token)))
-        line = (raw or '\n').splitlines()[-1]
+        line = self._preceding_line(token)
         # Now take current offset into account and return relative offset.
         return len(line) - len(self.char * self.leading_ws)
 
@@ -246,3 +325,8 @@ class ReindentFilter:
 
         self._last_stmt = stmt
         return stmt
+
+
+# The shipped _flatten_up_to_token, captured so that _preceding_line can tell
+# whether it is still in place and only then take its faster equivalent path.
+_ORIG_FLATTEN_UP_TO_TOKEN = ReindentFilter._flatten_up_to_token
