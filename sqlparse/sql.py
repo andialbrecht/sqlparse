@@ -641,7 +641,7 @@ class Function(NameAliasMixin, TokenList):
     def get_window(self):
         """Return the window if it exists."""
         over_clause = self.token_next_by(i=Over)
-        if not over_clause:
+        if over_clause[1] is None:
             return None
         return over_clause[1].tokens[-1]
 
