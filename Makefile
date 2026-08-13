@@ -44,4 +44,3 @@ release:
 	@rm -rf dist/
 	python -m build
 	hatch publish
-	@echo "Reminder: Add release on github https://github.com/andialbrecht/sqlparse/releases"
