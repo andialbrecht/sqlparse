@@ -245,3 +245,21 @@ def test_cli_commands():
     p = sqlparse.parse('\\copy')[0]
     assert len(p.tokens) == 1
     assert p.tokens[0].ttype == T.Command
+
+
+def test_tokenize_escaped_backslash():
+    """Test that escaped backslashes in SQL strings are correctly tokenized."""
+    import sqlparse
+    from sqlparse import tokens as T
+
+    # Test single-quoted string with escaped backslash
+    sql = r"SELECT '\\', '\\'"
+    tokens = list(sqlparse.parse(sql)[0].flatten())
+    token_types = [t.ttype for t in tokens]
+
+    # Should be: SELECT, whitespace, ',', ,, whitespace, ',',  (6 tokens after keyword)
+    assert T.Keyword.DML in token_types  # SELECT
+    string_tokens = [t for t in tokens if t.ttype in (T.String.Single,)]
+    assert len(string_tokens) == 2, f"Expected 2 string tokens, got {len(string_tokens)}"
+    assert string_tokens[0].value == "'\\\\'"
+    assert string_tokens[1].value == "'\\\\'"
