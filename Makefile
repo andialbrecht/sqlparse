@@ -42,5 +42,5 @@ clean:
 
 release:
 	@rm -rf dist/
-	python -m build
-	hatch publish
+	uv run python -m build
+	uv run hatch publish

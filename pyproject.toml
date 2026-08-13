@@ -76,6 +76,7 @@ dev = [
     "build",
     "sphinx",
     "furo",
+    "hatch>=1.18.0",
 ]
 
 [tool.ruff]
