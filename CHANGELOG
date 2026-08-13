@@ -4,69 +4,65 @@ Development Version
 Notable Changes
 
 * Drop support for Python 3.8 and 3.9. Python 3.10+ is now required.
-* Migrate project dependencies and environment management from `pixi` to `uv`.
-* Replace `flake8` with `ruff` for code checking and linting.
-
-Security Fixes
-
-* Fix uncontrolled CPU consumption (ReDoS) in the lexer's handling of
-  dollar-quoted literals and multiline comments (CVE-2026-59893,
-  GHSA-prg7-hcfm-mfcr, reported by EQSTLab, min8282, 7thpark).
-  Three regexes used a lazy dot-all quantifier (``[\s\S]*?``) terminated
-  by a backreference or a literal delimiter, applied at every text position
-  by the lexer loop; unclosed openers therefore forced a full rescan of
-  the remaining input per opener, costing O(n²) CPU on crafted SQL with
-  many unique unmatched ``$tag$`` or ``/*`` openers.
-  Fix: resolve delimiter pairs in a single linear pass instead of
-  re-scanning per opener.
-
-* Fix uncontrolled CPU consumption in ``TokenList`` grouping (CVE-2026-54284,
-  patches by alhudz and tonghuaroot, pr848).  Two independent
-  quadratic behaviours were fixed:
-
-  - ``TokenList.__init__`` called ``str(self)`` which recursively flattened
-    the entire token subtree on every group construction.  Deeply nested SQL
-    (parentheses, CASE WHEN, subqueries) therefore costs O(n·depth) CPU
-    before the depth cap fires — a ~2 KB payload could pin a worker for 10+
-    seconds.  Fix: join children's already-cached ``value`` fields directly,
-    reducing per-node cost to O(len(tokens)).
-
-  - ``group_tokens()`` recomputed ``grp.value = str(start)`` on every extend
-    step, re-scanning the entire growing group each time.  Wide flat queries
-    (e.g. SELECT with thousands of columns) therefore cost O(N²) in the
-    number of columns.  Fix: append only the newly added tokens' values.
-
-* Fix uncontrolled CPU consumption when reindenting long tuple lists
-  (CWE-1333, GHSA-cfqr-cjx5-5jcm).  ``ReindentFilter._get_offset()`` rebuilt
-  the statement prefix from its start on every call, making ``format()`` with
-  ``reindent=True`` O(N²) in the number of tuples.  Fix: measure the current
-  line by walking backwards from the token.  Output is unchanged.
-* Fix quadratic CPU consumption in ``group_comments`` on comment-only input
-  (CVE-2026-71491, GHSA-f2ff-p2ww-7p4p, reported by sanktjodel).
-
-* Escape backslashes in the ``python`` and ``php`` output formats to prevent
-  string-literal breakout (CVE-2026-59894, GHSA-3496-9g83-7v6x, reported by 7thParkk).
+* IMPORTANT: Fixes a potential denial of service attack (DOS) in the lexer,
+  which consumed CPU quadratically on statements containing many unclosed
+  dollar-quoted literals or multiline comments (CVE-2026-59893). See the
+  security advisory for details:
+  https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-prg7-hcfm-mfcr
+  The vulnerability was discovered by EQSTLab, min8282 and 7thpark.
+  Thanks for reporting!
+* IMPORTANT: Fixes a potential denial of service attack (DOS) when grouping
+  deeply nested or very wide statements. Building a token group re-read the
+  whole group on every step, so a small statement could keep a worker busy
+  for a long time (CVE-2026-54284, pr848 by alhudz and tonghuaroot).
+* IMPORTANT: Fixes a potential denial of service attack (DOS) in
+  `format(sql, reindent=True)`, which consumed CPU quadratically on long
+  lists of tuples. See the security advisory for details:
+  https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-cfqr-cjx5-5jcm
+* IMPORTANT: Fixes a potential denial of service attack (DOS) on statements
+  that consist only of comments (CVE-2026-71491). See the security advisory
+  for details:
+  https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-f2ff-p2ww-7p4p
+  The vulnerability was discovered by @sanktjodel. Thanks for reporting!
+* IMPORTANT: Backslashes are now escaped in the `python` and `php` output
+  formats. Without escaping, SQL containing a backslash could break out of
+  the generated string literal (CVE-2026-59894). See the security advisory
+  for details:
+  https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-3496-9g83-7v6x
+  The vulnerability was discovered by @7thParkk. Thanks for reporting!
 
 Enhancements
 
-* Modernize type annotations in top-level API functions using PEP 585 and PEP 604 syntax.
+* Modernize type annotations in top-level API functions using PEP 585 and
+  PEP 604 syntax.
+* `END FOR` and `END CASE` are now recognized as keywords.
 
 Bug Fixes
 
-* Fix statement splitting (issue845).
-* Fix a late-binding closure bug in `TokenList.token_not_matching`.
-* Fix function grouping being skipped in ``CREATE TABLE ... AS SELECT``
-  statements when the ``as`` keyword is lowercase.
-* Recognize ``ROW_FORMAT`` as a keyword so that ``ALTER TABLE ... ROW_FORMAT=...``
+* Statement splitting was rewritten on a stack-based architecture. This fixes
+  splitting of statements with nested BEGIN ... END blocks (issue845).
+* Fix function grouping being skipped in `CREATE TABLE ... AS SELECT`
+  statements when the `as` keyword is lowercase (pr867 by Osamaali313).
+* Recognize `ROW_FORMAT` as a keyword so that `ALTER TABLE ... ROW_FORMAT=...`
   no longer merges the table name and the option into a single identifier
-  (issue773).
-* Recognize ``MATERIALIZED`` as a keyword so it is parsed and formatted
-  consistently in ``CREATE MATERIALIZED VIEW`` statements (issue752).
-* Fix ``get_real_name`` for names with more than two dotted parts (issue332).
-* Keep a keyword such as ``BETWEEN`` from being reclassified as an identifier
-  when it is followed by a float literal written without a leading zero
-  (e.g. ``x BETWEEN .03 AND .06``), so the bounds are parsed as number tokens
-  (issue601).
+  (issue773, pr860 by apoorvdarshan).
+* Recognize `MATERIALIZED` as a keyword so it is parsed and formatted
+  consistently in `CREATE MATERIALIZED VIEW` statements (issue752, pr854 by
+  gaoflow).
+* Fix `get_real_name` for names with more than two dotted parts (issue332,
+  pr865 by chuenchen309).
+* Keep a keyword such as `BETWEEN` from being reclassified as an identifier
+  when it is followed by a float literal written without a leading zero, so
+  that `x BETWEEN .03 AND .06` parses its bounds as numbers (issue601, pr868
+  by deepakganesh78).
+* Fix a late-binding closure bug in `TokenList.token_not_matching`.
+
+Other
+
+* Migrate project dependencies and environment management from `pixi` to `uv`.
+* Replace `flake8` with `ruff` for code checking and linting.
+* The README is now written in Markdown and the documentation uses an
+  updated theme.
 
 
 Release 0.5.5 (Dec 19, 2025)
