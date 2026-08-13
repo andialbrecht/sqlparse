@@ -7,7 +7,7 @@
 
 import itertools
 import re
-from collections import defaultdict, deque, namedtuple
+from collections import deque
 from contextlib import contextmanager
 
 # This regular expression replaces the home-cooked parser that was here before.
@@ -108,50 +108,6 @@ def imt(token, i=None, m=None, t=None):
 def consume(iterator, n):
     """Advance the iterator n-steps ahead. If n is none, consume entirely."""
     deque(itertools.islice(iterator, n), maxlen=0)
-
-
-_DelimiterOccurrence = namedtuple(
-    '_DelimiterOccurrence', 'start end tag can_open can_close payload')
-
-
-def resolve_paired_delimiters(occurrences):
-    """Pair delimiter occurrences (quote/comment open & close markers) in
-    one left-to-right pass, instead of re-scanning the remaining text for
-    every unmatched opener -- which is what a backreference- or literal-
-    terminated lazy-dot-all regex applied at every text position ends up
-    doing, and is O(n^2) on adversarial input (GHSA-prg7-hcfm-mfcr).
-
-    `occurrences` must be sorted by `start`. Each occurrence with
-    `can_open` is paired with the nearest later occurrence sharing its
-    `tag` that has `can_close`; anything in between (including other
-    openers) is left as literal content. Unpaired openers are dropped,
-    exactly as a regex that never finds its closing delimiter fails to
-    match at all.
-
-    Returns a list of (start, end, payload) for each resolved span.
-    """
-    occurrences = list(occurrences)
-    closers = defaultdict(deque)
-    for idx, occ in enumerate(occurrences):
-        if occ.can_close:
-            closers[occ.tag].append(idx)
-
-    spans = []
-    consumed_until = 0
-    for i, occ in enumerate(occurrences):
-        if occ.can_close:
-            queue = closers[occ.tag]
-            if queue and queue[0] == i:
-                queue.popleft()
-        if occ.start < consumed_until or not occ.can_open:
-            continue
-        queue = closers[occ.tag]
-        if queue:
-            close_idx = queue.popleft()
-            close_end = occurrences[close_idx].end
-            spans.append((occ.start, close_end, occ.payload))
-            consumed_until = close_end
-    return spans
 
 
 @contextmanager

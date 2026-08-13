@@ -6,9 +6,10 @@
 # the BSD License: https://opensource.org/licenses/BSD-3-Clause
 
 import re
+from bisect import bisect_left
+from collections import defaultdict
 
 from sqlparse import tokens
-from sqlparse.utils import _DelimiterOccurrence, resolve_paired_delimiters
 
 # object() only supports "is" and is useful as a marker
 # use this marker to specify that the given regex in SQL_REGEX
@@ -20,22 +21,64 @@ PROCESS_AS_KEYWORD = object()
 # (`/*...*/`, `/*+...*/`) used to be matched with per-position regexes
 # using a lazy dot-all quantifier (`[\s\S]*?`) terminated by a
 # backreference or a literal delimiter. Applied at every text position by
-# the lexer loop below, that shape is O(n^2) on adversarial input with
-# many unclosed openers, since each failed attempt re-scans to the end of
-# the remaining text (GHSA-prg7-hcfm-mfcr). They are resolved instead in
-# a single linear pass by find_delimited_spans().
-_DOLLAR_QUOTE_DELIM = re.compile(r'\$(?:[_A-ZÀ-Ü]\w*)?\$', re.IGNORECASE | re.UNICODE)
+# the lexer loop, that shape is O(n^2) on adversarial input with many
+# unclosed openers, since each failed attempt re-scans to the end of the
+# remaining text (GHSA-prg7-hcfm-mfcr). find_delimited_spans() collects
+# all opener and closer positions in a single pass instead, so the lexer
+# can pair them with a binary search when it actually reaches an opener.
+#
+# The delimiter regex is wrapped in a lookahead so that overlapping
+# occurrences are reported too: in `$$$$` the closing `$$` starts inside
+# the match of the opening one, and a non-overlapping scan would miss it.
+_DOLLAR_QUOTE_DELIM = re.compile(
+    r'(?=(\$(?:[_A-ZÀ-Ü]\w*)?\$))', re.IGNORECASE | re.UNICODE)
 _DOLLAR_QUOTE_OPENER_OK = re.compile(r'(?<![\w"$])', re.UNICODE)
 _COMMENT_HINT_OPEN = re.compile(r'/\*\+')
 _COMMENT_OPEN = re.compile(r'/\*(?!\+)')
 _COMMENT_CLOSE = re.compile(r'\*/')
 
+# All multiline comments share a single closer (`*/`), so one bucket is
+# enough; dollar-quoted literals are bucketed by their tag.
+_COMMENT_TAG = '/*'
+
+
+class DelimitedSpans:
+    """Opener and closer positions of dollar-quoted literals and multiline
+    comments, resolved on demand by :meth:`resolve`.
+
+    Pairing has to happen at the position the lexer has actually reached,
+    not upfront: a `/*`, `*/` or `$$` inside a string literal or behind a
+    `--` comment is not a delimiter at all, and resolving it eagerly would
+    consume the partner of the next real delimiter.
+    """
+
+    __slots__ = ('_closers', 'openers')
+
+    def __init__(self, openers, closers):
+        #: start offset -> (offset behind the opener, tag, token type)
+        self.openers = openers
+        #: tag -> ([closer start, ...], [closer end, ...]), both ascending
+        self._closers = closers
+
+    def resolve(self, pos):
+        """Return ``(end offset, token type)`` for the span opening at
+        `pos`, or None if its closing delimiter is missing -- just as a
+        regex that never finds its closing delimiter fails to match.
+        """
+        opener_end, tag, ttype = self.openers[pos]
+        starts, ends = self._closers[tag]
+        idx = bisect_left(starts, opener_end)
+        if idx == len(starts):
+            return None
+        return ends[idx], ttype
+
+
+_NO_SPANS = DelimitedSpans({}, {})
+
 
 def find_delimited_spans(text):
-    """Locate dollar-quoted literals and multiline comments in `text`.
-
-    Returns a dict mapping each span's start offset to
-    (end offset, token type).
+    """Locate the delimiters of dollar-quoted literals and multiline
+    comments in `text` and return them as a :class:`DelimitedSpans`.
     """
     has_dollar = '$' in text
     # A comment can only ever open on "/*"; without it "*/" alone can
@@ -43,31 +86,34 @@ def find_delimited_spans(text):
     # skip all three comment-related regex passes below.
     has_comment_open = '/*' in text
     if not has_dollar and not has_comment_open:
-        return {}
+        return _NO_SPANS
 
-    occurrences = []
+    openers = {}
+    closers = defaultdict(lambda: ([], []))
     if has_dollar:
         for m in _DOLLAR_QUOTE_DELIM.finditer(text):
-            tag = m.group()
-            can_open = _DOLLAR_QUOTE_OPENER_OK.match(text, m.start()) is not None
-            occurrences.append(
-                _DelimiterOccurrence(m.start(), m.end(), tag, can_open, True, tokens.Literal))
+            start = m.start()
+            tag = m.group(1)
+            end = start + len(tag)
+            # Every delimiter can close a literal, but one preceded by a
+            # word character, `"` or `$` cannot open one.
+            starts, ends = closers[tag]
+            starts.append(start)
+            ends.append(end)
+            if _DOLLAR_QUOTE_OPENER_OK.match(text, start) is not None:
+                openers[start] = (end, tag, tokens.Literal)
     if has_comment_open:
         for m in _COMMENT_HINT_OPEN.finditer(text):
-            occurrences.append(_DelimiterOccurrence(
-                m.start(), m.end(), 'C', True, False,
-                tokens.Comment.Multiline.Hint))
+            openers[m.start()] = (
+                m.end(), _COMMENT_TAG, tokens.Comment.Multiline.Hint)
         for m in _COMMENT_OPEN.finditer(text):
-            occurrences.append(_DelimiterOccurrence(
-                m.start(), m.end(), 'C', True, False,
-                tokens.Comment.Multiline))
+            openers[m.start()] = (
+                m.end(), _COMMENT_TAG, tokens.Comment.Multiline)
+        starts, ends = closers[_COMMENT_TAG]
         for m in _COMMENT_CLOSE.finditer(text):
-            occurrences.append(
-                _DelimiterOccurrence(m.start(), m.end(), 'C', False, True, None))
-    occurrences.sort(key=lambda occ: occ.start)
-
-    spans = resolve_paired_delimiters(occurrences)
-    return {start: (end, ttype) for start, end, ttype in spans}
+            starts.append(m.start())
+            ends.append(m.end())
+    return DelimitedSpans(openers, closers)
 
 
 SQL_REGEX = [

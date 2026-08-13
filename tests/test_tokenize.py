@@ -245,3 +245,31 @@ def test_cli_commands():
     p = sqlparse.parse('\\copy')[0]
     assert len(p.tokens) == 1
     assert p.tokens[0].ttype == T.Command
+
+
+@pytest.mark.parametrize('sql, expected', [
+    # A "/*", "*/" or "$$" that merely looks like a delimiter because it
+    # sits inside a string literal or behind a "--" comment must not
+    # consume the closing delimiter of the next real one.
+    ("SELECT '/*' FROM t; /* c */ SELECT 1",
+     (T.Comment.Multiline, '/* c */')),
+    ("SELECT '*/' FROM t; /* c */ SELECT 1",
+     (T.Comment.Multiline, '/* c */')),
+    ("SELECT '/*+' FROM t; /*+ h */ SELECT 1",
+     (T.Comment.Multiline.Hint, '/*+ h */')),
+    ("-- /*\n/* c */ SELECT 1",
+     (T.Comment.Multiline, '/* c */')),
+    ('SELECT "/*" FROM t; /* c */ SELECT 1',
+     (T.Comment.Multiline, '/* c */')),
+    ("SELECT '$$' FROM t, $$x$$",
+     (T.Literal, '$$x$$')),
+    ("-- $$\nDO $$ BEGIN NULL; END $$",
+     (T.Literal, '$$ BEGIN NULL; END $$')),
+    ("SELECT '$t$' FROM t, $t$x$t$",
+     (T.Literal, '$t$x$t$')),
+    # The closing delimiter may start inside the match of the opening one.
+    ('SELECT $$$$', (T.Literal, '$$$$')),
+    ('SELECT $$$a$$', (T.Literal, '$$$a$$')),
+])
+def test_delimiters_in_strings_and_comments(sql, expected):
+    assert expected in list(lexer.tokenize(sql))
