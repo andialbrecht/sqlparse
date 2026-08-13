@@ -286,6 +286,30 @@ TRANSACTION;"""
     assert stmts[3] == 'END\nTRANSACTION;'
 
 
+@pytest.mark.parametrize('mode', ['READ WRITE', 'READ ONLY'])
+def test_split_begin_read_transaction(mode):  # issue843
+    sql = f"""BEGIN {mode};
+SELECT 1;
+COMMIT;"""
+    stmts = sqlparse.split(sql)
+    assert len(stmts) == 3
+    assert stmts[0] == f'BEGIN {mode};'
+    assert stmts[1] == 'SELECT 1;'
+    assert stmts[2] == 'COMMIT;'
+
+
+@pytest.mark.parametrize('keyword', ['WRITE', 'ONLY'])
+def test_split_begin_invalid_transaction_keyword_as_block(keyword):
+    sql = f"""BEGIN {keyword};
+SELECT 1;
+END;
+SELECT 2;"""
+    stmts = sqlparse.split(sql)
+    assert len(stmts) == 2
+    assert stmts[0].startswith(f'BEGIN {keyword};')
+    assert stmts[1] == 'SELECT 2;'
+
+
 def test_split_anonymous_begin_end_for():  # issue845 Case 1
     sql = """
 BEGIN
