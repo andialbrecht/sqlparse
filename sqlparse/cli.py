@@ -27,10 +27,18 @@ from sqlparse.exceptions import SQLParseError
 
 # TODO: Add CLI Tests
 # TODO: Simplify formatter by using argparse `type` arguments
+class _ArgumentParser(argparse.ArgumentParser):
+    """ArgumentParser that points at --help when arguments are invalid."""
+
+    def error(self, message):
+        self.exit(2, f'{self.format_usage()}{self.prog}: error: {message}\n'
+                     f"Try '{self.prog} --help' for more information.\n")
+
+
 def create_parser():
     _CASE_CHOICES = ['upper', 'lower', 'capitalize']
 
-    parser = argparse.ArgumentParser(
+    parser = _ArgumentParser(
         prog='sqlformat',
         description='Format FILE according to OPTIONS. Use "-" as FILE '
                     'to read from stdin.',

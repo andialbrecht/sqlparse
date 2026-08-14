@@ -204,3 +204,12 @@ def test_cli_error_handling_continues(tmpdir, capsys):
     assert "select * from baz" in file3.read()
     _, err = capsys.readouterr()
     assert "Failed to read" in err
+
+
+def test_cli_argument_error_mentions_help(capsys):
+    """Argument errors should point the user at --help."""
+    with pytest.raises(SystemExit) as exinfo:
+        sqlparse.cli.main([])
+    assert exinfo.value.code == 2
+    _, err = capsys.readouterr()
+    assert "Try 'sqlformat --help' for more information." in err
