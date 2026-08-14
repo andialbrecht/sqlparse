@@ -152,6 +152,14 @@ class StatementSplitter:
         """Process the stream"""
         EOS_TTYPE = T.Whitespace, T.Comment.Single
 
+        # A finished statement is held back for one segment instead of being
+        # yielded immediately. This lets whitespace that turns out to trail the
+        # whole input be reattached to the statement it follows, rather than
+        # being split off into a dangling all-whitespace buffer that is dropped
+        # at end of stream (which silently broke ``str(parse(sql)) == sql`` for
+        # any input ending in a newline after ``;``).
+        held_tokens = None
+
         # Run over all stream tokens
         for ttype, value in stream:
             # Yield token if we finished a statement and there's no whitespaces
@@ -159,7 +167,12 @@ class StatementSplitter:
             # whitespace ignores newlines.
             # why don't multi line comments also count?
             if self.consume_ws and ttype not in EOS_TTYPE:
-                yield sql.Statement(self.tokens)
+                # A new statement starts here, so the previously held one is
+                # now known to be complete (its trailing whitespace, if any,
+                # already leads this new statement) and can be emitted.
+                if held_tokens is not None:
+                    yield sql.Statement(held_tokens)
+                held_tokens = self.tokens
 
                 # Reset filter and prepare to process next statement
                 self._reset()
@@ -190,6 +203,17 @@ class StatementSplitter:
                 # Reset _seen_begin if we see a non-whitespace, non-comment
                 # token but not for BEGIN itself (which just set the flag)
                 self._seen_begin = False
+
+        # Flush the held statement and whatever remains. Any trailing tokens
+        # left in ``self.tokens`` after the last statement was completed are
+        # pure whitespace (the split was armed by ``consume_ws``); reattach
+        # them to that statement so the exact input is preserved on join,
+        # instead of dropping them as a dangling all-whitespace buffer.
+        if held_tokens is not None:
+            if self.tokens and all(t.is_whitespace for t in self.tokens):
+                held_tokens = held_tokens + self.tokens
+                self.tokens = []
+            yield sql.Statement(held_tokens)
 
         # Yield pending statement (if any)
         if self.tokens and not all(t.is_whitespace for t in self.tokens):
