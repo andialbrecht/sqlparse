@@ -150,14 +150,13 @@ class StatementSplitter:
 
     def process(self, stream):
         """Process the stream"""
-        EOS_TTYPE = T.Whitespace, T.Comment.Single
+        EOS_TTYPE = T.Whitespace, T.Comment.Single, T.Comment.Multiline
 
         # Run over all stream tokens
         for ttype, value in stream:
             # Yield token if we finished a statement and there's no whitespaces
             # It will count newline token as a non whitespace. In this context
             # whitespace ignores newlines.
-            # why don't multi line comments also count?
             if self.consume_ws and ttype not in EOS_TTYPE:
                 yield sql.Statement(self.tokens)
 
