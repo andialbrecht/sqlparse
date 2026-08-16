@@ -7,7 +7,7 @@
 
 """filter"""
 
-from sqlparse import lexer
+from sqlparse.lexer import Lexer
 from sqlparse.engine import grouping
 from sqlparse.engine.statement_splitter import StatementSplitter
 from sqlparse.exceptions import SQLParseError
@@ -16,6 +16,7 @@ from sqlparse.filters import StripTrailingSemicolonFilter
 
 class FilterStack:
     def __init__(self, strip_semicolon=False):
+        self.lexer = Lexer.get_default_instance()
         self.preprocess = []
         self.stmtprocess = []
         self.postprocess = []
@@ -28,7 +29,7 @@ class FilterStack:
 
     def run(self, sql, encoding=None):
         try:
-            stream = lexer.tokenize(sql, encoding)
+            stream = self.lexer.get_tokens(sql, encoding)
             # Process token stream
             for filter_ in self.preprocess:
                 stream = filter_.process(stream)
