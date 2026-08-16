@@ -14,6 +14,22 @@ class TestFormat:
         res = sqlparse.format(sql.upper(), keyword_case='lower')
         assert res == 'select * from BAR; -- SELECT FOO\n'
 
+    def test_keywordcase_leaves_tz_literal_alone(self):
+        # The TZCast rule matches the time zone literal as part of the keyword
+        # token, so recasing the token used to rewrite the literal too. 'UTC' is
+        # the only zone the existing tests use, and it survives either case.
+        sql = "SELECT ts AT TIME ZONE 'Asia/Tokyo'"
+        assert sqlparse.format(sql, keyword_case='upper') == sql
+        assert sqlparse.format(sql, keyword_case='lower') == \
+            "select ts at time zone 'Asia/Tokyo'"
+        assert sqlparse.format(sql, keyword_case='capitalize') == \
+            "Select ts At time zone 'Asia/Tokyo'"
+
+        sql = "SELECT ts AT TIME ZONE 'America/New_York'"
+        assert sqlparse.format(sql, keyword_case='upper') == sql
+        assert sqlparse.format(sql, keyword_case='lower') == \
+            "select ts at time zone 'America/New_York'"
+
     def test_keywordcase_invalid_option(self):
         sql = 'select * from bar; -- select foo\n'
         with pytest.raises(SQLParseError):

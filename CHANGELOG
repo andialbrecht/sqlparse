@@ -1,7 +1,12 @@
 Development Version
 -------------------
 
-Nothing yet.
+Bug Fixes
+
+* The time zone literal is no longer matched as part of the `AT TIME ZONE`
+  keyword. It was recased along with the keyword, so
+  `format("SELECT ts AT TIME ZONE 'Asia/Tokyo'", keyword_case='upper')`
+  returned `'ASIA/TOKYO'`, and a doubled quote in the literal split the token.
 
 
 Release 0.6.0 (Aug 13, 2026)
