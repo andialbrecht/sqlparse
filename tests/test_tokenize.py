@@ -234,11 +234,24 @@ def test_near_like_and_ilike_parsed_appropriately(s):
 
 @pytest.mark.parametrize('s', (
     'AT TIME ZONE \'UTC\'',
+    'AT TIME ZONE \'Asia/Tokyo\'',
+    'AT TIME ZONE \'a\'\'b\'',
 ))
 def test_parse_tzcast(s):
+    # The keyword and the time zone literal are separate tokens: the literal is
+    # data, so it has to stay a String for the filters to leave it alone.
     p = sqlparse.parse(s)[0]
-    assert len(p.tokens) == 1
     assert p.tokens[0].ttype == T.Keyword.TZCast
+    assert p.tokens[0].value == 'AT TIME ZONE'
+    assert p.tokens[-1].ttype == T.String.Single
+    assert str(p) == s
+
+
+def test_parse_tzcast_groups_with_its_operand():
+    p = sqlparse.parse("SELECT ts AT TIME ZONE 'Asia/Tokyo'")[0]
+    identifier = p.tokens[-1]
+    assert isinstance(identifier, sql.Identifier)
+    assert str(identifier) == "ts AT TIME ZONE 'Asia/Tokyo'"
 
 
 def test_cli_commands():
