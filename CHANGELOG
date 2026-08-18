@@ -1,7 +1,11 @@
 Development Version
 -------------------
 
-Nothing yet.
+Bug Fixes
+
+* ``Statement.get_type()`` now unwraps a leading parenthesis, so a
+  parenthesized statement such as ``(SELECT ...) UNION (SELECT ...)`` reports
+  the keyword inside the parentheses instead of ``UNKNOWN`` (issue727, pr877).
 
 
 Release 0.6.0 (Aug 13, 2026)

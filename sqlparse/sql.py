@@ -419,9 +419,22 @@ class Statement(TokenList):
         isn't a DML or DDL keyword "UNKNOWN" is returned.
 
         Whitespaces and comments at the beginning of the statement
-        are ignored.
+        are ignored.  A leading parenthesis is unwrapped, so parenthesized
+        statements such as ``(SELECT ...) UNION (SELECT ...)`` are
+        recognized by the keyword inside the parentheses.
         """
-        token = self.token_first(skip_cm=True)
+        parent = self
+        token = parent.token_first(skip_cm=True)
+
+        # Unwrap a leading parenthesis, e.g. "(SELECT ...) UNION (...)" or a
+        # nested "((SELECT ...))", so the keyword inside determines the type.
+        while isinstance(token, Parenthesis):
+            parent = token
+            # Skip the opening parenthesis punctuation as well as any
+            # whitespace and comments that follow it.
+            open_idx = parent.token_index(parent.token_first())
+            _, token = parent.token_next(open_idx, skip_cm=True)
+
         if token is None:
             # An "empty" statement that either has not tokens at all
             # or only whitespace tokens.
@@ -434,11 +447,11 @@ class Statement(TokenList):
             # The WITH keyword should be followed by either an Identifier or
             # an IdentifierList containing the CTE definitions;  the actual
             # DML keyword (e.g. SELECT, INSERT) will follow next.
-            tidx = self.token_index(token)
+            tidx = parent.token_index(token)
             while tidx is not None:
-                tidx, token = self.token_next(tidx, skip_ws=True)
+                tidx, token = parent.token_next(tidx, skip_ws=True)
                 if isinstance(token, (Identifier, IdentifierList)):
-                    tidx, token = self.token_next(tidx, skip_ws=True)
+                    tidx, token = parent.token_next(tidx, skip_ws=True)
 
                     if token is not None \
                             and token.ttype == T.Keyword.DML:
