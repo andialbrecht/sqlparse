@@ -516,3 +516,28 @@ def limit_recursion():
 def test_max_recursion(limit_recursion):
     with pytest.raises(SQLParseError):
         sqlparse.parse('[' * 1000 + ']' * 1000)
+
+
+def test_gettype_parenthesized_statement_issue727():
+    # A statement wrapped in parentheses (e.g. one side of a compound
+    # ``UNION``) must report the keyword found inside the parentheses
+    # instead of ``UNKNOWN``.
+    paren_union = sqlparse.parse(
+        '(select 1 as "a") UNION (select 2 as "a")')[0]
+    assert paren_union.get_type() == 'SELECT'
+
+    assert sqlparse.parse('(SELECT * FROM foo)')[0].get_type() == 'SELECT'
+    assert sqlparse.parse('  ( select 1 )')[0].get_type() == 'SELECT'
+    # Nested parentheses are unwrapped as well.
+    assert sqlparse.parse('((select 1))')[0].get_type() == 'SELECT'
+    # The keyword inside the parentheses is what counts, not SELECT.
+    assert sqlparse.parse(
+        '(INSERT INTO foo VALUES (1))')[0].get_type() == 'INSERT'
+    # A leading comment inside the parentheses is skipped.
+    assert sqlparse.parse(
+        '(  -- comment\n select 1)')[0].get_type() == 'SELECT'
+    # A CTE wrapped in parentheses still resolves to the DML keyword.
+    assert sqlparse.parse(
+        '(WITH foo AS (SELECT 1) SELECT * FROM foo)')[0].get_type() == 'SELECT'
+    # Empty parentheses have no keyword to report.
+    assert sqlparse.parse('()')[0].get_type() == 'UNKNOWN'
