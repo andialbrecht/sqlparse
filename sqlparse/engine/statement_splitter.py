@@ -21,6 +21,8 @@ class StatementSplitter:
         self._parenthesis_level = 0
         self._unconfirmed_start = None
         self._is_create = False
+        self._is_create_block = False
+        self._expect_create_body = False
         self._seen_begin = False
 
         self.consume_ws = False
@@ -98,7 +100,17 @@ class StatementSplitter:
         elif ttype is T.Punctuation and value == ')':
             self._parenthesis_level = max(0, self._parenthesis_level - 1)
             return -1
-        elif ttype not in T.Keyword:  # if normal token return
+
+        if (self._expect_create_body and ttype not in T.Whitespace
+                and ttype not in T.Comment):
+            self._expect_create_body = False
+            if ttype in T.Literal:
+                return 0
+            if not (ttype is T.Keyword and value.upper() == 'BEGIN'):
+                self._block_stack.append('DECLARE')
+                return 1
+
+        if ttype not in T.Keyword:  # if normal token return
             return 0
 
         # Everything after here is ttype = T.Keyword
@@ -107,6 +119,16 @@ class StatementSplitter:
         # DDL Create though can contain more words such as "or replace"
         if ttype is T.Keyword.DDL and unified.startswith('CREATE'):
             self._is_create = True
+            return 0
+
+        if self._is_create and unified in (
+                'FUNCTION', 'PROCEDURE', 'PACKAGE', 'TRIGGER'):
+            self._is_create_block = True
+            return 0
+
+        if (self._is_create_block and unified in ('AS', 'IS')
+                and not self._block_stack):
+            self._expect_create_body = True
             return 0
 
         # Handle DECLARE block start (only for CREATE statements)

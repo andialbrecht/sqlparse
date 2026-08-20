@@ -256,6 +256,34 @@ END;"""
     assert 'CREATE OR REPLACE PROCEDURE' in stmts[0]
 
 
+def test_split_oracle_procedure_with_declarations():  # issue692
+    sql = """CREATE PROCEDURE remove_emp (employee_id NUMBER) AS
+   tot_emps NUMBER;
+BEGIN
+   DELETE FROM employees
+   WHERE employees.employee_id = remove_emp.employee_id;
+   tot_emps := tot_emps - 1;
+END;"""
+    stmts = sqlparse.split(sql)
+    assert len(stmts) == 1
+    assert 'tot_emps NUMBER;' in stmts[0]
+
+
+def test_split_function_with_dollar_quoted_body_and_following_statement():
+    sql = """CREATE FUNCTION foo() RETURNS integer AS
+$body$
+BEGIN
+ select * from foo;
+END;
+$body$
+LANGUAGE 'plpgsql';
+SELECT 1;"""
+    stmts = sqlparse.split(sql)
+    assert len(stmts) == 2
+    assert stmts[0].startswith('CREATE FUNCTION')
+    assert stmts[1] == 'SELECT 1;'
+
+
 def test_split_begin_transaction():  # issue826
     # BEGIN TRANSACTION should not be treated as a block start
     sql = """BEGIN TRANSACTION;
@@ -372,5 +400,4 @@ def test_split_standalone_for_update():
     assert len(stmts) == 2
     assert stmts[0] == "SELECT * FROM foo FOR UPDATE;"
     assert stmts[1] == "SELECT 3;"
-
 
