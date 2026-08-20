@@ -68,6 +68,12 @@ class TestFormat:
         res = ''
         assert res == sqlparse.format(sql, strip_comments=True)
 
+    def test_strip_comments_single_no_space_before_operator(self):
+        # see issue722
+        sql = 'foo || bar ||--comment\nbaz'
+        res = sqlparse.format(sql, strip_comments=True)
+        assert res == 'foo || bar ||\nbaz'
+
     def test_strip_comments_invalid_option(self):
         sql = 'select-- foo\nfrom -- bar\nwhere'
         with pytest.raises(SQLParseError):

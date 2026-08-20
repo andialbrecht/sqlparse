@@ -200,7 +200,11 @@ SQL_REGEX = [
     # JSON operators
     (r'(\->>?|#>>?|@>|<@|\?\|?|\?&|\-|#\-)', tokens.Operator),
     (r'[<>=~!]+', tokens.Operator.Comparison),
-    (r'[+/@#%^&|^-]+', tokens.Operator),
+    # Negative lookahead keeps a `--` (or `# `) comment marker from being
+    # swallowed into a preceding operator run, e.g. `||--comment` must
+    # tokenize as `||` followed by a comment, not a single operator.
+    # See issue #722.
+    (r'(?:(?!--|# )[+/@#%^&|^-])+', tokens.Operator),
 ]
 
 KEYWORDS = {
