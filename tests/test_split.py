@@ -90,6 +90,19 @@ def test_split_comment_end_of_line():
     assert str(stmts[0]) == 'select * from foo; -- foo\n'
 
 
+def test_split_comment_directly_after_operator():
+    # see issue722: a `--` comment marker glued directly onto a preceding
+    # operator run (e.g. `||--`) must still be recognized as a comment, not
+    # merged into the operator token. The `;` right after `--` is part of
+    # the comment text (not a statement terminator), so this is genuinely
+    # a single statement; previously the bug caused it to be split in two.
+    sql = ('myval := oneval || otherval ||--;\n'
+           'continuedvals;\n')
+    stmts = sqlparse.split(sql)
+    assert len(stmts) == 1
+    assert stmts[0] == 'myval := oneval || otherval ||--;\ncontinuedvals;'
+
+
 def test_split_casewhen():
     sql = ("SELECT case when val = 1 then 2 else null end as foo;\n"
            "comment on table actor is 'The actor table.';")
