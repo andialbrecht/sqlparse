@@ -335,10 +335,8 @@ def group_comments(tlist):
         eidx, end = tlist.token_not_matching(
             lambda tk: imt(tk, t=T.Comment) or tk.is_newline, idx=tidx)
         if end is None:
-            # From tidx onward everything is comment/newline: there is no
-            # terminator to group against, and every later start would hit
-            # the same dead end. Stop instead of re-scanning the tail once
-            # per remaining comment token (which is O(n**2)).
+            # Everything from tidx on is comment/newline, so every later
+            # start hits the same dead end; continuing rescans it each time.
             break
         eidx, end = tlist.token_prev(eidx, skip_ws=False)
         tlist.group_tokens(sql.Comment, tidx, eidx)
@@ -353,12 +351,13 @@ def group_where(tlist):
         eidx, end = tlist.token_next_by(m=sql.Where.M_CLOSE, idx=tidx)
 
         if end is None:
-            end = tlist._groupable_tokens[-1]
+            # _groupable_tokens drops the enclosing pair for Parenthesis and
+            # SquareBrackets, so its last token needn't be the last one here.
+            eidx = tlist.token_index(tlist._groupable_tokens[-1], tidx)
         else:
-            end = tlist.tokens[eidx - 1]
-        # TODO: convert this to eidx instead of end token.
-        # i think above values are len(tlist) and eidx-1
-        eidx = tlist.token_index(end)
+            # Re-deriving this by scanning for the token was quadratic in the
+            # number of WHERE clauses sharing a statement.
+            eidx -= 1
         tlist.group_tokens(sql.Where, tidx, eidx)
         tidx, token = tlist.token_next_by(m=sql.Where.M_OPEN, idx=tidx)
 
