@@ -25,15 +25,25 @@ without hard-coding a timing threshold.
 """
 
 import argparse
+import cProfile
+import io
 import math
+import pstats
 import signal
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
+from pathlib import Path
 
 import sqlparse
 
 DEFAULT_TIMEOUT = 30
+
+#: Frames printed per vector by --profile.
+DEFAULT_PROFILE_TOP = 15
+
+#: Stripped from profile output so frames read as "sqlparse/engine/...".
+_REPO_ROOT = f'{Path(sqlparse.__file__).resolve().parent.parent}/'
 
 #: Midpoint between linear (1.0) and quadratic (2.0) growth.  At or above
 #: this the measured code path is reported as super-linear.
@@ -134,7 +144,8 @@ def _exponent(points):
 def run_vector(vector, timeout=DEFAULT_TIMEOUT):
     """Measure one vector, print its table and return its verdict."""
     print(f'{vector.name}:')
-    print(f'  {"n":>8}  {"input":>9}  {"time":>11}  {"ratio":>7}  status')
+    print(f'  {"n":>8}  {"input":>9}  {"time":>11}  {"ratio":>7}'
+          f'  {"kB/s":>7}  status')
 
     points = []
     previous = None
@@ -142,8 +153,10 @@ def run_vector(vector, timeout=DEFAULT_TIMEOUT):
         sql = vector.build(n)
         status, elapsed = measure(vector.run, sql, timeout)
         ratio = f'{elapsed / previous:.2f}x' if previous else '-'
+        rate = (f'{len(sql) / elapsed:.0f}'
+                if status == 'ok' and elapsed else '-')
         print(f'  {n:>8}  {_format_size(len(sql)):>9}  {elapsed:>8.1f} ms  '
-              f'{ratio:>7}  {status}')
+              f'{ratio:>7}  {rate:>7}  {status}')
         previous = elapsed
         if status == 'ok' and elapsed >= MIN_SIGNIFICANT_MS:
             points.append((n, elapsed))
@@ -157,6 +170,47 @@ def run_vector(vector, timeout=DEFAULT_TIMEOUT):
     print(f'  scaling exponent {exponent:.2f} '
           f'(1.0 linear, 2.0 quadratic)  =>  {verdict}\n')
     return verdict
+
+
+def profile_vector(vector, top=DEFAULT_PROFILE_TOP, timeout=DEFAULT_TIMEOUT):
+    """Profile ``vector`` at its largest size, printing the hottest frames.
+
+    Sorted by ``tottime``, excluding callees: that points at the
+    function to change rather than at whatever calls it.
+    """
+    n = vector.sizes[-1]
+    sql = vector.build(n)
+    print(f'{vector.name}:  n={n}, {_format_size(len(sql))}')
+
+    profiler = cProfile.Profile()
+    status = 'ok'
+    if _CAN_ALARM:
+        signal.alarm(timeout)
+    profiler.enable()
+    try:
+        vector.run(sql)
+    except sqlparse.exceptions.SQLParseError:
+        status = 'cap'
+    except Timeout:
+        status = 'timeout'
+    finally:
+        profiler.disable()
+        if _CAN_ALARM:
+            signal.alarm(0)
+
+    if status != 'ok':
+        print(f'  {status}: the measured path was not reached, '
+              f'nothing to profile\n')
+        return
+
+    buffer = io.StringIO()
+    stats = pstats.Stats(profiler, stream=buffer)
+    stats.sort_stats('tottime').print_stats(top)
+    text = buffer.getvalue().replace(_REPO_ROOT, '')
+    header = text.find('ncalls')
+    for line in text[header if header > 0 else 0:].splitlines():
+        print(f'  {line}' if line.strip() else '')
+    print()
 
 
 def _parse_args(argv, title, vectors):
@@ -173,6 +227,13 @@ def _parse_args(argv, title, vectors):
         '--vector', action='append', metavar='SUBSTRING',
         help='only run vectors whose name contains SUBSTRING '
              f'(available: {", ".join(v.name for v in vectors)})')
+    parser.add_argument(
+        '--profile', action='store_true',
+        help='instead of timing, profile each vector at its largest size '
+             'and print the hottest frames')
+    parser.add_argument(
+        '--profile-top', type=int, default=DEFAULT_PROFILE_TOP,
+        metavar='N', help='frames to print per vector with --profile')
     return parser.parse_args(argv)
 
 
@@ -195,6 +256,16 @@ def main(title, vectors, note=None, argv=None):
     if note:
         print(note)
     print()
+
+    if args.profile:
+        print('profiling at the largest size of each vector, '
+              'sorted by tottime\n')
+        for vector in vectors:
+            profile_vector(
+                vector if args.sizes is None
+                else Vector(vector.name, vector.build, args.sizes, vector.run),
+                args.profile_top, args.timeout)
+        return 0  # hotspots only; no scaling claim, so nothing to fail on
 
     verdicts = [
         run_vector(

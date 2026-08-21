@@ -5,6 +5,7 @@
 # This module is part of python-sqlparse and is released under
 # the BSD License: https://opensource.org/licenses/BSD-3-Clause
 
+import functools
 import itertools
 import re
 from collections import deque
@@ -67,6 +68,7 @@ def recurse(*cls):
     :return: function
     """
     def wrap(f):
+        @functools.wraps(f)
         def wrapped_f(tlist):
             for sgroup in tlist.get_sublists():
                 if not isinstance(sgroup, cls):
