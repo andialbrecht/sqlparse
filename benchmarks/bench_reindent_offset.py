@@ -12,8 +12,10 @@ succeeds and the expensive reindentation path is entered.
 Both shapes reach the same offset calculation through different filters:
 ``IN (...)`` tuple lists via ``_process_parenthesis()`` and
 ``_process_identifierlist()``, ``VALUES`` lists via ``_process_values()``.
-Sizes stay below the grouping-token cap; larger input is rejected by the
-cap instead of reaching the measured path.
+
+The first two vectors stay below the grouping-token cap, which bounds both
+what an attacker can reach and the exponent they can show; a third runs the
+same shape with the guards lifted, where the growth is unobscured.
 
 Run with:  python benchmarks/bench_reindent_offset.py
 """
@@ -23,6 +25,12 @@ import sys
 from _harness import Vector, main
 
 import sqlparse
+from sqlparse.engine import grouping
+
+# Only the third vector needs these lifted; the other two are sized to stay
+# below the cap (as an attacker facing the defaults would also have to).
+grouping.MAX_GROUPING_DEPTH = None
+grouping.MAX_GROUPING_TOKENS = None
 
 
 def in_tuple_list(n):
@@ -44,6 +52,7 @@ def reindent(sql):
 VECTORS = [
     Vector('IN-tuple list', in_tuple_list, (150, 300, 600, 1200), reindent),
     Vector('VALUES list', values_list, (250, 500, 1000, 1950), reindent),
+    Vector('VALUES list, no guards', values_list, (1000, 2000, 4000, 8000), reindent),
 ]
 
 if __name__ == '__main__':

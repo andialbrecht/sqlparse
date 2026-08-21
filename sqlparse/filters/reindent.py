@@ -31,27 +31,36 @@ class ReindentFilter:
     def leading_ws(self):
         return self.offset + self.indent * self.width
 
-    def _current_line_len(self, token):
+    def _current_line_len(self, token, idx=None):
         """Returns the width of what's already emitted on *token*'s line.
 
-        The tokens preceding *token* are visited last one first, so the walk
-        stops at the line break that starts the current line.  Rebuilding the
-        statement prefix from its start instead made every caller
-        O(statement), and the callers running once per group (tuple lists,
-        identifier lists) quadratic in the number of groups -- a CPU
-        exhaustion vector (GHSA-cfqr-cjx5-5jcm).  The walk is inlined and
-        counts characters rather than collecting them: both matter, since a
-        line without any break still has to be measured token by token.
+        Walks back to the nearest line break rather than rebuilding the
+        statement prefix from its start, which was O(statement) per call and
+        so quadratic over the callers that run once per group -- a CPU
+        exhaustion vector (GHSA-cfqr-cjx5-5jcm).
+
+        *idx* is ``token``'s position in its parent, for callers that already
+        know it; without it an O(position) identity scan recovers it.
         """
         length = 0
         node = token
         while node is not self._curr_stmt and node.parent is not None:
             parent = node.parent
-            # ``Token`` doesn't implement ``__eq__``, so ``index()`` is an
-            # identity lookup and safe against tokens sharing a value.
-            stack = parent.tokens[:parent.tokens.index(node)]
-            while stack:
-                prev_ = stack.pop()
+            siblings = parent.tokens
+            if idx is None:
+                # ``Token`` doesn't implement ``__eq__``, so ``index()`` is an
+                # identity lookup and safe against tokens sharing a value.
+                idx = siblings.index(node)
+
+            # Right to left, groups expanded as reached, so a break in the
+            # first token examined costs one token rather than O(idx).
+            stack = []
+            while stack or idx:
+                if stack:
+                    prev_ = stack.pop()
+                else:
+                    idx -= 1
+                    prev_ = siblings[idx]
                 if prev_.is_group:
                     stack.extend(prev_.tokens)
                     continue
@@ -62,9 +71,6 @@ class ReindentFilter:
                     continue
                 lines = value.splitlines()
                 if len(lines) == 1 and len(lines[0]) == size:
-                    # No break in here.  ``splitlines()`` hands back the value
-                    # itself in that case, so this costs a scan but no copy --
-                    # which is what keeps a long break-free line affordable.
                     length += size
                     continue
 
@@ -75,17 +81,19 @@ class ReindentFilter:
                 tail = len(lines[-1]) - 1 + length
                 if tail:
                     return tail
-                # Nothing but a break to our right, and ``splitlines()`` drops
-                # that empty line -- so the line to measure is the one before.
+                # Nothing but a break to our right, whose empty line
+                # ``splitlines()`` drops: measure the one before it.
                 if len(lines) > 2:
                     return len(lines[-2])
                 length = len(lines[0])
             node = parent
+            idx = None  # only ever applied to token's own parent
         return length
 
-    def _get_offset(self, token):
+    def _get_offset(self, token, idx=None):
         # Now take current offset into account and return relative offset.
-        return self._current_line_len(token) - len(self.char * self.leading_ws)
+        return (self._current_line_len(token, idx)
+                - len(self.char * self.leading_ws))
 
     def nl(self, offset=0):
         return sql.Token(
@@ -261,13 +269,15 @@ class ReindentFilter:
             ptidx, ptoken = tlist.token_next_by(m=(T.Punctuation, ','),
                                                 idx=tidx)
             if ptoken:
+                # Both indexes were resolved after the previous insert, so
+                # passing them avoids the scans that made this quadratic.
                 if self.comma_first:
                     adjust = -2
                     offset = self._get_offset(first_token) + adjust
-                    tlist.insert_before(ptoken, self.nl(offset))
+                    tlist.insert_before(ptidx, self.nl(offset))
                 else:
-                    tlist.insert_after(ptoken,
-                                       self.nl(self._get_offset(token)))
+                    tlist.insert_after(ptidx,
+                                       self.nl(self._get_offset(token, tidx)))
             tidx, token = tlist.token_next_by(i=sql.Parenthesis, idx=tidx)
 
     def _process_default(self, tlist, stmts=True):
