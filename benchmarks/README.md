@@ -1,8 +1,10 @@
 # Benchmarks
 
 Scaling benchmarks for the code paths that have carried quadratic-CPU
-(DoS) regressions.  They are developer tools, not part of the test suite:
-they are not run by `pytest` and not wired into CI.
+(DoS) regressions, plus `bench_parse_throughput.py`, which measures
+ordinary large SQL rather than an advisory shape.  They are developer
+tools, not part of the test suite: they are not run by `pytest` and not
+wired into CI.
 
 Run one, or all of them at once:
 
@@ -17,7 +19,21 @@ Every script accepts the same options:
 --sizes 100,200,400     comma-separated sizes, overriding the defaults
 --timeout SECONDS       abort a single measurement (default: 30)
 --vector SUBSTRING      only run matching vectors, repeatable
+--profile               profile instead of timing, see below
+--profile-top N         frames to print per vector (default: 15)
 ```
+
+`--profile` runs each vector once at its largest size under `cProfile` and
+prints the hottest frames by `tottime`, the time spent in the frame itself.
+That is the column that names the function to change; `cumtime` mostly
+re-reports the callers above it.  Combine with `--vector` to profile a
+single path:
+
+```
+python benchmarks/bench_parse_throughput.py --profile --vector UNION
+```
+
+Profiling makes no scaling claim, so `--profile` always exits 0.
 
 ## Output
 
@@ -25,10 +41,10 @@ Each vector prints one row per size and closes with a verdict:
 
 ```
 wide column lists:
-         n      input         time    ratio  status
-       500     4402 B      12.3 ms        -  ok
-      1000     8902 B      24.6 ms    2.00x  ok
-      2000    18.9 kB      49.1 ms    1.99x  ok
+         n      input         time    ratio     kB/s  status
+       500     4402 B      12.3 ms        -      358  ok
+      1000     8902 B      24.6 ms    2.00x      362  ok
+      2000    18.9 kB      49.1 ms    1.99x      385  ok
   scaling exponent 1.00 (1.0 linear, 2.0 quadratic)  =>  linear
 ```
 
@@ -38,6 +54,24 @@ log(n) gives an exponent near 1 for linear and near 2 for quadratic
 behaviour.  A script exits non-zero as soon as one vector grows
 super-linearly, which makes it usable as a regression check for the
 advisories it covers.
+
+`kB/s` is throughput at that size and does not feed the verdict.  It
+covers the blind spot growth alone leaves: a change that makes everything
+uniformly twice as slow keeps the exponent at 1.0 and is invisible in the
+`ratio` column, but halves this one.  Compare it against a run of the same
+script on the previous commit, not against the numbers above.
+
+Two caveats when reading a verdict:
+
+- The exponent is diluted by whatever linear work shares the path.  A
+  quadratic step behind a large linear one (lexing, typically) can fit
+  under the 1.5 threshold at small sizes and still be quadratic; the fit
+  uses only the largest sizes for that reason.  If the `ratio` column
+  climbs steadily above 2.00x while the verdict says linear, trust the
+  ratios and extend `--sizes`.
+- A vector sized to stay under `MAX_GROUPING_TOKENS` measures what the
+  default limits permit, not whether the path is linear.  The cap bounds
+  how far a quadratic path can be pushed; it does not straighten it.
 
 The `status` column is `ok`, `cap` when a grouping limit rejected the
 input before the measured path was reached, or `timeout`.  Only `ok` rows
