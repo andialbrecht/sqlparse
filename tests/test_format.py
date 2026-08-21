@@ -649,6 +649,37 @@ class TestFormatReindent:
             '     , (3, 4)',
             '     , (5, 6)'])
 
+    def test_multi_statement_idempotent(self):
+        # Reformatting should not add accumulating blank lines
+        # between statements.
+        f = lambda sql: sqlparse.format(sql, reindent=True)
+        sql = 'select a from b; select c from d'
+        once = f(sql)
+        twice = f(once)
+        assert once == twice, f'not idempotent:\n  {once!r}\n  {twice!r}'
+
+        # Also with keyword_case
+        f2 = lambda sql: sqlparse.format(
+            sql, reindent=True, keyword_case='upper')
+        once = f2(sql)
+        twice = f2(once)
+        assert once == twice
+
+        # And with comma_first
+        f3 = lambda sql: sqlparse.format(
+            sql, reindent=True, comma_first=True)
+        once = f3(sql)
+        twice = f3(once)
+        assert once == twice
+
+    def test_union_idempotent(self):
+        # UNION within a single statement should also be idempotent
+        f = lambda sql: sqlparse.format(sql, reindent=True)
+        sql = 'select a from b union select c from d'
+        once = f(sql)
+        twice = f(once)
+        assert once == twice, f'not idempotent:\n  {once!r}\n  {twice!r}'
+
 
 class TestOutputFormat:
     def test_python(self):
