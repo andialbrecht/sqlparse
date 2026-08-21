@@ -62,6 +62,11 @@ Bug Fixes
   that `x BETWEEN .03 AND .06` parses its bounds as numbers (issue601, pr868
   by deepakganesh78).
 * Fix a late-binding closure bug in `TokenList.token_not_matching`.
+* Fix non-idempotent reindent output when a comma in an identifier list is
+  preceded by more than one whitespace token (e.g. ``a  ,  b``). Previously
+  only a single whitespace token before a comma was stripped, leaving a stray
+  space that was removed on a subsequent format pass. All whitespace before a
+  comma is now removed.
 
 Other
 
