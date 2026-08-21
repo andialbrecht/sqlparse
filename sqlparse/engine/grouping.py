@@ -41,6 +41,7 @@ def _group_matching(tlist, cls, depth=0):
     opens = []
     tidx_offset = 0
     token_list = list(tlist)
+    m_open, m_close = cls.M_OPEN, cls.M_CLOSE
 
     for idx, token in enumerate(token_list):
         tidx = idx - tidx_offset
@@ -58,10 +59,10 @@ def _group_matching(tlist, cls, depth=0):
             _group_matching(token, cls, depth + 1)
             continue
 
-        if token.match(*cls.M_OPEN):
+        if token.match(*m_open):
             opens.append(tidx)
 
-        elif token.match(*cls.M_CLOSE):
+        elif token.match(*m_close):
             try:
                 open_idx = opens.pop()
             except IndexError:
@@ -382,11 +383,12 @@ def group_functions(tlist):
     has_table = False
     has_as = False
     for tmp_token in tlist.tokens:
-        if tmp_token.value.upper() == 'CREATE':
+        value = tmp_token.value.upper()
+        if value == 'CREATE':
             has_create = True
-        if tmp_token.value.upper() == 'TABLE':
+        elif value == 'TABLE':
             has_table = True
-        if tmp_token.value.upper() == 'AS':
+        elif value == 'AS':
             has_as = True
     if has_create and has_table and not has_as:
         return

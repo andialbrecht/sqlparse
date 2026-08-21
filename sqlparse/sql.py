@@ -39,6 +39,11 @@ class NameAliasMixin:
             return self._get_first_name(reverse=True)
 
 
+#: ``(is_keyword, is_whitespace, is_newline)`` per token type.  Snapshotted at
+#: construction, as before: grouping reassigns ``ttype`` without revisiting it.
+_TTYPE_FLAGS = {}
+
+
 class Token:
     """Base class for all other classes in this module.
 
@@ -64,9 +69,11 @@ class Token:
         self.ttype = ttype
         self.parent = None
         self.is_group = False
-        self.is_keyword = ttype in T.Keyword
-        self.is_whitespace = self.ttype in T.Whitespace
-        self.is_newline = self.ttype in T.Newline
+        flags = _TTYPE_FLAGS.get(ttype)
+        if flags is None:
+            flags = _TTYPE_FLAGS[ttype] = (
+                ttype in T.Keyword, ttype in T.Whitespace, ttype in T.Newline)
+        self.is_keyword, self.is_whitespace, self.is_newline = flags
         self.normalized = value.upper() if self.is_keyword else value
 
     def __str__(self):
@@ -270,8 +277,14 @@ class TokenList(Token):
         return self._token_matching(matcher)[1]
 
     def token_next_by(self, i=None, m=None, t=None, idx=-1, end=None):
-        idx += 1
-        return self._token_matching(lambda tk: imt(tk, i, m, t), idx, end)
+        # Not routed through _token_matching: its lambda cost two Python calls
+        # per token, and every grouping pass walks the tree through here.
+        tokens = self.tokens
+        for tidx in range(idx + 1, len(tokens) if end is None else end):
+            token = tokens[tidx]
+            if imt(token, i, m, t):
+                return tidx, token
+        return None, None
 
     def token_not_matching(self, funcs, idx):
         funcs = (funcs,) if not isinstance(funcs, (list, tuple)) else funcs
