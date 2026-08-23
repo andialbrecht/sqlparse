@@ -182,7 +182,7 @@ class StatementSplitter:
                 # Split on semicolon if not inside a BEGIN...END block
                 if self.level <= 0 and 'BEGIN' not in self._block_stack:
                     self.consume_ws = True
-            elif ttype is T.Keyword and value.split()[0] == 'GO':
+            elif ttype is T.Keyword and value.upper().split()[0] == 'GO':
                 self.consume_ws = True
             elif (ttype not in (T.Whitespace, T.Newline, T.Comment.Single,
                                 T.Comment.Multiline)

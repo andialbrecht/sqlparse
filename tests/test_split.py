@@ -198,7 +198,12 @@ def test_split_strip_semicolon_procedure(load_file):
 @pytest.mark.parametrize('sql, num', [
     ('USE foo;\nGO\nSELECT 1;\nGO', 4),
     ('SELECT * FROM foo;\nGO', 2),
-    ('USE foo;\nGO 2\nSELECT 1;', 3)
+    ('USE foo;\nGO 2\nSELECT 1;', 3),
+    # issue762: the batch separator is case-insensitive
+    ('USE foo;\ngo\nSELECT 1;\ngo', 4),
+    ('USE foo;\nGo\nSELECT 1;\nGo', 4),
+    ('SELECT * FROM foo;\ngo', 2),
+    ('USE foo;\ngo 2\nSELECT 1;', 3),
 ])
 def test_split_go(sql, num):  # issue762
     stmts = sqlparse.split(sql)
