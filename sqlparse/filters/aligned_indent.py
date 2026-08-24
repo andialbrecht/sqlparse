@@ -22,11 +22,12 @@ class AlignedIndentFilter:
                    'UNION', 'VALUES',
                    'SET', 'BETWEEN', 'EXCEPT')
 
-    def __init__(self, char=' ', n='\n'):
+    def __init__(self, char=' ', n='\n', comma_first=False):
         self.n = n
         self.offset = 0
         self.indent = 0
         self.char = char
+        self.comma_first = comma_first
         self._max_kwd_len = len('select')
 
     def nl(self, offset=1):
@@ -62,8 +63,25 @@ class AlignedIndentFilter:
         # columns being selected
         identifiers = list(tlist.get_identifiers())
         identifiers.pop(0)
-        [tlist.insert_before(token, self.nl()) for token in identifiers]
+        for token in identifiers:
+            if self.comma_first:
+                self._break_before_comma(tlist, token)
+            else:
+                tlist.insert_before(token, self.nl())
         self._process_default(tlist)
+
+    def _break_before_comma(self, tlist, token):
+        # comma-first puts the separator at the start of the next line, two
+        # columns left of where the aligned item sits, so the commas line up
+        # just under the keyword.
+        _, comma = tlist.token_prev(tlist.token_index(token))
+        if comma is None:
+            return
+        tlist.insert_before(comma, self.nl(offset=-1))
+        # keep a single space between the comma and the following item
+        _, ws = tlist.token_next(tlist.token_index(comma), skip_ws=False)
+        if ws is not None and ws.ttype is not T.Whitespace:
+            tlist.insert_after(comma, sql.Token(T.Whitespace, ' '))
 
     def _process_case(self, tlist):
         offset_ = len('case ') + len('when ')

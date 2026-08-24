@@ -1,7 +1,11 @@
 Development Version
 -------------------
 
-Nothing yet.
+Enhancements
+
+* Honor the ``comma_first`` option when formatting with
+  ``reindent_aligned``, so the commas line up under the keywords
+  (issue490).
 
 
 Release 0.6.0 (Aug 13, 2026)

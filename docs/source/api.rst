@@ -82,7 +82,9 @@ The :meth:`~sqlparse.format` function accepts the following keyword arguments.
   in a programming language. Allowed values are "python" and "php".
 
 ``comma_first``
-  If ``True`` comma-first notation for column names is used.
+  If ``True`` comma-first notation for column names is used. This also
+  applies to ``reindent_aligned``, where the commas line up under the
+  keywords.
 
 
 Security and Performance Considerations
