@@ -345,6 +345,27 @@ class TestFormatReindentAligned:
             '(PARTITION BY b, c ORDER BY d DESC) as row_num',
             '  from table'])
 
+    def test_comma_first(self):
+        sql = ('select j.jobtitle, count(*), max(salary) as top '
+               'from employee e, job j where e.orig_salary < 43000 '
+               'group by j.jobtitle')
+        f = lambda s: sqlparse.format(s, reindent_aligned=True,
+                                      comma_first=True)
+        assert f(sql) == '\n'.join([
+            'select j.jobtitle',
+            '     , count(*)',
+            '     , max(salary) as top',
+            '  from employee e',
+            '     , job j',
+            ' where e.orig_salary < 43000',
+            ' group by j.jobtitle'])
+
+    def test_comma_first_single_column(self):
+        # nothing to move to the front when there is only one column
+        f = lambda s: sqlparse.format(s, reindent_aligned=True,
+                                      comma_first=True)
+        assert f('select a from t') == 'select a\n  from t'
+
 
 class TestSpacesAroundOperators:
     @staticmethod
