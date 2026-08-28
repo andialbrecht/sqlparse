@@ -15,12 +15,18 @@ class AlignedIndentFilter:
                   r'(INNER\s+|OUTER\s+|STRAIGHT\s+)?|'
                   r'(CROSS\s+|NATURAL\s+)?)?JOIN\b')
     by_words = r'(GROUP|ORDER)\s+BY\b'
-    split_words = ('FROM',
-                   join_words, 'ON', by_words,
-                   'WHERE', 'AND', 'OR',
-                   'HAVING', 'LIMIT',
-                   'UNION', 'VALUES',
-                   'SET', 'BETWEEN', 'EXCEPT')
+    # Keywords that start a new aligned line. They are matched as regular
+    # expressions (see ``_next_token``), and ``Token.match`` uses an
+    # unanchored ``search``, so each bare keyword is wrapped in word
+    # boundaries. Without them ``ON`` matches inside ``ONLY`` and ``SET``
+    # inside ``OFFSET``, which broke the ``OFFSET ... FETCH NEXT n ROWS ONLY``
+    # paging clause across lines (issue #842).
+    split_words = (r'\bFROM\b',
+                   join_words, r'\bON\b', by_words,
+                   r'\bWHERE\b', r'\bAND\b', r'\bOR\b',
+                   r'\bHAVING\b', r'\bLIMIT\b', r'\bOFFSET\b',
+                   r'\bUNION\b', r'\bVALUES\b',
+                   r'\bSET\b', r'\bBETWEEN\b', r'\bEXCEPT\b')
 
     def __init__(self, char=' ', n='\n'):
         self.n = n

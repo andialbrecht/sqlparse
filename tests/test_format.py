@@ -345,6 +345,19 @@ class TestFormatReindentAligned:
             '(PARTITION BY b, c ORDER BY d DESC) as row_num',
             '  from table'])
 
+    def test_offset_fetch(self):
+        # the OFFSET ... FETCH NEXT n ROWS ONLY paging clause should stay on
+        # a single aligned line and not be split by substring matches of the
+        # clause keywords (ON in ONLY, SET in OFFSET) -- issue #842
+        sql = ('select id from tbl where id > 0 order by id asc '
+               'offset 0 rows fetch next 100 rows only')
+        assert self.formatter(sql) == '\n'.join([
+            'select id',
+            '  from tbl',
+            ' where id > 0',
+            ' order by id asc',
+            'offset 0 rows fetch next 100 rows only'])
+
 
 class TestSpacesAroundOperators:
     @staticmethod
