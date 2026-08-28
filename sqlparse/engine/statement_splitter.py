@@ -132,7 +132,8 @@ class StatementSplitter:
                 (ttype is T.Keyword or ttype is T.Name) and \
                 unified in ('TRANSACTION', 'WORK', 'TRAN',
                             'DISTRIBUTED', 'DEFERRED',
-                            'IMMEDIATE', 'EXCLUSIVE'):
+                            'IMMEDIATE', 'EXCLUSIVE',
+                            'ISOLATION', 'READ'):
             self._seen_begin = False
             if self._block_stack and self._block_stack[-1] == 'BEGIN':
                 self._block_stack.pop()
