@@ -13,6 +13,10 @@ Bug Fixes
   grouping limits. The output file is now only written after formatting
   succeeded, and the error is reported like other CLI errors. Thanks to
   @Joejiaojian, @president-xd, @hash3liZer and @eros938 for reporting!
+* `identifier_case` no longer changes the case of identifiers quoted with
+  backticks, acute accents or square brackets. Only double-quoted identifiers
+  were exempt before, although the lexer recognizes all four quoting styles
+  (issue433).
 
 
 Release 0.6.0 (Aug 13, 2026)
