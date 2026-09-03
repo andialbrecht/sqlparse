@@ -516,3 +516,19 @@ def limit_recursion():
 def test_max_recursion(limit_recursion):
     with pytest.raises(SQLParseError):
         sqlparse.parse('[' * 1000 + ']' * 1000)
+
+
+def test_stripws_parenthesis_with_no_direct_children_issue885():
+    # Malformed input can collapse the whole parenthesis body into a single
+    # nested group, leaving fewer than two direct children of the
+    # Parenthesis token list. This used to raise IndexError.
+    assert sqlparse.format('( AS )', strip_whitespace=True) == '( AS )'
+
+
+def test_aligned_indent_case_without_direct_end_issue886():
+    # Malformed CASE expressions can end up with the END keyword nested
+    # inside a sibling group rather than being a direct child of the Case
+    # token list, so token_next_by can't find it and used to raise
+    # ValueError when that None was later used as an insertion point.
+    sql = "CASE 'a' := WHERE END SELECT GO # ->>"
+    assert sqlparse.format(sql, reindent_aligned=True) == sql

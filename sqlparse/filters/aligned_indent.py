@@ -70,6 +70,12 @@ class AlignedIndentFilter:
         cases = tlist.get_cases(skip_ws=True)
         # align the end as well
         end_token = tlist.token_next_by(m=(T.Keyword, 'END'))[1]
+        if end_token is None:
+            # A malformed CASE expression can leave END nested inside a
+            # sibling group instead of being a direct child of this token
+            # list (get_cases and token_next_by only look at direct
+            # children), so there's nothing valid to align it against.
+            return
         cases.append((None, [end_token]))
 
         condition_width = [len(' '.join(map(str, cond))) if cond else 0

@@ -112,11 +112,15 @@ class StripWhitespaceFilter:
         return self._stripws_default(tlist)
 
     def _stripws_parenthesis(self, tlist):
-        while tlist.tokens[1].is_whitespace:
+        # A malformed parenthesis can end up with only one or two direct
+        # children once grouping is done (e.g. the whole inside collapses
+        # into a single nested group), so don't assume tokens[1]/tokens[-2]
+        # are always there.
+        while len(tlist.tokens) > 2 and tlist.tokens[1].is_whitespace:
             tlist.tokens.pop(1)
-        while tlist.tokens[-2].is_whitespace:
+        while len(tlist.tokens) > 2 and tlist.tokens[-2].is_whitespace:
             tlist.tokens.pop(-2)
-        if tlist.tokens[-2].is_group:
+        if len(tlist.tokens) > 1 and tlist.tokens[-2].is_group:
             # save to remove the last whitespace
             while tlist.tokens[-2].tokens[-1].is_whitespace:
                 tlist.tokens[-2].tokens.pop(-1)
