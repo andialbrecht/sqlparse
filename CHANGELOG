@@ -1,7 +1,8 @@
 Development Version
 -------------------
 
-Nothing yet.
+* Recognize REFRESH as a DDL keyword so that REFRESH MATERIALIZED VIEW
+  statements are detected and formatted correctly (issue797).
 
 
 Release 0.6.0 (Aug 13, 2026)

@@ -477,6 +477,25 @@ def test_materialized_view_issue752():
     assert formatted == 'CREATE MATERIALIZED VIEW v AS SELECT 1'
 
 
+@pytest.mark.parametrize('statement', [
+    'REFRESH MATERIALIZED VIEW order_summary;',
+    'refresh materialized view order_summary;',
+    'REFRESH MATERIALIZED VIEW CONCURRENTLY public.order_summary;',
+    'REFRESH MATERIALIZED VIEW order_summary WITH NO DATA;',
+    '-- update cached results\nREFRESH MATERIALIZED VIEW order_summary;',
+])
+def test_refresh_materialized_view_type_issue797(statement):
+    parsed = sqlparse.parse(statement)[0]
+    assert parsed.get_type() == 'REFRESH'
+    assert str(parsed) == statement
+
+
+def test_refresh_materialized_view_format_issue797():
+    formatted = sqlparse.format(
+        'refresh materialized view order_summary;', keyword_case='upper')
+    assert formatted == 'REFRESH MATERIALIZED VIEW order_summary;'
+
+
 @pytest.mark.parametrize('sql', [
     'a BETWEEN .03 AND .06',
     'a between .03 and .06',

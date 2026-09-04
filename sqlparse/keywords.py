@@ -568,6 +568,7 @@ KEYWORDS = {
     'REF': tokens.Keyword,
     'REFERENCES': tokens.Keyword,
     'REFERENCING': tokens.Keyword,
+    'REFRESH': tokens.Keyword.DDL,
     'REINDEX': tokens.Keyword,
     'RELATIVE': tokens.Keyword,
     'RENAME': tokens.Keyword,
