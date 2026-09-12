@@ -633,7 +633,8 @@ class Function(NameAliasMixin, TokenList):
         for token in parenthesis.tokens:
             if isinstance(token, IdentifierList):
                 return token.get_identifiers()
-            elif imt(token, i=(Function, Identifier, TypedLiteral),
+            elif imt(token, i=(Function, Identifier, TypedLiteral,
+                               Operation, Parenthesis, Case, Comparison),
                      t=T.Literal):
                 result.append(token)
         return result
