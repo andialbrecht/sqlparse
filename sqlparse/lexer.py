@@ -154,6 +154,11 @@ class Lexer:
 
                 if not m:
                     continue
+                elif action is tokens.Name and m.group().upper() == 'SELECT':
+                    # The function-name lookahead runs before keyword lookup.
+                    # SELECT followed immediately by "(" is still a DML
+                    # keyword, not a function name (see issue #775).
+                    yield tokens.Keyword.DML, m.group()
                 elif isinstance(action, tokens._TokenType):
                     yield action, m.group()
                 elif action is keywords.PROCESS_AS_KEYWORD:
