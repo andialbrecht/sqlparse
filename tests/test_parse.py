@@ -127,6 +127,21 @@ def test_parse_function_param_single_literal():
     assert t[0].ttype is T.Number.Integer
 
 
+@pytest.mark.parametrize('argument, cls', [
+    ('1 + 2', sql.Operation),
+    ('(1 + 2)', sql.Parenthesis),
+    ('CASE WHEN 1 THEN 2 ELSE 3 END', sql.Case),
+    ('1 = 2', sql.Comparison),
+])
+def test_parse_function_param_single_grouped_expression(argument, cls):
+    function = sqlparse.parse(f'abs({argument})')[0].tokens[0]
+    parameters = list(function.get_parameters())
+
+    assert len(parameters) == 1
+    assert isinstance(parameters[0], cls)
+    assert str(parameters[0]) == argument
+
+
 def test_parse_nested_function():
     t = sqlparse.parse('foo(bar(5))')[0].tokens[0].get_parameters()
     assert len(t) == 1
