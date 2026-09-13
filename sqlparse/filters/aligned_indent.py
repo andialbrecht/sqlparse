@@ -80,9 +80,16 @@ class AlignedIndentFilter:
             # cond is None when 'else or end'
             stmt = cond[0] if cond else value[0]
 
+            # Malformed CASE expressions can yield case fragments that are no
+            # longer direct children of this token list. Aligned indentation is
+            # best-effort for such input, so do not try to insert relative to a
+            # token that token_index() cannot resolve.
+            if stmt not in tlist.tokens:
+                continue
+
             if i > 0:
                 tlist.insert_before(stmt, self.nl(offset_ - len(str(stmt))))
-            if cond:
+            if cond and cond[-1] in tlist.tokens:
                 ws = sql.Token(T.Whitespace, self.char * (
                     max_cond_width - condition_width[i]))
                 tlist.insert_after(cond[-1], ws)
