@@ -99,6 +99,21 @@ def test_single_quotes():
     assert repr(p.tokens[0])[:len(tst)] == tst
 
 
+def test_single_quotes_escaped_backslash():
+    # issue 814 - Incorrect Tokenization of Escaped Backslashes
+    # A string containing an escaped backslash (\\) should be tokenized
+    # as a single string literal, not split incorrectly.
+    sql = r"SELECT '\\', '\\'"
+    tokens = list(lexer.tokenize(sql))
+    # Should be: SELECT, ws, '\\', ,, ws, '\\'
+    assert tokens[0] == (T.Keyword.DML, 'SELECT')
+    assert tokens[1] == (T.Whitespace, ' ')
+    assert tokens[2] == (T.String.Single, "'\\\\'")
+    assert tokens[3] == (T.Punctuation, ',')
+    assert tokens[4] == (T.Whitespace, ' ')
+    assert tokens[5] == (T.String.Single, "'\\\\'")
+
+
 def test_tokenlist_first():
     p = sqlparse.parse(' select foo')[0]
     first = p.token_first()
