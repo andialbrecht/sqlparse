@@ -317,7 +317,32 @@ def group_identifier_list(tlist):
     def match(token):
         return token.match(T.Punctuation, ',')
 
+    def comparison_is_join_condition(token):
+        if not isinstance(token, sql.Comparison) or token.parent is None:
+            return False
+
+        parent = token.parent
+        idx = parent.token_index(token)
+        while True:
+            idx, prev_ = parent.token_prev(idx)
+            if prev_ is None:
+                return False
+            if prev_.match(T.Keyword, 'ON'):
+                return True
+            if prev_.match(T.Punctuation, ','):
+                return False
+            if prev_.ttype in T.DML:
+                return False
+            if prev_.is_keyword and (
+                prev_.normalized == 'FROM' or
+                prev_.normalized == 'WHERE' or
+                'JOIN' in prev_.normalized
+            ):
+                return False
+
     def valid(token):
+        if comparison_is_join_condition(token):
+            return False
         return imt(token, i=sqlcls, m=m_role, t=ttypes)
 
     def post(tlist, pidx, tidx, nidx):
