@@ -38,6 +38,8 @@ The :meth:`~sqlparse.format` function accepts the following keyword arguments.
 ``truncate_strings``
   If ``truncate_strings`` is a positive integer, string literals longer than
   the given value will be truncated.
+  Truncation does not split doubled quotes or backslash escape sequences;
+  the retained content may be shorter than the requested width.
 
 ``truncate_char`` (default: "[...]")
   If long string literals are truncated (see above) this value will be append

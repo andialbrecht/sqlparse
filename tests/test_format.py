@@ -738,6 +738,27 @@ def test_truncate_strings():
     assert formatted == "update foo set value = 'xxxYYY';"
 
 
+@pytest.mark.parametrize('marker', ['[...]', '...', ''])
+@pytest.mark.parametrize(('literal', 'width', 'expected'), [
+    ("'ab''cdef'", 3, "'ab[...]'"),
+    ("'ab''cdef'", 4, "'ab''[...]'"),
+    ("'''abcdef'", 3, "'''a[...]'"),
+    ("'''abcdef'", 6, "'''abcd[...]'"),
+    ("'a\nb''cdef'", 4, "'a\nb[...]'"),
+    ("'ab''''cdef'", 5, "'ab''[...]'"),
+    ("'ab''''cdef'", 6, "'ab''''[...]'"),
+    (r"'ab\'cdef'", 3, "'ab[...]'"),
+    (r"'ab\'cdef'", 4, r"'ab\'[...]'"),
+    (r"'ab\\cdef'", 3, "'ab[...]'"),
+    (r"'ab\\cdef'", 4, r"'ab\\[...]'"),
+    ("'ab''cd'", 6, "'ab''cd'"),
+])
+def test_truncate_strings_preserves_escapes(literal, width, expected, marker):
+    formatted = sqlparse.format(f'SELECT {literal};', truncate_strings=width,
+                               truncate_char=marker)
+    assert formatted == 'SELECT {};'.format(expected.replace('[...]', marker))
+
+
 @pytest.mark.parametrize('option', ['bar', -1, 0])
 def test_truncate_strings_invalid_option2(option):
     with pytest.raises(SQLParseError):
