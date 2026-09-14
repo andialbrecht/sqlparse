@@ -5,6 +5,8 @@
 # This module is part of python-sqlparse and is released under
 # the BSD License: https://opensource.org/licenses/BSD-3-Clause
 
+import re
+
 from sqlparse import tokens as T
 
 
@@ -47,13 +49,14 @@ class TruncateStringFilter:
                 yield ttype, value
                 continue
 
-            if value[:2] == "''":
-                inner = value[2:-2]
-                quote = "''"
-            else:
-                inner = value[1:-1]
-                quote = "'"
-
+            inner = value[1:-1]
             if len(inner) > self.width:
-                value = ''.join((quote, inner[:self.width], self.char, quote))
+                # Keep doubled quotes and backslash escapes intact at the
+                # truncation boundary, without exceeding the requested width.
+                end = 0
+                for match in re.finditer(r"''|\\.|.", inner, re.DOTALL):
+                    if match.end() > self.width:
+                        break
+                    end = match.end()
+                value = ''.join(("'", inner[:end], self.char, "'"))
             yield ttype, value
