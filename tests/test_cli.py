@@ -67,6 +67,28 @@ def test_stdout(filepath, load_file, capsys):
     assert out == expected
 
 
+@pytest.mark.parametrize('trailing_newline', ('', '\n'))
+def test_stdout_preserves_final_newline(tmpdir, capsys, trailing_newline):
+    path = tmpdir.join('query.sql')
+    path.write(f'select 1;{trailing_newline}')
+
+    result = sqlparse.cli.main([str(path), '--keywords', 'upper'])
+
+    out, _ = capsys.readouterr()
+    assert result == 0
+    assert out == f'SELECT 1;{trailing_newline}'
+
+
+def test_inplace_preserves_final_newline(tmpdir):
+    path = tmpdir.join('query.sql')
+    path.write('select 1;\n')
+
+    result = sqlparse.cli.main([str(path), '--keywords', 'upper', '--in-place'])
+
+    assert result == 0
+    assert path.read() == 'SELECT 1;\n'
+
+
 def test_script():
     # Call with the --help option as a basic sanity check.
     cmd = [sys.executable, '-m', 'sqlparse.cli', '--help']

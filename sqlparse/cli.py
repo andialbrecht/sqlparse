@@ -217,6 +217,8 @@ def _process_file(filename, args):
         return _error(f'Invalid options: {e}')
 
     s = sqlparse.format(data, **formatter_opts)
+    if data.endswith('\n') and not s.endswith('\n'):
+        s += '\n'
     stream.write(s)
     stream.flush()
     if close_stream:
