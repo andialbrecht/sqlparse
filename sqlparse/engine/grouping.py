@@ -188,7 +188,8 @@ def group_period(tlist):
 
         return (pidx, nidx) if valid_next else (pidx, tidx)
 
-    _group(tlist, sql.Identifier, match, valid_prev, valid_next, post)
+    _group(tlist, sql.Identifier, match, valid_prev, valid_next, post,
+           skip_cm=True)
 
 
 def group_as(tlist):
@@ -205,7 +206,8 @@ def group_as(tlist):
     def post(tlist, pidx, tidx, nidx):
         return pidx, nidx
 
-    _group(tlist, sql.Identifier, match, valid_prev, valid_next, post)
+    _group(tlist, sql.Identifier, match, valid_prev, valid_next, post,
+           skip_cm=True)
 
 
 def group_assignment(tlist):
@@ -370,7 +372,7 @@ def group_aliased(tlist):
 
     tidx, token = tlist.token_next_by(i=I_ALIAS, t=T.Number)
     while token:
-        nidx, next_ = tlist.token_next(tidx)
+        nidx, next_ = tlist.token_next(tidx, skip_cm=True)
         if isinstance(next_, sql.Identifier):
             tlist.group_tokens(sql.Identifier, tidx, nidx, extend=True)
         tidx, token = tlist.token_next_by(i=I_ALIAS, t=T.Number, idx=tidx)
@@ -481,7 +483,8 @@ def _group(tlist, cls, match,
            post=None,
            extend=True,
            recurse=True,
-           depth=0
+           depth=0,
+           skip_cm=False
            ):
     """Groups together tokens that are joined by a middle token. i.e. x < y"""
     if MAX_GROUPING_DEPTH is not None and depth > MAX_GROUPING_DEPTH:
@@ -505,15 +508,16 @@ def _group(tlist, cls, match,
         if tidx < 0:  # tidx shouldn't get negative
             continue
 
-        if token.is_whitespace:
+        if token.is_whitespace or (skip_cm and imt(token, t=T.Comment,
+                                                  i=sql.Comment)):
             continue
 
         if recurse and token.is_group and not isinstance(token, cls):
             _group(token, cls, match, valid_prev, valid_next,
-                   post, extend, True, depth + 1)
+                   post, extend, True, depth + 1, skip_cm=skip_cm)
 
         if match(token):
-            nidx, next_ = tlist.token_next(tidx)
+            nidx, next_ = tlist.token_next(tidx, skip_cm=skip_cm)
             if prev_ and valid_prev(prev_) and valid_next(next_):
                 from_idx, to_idx = post(tlist, pidx, tidx, nidx)
                 grp = tlist.group_tokens(cls, from_idx, to_idx, extend=extend)

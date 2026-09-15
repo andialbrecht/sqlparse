@@ -64,7 +64,9 @@ class StripCommentsFilter:
                 # Insert a whitespace to ensure the following SQL produces
                 # a valid SQL (see #425).
                 if prev_ is not None and not prev_.match(T.Punctuation, '('):
-                    tlist.tokens.insert(tidx, _get_insert_token(token))
+                    replacement = _get_insert_token(token)
+                    if replacement.is_newline or next_ is None or not next_.is_whitespace:
+                        tlist.tokens.insert(tidx, replacement)
                 tlist.tokens.remove(token)
                 tidx -= 1
             else:

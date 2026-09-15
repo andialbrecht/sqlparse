@@ -34,9 +34,22 @@ class NameAliasMixin:
             return self._get_first_name(kw_idx + 1, keywords=True)
 
         # "name alias" or "complicated column expression alias"
-        _, ws = self.token_next_by(t=T.Whitespace)
-        if len(self.tokens) > 2 and ws is not None:
-            return self._get_first_name(reverse=True)
+        if len(self.tokens) > 2:
+            last_idx, last = self.token_prev(len(self.tokens), skip_cm=True)
+            if not imt(last, i=Identifier, t=[T.Name, T.String.Symbol]):
+                return None
+            _, prev = self.token_prev(last_idx, skip_cm=True)
+            _, separator = self.token_prev(last_idx, skip_ws=False)
+            # A trailing comment may belong to the preceding expression.
+            if separator is not None and separator.is_group:
+                separator = separator.tokens[-1] if separator.tokens else None
+            # A separator after a qualification operator precedes an operand,
+            # not an alias (see the operators handled by group_period).
+            if (imt(separator, i=Comment, t=[T.Whitespace, T.Comment])
+                    and prev is not None
+                    and not prev.match(T.Punctuation, '.')
+                    and not prev.match(T.Operator, ('->', '->>'))):
+                return self._get_first_name(reverse=True)
 
 
 class Token:
@@ -387,7 +400,7 @@ class TokenList(Token):
         A parent object is identified by the first occurring dot.
         """
         dot_idx, _ = self.token_next_by(m=(T.Punctuation, '.'))
-        _, prev_ = self.token_prev(dot_idx)
+        _, prev_ = self.token_prev(dot_idx, skip_cm=True)
         return remove_quotes(prev_.value) if prev_ is not None else None
 
     def _get_first_name(self, idx=None, reverse=False, keywords=False,
