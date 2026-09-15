@@ -22,18 +22,19 @@ def extract_definitions(token_list):
             continue
         elif token.match(sqlparse.tokens.Punctuation, '('):
             par_level += 1
+            tmp.append(token)
             continue
         if token.match(sqlparse.tokens.Punctuation, ')'):
             if par_level == 0:
                 break
             else:
                 par_level -= 1
-        elif token.match(sqlparse.tokens.Punctuation, ','):
+        elif token.match(sqlparse.tokens.Punctuation, ',') and par_level == 0:
             if tmp:
                 definitions.append(tmp)
             tmp = []
-        else:
-            tmp.append(token)
+            continue
+        tmp.append(token)
     if tmp:
         definitions.append(tmp)
     return definitions
@@ -41,7 +42,7 @@ def extract_definitions(token_list):
 
 if __name__ == '__main__':
     SQL = """CREATE TABLE foo (
-             id integer primary key,
+             id decimal(30, 8) primary key,
              title varchar(200) not null,
              description text);"""
 
