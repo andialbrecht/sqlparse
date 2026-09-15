@@ -192,6 +192,15 @@ def _process_file(filename, args):
         except OSError as e:
             return _error(f'Failed to read {filename}: {e}')
 
+    # Validate formatting options before opening output. Opening an in-place
+    # destination truncates the input file immediately, so invalid options must
+    # be rejected before that destructive operation.
+    formatter_opts = vars(args)
+    try:
+        formatter_opts = sqlparse.formatter.validate_options(formatter_opts)
+    except SQLParseError as e:
+        return _error(f'Invalid options: {e}')
+
     # Determine output destination
     close_stream = False
     if args.inplace:
@@ -208,13 +217,6 @@ def _process_file(filename, args):
             return _error(f'Failed to open {args.outfile}: {e}')
     else:
         stream = sys.stdout
-
-    # Format the SQL
-    formatter_opts = vars(args)
-    try:
-        formatter_opts = sqlparse.formatter.validate_options(formatter_opts)
-    except SQLParseError as e:
-        return _error(f'Invalid options: {e}')
 
     s = sqlparse.format(data, **formatter_opts)
     stream.write(s)
