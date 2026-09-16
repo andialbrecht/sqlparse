@@ -11,6 +11,53 @@ def test_cli_main_empty():
         sqlparse.cli.main([])
 
 
+@pytest.mark.parametrize('option', ['comma_first', 'compact'])
+@pytest.mark.parametrize('value, expected', [
+    ('True', True), ('true', True), ('TRUE', True), ('1', True),
+    ('False', False), ('false', False), ('FALSE', False), ('0', False),
+])
+def test_parser_boolean_values(option, value, expected):
+    parser = sqlparse.cli.create_parser()
+    args = parser.parse_args(['-', '--' + option, value])
+    assert getattr(args, option) is expected
+
+
+@pytest.mark.parametrize('option', ['comma_first', 'compact'])
+def test_parser_boolean_default(option):
+    args = sqlparse.cli.create_parser().parse_args(['-'])
+    assert getattr(args, option) is False
+
+
+@pytest.mark.parametrize('option', ['comma_first', 'compact'])
+@pytest.mark.parametrize('value', ['xxx', '2', ''])
+def test_parser_boolean_invalid(option, value, capsys):
+    with pytest.raises(SystemExit) as exc:
+        sqlparse.cli.create_parser().parse_args(['-', '--' + option, value])
+    assert exc.value.code == 2
+    out, err = capsys.readouterr()
+    assert out == ''
+    assert '--' + option in err
+    assert 'expected true, false, 1 or 0' in err
+
+
+@pytest.mark.parametrize('option, sql, normal, enabled', [
+    ('comma_first', 'select a, b from foo',
+     'select a,\n       b\nfrom foo', 'select a\n     , b\nfrom foo'),
+    ('compact', 'case when foo then 1 else bar end',
+     'case\n    when foo then 1\n    else bar\nend',
+     'case when foo then 1 else bar end'),
+])
+@pytest.mark.parametrize('value', [None, 'False', '0', 'True', '1'])
+def test_cli_boolean_formatting(option, sql, normal, enabled, value):
+    cmd = [sys.executable, '-m', 'sqlparse', '-', '--reindent']
+    if value is not None:
+        cmd.extend(['--' + option, value])
+    result = subprocess.run(cmd, input=sql, capture_output=True, text=True)
+    assert result.returncode == 0
+    assert result.stderr == ''
+    assert result.stdout == (enabled if value in ('True', '1') else normal)
+
+
 def test_parser_empty():
     with pytest.raises(SystemExit):
         parser = sqlparse.cli.create_parser()

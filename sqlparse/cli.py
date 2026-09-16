@@ -25,6 +25,14 @@ import sqlparse
 from sqlparse.exceptions import SQLParseError
 
 
+def _parse_bool(value):
+    if value.lower() in ('true', '1'):
+        return True
+    if value.lower() in ('false', '0'):
+        return False
+    raise argparse.ArgumentTypeError('expected true, false, 1 or 0')
+
+
 # TODO: Add CLI Tests
 # TODO: Simplify formatter by using argparse `type` arguments
 def create_parser():
@@ -144,15 +152,19 @@ def create_parser():
         '--comma_first',
         dest='comma_first',
         default=False,
-        type=bool,
-        help='Insert linebreak before comma (default False)')
+        type=_parse_bool,
+        metavar='BOOL',
+        help='Insert linebreak before comma '
+             '(true/false or 1/0, case-insensitive; default false)')
 
     group.add_argument(
         '--compact',
         dest='compact',
         default=False,
-        type=bool,
-        help='Try to produce more compact output (default False)')
+        type=_parse_bool,
+        metavar='BOOL',
+        help='Try to produce more compact output '
+             '(true/false or 1/0, case-insensitive; default false)')
 
     group.add_argument(
         '--encoding',
