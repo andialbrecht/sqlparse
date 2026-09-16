@@ -1,7 +1,9 @@
 Development Version
 -------------------
 
-Nothing yet.
+* Fix boolean value parsing for the sqlformat command's --comma_first and
+  --compact options. Accept true/false (case-insensitive) and 1/0, and reject
+  other values instead of treating every non-empty string as true (issue638).
 
 
 Release 0.6.0 (Aug 13, 2026)
