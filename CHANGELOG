@@ -1,7 +1,10 @@
 Development Version
 -------------------
 
-Nothing yet.
+Bug Fixes
+
+* Group ordered-set aggregates with their WITHIN GROUP clause and optional
+  OVER clause before resolving column aliases (issue700).
 
 
 Release 0.6.0 (Aug 13, 2026)

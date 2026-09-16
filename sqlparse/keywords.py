@@ -182,6 +182,7 @@ SQL_REGEX = [
     (r'UNION\s+ALL\b', tokens.Keyword),
     (r'CREATE(\s+OR\s+REPLACE)?\b', tokens.Keyword.DDL),
     (r'DOUBLE\s+PRECISION\b', tokens.Name.Builtin),
+    (r'WITHIN\s+GROUP\b(?!\s+BY\b)', tokens.Keyword),
     (r'GROUP\s+BY\b', tokens.Keyword),
     (r'ORDER\s+BY\b', tokens.Keyword),
     (r'PRIMARY\s+KEY\b', tokens.Keyword),
