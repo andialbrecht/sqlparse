@@ -396,6 +396,12 @@ def group_functions(tlist):
         nidx, next_ = tlist.token_next(tidx)
         if isinstance(next_, sql.Parenthesis):
             over_idx, over = tlist.token_next(nidx)
+            within_idx, within = tlist.token_next(nidx, skip_cm=True)
+            if within and within.match(T.Keyword, r'WITHIN\s+GROUP', regex=True):
+                order_idx, order = tlist.token_next(within_idx, skip_cm=True)
+                if isinstance(order, sql.Parenthesis):
+                    nidx = order_idx
+                    over_idx, over = tlist.token_next(nidx, skip_cm=True)
             if over and isinstance(over, sql.Over):
                 eidx = over_idx
             else:
