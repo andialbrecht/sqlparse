@@ -26,6 +26,7 @@ class ReindentFilter:
         self._curr_stmt = None
         self._last_stmt = None
         self._last_func = None
+        self._create_table_parenthesis = None
 
     @property
     def leading_ws(self):
@@ -174,7 +175,13 @@ class ReindentFilter:
             num_offset = 1 if self.char == '\t' else self.width
         else:
             first = next(identifiers.pop(0).flatten())
-            num_offset = 1 if self.char == '\t' else self._get_offset(first)
+            if (tlist.parent is self._create_table_parenthesis
+                    and self.char != '\t'):
+                # Column constraints and the next column name can form separate
+                # lists. Align these with the first column, not the constraint.
+                num_offset = 0
+            else:
+                num_offset = 1 if self.char == '\t' else self._get_offset(first)
 
         if not tlist.within(sql.Function) and not tlist.within(sql.Values):
             with offset(self, num_offset):
@@ -278,6 +285,13 @@ class ReindentFilter:
 
     def process(self, stmt):
         self._curr_stmt = stmt
+        self._create_table_parenthesis = None
+        if stmt.get_type() == 'CREATE':
+            tidx, table = stmt.token_next_by(m=(T.Keyword, 'TABLE'))
+            _, as_ = stmt.token_next_by(m=(T.Keyword, 'AS'))
+            if table is not None and as_ is None:
+                _, self._create_table_parenthesis = stmt.token_next_by(
+                    i=sql.Parenthesis, idx=tidx)
         self._process(stmt)
 
         if self._last_stmt is not None:
