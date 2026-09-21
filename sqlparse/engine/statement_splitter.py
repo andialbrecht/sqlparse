@@ -152,6 +152,12 @@ class StatementSplitter:
         """Process the stream"""
         EOS_TTYPE = T.Whitespace, T.Comment.Single
 
+        # Tokens of the previous completed statement, held back by one step so
+        # a trailing whitespace-only run (e.g. a newline after the final ';')
+        # can be re-attached to it instead of being dropped, keeping the
+        # round-trip lossless.
+        completed = None
+
         # Run over all stream tokens
         for ttype, value in stream:
             # Yield token if we finished a statement and there's no whitespaces
@@ -159,7 +165,9 @@ class StatementSplitter:
             # whitespace ignores newlines.
             # why don't multi line comments also count?
             if self.consume_ws and ttype not in EOS_TTYPE:
-                yield sql.Statement(self.tokens)
+                if completed is not None:
+                    yield sql.Statement(completed)
+                completed = self.tokens
 
                 # Reset filter and prepare to process next statement
                 self._reset()
@@ -191,6 +199,19 @@ class StatementSplitter:
                 # token but not for BEGIN itself (which just set the flag)
                 self._seen_begin = False
 
-        # Yield pending statement (if any)
-        if self.tokens and not all(t.is_whitespace for t in self.tokens):
-            yield sql.Statement(self.tokens)
+        # Decide what to do with the final run of tokens.
+        if self.tokens:
+            if completed is not None and all(t.is_whitespace for t in self.tokens):
+                # A trailing whitespace-only run after a completed statement
+                # (a newline after the last ';'): re-attach it so the text is
+                # preserved, rather than emitting it as an empty statement.
+                completed.extend(self.tokens)
+            else:
+                if completed is not None:
+                    yield sql.Statement(completed)
+                completed = self.tokens
+
+        # Yield pending statement (if any); a leading whitespace-only run with
+        # no statement is dropped, as before.
+        if completed is not None and not all(t.is_whitespace for t in completed):
+            yield sql.Statement(completed)
