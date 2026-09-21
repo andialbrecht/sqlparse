@@ -28,6 +28,7 @@ class AlignedIndentFilter:
         self.indent = 0
         self.char = char
         self._max_kwd_len = len('select')
+        self._last_stmt = None
 
     def nl(self, offset=1):
         # offset = 1 represent a single space after SELECT
@@ -133,4 +134,14 @@ class AlignedIndentFilter:
 
     def process(self, stmt):
         self._process(stmt)
+
+        # reindent_aligned implies strip_whitespace, so the whitespace that
+        # separated this statement from the previous one is gone by now. Put a
+        # separator back, the way ReindentFilter does, or the statements are
+        # emitted glued together.
+        if self._last_stmt is not None:
+            nl = '\n' if str(self._last_stmt).endswith('\n') else '\n\n'
+            stmt.tokens.insert(0, sql.Token(T.Whitespace, nl))
+
+        self._last_stmt = stmt
         return stmt

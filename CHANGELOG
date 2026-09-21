@@ -1,7 +1,12 @@
 Development Version
 -------------------
 
-Nothing yet.
+Bug Fixes
+
+* `format(sql, reindent_aligned=True)` no longer runs consecutive statements
+  together on one line. `reindent_aligned` implies `strip_whitespace`, which
+  removes the whitespace separating the statements, and unlike `reindent` the
+  aligned filter never put a separator back (issue673).
 
 
 Release 0.6.0 (Aug 13, 2026)

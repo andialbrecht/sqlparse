@@ -345,6 +345,16 @@ class TestFormatReindentAligned:
             '(PARTITION BY b, c ORDER BY d DESC) as row_num',
             '  from table'])
 
+    def test_multiple_statements_are_separated(self):
+        # issue673
+        sql = 'select a from t1;\nselect b from t2;\n'
+        assert self.formatter(sql) == '\n'.join([
+            'select a',
+            '  from t1;',
+            '',
+            'select b',
+            '  from t2;'])
+
 
 class TestSpacesAroundOperators:
     @staticmethod
