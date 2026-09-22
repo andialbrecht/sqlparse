@@ -213,6 +213,10 @@ def test_placeholder(ph):
     ('6.67428E-8', T.Number.Float),
     ('1.988e33', T.Number.Float),
     ('1e-12', T.Number.Float),
+    ('1e+3', T.Number.Float),
+    ('1E+3', T.Number.Float),
+    ('1.25e+3', T.Number.Float),
+    ('-1.25E+3', T.Number.Float),
     ('e1', None),
 ])
 def test_scientific_numbers(num, expected):
