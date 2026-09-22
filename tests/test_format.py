@@ -351,6 +351,10 @@ class TestSpacesAroundOperators:
     def formatter(sql):
         return sqlparse.format(sql, use_space_around_operators=True)
 
+    @pytest.mark.parametrize('number', ['1e+3', '1E+3', '1.25e+3', '-1.25E+3'])
+    def test_preserves_positive_exponents(self, number):
+        assert self.formatter(f'SELECT {number}*2') == f'SELECT {number} * 2'
+
     def test_basic(self):
         sql = ('select a+b as d from table '
                'where (c-d)%2= 1 and e> 3.0/4 and z^2 <100')
