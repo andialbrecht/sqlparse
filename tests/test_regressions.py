@@ -505,6 +505,50 @@ def test_keyword_before_qualified_name_still_grouped():
         assert ident is not None
 
 
+@pytest.mark.parametrize(('stmt', 'source', 'destination', 'formatted'), [
+    ('CREATE DATABASE DATABASE_NAME CLONE MASTER_DATABASE;',
+     'DATABASE_NAME', 'MASTER_DATABASE',
+     'CREATE DATABASE DATABASE_NAME CLONE MASTER_DATABASE;'),
+    ('create schema source_schema clone target_schema;',
+     'source_schema', 'target_schema',
+     'CREATE SCHEMA source_schema CLONE target_schema;'),
+    ('CrEaTe TaBlE source_table ClOnE target_table;',
+     'source_table', 'target_table',
+     'CREATE TABLE source_table CLONE target_table;'),
+    ('CREATE DATABASE "DATABASE NAME" CLONE "MASTER DATABASE";',
+     '"DATABASE NAME"', '"MASTER DATABASE"',
+     'CREATE DATABASE "DATABASE NAME" CLONE "MASTER DATABASE";'),
+    ('CREATE SCHEMA "SCHEMA NAME" CLONE "MASTER SCHEMA";',
+     '"SCHEMA NAME"', '"MASTER SCHEMA"',
+     'CREATE SCHEMA "SCHEMA NAME" CLONE "MASTER SCHEMA";'),
+    ('CREATE TABLE "TABLE NAME" CLONE "MASTER TABLE";',
+     '"TABLE NAME"', '"MASTER TABLE"',
+     'CREATE TABLE "TABLE NAME" CLONE "MASTER TABLE";'),
+])
+def test_snowflake_clone_is_a_separate_keyword(stmt, source, destination,
+                                               formatted):
+    parsed = sqlparse.parse(stmt)[0]
+    assert str(parsed) == stmt
+    assert parsed.get_type() == 'CREATE'
+
+    clone = [token for token in parsed.tokens
+             if token.ttype is T.Keyword and token.normalized == 'CLONE']
+    assert len(clone) == 1
+    identifiers = [token for token in parsed.tokens
+                   if isinstance(token, sql.Identifier)]
+    assert [str(token) for token in identifiers] == [source, destination]
+    assert sqlparse.format(stmt, keyword_case='upper') == formatted
+
+
+def test_snowflake_create_without_clone_preserves_identifier():
+    stmt = 'CREATE DATABASE DATABASE_NAME;'
+    parsed = sqlparse.parse(stmt)[0]
+    assert str(parsed) == stmt
+    assert parsed.get_type() == 'CREATE'
+    assert [str(token) for token in parsed.tokens
+            if isinstance(token, sql.Identifier)] == ['DATABASE_NAME']
+
+
 @pytest.fixture
 def limit_recursion():
     curr_limit = sys.getrecursionlimit()
