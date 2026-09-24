@@ -1081,6 +1081,7 @@ KEYWORDS_MSACCESS = {
 
 KEYWORDS_SNOWFLAKE = {
     'ACCOUNT': tokens.Keyword,
+    'CLONE': tokens.Keyword,
     'GSCLUSTER': tokens.Keyword,
     'ISSUE': tokens.Keyword,
     'ORGANIZATION': tokens.Keyword,
