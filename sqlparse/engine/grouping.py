@@ -254,6 +254,56 @@ def group_identifier(tlist):
         tidx, token = tlist.token_next_by(t=ttypes, idx=tidx)
 
 
+@recurse()
+def group_select_aliases(tlist):
+    """Recognize interval keywords used as aliases of SELECT functions."""
+    in_select = False
+    at_start = False
+    boundaries = (T.Keyword, ('FROM', 'INTO', 'GROUP BY', 'HAVING',
+                              'ORDER BY', 'LIMIT', 'OFFSET', 'FETCH', 'FOR',
+                              'WINDOW', 'QUALIFY', 'UNION', 'UNION ALL',
+                              'INTERSECT', 'EXCEPT', 'MINUS'))
+    literals = (T.Keyword, ('NULL', 'TRUE', 'FALSE', 'CURRENT_DATE',
+                            'CURRENT_TIME', 'CURRENT_TIMESTAMP',
+                            'LOCALTIME', 'LOCALTIMESTAMP'))
+    for tidx, token in enumerate(tlist.tokens):
+        if token.is_whitespace or imt(token, i=sql.Comment, t=T.Comment):
+            continue
+        if token.match(T.DML, 'SELECT'):
+            in_select = at_start = True
+            continue
+        if not in_select:
+            continue
+        if at_start and token.match(T.Keyword, ('ALL', 'DISTINCT')):
+            continue
+        # A scalar keyword is still part of the projection; an unrecognized
+        # keyword may start a dialect-specific clause, so stop there.
+        if isinstance(token, sql.Where) or (token.is_keyword and not imt(
+            token, m=[sql.TypedLiteral.M_EXTEND, literals],
+        )):
+            in_select = False
+            continue
+        if token.match(T.Punctuation, ','):
+            at_start = True
+            continue
+        if (at_start and isinstance(token, sql.Function)
+                and token.token_first().value.upper() != 'INTERVAL'):
+            nidx, alias = tlist.token_next(tidx)
+            if alias is not None and alias.match(*sql.TypedLiteral.M_EXTEND):
+                _, following = tlist.token_next(nidx, skip_cm=True)
+                if following is None or imt(
+                    following, i=sql.Where,
+                    m=[(T.Punctuation, (',', ';', ')')), boundaries],
+                ):
+                    # Only this confirmed alias is a name. In particular,
+                    # INTERVAL f() DAY does not start with a bare function,
+                    # and INTERVAL(amount) is excluded above as well.
+                    name = sql.Identifier([sql.Token(T.Name, alias.value)])
+                    name.parent = tlist
+                    tlist.tokens[nidx] = name
+        at_start = False
+
+
 @recurse(sql.Over)
 def group_over(tlist):
     tidx, token = tlist.token_next_by(m=sql.Over.M_OPEN)
@@ -464,6 +514,7 @@ def group(stmt):
         group_operator,
         group_comparison,
         group_as,
+        group_select_aliases,
         group_aliased,
         group_assignment,
 

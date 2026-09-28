@@ -332,6 +332,133 @@ def test_grouping_alias():
     assert p.tokens[4].get_alias() == 'view'
 
 
+@pytest.mark.parametrize('modifier', ['', 'DISTINCT ', 'ALL '])
+def test_function_keyword_aliases_in_select_list(modifier):
+    s = (f'SELECT {modifier}EXTRACT(YEAR FROM foo) year, '
+         'EXTRACT(MONTH FROM foo) month, value FROM orders')
+    p = sqlparse.parse(s)[0]
+    _, projection = p.token_next_by(i=sql.IdentifierList)
+    assert projection is not None
+    identifiers = list(projection.get_identifiers())
+    assert [item.get_alias() for item in identifiers] == ['year', 'month', None]
+    assert [item.get_real_name() for item in identifiers] == ['EXTRACT', 'EXTRACT', 'value']
+    assert str(p) == s
+
+
+def test_function_keyword_alias_reindent():
+    s = ('select extract(year from foo) year, '
+         'extract(month from foo) month, value from orders')
+    assert sqlparse.format(s, reindent=True) == '\n'.join([
+        'select extract(year',
+        '               from foo) year,',
+        '       extract(month',
+        '               from foo) month,',
+        '       value',
+        'from orders',
+    ])
+
+
+@pytest.mark.parametrize('alias', ['day', 'hour', 'minute', 'month', 'second', 'year'])
+@pytest.mark.parametrize('ending', ['', ';', ' FROM orders', ' WHERE foo > 0'])
+def test_function_keyword_alias_at_projection_end(alias, ending):
+    s = f'SELECT EXTRACT(YEAR FROM foo) {alias}{ending}'
+    p = sqlparse.parse(s)[0]
+    assert isinstance(p.tokens[2], sql.Identifier)
+    assert p.tokens[2].get_alias() == alias
+    assert p.tokens[2].get_real_name() == 'EXTRACT'
+    assert str(p) == s
+
+
+def test_function_keyword_alias_in_nested_select():
+    s = 'SELECT COALESCE((SELECT EXTRACT(YEAR FROM foo) year), 1) month FROM orders'
+    p = sqlparse.parse(s)[0]
+
+    def aliases(group):
+        for child in group.get_sublists():
+            if isinstance(child, sql.Identifier) and child.get_alias():
+                yield child.get_alias()
+            yield from aliases(child)
+
+    assert list(aliases(p)) == ['month', 'year']
+    assert str(p) == s
+
+
+def test_function_keyword_alias_after_explicit_alias():
+    s = 'SELECT value AS label, EXTRACT(YEAR FROM foo) year FROM orders'
+    p = sqlparse.parse(s)[0]
+    _, projection = p.token_next_by(i=sql.IdentifierList)
+    assert [item.get_alias() for item in projection.get_identifiers()] == ['label', 'year']
+    assert str(p) == s
+
+
+@pytest.mark.parametrize('literal', [
+    'NULL', 'TRUE', 'FALSE', 'CURRENT_DATE', 'CURRENT_TIME',
+    'CURRENT_TIMESTAMP', 'LOCALTIME', 'LOCALTIMESTAMP',
+])
+def test_function_keyword_alias_after_literal(literal):
+    s = (f'SELECT {literal}, EXTRACT(YEAR FROM foo) year, '
+         'EXTRACT(MONTH FROM foo) month FROM orders')
+    p = sqlparse.parse(s)[0]
+    _, projection = p.token_next_by(i=sql.IdentifierList)
+    identifiers = list(projection.get_identifiers())
+    assert [str(item) for item in identifiers] == [
+        literal, 'EXTRACT(YEAR FROM foo) year', 'EXTRACT(MONTH FROM foo) month',
+    ]
+    assert [item.get_alias() for item in identifiers[1:]] == ['year', 'month']
+    assert str(p) == s
+
+
+def test_function_keyword_alias_keeps_select_clause_boundaries():
+    s = ('SELECT EXTRACT(YEAR FROM foo) year FROM orders '
+         'JOIN items ON orders.id = items.id '
+         'UNION SELECT EXTRACT(MONTH FROM foo) month FROM other')
+    p = sqlparse.parse(s)[0]
+    assert [t.get_alias() for t in p if isinstance(t, sql.Identifier)] == [
+        'year', None, None, 'month', None,
+    ]
+    assert [t.normalized for t in p if t.is_keyword] == [
+        'SELECT', 'FROM', 'JOIN', 'ON', 'UNION', 'SELECT', 'FROM',
+    ]
+    assert str(p) == s
+
+
+@pytest.mark.parametrize('expression', [
+    'INTERVAL ABS(-1) DAY',
+    'INTERVAL(1) DAY',
+    'interval (ABS(-1)) DAY',
+    'INTERVAL((1 + 2)) DAY',
+    'INTERVAL (EXTRACT(DAY FROM foo)) DAY',
+    "INTERVAL '1' DAY",
+    '(CURRENT_TIMESTAMP - CURRENT_TIMESTAMP) DAY TO SECOND',
+    'MAX(finished) - MIN(started) DAY TO SECOND',
+])
+def test_function_keyword_alias_does_not_consume_interval_units(expression):
+    s = f'SELECT {expression} FROM jobs'
+    p = sqlparse.parse(s)[0]
+    units = [token for token in p.flatten() if token.value in ('DAY', 'SECOND')]
+    assert units
+    assert all(token.ttype is T.Keyword for token in units)
+    assert str(p) == s
+
+
+def test_function_keyword_alias_on_quoted_interval_name():
+    s = 'SELECT `INTERVAL`(1) day FROM jobs'
+    p = sqlparse.parse(s)[0]
+    assert p.tokens[2].get_alias() == 'day'
+    assert p.tokens[2].get_real_name() == 'INTERVAL'
+    assert str(p) == s
+
+
+def test_function_keyword_alias_preserves_window_interval():
+    s = ('SELECT MIN(time) OVER (ORDER BY time RANGE '
+         "INTERVAL '1' DAY PRECEDING) year FROM jobs")
+    p = sqlparse.parse(s)[0]
+    assert isinstance(p.tokens[2], sql.Identifier)
+    assert p.tokens[2].get_alias() == 'year'
+    assert [t.ttype for t in p.flatten() if t.value == 'DAY'] == [T.Keyword]
+    assert str(p) == s
+
+
 def test_grouping_alias_case():
     # see issue46
     p = sqlparse.parse('CASE WHEN 1 THEN 2 ELSE 3 END foo')[0]
