@@ -105,6 +105,29 @@ def group_typecasts(tlist):
         return token is not None
 
     def post(tlist, pidx, tidx, nidx):
+        type_idx, token = tlist.token_next(tidx, skip_cm=True)
+        if isinstance(token, sql.Function):
+            token = token.token_first()
+            if isinstance(token, sql.Identifier):
+                token = token.token_first()
+        if token is None or token.ttype not in (T.Name, T.Name.Builtin,
+                                                T.Keyword) \
+                or token.value.upper() not in ('TIME', 'TIMESTAMP'):
+            return pidx, nidx
+
+        # Precision may be separate when a comment prevents function grouping.
+        next_idx, next_ = tlist.token_next(type_idx, skip_cm=True)
+        if isinstance(next_, sql.Parenthesis):
+            type_idx = next_idx
+
+        # Keep the complete datetime type together, without changing keyword
+        # types (in particular WITH, which also introduces a CTE).
+        for matches in (((T.Keyword.CTE, 'WITH'), (T.Keyword, 'WITHOUT')),
+                        ((T.Keyword, 'TIME'),), ((T.Keyword, 'ZONE'),)):
+            type_idx, token = tlist.token_next(type_idx, skip_cm=True)
+            if token is None or not any(token.match(*m) for m in matches):
+                return pidx, nidx
+        nidx = type_idx
         return pidx, nidx
 
     valid_prev = valid_next = valid

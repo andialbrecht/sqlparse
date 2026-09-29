@@ -414,6 +414,15 @@ def test_issue562_tzcasts():
            'SELECT f(HOUR\n         from bar AT TIME ZONE \'UTC\')\nfrom foo'
 
 
+def test_issue811_datetime_typecast_reindent():
+    text = ("SELECT '2020-01-01'::timestamp WITH TIME ZONE AS moment, "
+            'ARRAY(SELECT 1) AS items;')
+    assert sqlparse.format(text, reindent=True) == (
+        "SELECT '2020-01-01'::timestamp WITH TIME ZONE AS moment,\n"
+        '       ARRAY\n'
+        '  (SELECT 1) AS items;')
+
+
 def test_as_in_parentheses_indents():
     # did raise NoneType has no attribute is_group in _process_parentheses
     formatted = sqlparse.format('(as foo)', reindent=True)

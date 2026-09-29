@@ -1,7 +1,8 @@
 Development Version
 -------------------
 
-Nothing yet.
+* Keep WITH/WITHOUT TIME ZONE suffixes in datetime typecasts grouped with
+  their expressions, fixing SELECT list indentation (issue811).
 
 
 Release 0.6.0 (Aug 13, 2026)
