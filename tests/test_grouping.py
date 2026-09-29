@@ -310,6 +310,104 @@ def test_grouping_typecast(sql, expected):
     assert p.tokens[2].get_typecast() == expected
 
 
+@pytest.mark.parametrize('datatype', [
+    'timestamp WITH TIME ZONE',
+    'timestamp WITHOUT TIME ZONE',
+    'time WITH TIME ZONE',
+    'time WITHOUT TIME ZONE',
+    'TIMESTAMP(3) WITH TIME ZONE',
+    'timestamp (3) WITH TIME ZONE',
+    'TIMESTAMP\n(3) WITHOUT TIME ZONE',
+    'time (0) WITHOUT TIME ZONE',
+    'TiMeStAmP(6) WiTh TiMe ZoNe',
+    'timestamp /* precision */ (3) WITH TIME ZONE',
+    '/* type */ timestamp /* zone */ WITH /* time */ TIME /* end */ ZONE',
+    'time -- precision\n(0) WITHOUT -- zone\nTIME ZONE',
+])
+@pytest.mark.parametrize('alias', [' AS moment', ' moment', ''])
+def test_grouping_datetime_typecast(datatype, alias):
+    expression = f'ts::{datatype}{alias}'
+    text = f'SELECT {expression}, other FROM events'
+    parsed = sqlparse.parse(text)[0]
+    assert str(parsed) == text
+    assert isinstance(parsed[2], sql.IdentifierList)
+    identifiers = list(parsed[2].get_identifiers())
+    assert [str(token) for token in identifiers] == [expression, 'other']
+    assert identifiers[0].get_alias() == ('moment' if alias else None)
+    assert [(token.ttype, token.value) for token in parsed.flatten()] == list(
+        sqlparse.lexer.tokenize(text))
+
+
+@pytest.mark.parametrize('datatype', [
+    'timestamp', 'timestamp (3)', 'TIMESTAMP\n(3)',
+    'time', 'timestamptz', 'custom_type', 'schema.timestamp',
+    '"timestamp"', '"time"', '"schema"."timestamp"',
+    'schema.timestamp(3)',
+])
+def test_grouping_datetime_typecast_custom_types(datatype):
+    text = f'SELECT ts::{datatype} AS moment, other FROM events'
+    parsed = sqlparse.parse(text)[0]
+    assert str(parsed) == text
+    assert isinstance(parsed[2], sql.IdentifierList)
+    identifiers = list(parsed[2].get_identifiers())
+    assert [str(token) for token in identifiers] == [
+        f'ts::{datatype} AS moment', 'other']
+    assert identifiers[0].get_alias() == 'moment'
+
+
+def test_grouping_datetime_typecast_cte():
+    text = ('WITH moments AS (SELECT ts::timestamp WITH TIME ZONE AS moment, '
+            'other FROM events) SELECT moment, other FROM moments')
+    parsed = sqlparse.parse(text)[0]
+    assert str(parsed) == text
+    assert parsed[0].ttype is T.Keyword.CTE
+    assert parsed.get_type() == 'SELECT'
+    cte = parsed[2]
+    assert cte.get_name() == 'moments'
+    projection = cte[-1][3]
+    assert isinstance(projection, sql.IdentifierList)
+    assert [token.get_name() for token in projection.get_identifiers()] == [
+        'moment', 'other']
+
+
+def test_grouping_datetime_typecast_timezone_conversion():
+    expression = "ts::timestamp WITH TIME ZONE AT TIME ZONE 'UTC' AS moment"
+    text = f'SELECT {expression}, other FROM events'
+    parsed = sqlparse.parse(text)[0]
+    assert str(parsed) == text
+    assert isinstance(parsed[2], sql.IdentifierList)
+    identifiers = list(parsed[2].get_identifiers())
+    assert [str(token) for token in identifiers] == [expression, 'other']
+    assert identifiers[0].get_alias() == 'moment'
+    assert [(token.ttype, token.value) for token in parsed.flatten()] == list(
+        sqlparse.lexer.tokenize(text))
+
+
+@pytest.mark.parametrize('expression, alias', [
+    ('events.ts::timestamp WITH TIME ZONE /* note */', None),
+    ("'2020-01-01'::timestamp(6) WITHOUT TIME ZONE", None),
+    ('ts::timestamp WITH TIME ZONE::text', None),
+    ('ts::timestamp WITH TIME ZONE::custom_type', None),
+    ('ts::timestamp WITH TIME ZONE::varchar(3)', None),
+    ('ts::timestamp WITH TIME ZONE::pg_catalog.text', None),
+    ('ts::timestamp WITH TIME ZONE[]', None),
+    ('ts::timestamp WITH TIME ZONE::text[]', None),
+    ('ts::timestamp WITH TIME ZONE AS zone', 'zone'),
+    ('ts::timestamp WITH TIME ZONE "Local moment"', 'Local moment'),
+    ('ts::timestamp WITH TIME ZONE AS "Local moment"', 'Local moment'),
+    ('ts::timestamp WITH TIME ZONE::text moment', 'moment'),
+    ('ts::timestamp WITH TIME ZONE::varchar(3) moment', 'moment'),
+    ('ts::timestamp WITH TIME ZONE::pg_catalog.text AS "Local moment"',
+     'Local moment'),
+])
+def test_grouping_datetime_typecast_alias_boundaries(expression, alias):
+    text = f'SELECT {expression}'
+    parsed = sqlparse.parse(text)[0]
+    assert str(parsed) == text
+    assert isinstance(parsed[2], sql.Identifier)
+    assert parsed[2].get_alias() == alias
+
+
 def test_grouping_alias():
     s = 'select foo as bar from mytable'
     p = sqlparse.parse(s)[0]

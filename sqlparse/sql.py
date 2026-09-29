@@ -36,6 +36,24 @@ class NameAliasMixin:
         # "name alias" or "complicated column expression alias"
         _, ws = self.token_next_by(t=T.Whitespace)
         if len(self.tokens) > 2 and ws is not None:
+            # A datetime cast's suffix contains whitespace, but no alias.
+            _, cast = self.token_next_by(m=(T.Punctuation, '::'))
+            if cast is not None:
+                idx = len(self.tokens)
+                idx, token = self.token_prev(idx, skip_cm=True)
+                while isinstance(token, SquareBrackets):
+                    idx, token = self.token_prev(idx, skip_cm=True)
+                _, prev = self.token_prev(idx, skip_cm=True)
+                if prev is not None and prev.match(T.Punctuation, '::'):
+                    return None
+                idx += 1
+                for values in (('ZONE',), ('TIME',), ('WITH', 'WITHOUT')):
+                    idx, token = self.token_prev(idx, skip_cm=True)
+                    if token is None or not token.is_keyword \
+                            or token.normalized not in values:
+                        break
+                else:
+                    return None
             return self._get_first_name(reverse=True)
 
 
