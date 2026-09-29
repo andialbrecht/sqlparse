@@ -649,6 +649,25 @@ class TestFormatReindent:
             '     , (3, 4)',
             '     , (5, 6)'])
 
+    def test_values_in_parenthesis(self):
+        # issue506
+        f = lambda sql: sqlparse.format(sql, reindent=True)
+        s = ("select foo from (values ('a', 'b'), ('c', 'd'))"
+             " as tmp (foo, bar)")
+        assert f(s) == '\n'.join([
+            'select foo',
+            'from (',
+            "      values ('a', 'b'),",
+            "             ('c', 'd')) as tmp (foo, bar)"])
+
+        f = lambda sql: sqlparse.format(sql, reindent=True,
+                                        comma_first=True)
+        assert f(s) == '\n'.join([
+            'select foo',
+            'from (',
+            "      values ('a', 'b')",
+            "           , ('c', 'd')) as tmp (foo, bar)"])
+
 
 class TestOutputFormat:
     def test_python(self):

@@ -82,6 +82,14 @@ def test_grouping_identifiers():
         assert types == [T.DML, T.Keyword, None, None, T.Punctuation]
         assert isinstance(parsed.tokens[6], sql.Values)
 
+    # issue506: VALUES inside parenthesis
+    s = "select * from (values (1, 2), (3, 4)) as t (a, b)"
+    parsed = sqlparse.parse(s)[0]
+    assert str(parsed) == s
+    values = parsed.tokens[-1].tokens[0].tokens[1]
+    assert isinstance(values, sql.Values)
+    assert str(values) == "values (1, 2), (3, 4)"
+
     s = "select 1.0*(a+b) as col, sum(c)/sum(d) from myschema.mytable"
     parsed = sqlparse.parse(s)[0]
     assert len(parsed.tokens) == 7

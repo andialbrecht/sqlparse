@@ -1,7 +1,11 @@
 Development Version
 -------------------
 
-Nothing yet.
+Bug Fixes
+
+* `VALUES` lists inside parentheses, e.g. `FROM (VALUES (1, 2), (3, 4))`, are
+  now grouped as `Values` like top-level ones, so `reindent` puts one row per
+  line instead of breaking inside each row (issue506).
 
 
 Release 0.6.0 (Aug 13, 2026)

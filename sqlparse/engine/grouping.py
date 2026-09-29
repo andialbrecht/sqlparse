@@ -427,6 +427,7 @@ def align_comments(tlist):
         tidx, token = tlist.token_next_by(i=sql.Comment, idx=tidx)
 
 
+@recurse()
 def group_values(tlist):
     tidx, token = tlist.token_next_by(m=(T.Keyword, 'VALUES'))
     start_idx = tidx
