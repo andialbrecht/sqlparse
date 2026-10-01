@@ -163,9 +163,13 @@ SQL_REGEX = [
     (r'(?![_A-ZÀ-Ü])-?(\d+(\.\d*)|\.\d+)(?![_A-ZÀ-Ü])',
      tokens.Number.Float),
     (r'(?![_A-ZÀ-Ü])-?\d+(?![_A-ZÀ-Ü])', tokens.Number.Integer),
-    (r"'(''|\\'|[^'])*'", tokens.String.Single),
+    # An escape is either a doubled quote or a backslash followed by any
+    # character. Using "\\'" for the latter is ambiguous: once "[^']" has
+    # consumed the first backslash of "\\", the second one pairs up with
+    # the closing quote and swallows it (issue #814).
+    (r"'(''|\\.|[^'\\])*'", tokens.String.Single),
     # not a real string literal in ANSI SQL:
-    (r'"(""|\\"|[^"])*"', tokens.String.Symbol),
+    (r'"(""|\\.|[^"\\])*"', tokens.String.Symbol),
     (r'(""|".*?[^\\]")', tokens.String.Symbol),
     # sqlite names can be escaped with [square brackets]. left bracket
     # cannot be preceded by word character or a right bracket --

@@ -1,7 +1,12 @@
 Development Version
 -------------------
 
-Nothing yet.
+* Fixed the lexer mis-tokenizing string literals that contain an escaped
+  backslash. In ``SELECT '\\', '\\'`` the closing quote was swallowed by the
+  escape sequence, so the literal ran on and the remainder was emitted as
+  error tokens. The same ambiguity affected double quoted strings, which are
+  reported as ``String.Symbol``. See
+  https://github.com/andialbrecht/sqlparse/issues/814
 
 
 Release 0.6.0 (Aug 13, 2026)

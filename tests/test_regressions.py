@@ -516,3 +516,36 @@ def limit_recursion():
 def test_max_recursion(limit_recursion):
     with pytest.raises(SQLParseError):
         sqlparse.parse('[' * 1000 + ']' * 1000)
+
+
+def test_issue814():
+    # An escaped backslash must not pair up with the closing quote: that
+    # used to swallow it, leaving the rest of the statement as error tokens.
+    stmt = sqlparse.parse("SELECT '\\\\', '\\\\'")[0]
+    assert [t.value for t in stmt.flatten()] == [
+        'SELECT', ' ', "'\\\\'", ',', ' ', "'\\\\'"
+    ]
+
+
+def test_issue814_quoted_identifier():
+    # The double quoted rule had the same ambiguity, it just reports
+    # String.Symbol rather than String.Single.
+    stmt = sqlparse.parse('SELECT "\\\\", "\\\\"')[0]
+    assert [t.value for t in stmt.flatten()] == [
+        'SELECT', ' ', '"\\\\"', ',', ' ', '"\\\\"'
+    ]
+
+
+@pytest.mark.parametrize("value", ["'it\\'s'", "'it''s'", "'a\\\\'", "'plain'"])
+def test_issue814_keeps_escaping_forms(value):
+    # The escaping forms that already lexed as a single literal must keep
+    # doing so.
+    stmt = sqlparse.parse(f'SELECT {value}')[0]
+    literals = [t for t in stmt.flatten() if t.ttype is T.Literal.String.Single]
+    assert [t.value for t in literals] == [value]
+
+
+def test_issue814_unterminated_string_still_unmatched():
+    # A literal without a closing quote must keep failing to lex as one.
+    stmt = sqlparse.parse("SELECT 'abc")[0]
+    assert [t.value for t in stmt.flatten()] == ['SELECT', ' ', "'", 'abc']
