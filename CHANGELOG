@@ -1,7 +1,8 @@
 Development Version
 -------------------
 
-Nothing yet.
+* Escape embedded line breaks in Python output so multiline SQL strings,
+  quoted identifiers and comments produce valid Python string literals.
 
 
 Release 0.6.0 (Aug 13, 2026)

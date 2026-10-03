@@ -1,3 +1,5 @@
+import ast
+
 import pytest
 
 import sqlparse
@@ -651,6 +653,20 @@ class TestFormatReindent:
 
 
 class TestOutputFormat:
+    @pytest.mark.parametrize('line_break', ['\n', '\r', '\r\n', r'\n'])
+    @pytest.mark.parametrize('template', [
+        "SELECT 'first{}second''quote\\path'",
+        'SELECT "first{}second"',
+        'SELECT $body$first{}second$body$',
+        'SELECT 1 /* first{}second */',
+        'SELECT 1 -- first{}FROM t',
+    ])
+    def test_python_multiline_tokens(self, line_break, template):
+        sql = template.format(line_break)
+        formatted = sqlparse.format(sql, output_format='python')
+        assignment = ast.parse(formatted).body[0]
+        assert ast.literal_eval(assignment.value) == sql
+
     def test_python(self):
         sql = 'select * from foo;'
         f = lambda sql: sqlparse.format(sql, output_format='python')

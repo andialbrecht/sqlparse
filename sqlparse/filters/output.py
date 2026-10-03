@@ -66,7 +66,9 @@ class OutputPythonFilter(OutputFilter):
             # quote cannot break out of the generated string literal
             # (GHSA-3496-9g83-7v6x).
             else:
-                token.value = token.value.replace('\\', '\\\\').replace("'", "\\'")
+                token.value = (token.value.replace('\\', '\\\\')
+                               .replace("'", "\\'")
+                               .replace('\r', '\\r').replace('\n', '\\n'))
 
             # Put the token
             yield sql.Token(T.Text, token.value)
