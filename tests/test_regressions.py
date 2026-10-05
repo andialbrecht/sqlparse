@@ -285,6 +285,12 @@ def test_issue213_leadingws():
     assert sqlparse.format(sql, strip_whitespace=True) == "select * from foo"
 
 
+def test_issue885_strip_ws_malformed_parenthesis():
+    # Parenthesis grouping can collapse "( AS )" to a single nested child.
+    # strip_whitespace must not assume tokens[1] / tokens[-2] exist.
+    assert sqlparse.format("( AS )", strip_whitespace=True) == "( AS )"
+
+
 def test_issue227_gettype_cte():
     select_stmt = sqlparse.parse('SELECT 1, 2, 3 FROM foo;')
     assert select_stmt[0].get_type() == 'SELECT'

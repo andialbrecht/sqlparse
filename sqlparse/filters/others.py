@@ -112,13 +112,18 @@ class StripWhitespaceFilter:
         return self._stripws_default(tlist)
 
     def _stripws_parenthesis(self, tlist):
+        # Well-formed groups look like "(", content..., ")". Some inputs
+        # (e.g. "( AS )") collapse to a single nested child, so there is
+        # no tokens[1] / tokens[-2] to strip.
+        if len(tlist.tokens) < 3:
+            return self._stripws_default(tlist)
         while tlist.tokens[1].is_whitespace:
             tlist.tokens.pop(1)
         while tlist.tokens[-2].is_whitespace:
             tlist.tokens.pop(-2)
         if tlist.tokens[-2].is_group:
             # save to remove the last whitespace
-            while tlist.tokens[-2].tokens[-1].is_whitespace:
+            while tlist.tokens[-2].tokens and tlist.tokens[-2].tokens[-1].is_whitespace:
                 tlist.tokens[-2].tokens.pop(-1)
         self._stripws_default(tlist)
 
