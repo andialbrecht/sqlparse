@@ -380,6 +380,10 @@ class TestFormatReindent:
         with pytest.raises(SQLParseError):
             sqlparse.format('foo', indent_tabs=2)
         with pytest.raises(SQLParseError):
+            sqlparse.format('foo', reindent_aligned=2)
+        with pytest.raises(SQLParseError):
+            sqlparse.format('foo', indent_after_first=2)
+        with pytest.raises(SQLParseError):
             sqlparse.format('foo', reindent=True, indent_width='foo')
         with pytest.raises(SQLParseError):
             sqlparse.format('foo', reindent=True, indent_width=-12)
