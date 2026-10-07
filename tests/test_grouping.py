@@ -669,10 +669,66 @@ def test_aliased_function_without_as():
     assert p.get_alias() == 'baz'
 
 
-def test_aliased_literal_without_as():
-    p = sqlparse.parse('1 foo')[0].tokens
+@pytest.mark.parametrize('literal', ['1', '1.5', '1e2', '0xff'])
+def test_aliased_literal_without_as(literal):
+    p = sqlparse.parse(f'{literal} foo')[0].tokens
     assert len(p) == 1
     assert p[0].get_alias() == 'foo'
+
+
+@pytest.mark.parametrize('literal', ["'fixed_text'", "''", "'a''b'", "'a\nb'"])
+@pytest.mark.parametrize('alias', ['alias1', '"Alias Name"'])
+def test_aliased_string_without_as(literal, alias):
+    # issue518: keep the literal and its implicit alias in one expression.
+    text = f'{literal} {alias}'
+    p = sqlparse.parse(text)[0]
+    assert str(p) == text
+    assert len(p.tokens) == 1
+    identifier = p.tokens[0]
+    assert isinstance(identifier, sql.Identifier)
+    assert identifier.get_alias() == alias.strip('"')
+    assert identifier.tokens[0].ttype is T.String.Single
+    assert identifier.tokens[0].value == literal
+    assert identifier.tokens[0].parent is identifier
+
+
+@pytest.mark.parametrize('position', range(3))
+@pytest.mark.parametrize('nested', [False, True])
+def test_aliased_string_in_projection(position, nested):
+    # issue518: an implicit alias must not fragment the projection list.
+    columns = ['field1', 'field2']
+    columns.insert(position, "'fixed_text' alias1")
+    query = 'SELECT {} FROM tbl'.format(', '.join(columns))
+    text = f'SELECT * FROM ({query}) subquery' if nested else query
+    statement = sqlparse.parse(text)[0]
+    assert str(statement) == text
+    parsed = statement.tokens[-1].tokens[0] if nested else statement
+    _, identifiers = parsed.token_next_by(i=sql.IdentifierList)
+    assert isinstance(identifiers, sql.IdentifierList)
+    items = list(identifiers.get_identifiers())
+    assert [str(item) for item in items] == columns
+    assert items[position].get_alias() == 'alias1'
+    assert all(item.parent is identifiers for item in items)
+
+
+@pytest.mark.parametrize('text', ["'foo'", "''", "'a''b'", "'foo' 'bar'",
+                                  "'foo'\n'bar'"])
+def test_unaliased_strings_remain_literals(text):
+    # issue111: recognizing aliases must not group bare/adjacent strings.
+    statement = sqlparse.parse(text)[0]
+    assert str(statement) == text
+    tokens = [token for token in statement if not token.is_whitespace]
+    assert all(token.ttype is T.String.Single for token in tokens)
+
+
+@pytest.mark.parametrize('text', ["DATE '2020-01-01'", "INTERVAL '1' DAY"])
+def test_string_alias_grouping_preserves_typed_literals(text):
+    statement = sqlparse.parse(f'SELECT {text}')[0]
+    assert str(statement) == f'SELECT {text}'
+    assert len(statement.tokens) == 3
+    assert isinstance(statement.tokens[2], sql.TypedLiteral)
+    assert any(token.ttype is T.String.Single
+               for token in statement.tokens[2].flatten())
 
 
 def test_grouping_as_cte():

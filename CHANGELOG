@@ -1,7 +1,9 @@
 Development Version
 -------------------
 
-Nothing yet.
+Bug Fixes
+
+* Group single-quoted string literals with their implicit aliases (issue518).
 
 
 Release 0.6.0 (Aug 13, 2026)

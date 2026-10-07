@@ -597,6 +597,17 @@ class TestFormatReindent:
             '       foo,',
             '       bar'])
 
+    @pytest.mark.parametrize('position', range(3))
+    def test_aliased_string(self, position):
+        # issue518: align following columns with the complete expression.
+        columns = ['field1', 'field2']
+        columns.insert(position, "'fixed_text' alias1")
+        query = 'SELECT {} FROM tbl'.format(', '.join(columns))
+        expected = 'SELECT ' + ',\n       '.join(columns) + '\nFROM tbl'
+        formatted = sqlparse.format(query, reindent=True)
+        assert formatted == expected
+        assert sqlparse.format(formatted, reindent=True) == expected
+
     def test_identifier_and_functions(self):
         # issue45
         f = lambda sql: sqlparse.format(sql, reindent=True)
