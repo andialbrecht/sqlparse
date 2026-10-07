@@ -1,7 +1,7 @@
 Development Version
 -------------------
 
-Nothing yet.
+* Fix CASE...END split-level tracking outside BEGIN blocks (pr839).
 
 
 Release 0.6.0 (Aug 13, 2026)

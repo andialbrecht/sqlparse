@@ -145,6 +145,10 @@ class StatementSplitter:
             if res is not None:
                 return res
 
+        if unified == 'CASE':
+            self._block_stack.append('CASE')
+            return 1
+
         # Handle closing keywords
         return self._handle_closing_keyword(unified)
 
