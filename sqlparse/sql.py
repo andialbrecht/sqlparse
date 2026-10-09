@@ -271,6 +271,27 @@ class TokenList(Token):
 
     def token_next_by(self, i=None, m=None, t=None, idx=-1, end=None):
         idx += 1
+        tokens = self.tokens
+        end = len(tokens) if end is None else end
+        if idx < end:
+            if t is not None and i is None and m is None and not isinstance(t, list):
+                for k in range(idx, end):
+                    tk = tokens[k]
+                    if tk is not None and tk.ttype in t:
+                        return k, tk
+                return None, None
+            if m is not None and i is None and t is None and not isinstance(m, list):
+                for k in range(idx, end):
+                    tk = tokens[k]
+                    if tk is not None and tk.match(*m):
+                        return k, tk
+                return None, None
+            if i is not None and m is None and t is None:
+                for k in range(idx, end):
+                    tk = tokens[k]
+                    if tk is not None and isinstance(tk, i):
+                        return k, tk
+                return None, None
         return self._token_matching(lambda tk: imt(tk, i, m, t), idx, end)
 
     def token_not_matching(self, funcs, idx):
@@ -310,7 +331,7 @@ class TokenList(Token):
     def token_index(self, token, start=0):
         """Return list index of token."""
         start = start if isinstance(start, int) else self.token_index(start)
-        return start + self.tokens[start:].index(token)
+        return self.tokens.index(token, start)
 
     def group_tokens(self, grp_cls, start, end, include_end=True,
                      extend=False):
