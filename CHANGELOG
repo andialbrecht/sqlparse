@@ -1,7 +1,7 @@
 Development Version
 -------------------
 
-Nothing yet.
+* Recognize CROSS APPLY and OUTER APPLY as keywords (issue300).
 
 
 Release 0.6.0 (Aug 13, 2026)
