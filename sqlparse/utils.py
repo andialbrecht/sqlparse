@@ -28,7 +28,7 @@ SPLIT_REGEX = re.compile(r"""
   '(?:[^'\\]|\\.)*'      # Match single quoted strings
  )
 )
-""", re.VERBOSE)
+""", re.VERBOSE | re.DOTALL)
 
 LINE_MATCH = re.compile(r'(\r\n|\r|\n)')
 

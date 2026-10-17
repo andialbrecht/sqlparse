@@ -1,7 +1,8 @@
 Development Version
 -------------------
 
-Nothing yet.
+* Preserve whitespace and line endings inside quoted values containing a
+  backslash followed by a newline when formatting SQL.
 
 
 Release 0.6.0 (Aug 13, 2026)
