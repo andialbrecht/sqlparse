@@ -1,7 +1,10 @@
 Development Version
 -------------------
 
-Nothing yet.
+* IMPORTANT: Dollar signs are now escaped in the `php` output format. PHP
+  interpolates `$var`, `${expr}` and `{$expr}` inside double-quoted strings,
+  so SQL text containing them could inject PHP code into the generated
+  snippet (CVE-2026-112307, pr930 by xiehuanyi).
 
 
 Release 0.6.0 (Aug 13, 2026)
