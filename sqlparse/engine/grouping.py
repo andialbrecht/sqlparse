@@ -196,7 +196,9 @@ def group_as(tlist):
         return token.is_keyword and token.normalized == 'AS'
 
     def valid_prev(token):
-        return token.normalized == 'NULL' or not token.is_keyword
+        return (token.normalized in ('NULL', 'CURRENT_DATE', 'CURRENT_TIME',
+                                     'CURRENT_TIMESTAMP')
+                or not token.is_keyword)
 
     def valid_next(token):
         ttypes = T.DML, T.DDL, T.CTE

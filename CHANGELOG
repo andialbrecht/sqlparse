@@ -1,7 +1,8 @@
 Development Version
 -------------------
 
-Nothing yet.
+* Fix SELECT-list alignment for CURRENT_DATE, CURRENT_TIME, and
+  CURRENT_TIMESTAMP with explicit AS aliases (issue550).
 
 
 Release 0.6.0 (Aug 13, 2026)

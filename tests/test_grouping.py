@@ -332,6 +332,28 @@ def test_grouping_alias():
     assert p.tokens[4].get_alias() == 'view'
 
 
+@pytest.mark.parametrize('expression', [
+    'CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP', 'NULL', 'created_on',
+])
+@pytest.mark.parametrize('case', [str.upper, str.lower, str.title])
+def test_grouping_date_scalar_as_alias(expression, case):
+    # issue550: the scalar and its explicit alias must stay in one projection.
+    aliased = f'{case(expression)}\t{case("AS")}\n  CREATED_AT'
+    s = (f"SELECT 'value 1' AS VALUE_1, {aliased}, "
+         "'testing' AS VALUE_2, 'testing2' AS VALUE_3 FROM TABLE_1")
+    p = sqlparse.parse(s)[0]
+    assert str(p) == s
+    assert isinstance(p.tokens[2], sql.IdentifierList)
+    identifiers = list(p.tokens[2].get_identifiers())
+    assert [str(item) for item in identifiers] == [
+        "'value 1' AS VALUE_1", aliased,
+        "'testing' AS VALUE_2", "'testing2' AS VALUE_3",
+    ]
+    assert [item.get_alias() for item in identifiers] == [
+        'VALUE_1', 'CREATED_AT', 'VALUE_2', 'VALUE_3',
+    ]
+
+
 def test_grouping_alias_case():
     # see issue46
     p = sqlparse.parse('CASE WHEN 1 THEN 2 ELSE 3 END foo')[0]
