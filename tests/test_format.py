@@ -491,6 +491,39 @@ class TestFormatReindent:
             'from a,',
             '     b'])
 
+    @pytest.mark.parametrize('date', [
+        'CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP',
+    ])
+    @pytest.mark.parametrize('case', [str.upper, str.lower, str.title])
+    def test_date_scalar_as_alias(self, date, case):
+        # issue550
+        aliased = f'{case(date)} {case("AS")} CREATED_AT'
+        s = (f"SELECT 'value 1' AS VALUE_1, {aliased}, "
+             "'testing' AS VALUE_2, 'testing2' AS VALUE_3 FROM TABLE_1")
+        expected = '\n'.join([
+            "SELECT 'value 1' AS VALUE_1,",
+            f'       {aliased},',
+            "       'testing' AS VALUE_2,",
+            "       'testing2' AS VALUE_3",
+            'FROM TABLE_1',
+        ])
+        assert sqlparse.format(s, reindent=True) == expected
+        assert sqlparse.format(expected, reindent=True) == expected
+
+    def test_date_scalar_as_alias_trailing_comma(self):
+        # Preserve the trailing comma in issue550's reported output separately
+        # from the valid SELECT-list regression above.
+        s = ("SELECT 'value 1' AS VALUE_1, CURRENT_DATE AS CREATED_AT, "
+             "'testing' AS VALUE_2, 'testing2' AS VALUE_3, FROM TABLE_1")
+        assert str(sqlparse.parse(s)[0]) == s
+        assert sqlparse.format(s, reindent=True) == '\n'.join([
+            "SELECT 'value 1' AS VALUE_1,",
+            '       CURRENT_DATE AS CREATED_AT,',
+            "       'testing' AS VALUE_2,",
+            "       'testing2' AS VALUE_3,",
+            'FROM TABLE_1',
+        ])
+
     def test_identifier_list_with_wrap_after(self):
         f = lambda sql: sqlparse.format(sql, reindent=True, wrap_after=14)
         s = 'select foo, bar, baz from table1, table2 where 1 = 2'
