@@ -114,6 +114,77 @@ def test_parse_keyword_like_identifier():
     assert isinstance(t[0], sql.Identifier)
 
 
+@pytest.mark.parametrize('top', ['TOP', 'top', 'ToP'])
+@pytest.mark.parametrize('limit', [' 10', ' (10)', '(10)', '\n(10)'])
+def test_parse_top_keyword(top, limit):
+    # see issue703
+    statement = f'select {top}{limit} "name", "id" from some_table'
+    parsed = sqlparse.parse(statement)[0]
+    assert parsed.tokens[2].match(T.Keyword, 'TOP')
+    assert str(parsed) == statement
+    assert sqlparse.format(statement, keyword_case='upper') == (
+        f'SELECT TOP{limit} "name", "id" FROM some_table')
+
+
+@pytest.mark.parametrize('name', [
+    '[top]', '"top"', '`top`', 'top_count', 'top.value',
+])
+def test_parse_top_identifier(name):
+    statement = f'select {name} from some_table'
+    parsed = sqlparse.parse(statement)[0]
+    assert isinstance(parsed.tokens[2], sql.Identifier)
+    assert str(parsed.tokens[2]) == name
+    assert sqlparse.format(statement, keyword_case='upper') == (
+        f'SELECT {name} FROM some_table')
+
+
+@pytest.mark.parametrize('qualifier', ['schema', '"schema"'])
+@pytest.mark.parametrize('separator', ['', ' ', '\n\t'])
+@pytest.mark.parametrize('suffix', ['', '(1)'])
+def test_parse_qualified_top(qualifier, separator, suffix):
+    name = f'{qualifier}.{separator}top{suffix}'
+    statement = f'select {name} from some_table'
+    parsed = sqlparse.parse(statement)[0]
+    identifier = parsed.tokens[2]
+    assert isinstance(identifier, sql.Identifier)
+    assert str(identifier) == name
+    assert identifier.get_real_name() == 'top'
+    assert identifier.get_parent_name() == 'schema'
+    functions = [token for token in identifier.tokens
+                 if isinstance(token, sql.Function)]
+    if suffix:
+        assert len(functions) == 1
+        assert functions[0].get_name() == 'top'
+        assert [str(token) for token in functions[0].get_parameters()] == ['1']
+    else:
+        assert not functions
+    assert str(parsed) == statement
+    assert sqlparse.format(statement, keyword_case='upper') == (
+        f'SELECT {name} FROM some_table')
+
+
+@pytest.mark.parametrize('qualifier', ['schema', '"schema"'])
+@pytest.mark.parametrize('comment', ['/* comment */', '-- comment\n'])
+@pytest.mark.parametrize('suffix', ['', '(1)'])
+def test_parse_qualified_top_with_comment(qualifier, comment, suffix):
+    name = f'{qualifier}. {comment} top{suffix}'
+    statement = f'select {name} from some_table'
+    parsed = sqlparse.parse(statement)[0]
+    identifiers = [token for token in parsed.tokens
+                   if isinstance(token, (sql.Identifier, sql.Function))]
+    # Comments already separate the qualifier and name into distinct groups.
+    assert identifiers[0].get_parent_name() == 'schema'
+    assert identifiers[0].get_real_name() is None
+    assert identifiers[1].get_real_name() == 'top'
+    assert identifiers[1].get_parent_name() is None
+    assert isinstance(identifiers[1], sql.Function if suffix else sql.Identifier)
+    if suffix:
+        assert [str(token) for token in identifiers[1].get_parameters()] == ['1']
+    assert str(parsed) == statement
+    assert sqlparse.format(statement, keyword_case='upper') == (
+        f'SELECT {name} FROM some_table')
+
+
 def test_parse_function_parameter():
     # see issue94
     t = sqlparse.parse('abs(some_col)')[0].tokens[0].get_parameters()

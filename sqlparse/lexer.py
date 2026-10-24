@@ -136,6 +136,7 @@ class Lexer:
         span_openers = delimited_spans.openers
 
         iterable = enumerate(text)
+        after_dot = False
         for pos, char in iterable:
             # Only positions the lexer actually reaches may open a
             # dollar-quoted literal or a multiline comment; a delimiter
@@ -145,6 +146,8 @@ class Lexer:
                 resolved = delimited_spans.resolve(pos)
                 if resolved is not None:
                     end, ttype = resolved
+                    if ttype not in tokens.Comment:
+                        after_dot = False
                     yield ttype, text[pos:end]
                     consume(iterable, end - pos - 1)
                     continue
@@ -154,14 +157,21 @@ class Lexer:
 
                 if not m:
                     continue
-                elif isinstance(action, tokens._TokenType):
-                    yield action, m.group()
-                elif action is keywords.PROCESS_AS_KEYWORD:
-                    yield self.is_keyword(m.group())
+                value = m.group()
+                if action is keywords.PROCESS_AS_KEYWORD:
+                    action, value = self.is_keyword(value)
+                if isinstance(action, tokens._TokenType):
+                    # Qualified TOP stays a name across whitespace/comments.
+                    if after_dot and action is tokens.Keyword and value.upper() == 'TOP':
+                        action = tokens.Name
+                    if action not in tokens.Whitespace and action not in tokens.Comment:
+                        after_dot = action is tokens.Punctuation and value == '.'
+                    yield action, value
 
                 consume(iterable, m.end() - pos - 1)
                 break
             else:
+                after_dot = False
                 yield tokens.Error, char
 
 

@@ -1,7 +1,8 @@
 Development Version
 -------------------
 
-Nothing yet.
+* Recognize TOP as a keyword, including parenthesized row limits, so it is
+  parsed and formatted consistently in SQL Server queries (issue703).
 
 
 Release 0.6.0 (Aug 13, 2026)

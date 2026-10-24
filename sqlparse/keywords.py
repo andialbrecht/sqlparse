@@ -157,6 +157,7 @@ SQL_REGEX = [
     # FIXME(atronah): never match,
     # because `re.match` doesn't work with look-behind regexp feature
     (r'(?<=\.)[A-ZÀ-Ü]\w*', tokens.Name),  # .'Name'
+    (r'TOP\b(?=\s*\()', tokens.Keyword),  # Parenthesized row limit, not a function.
     (r'[A-ZÀ-Ü]\w*(?=\()', tokens.Name),  # side effect: change kw to func
     (r'-?0x[\dA-F]+', tokens.Number.Hexadecimal),
     (r'-?\d+(\.\d+)?E-?\d+', tokens.Number.Float),
@@ -667,6 +668,7 @@ KEYWORDS = {
     'TIMEZONE_MINUTE': tokens.Keyword,
     'TO': tokens.Keyword,
     'TOAST': tokens.Keyword,
+    'TOP': tokens.Keyword,
     'TRAILING': tokens.Keyword,
     'TRANSATION': tokens.Keyword,
     'TRANSACTIONS_COMMITTED': tokens.Keyword,
