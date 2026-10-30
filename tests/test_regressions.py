@@ -285,6 +285,13 @@ def test_issue213_leadingws():
     assert sqlparse.format(sql, strip_whitespace=True) == "select * from foo"
 
 
+def test_issue886_reindent_aligned_malformed_case():
+    # This CASE has no END token of its own (it is grouped into a nested
+    # Where), so the aligned-indent filter used to anchor on None.
+    sql = "CASE 'a' := WHERE END SELECT GO # ->>"
+    assert sqlparse.format(sql, reindent_aligned=True) == sql
+
+
 def test_issue227_gettype_cte():
     select_stmt = sqlparse.parse('SELECT 1, 2, 3 FROM foo;')
     assert select_stmt[0].get_type() == 'SELECT'
