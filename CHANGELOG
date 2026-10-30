@@ -1,7 +1,10 @@
 Development Version
 -------------------
 
-Nothing yet.
+Bug Fixes
+
+* ``strip_whitespace=True`` no longer raises ``IndexError`` on a parenthesis
+  group holding fewer tokens than expected, e.g. "( AS )" (#885).
 
 
 Release 0.6.0 (Aug 13, 2026)

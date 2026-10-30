@@ -285,6 +285,18 @@ def test_issue213_leadingws():
     assert sqlparse.format(sql, strip_whitespace=True) == "select * from foo"
 
 
+def test_issue885_stripws_malformed_parenthesis():
+    # "( AS )" parses to a Parenthesis group holding a single nested group;
+    # strip_whitespace used to raise IndexError on it.
+    assert sqlparse.format("( AS )", strip_whitespace=True) == "( AS )"
+
+
+def test_issue885_stripws_short_parenthesis_groups():
+    # Parenthesis groups with fewer than three tokens must not raise.
+    for case in ["()", "( )", "(a)"]:
+        sqlparse.format(case, strip_whitespace=True)
+
+
 def test_issue227_gettype_cte():
     select_stmt = sqlparse.parse('SELECT 1, 2, 3 FROM foo;')
     assert select_stmt[0].get_type() == 'SELECT'

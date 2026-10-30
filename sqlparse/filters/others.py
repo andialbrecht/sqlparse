@@ -112,14 +112,20 @@ class StripWhitespaceFilter:
         return self._stripws_default(tlist)
 
     def _stripws_parenthesis(self, tlist):
+        # A malformed group may hold fewer tokens than the "(" ... ")" layout
+        # assumed below, e.g. "( AS )" parses to a single nested group (#885).
+        if len(tlist.tokens) < 3:
+            self._stripws_default(tlist)
+            return
         while tlist.tokens[1].is_whitespace:
             tlist.tokens.pop(1)
         while tlist.tokens[-2].is_whitespace:
             tlist.tokens.pop(-2)
-        if tlist.tokens[-2].is_group:
+        inner = tlist.tokens[-2]
+        if inner.is_group:
             # save to remove the last whitespace
-            while tlist.tokens[-2].tokens[-1].is_whitespace:
-                tlist.tokens[-2].tokens.pop(-1)
+            while inner.tokens and inner.tokens[-1].is_whitespace:
+                inner.tokens.pop(-1)
         self._stripws_default(tlist)
 
     def process(self, stmt, depth=0):
