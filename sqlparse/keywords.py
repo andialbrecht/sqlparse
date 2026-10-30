@@ -16,6 +16,10 @@ from sqlparse import tokens
 # shall be processed further through a lookup in the KEYWORDS dictionaries
 PROCESS_AS_KEYWORD = object()
 
+# Keep delimited-token recognition in the configurable rule sequence while
+# resolving the full span without a potentially quadratic regular expression.
+PROCESS_AS_DELIMITED = object()
+
 
 # Dollar-quoted literals (`$tag$...$tag$`) and multiline comments
 # (`/*...*/`, `/*+...*/`) used to be matched with per-position regexes
@@ -117,6 +121,7 @@ def find_delimited_spans(text):
 
 
 SQL_REGEX = [
+    (r'/\*|\$', PROCESS_AS_DELIMITED),
     (r'(--|# )\+.*?(\r\n|\r|\n|$)', tokens.Comment.Single.Hint),
 
     (r'(--|# ).*?(\r\n|\r|\n|$)', tokens.Comment.Single),
