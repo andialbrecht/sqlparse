@@ -8,6 +8,11 @@ Bug Fixes
   own `END` with `reindent_aligned=True`. Grouping no longer moves the
   brackets of a parenthesis or the `CASE`/`END` keywords into an inner
   group.
+* `sqlformat` no longer empties the file given with `--in-place` or
+  `--outfile` when formatting fails, e.g. because a statement exceeds the
+  grouping limits. The output file is now only written after formatting
+  succeeded, and the error is reported like other CLI errors. Thanks to
+  @Joejiaojian, @president-xd, @hash3liZer and @eros938 for reporting!
 
 
 Release 0.6.0 (Aug 13, 2026)

@@ -192,35 +192,34 @@ def _process_file(filename, args):
         except OSError as e:
             return _error(f'Failed to read {filename}: {e}')
 
-    # Determine output destination
-    close_stream = False
-    if args.inplace:
-        try:
-            stream = open(filename, 'w', encoding=args.encoding)
-            close_stream = True
-        except OSError as e:
-            return _error(f'Failed to open {filename}: {e}')
-    elif args.outfile:
-        try:
-            stream = open(args.outfile, 'w', encoding=args.encoding)
-            close_stream = True
-        except OSError as e:
-            return _error(f'Failed to open {args.outfile}: {e}')
-    else:
-        stream = sys.stdout
-
-    # Format the SQL
+    # Format the SQL before opening the destination. Opening it truncates
+    # the file, so a formatting error would otherwise leave it empty.
     formatter_opts = vars(args)
     try:
         formatter_opts = sqlparse.formatter.validate_options(formatter_opts)
     except SQLParseError as e:
         return _error(f'Invalid options: {e}')
 
-    s = sqlparse.format(data, **formatter_opts)
-    stream.write(s)
-    stream.flush()
-    if close_stream:
-        stream.close()
+    try:
+        s = sqlparse.format(data, **formatter_opts)
+    except SQLParseError as e:
+        return _error(f'Failed to format {filename}: {e}')
+
+    # Write output
+    if args.inplace:
+        outfile = filename
+    elif args.outfile:
+        outfile = args.outfile
+    else:
+        sys.stdout.write(s)
+        sys.stdout.flush()
+        return 0
+
+    try:
+        with open(outfile, 'w', encoding=args.encoding) as stream:
+            stream.write(s)
+    except OSError as e:
+        return _error(f'Failed to open {outfile}: {e}')
     return 0
 
 
