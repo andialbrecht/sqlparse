@@ -38,6 +38,18 @@ class TestFormat:
         res = sqlparse.format(sql, identifier_case="upper")
         assert res == 'select * from "foo"."bar"'
 
+    @pytest.mark.parametrize('sql', [
+        'select * from `myS`.`Tbl`',      # MySQL
+        'select * from ´myS´.´Tbl´',
+        'select * from [myS].[Tbl]',      # T-SQL / SQLite
+    ])
+    @pytest.mark.parametrize('case', ['upper', 'lower', 'capitalize'])
+    def test_identifiercase_non_ansi_quotes(self, sql, case):
+        # issue433: a delimited identifier keeps its case whichever of the
+        # four quoting styles SQL_REGEX recognizes was used. The mixed-case
+        # names make every one of the three conversions observable.
+        assert sqlparse.format(sql, identifier_case=case) == sql
+
     def test_strip_comments_single(self):
         sql = 'select *-- statement starts here\nfrom foo'
         res = sqlparse.format(sql, strip_comments=True)

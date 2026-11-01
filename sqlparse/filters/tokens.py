@@ -29,9 +29,15 @@ class KeywordCaseFilter(_CaseFilter):
 class IdentifierCaseFilter(_CaseFilter):
     ttype = T.Name, T.String.Symbol
 
+    # Opening delimiters of a quoted identifier. SQL_REGEX recognizes four
+    # quoting styles, and only the double-quoted one reaches this filter as
+    # T.String.Symbol; the backtick, acute-accent and [bracket] forms arrive
+    # as plain T.Name, indistinguishable from a bare identifier here.
+    QUOTES = '"`´['
+
     def process(self, stream):
         for ttype, value in stream:
-            if ttype in self.ttype and value.strip()[0] != '"':
+            if ttype in self.ttype and value.strip()[0] not in self.QUOTES:
                 value = self.convert(value)
             yield ttype, value
 
