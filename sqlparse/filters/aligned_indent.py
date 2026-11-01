@@ -68,12 +68,14 @@ class AlignedIndentFilter:
     def _process_case(self, tlist):
         offset_ = len('case ') + len('when ')
         cases = tlist.get_cases(skip_ws=True)
-        # align the end as well
+        # align the end as well (skip when END is missing or nested)
         end_token = tlist.token_next_by(m=(T.Keyword, 'END'))[1]
         # END is missing on malformed input, e.g. when an inner BEGIN ... END
         # block closed the CASE.
         if end_token is not None:
             cases.append((None, [end_token]))
+        if not cases:
+            return
 
         condition_width = [len(' '.join(map(str, cond))) if cond else 0
                            for cond, _ in cases]
@@ -81,10 +83,21 @@ class AlignedIndentFilter:
 
         for i, (cond, value) in enumerate(cases):
             # cond is None when 'else or end'
-            stmt = cond[0] if cond else value[0]
+            if cond:
+                stmt = cond[0]
+            elif value:
+                stmt = value[0]
+            else:
+                continue
+            if stmt is None:
+                continue
 
             if i > 0:
-                tlist.insert_before(stmt, self.nl(offset_ - len(str(stmt))))
+                try:
+                    tlist.insert_before(stmt, self.nl(offset_ - len(str(stmt))))
+                except ValueError:
+                    # Token is not a direct child (malformed CASE) — leave as-is.
+                    continue
             if cond:
                 ws = sql.Token(T.Whitespace, self.char * (
                     max_cond_width - condition_width[i]))
