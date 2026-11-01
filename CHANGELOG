@@ -1,6 +1,17 @@
 Development Version
 -------------------
 
+Notable Changes
+
+* IMPORTANT: Dollar signs are now escaped in the `php` output format. PHP
+  interpolates `$var`, `${expr}` and `{$expr}` inside double-quoted strings,
+  so SQL text containing them could inject PHP code into the generated
+  snippet (CVE-2026-112307, pr937 by cve-zh00). See the security advisory
+  for details:
+  https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-xmww-55xg-h3vc
+  The vulnerability was discovered by @iRevivalx, @Gares95, @manus-pi,
+  @president-xd, @arpitjain099 and @Tan-JunWei. Thanks for reporting!
+
 Bug Fixes
 
 * Fix `IndexError` and `ValueError` in `format()` on some malformed
