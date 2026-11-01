@@ -50,6 +50,26 @@ def test_split_dashcomments_eol(s):
     assert len(stmts) == 1
 
 
+@pytest.mark.parametrize('s', ['select 1;\n',
+                               'select 1;\n\n',
+                               'select 1; \n',
+                               'select 1;  \n    ',
+                               'select 1;\t',
+                               'select 1;   '])
+def test_split_trailing_whitespace_preserved(s):
+    # A trailing whitespace run after the final ';' must not be dropped, so
+    # concatenating the parsed statements reproduces the input exactly.
+    stmts = sqlparse.parse(s)
+    assert len(stmts) == 1
+    assert ''.join(str(stmt) for stmt in stmts) == s
+
+
+@pytest.mark.parametrize('s', ['', '   ', '\n\n', '\t'])
+def test_split_whitespace_only(s):
+    # Whitespace-only input yields no statements.
+    assert sqlparse.parse(s) == ()
+
+
 def test_split_begintag(load_file):
     sql = load_file('begintag.sql')
     stmts = sqlparse.parse(sql)
