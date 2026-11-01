@@ -7,6 +7,20 @@
 [![Python versions](https://img.shields.io/pypi/pyversions/sqlparse)](https://pypi.org/project/sqlparse)
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-blue)](https://opensource.org/licenses/BSD-3-Clause)
 
+> [!IMPORTANT]
+> **Project Status: End of Maintenance**
+>
+> sqlparse is no longer actively maintained. Version 0.6.1 was its final release.
+>
+> No further bug fixes, feature updates, or security fixes are planned. The repository and published packages will remain available, but users should not expect ongoing maintenance or security support.
+>
+> Software Supply Chain Security: To minimize supply chain risks, I will retain control of the sqlparse project on PyPI and this GitHub repository. There are no plans to transfer ownership or grant publishing or commit access to third parties.
+>
+> After many years of maintaining sqlparse as a volunteer, I have decided to bring the project to a close. A more detailed explanation of this decision is available separately.
+>
+> THANKS TO ALL USERS AND CONTRIBUTORS!
+> I would like to thank everyone who has contributed to sqlparse over the years.
+
 A non-validating SQL parser for Python. Split scripts into statements, format
 them, and walk their token tree.
 
