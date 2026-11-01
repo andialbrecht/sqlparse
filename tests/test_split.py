@@ -50,6 +50,22 @@ def test_split_dashcomments_eol(s):
     assert len(stmts) == 1
 
 
+@pytest.mark.parametrize('sql, expected', [
+    ('select 1||--comment;\n2; select 3;',
+     ['select 1||--comment;\n2;', 'select 3;']),
+    ('select 1||-- comment;\n2; select 3;',
+     ['select 1||-- comment;\n2;', 'select 3;']),
+    ('select 1+-- comment;\n2; select 3;',
+     ['select 1+-- comment;\n2;', 'select 3;']),
+    ('select 1+# comment;\r2; select 3;',
+     ['select 1+# comment;\r2;', 'select 3;']),
+    ('select 1+/* comment; */2; select 3;',
+     ['select 1+/* comment; */2;', 'select 3;']),
+])
+def test_split_comments_after_operators(sql, expected):
+    assert sqlparse.split(sql) == expected
+
+
 def test_split_begintag(load_file):
     sql = load_file('begintag.sql')
     stmts = sqlparse.parse(sql)
@@ -372,5 +388,4 @@ def test_split_standalone_for_update():
     assert len(stmts) == 2
     assert stmts[0] == "SELECT * FROM foo FOR UPDATE;"
     assert stmts[1] == "SELECT 3;"
-
 

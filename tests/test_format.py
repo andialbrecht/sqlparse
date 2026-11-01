@@ -96,6 +96,24 @@ class TestFormat:
         res = sqlparse.format(sql, strip_comments=True, strip_whitespace=True)
         assert res == 'select (select 2)'
 
+    @pytest.mark.parametrize('sql, expected', [
+        ('select 1||--comment\n2', 'select 1||\n2'),
+        ('select 1||-- comment\n2', 'select 1||\n2'),
+        ('select 1+-- comment\n2', 'select 1+\n2'),
+        ('select 1+# comment\n2', 'select 1+\n2'),
+        ('select 1+/* comment */2', 'select 1+ 2'),
+    ])
+    def test_strip_comments_after_operators(self, sql, expected):
+        assert sqlparse.format(sql, strip_comments=True) == expected
+
+    @pytest.mark.parametrize('sql', [
+        'select 1+--+ hint\n2',
+        'select 1+# + hint\n2',
+        'select 1+/*+ hint */2',
+    ])
+    def test_strip_comments_preserves_hints_after_operators(self, sql):
+        assert sqlparse.format(sql, strip_comments=True) == sql
+
     def test_strip_comments_preserves_linebreak(self):
         sql = 'select * -- a comment\r\nfrom foo'
         res = sqlparse.format(sql, strip_comments=True)

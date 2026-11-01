@@ -198,9 +198,12 @@ SQL_REGEX = [
     (r'\w[$#\w]*', PROCESS_AS_KEYWORD),
     (r'[;:()\[\],\.]', tokens.Punctuation),
     # JSON operators
-    (r'(\->>?|#>>?|@>|<@|\?\|?|\?&|\-|#\-)', tokens.Operator),
+    (r'(\->>?|#>>?|@>|<@|\?\|?|\?&|\-|#\-(?!-))', tokens.Operator),
     (r'[<>=~!]+', tokens.Operator.Comparison),
-    (r'[+/@#%^&|^-]+', tokens.Operator),
+    # Keep comment openers available to the comment rules when they follow
+    # an operator.  The first character remains unconditional so an
+    # unterminated `/*` keeps the historical `/` operator fallback.
+    (r'[+/@#%^&|^-](?:(?!--|# |/\*)[+/@#%^&|^-])*', tokens.Operator),
 ]
 
 KEYWORDS = {

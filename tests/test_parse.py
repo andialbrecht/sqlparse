@@ -316,6 +316,52 @@ def test_single_line_comments(s):
     assert p.tokens[-1].ttype == T.Comment.Single
 
 
+@pytest.mark.parametrize('s, operator', [
+    ('select 1 ||--comment\r\n2', '||'),
+    ('select 1 ||-- comment\r\n2', '||'),
+    ('select 1 +-- comment\r\n2', '+'),
+    ('select 1 +# comment\r2', '+'),
+    ('select 1 +/* comment */2', '+'),
+])
+def test_comments_after_operators(s, operator):
+    tokens = list(sqlparse.parse(s)[0].flatten())
+    assert (T.Operator, operator) in [(t.ttype, t.value) for t in tokens]
+    assert any(t.ttype in (T.Comment.Single, T.Comment.Multiline) for t in tokens)
+
+
+@pytest.mark.parametrize('s, comment_type', [
+    ('select 1+--+ hint\n2', T.Comment.Single.Hint),
+    ('select 1+# + hint\n2', T.Comment.Single.Hint),
+    ('select 1+/*+ hint */2', T.Comment.Multiline.Hint),
+])
+def test_hints_after_operators(s, comment_type):
+    tokens = list(sqlparse.parse(s)[0].flatten())
+    assert any(t.ttype is comment_type for t in tokens)
+
+
+def test_json_hash_dash_does_not_consume_comment():
+    tokens = list(sqlparse.parse('select 7#-- comment\n3')[0].flatten())
+    assert [(t.ttype, t.value) for t in tokens if t.ttype in
+            (T.Operator, T.Comment.Single)] == [
+                (T.Operator, '#'),
+                (T.Comment.Single, '-- comment\n'),
+            ]
+    tokens = list(sqlparse.parse('select data #- 2')[0].flatten())
+    assert (T.Operator, '#-') in [(t.ttype, t.value) for t in tokens]
+
+
+def test_unterminated_block_comment_keeps_operator_fallback():
+    tokens = list(sqlparse.parse('select /*')[0].flatten())
+    assert [(t.ttype, t.value) for t in tokens[-2:]] == [
+        (T.Operator, '/'),
+        (T.Wildcard, '*'),
+    ]
+    text = 'select 1+/*'
+    parsed = sqlparse.parse(text)[0]
+    assert str(parsed) == text
+    assert not any(t.ttype is T.Error for t in parsed.flatten())
+
+
 @pytest.mark.parametrize('s', ['foo', '@foo', '#foo', '##foo'])
 def test_names_and_special_names(s):
     # see issue192
