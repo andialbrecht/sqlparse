@@ -11,6 +11,13 @@ Notable Changes
   https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-xmww-55xg-h3vc
   The vulnerability was discovered by @iRevivalx, @Gares95, @manus-pi,
   @president-xd, @arpitjain099 and @Tan-JunWei. Thanks for reporting!
+* IMPORTANT: Fixes a potential denial of service attack (DOS) in `format()`,
+  which consumed CPU quadratically on statements containing many quotes
+  that are never closed. This affected `format()` with default options and
+  the `sqlformat` command. See the security advisory for details:
+  https://github.com/andialbrecht/sqlparse/security/advisories/GHSA-3r5h-5jcg-gmgg
+  The vulnerability was discovered by @LinFeng-1219 and @president-xd.
+  Thanks for reporting!
 
 Bug Fixes
 
