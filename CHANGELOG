@@ -1,7 +1,13 @@
 Development Version
 -------------------
 
-Nothing yet.
+Bug Fixes
+
+* Fix `IndexError` and `ValueError` in `format()` on some malformed
+  statements, e.g. `( as )` with `reindent=True` or a `CASE` without its
+  own `END` with `reindent_aligned=True`. Grouping no longer moves the
+  brackets of a parenthesis or the `CASE`/`END` keywords into an inner
+  group.
 
 
 Release 0.6.0 (Aug 13, 2026)

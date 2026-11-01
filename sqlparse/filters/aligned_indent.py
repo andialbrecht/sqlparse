@@ -70,11 +70,14 @@ class AlignedIndentFilter:
         cases = tlist.get_cases(skip_ws=True)
         # align the end as well
         end_token = tlist.token_next_by(m=(T.Keyword, 'END'))[1]
-        cases.append((None, [end_token]))
+        # END is missing on malformed input, e.g. when an inner BEGIN ... END
+        # block closed the CASE.
+        if end_token is not None:
+            cases.append((None, [end_token]))
 
         condition_width = [len(' '.join(map(str, cond))) if cond else 0
                            for cond, _ in cases]
-        max_cond_width = max(condition_width)
+        max_cond_width = max(condition_width, default=0)
 
         for i, (cond, value) in enumerate(cases):
             # cond is None when 'else or end'
