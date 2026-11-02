@@ -102,7 +102,7 @@ class StatementSplitter:
             return 0
 
         # Everything after here is ttype = T.Keyword
-        unified = value.upper()
+        unified = ' '.join(value.upper().split())
 
         # DDL Create though can contain more words such as "or replace"
         if ttype is T.Keyword.DDL and unified.startswith('CREATE'):

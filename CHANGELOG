@@ -1,3 +1,10 @@
+Development Version
+-------------------
+
+* Fix statement splitting after compound blocks whose closing keywords
+  contain multiple spaces, tabs, or newlines.
+
+
 Release 0.6.1 (Nov 01, 2026)
 ----------------------------
 

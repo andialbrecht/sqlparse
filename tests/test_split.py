@@ -374,3 +374,26 @@ def test_split_standalone_for_update():
     assert stmts[1] == "SELECT 3;"
 
 
+@pytest.mark.parametrize('prefix', ['', 'CREATE PROCEDURE p() '])
+@pytest.mark.parametrize('separator', [' ', '  ', '\t', '\n'])
+@pytest.mark.parametrize('opening, closing', [
+    ('IF 1 THEN', 'IF'),
+    ('FOR r DO', 'FOR'),
+    ('WHILE 1 DO', 'WHILE'),
+    ('LOOP', 'LOOP'),
+    ('CASE 1 WHEN 1 THEN', 'CASE'),
+])
+def test_split_compound_closing_keyword_whitespace(prefix, separator,
+                                                  opening, closing):
+    block = (f'{prefix}BEGIN\n'
+             f'    {opening}\n'
+             "        SELECT 'END  IF';\n"
+             f'    END{separator}{closing};\n'
+             'END;')
+    text = block + '\nSELECT 2;\nSELECT 3;'
+    expected = [block, 'SELECT 2;', 'SELECT 3;']
+
+    assert sqlparse.split(text) == expected
+    assert [str(stmt).strip() for stmt in sqlparse.parse(text)] == expected
+
+
