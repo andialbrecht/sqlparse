@@ -112,6 +112,12 @@ class StripWhitespaceFilter:
         return self._stripws_default(tlist)
 
     def _stripws_parenthesis(self, tlist):
+        # Grouping keeps the brackets as first and last token. Don't rely on
+        # that for malformed input, the indexing below would fail otherwise.
+        if not (len(tlist.tokens) >= 2
+                and tlist.tokens[0].match(T.Punctuation, '(')
+                and tlist.tokens[-1].match(T.Punctuation, ')')):
+            return self._stripws_default(tlist)
         while tlist.tokens[1].is_whitespace:
             tlist.tokens.pop(1)
         while tlist.tokens[-2].is_whitespace:

@@ -516,3 +516,14 @@ def limit_recursion():
 def test_max_recursion(limit_recursion):
     with pytest.raises(SQLParseError):
         sqlparse.parse('[' * 1000 + ']' * 1000)
+
+
+@pytest.mark.parametrize('sql, options', [
+    ('( as )', {'reindent': True}),
+    ('( as )', {'strip_whitespace': True}),
+    ('( :: )', {'reindent': True}),
+    ('case , end', {'reindent_aligned': True}),
+    ('case when a then begin b end else c end', {'reindent_aligned': True}),
+])
+def test_format_malformed_input_does_not_crash(sql, options):
+    assert isinstance(sqlparse.format(sql, **options), str)

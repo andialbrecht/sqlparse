@@ -10,45 +10,49 @@ import re
 from collections import deque
 from contextlib import contextmanager
 
-# This regular expression replaces the home-cooked parser that was here before.
-# It is much faster, but requires an extra post-processing step to get the
-# desired results (that are compatible with what you would expect from the
-# str.splitlines() method).
-#
-# It matches groups of characters: newlines, quoted strings, or unquoted text,
-# and splits on that basis. The post-processing step puts those back together
-# into the actual lines of SQL.
-SPLIT_REGEX = re.compile(r"""
-(
- (?:                     # Start of non-capturing group
-  (?:\r\n|\r|\n)      |  # Match any single newline, or
-  [^\r\n'"]+          |  # Match any character series without quotes or
-                         # newlines, or
-  "(?:[^"\\]|\\.)*"   |  # Match double-quoted strings, or
-  '(?:[^'\\]|\\.)*'      # Match single quoted strings
- )
-)
-""", re.VERBOSE)
-
-LINE_MATCH = re.compile(r'(\r\n|\r|\n)')
+_UNQUOTED_TEXT = re.compile(r'[^\r\n\'"]+')
+# Content of a quoted string. A backslash escapes the next character,
+# except for a newline.
+_STRING_CONTENT = {
+    '"': re.compile(r'(?:[^"\\]|\\.)*'),
+    "'": re.compile(r"(?:[^'\\]|\\.)*"),
+}
 
 
 def split_unquoted_newlines(stmt):
     """Split a string on all unquoted newlines.
 
     Unlike str.splitlines(), this will ignore CR/LF/CR+LF if the requisite
-    character is inside of a string."""
+    character is inside of a string. A quote that is never closed is
+    treated as plain text."""
     text = str(stmt)
-    lines = SPLIT_REGEX.split(text)
-    outputlines = ['']
-    for line in lines:
-        if not line:
-            continue
-        elif LINE_MATCH.match(line):
-            outputlines.append('')
+    length = len(text)
+    lines = []
+    line_start = pos = 0
+    # Searching the end of a string that is never closed scans up to some
+    # position. Every later quote of the same kind before that position
+    # can't be closed either, so remember it instead of scanning again.
+    # Otherwise many unclosed quotes take quadratic time
+    # (GHSA-3r5h-5jcg-gmgg).
+    unclosed_before = {'"': 0, "'": 0}
+    while pos < length:
+        char = text[pos]
+        if char in '\r\n':
+            lines.append(text[line_start:pos])
+            pos += 2 if text.startswith('\r\n', pos) else 1
+            line_start = pos
+        elif char in unclosed_before:
+            if pos >= unclosed_before[char]:
+                end = _STRING_CONTENT[char].match(text, pos + 1).end()
+                if end < length and text[end] == char:
+                    pos = end + 1
+                    continue
+                unclosed_before[char] = end
+            pos += 1
         else:
-            outputlines[-1] += line
-    return outputlines
+            pos = _UNQUOTED_TEXT.match(text, pos).end()
+    lines.append(text[line_start:])
+    return lines
 
 
 def remove_quotes(val):

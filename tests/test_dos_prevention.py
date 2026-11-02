@@ -117,3 +117,17 @@ class TestDoSPrevention:
         assert "IN" in result
         assert "1," in result  # First tuple should be there
         assert "200" in result  # Last tuple should be there
+
+
+def test_unterminated_quotes_format_under_1s():
+    """format() must not be quadratic on many unterminated quotes.
+
+    split_unquoted_newlines() used a regex that scanned to the end of the
+    text for every unterminated quote, so this 40 KB payload took several
+    seconds (GHSA-3r5h-5jcg-gmgg).
+    """
+    for sql in ('"\\' * 20000, "'\\" * 20000):
+        t0 = time.perf_counter()
+        sqlparse.format(sql)
+        dt = time.perf_counter() - t0
+        assert dt < 1.0, f'format took {dt:.2f}s, expected sub-second'
