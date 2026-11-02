@@ -94,6 +94,7 @@ class StripWhitespaceFilter:
         for token in tlist.tokens:
             if token.is_whitespace:
                 token.value = '' if last_was_ws or is_first_char else ' '
+                token.normalized = token.value
             last_was_ws = token.is_whitespace
             is_first_char = False
 

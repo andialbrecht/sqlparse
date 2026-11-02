@@ -150,6 +150,24 @@ class TestFormat:
         with pytest.raises(SQLParseError):
             sqlparse.format(s, strip_whitespace=None)
 
+    @pytest.mark.parametrize('text', [
+        '\t select\n\t* from foo',
+        'select (a\t +\n b)',
+        'select a\t,\n b from foo',
+    ])
+    def test_strip_ws_updates_normalized_value(self, text):
+        # Regression for issue547: match() must see the filtered whitespace.
+        from sqlparse.filters import StripWhitespaceFilter
+
+        stmt = sqlparse.parse(text)[0]
+        StripWhitespaceFilter().process(stmt)
+        for token in stmt.flatten():
+            if token.is_whitespace:
+                assert token.normalized == token.value
+                assert token.match(token.ttype, token.value)
+                pattern = '^ $' if token.value else '^$'
+                assert token.match(token.ttype, pattern, regex=True)
+
     def test_preserve_ws(self):
         # preserve at least one whitespace after subgroups
         f = lambda sql: sqlparse.format(sql, strip_whitespace=True)
