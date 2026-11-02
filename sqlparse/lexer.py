@@ -128,7 +128,11 @@ class Lexer:
                 try:
                     text = text.decode('utf-8')
                 except UnicodeDecodeError:
-                    text = text.decode('unicode-escape')
+                    # Fall back to latin-1 rather than unicode-escape: the
+                    # latter evaluates backslash escapes (\n, \x41, ',
+                    # octal) in the input, so the parsed token stream would
+                    # no longer match the raw bytes the database receives.
+                    text = text.decode('latin-1')
         else:
             raise TypeError(f"Expected text or file-like object, got {type(text)!r}")
 
