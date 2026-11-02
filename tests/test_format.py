@@ -5,6 +5,15 @@ from sqlparse.exceptions import SQLParseError
 
 
 class TestFormat:
+    @pytest.mark.parametrize('reindent', [True, False])
+    @pytest.mark.parametrize('aligned', ['invalid', None, 2])
+    def test_reindent_aligned_invalid_option_diagnostic(self, reindent, aligned):
+        with pytest.raises(SQLParseError) as exc:
+            sqlparse.format('select 1', reindent=reindent,
+                            reindent_aligned=aligned)
+        assert str(exc.value) == (
+            f'Invalid value for reindent_aligned: {aligned!r}')
+
     def test_keywordcase(self):
         sql = 'select * from bar; -- select foo\n'
         res = sqlparse.format(sql, keyword_case='upper')

@@ -74,7 +74,7 @@ def validate_options(options):
     reindent_aligned = options.get('reindent_aligned', False)
     if reindent_aligned not in [True, False]:
         raise SQLParseError('Invalid value for reindent_aligned: '
-                            f'{reindent!r}')
+                            f'{reindent_aligned!r}')
     elif reindent_aligned:
         options['strip_whitespace'] = True
 
