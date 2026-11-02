@@ -23,6 +23,10 @@ T_NUMERICAL = (T.Number, T.Number.Integer, T.Number.Float)
 T_STRING = (T.String, T.String.Single, T.String.Symbol)
 T_NAME = (T.Name, T.Name.Placeholder)
 
+# Groups built by _group_matching(), their first and last token are delimiters.
+_DELIMITED_GROUPS = (sql.Parenthesis, sql.SquareBrackets, sql.Case,
+                     sql.If, sql.For, sql.Begin)
+
 
 def _group_matching(tlist, cls, depth=0):
     """Groups Tokens that have beginning and end."""
@@ -475,6 +479,19 @@ def group(stmt):
     return stmt
 
 
+def _is_delimiter(tlist, token):
+    """Return True if token opens or closes tlist itself.
+
+    Groups created by _group_matching() start and end with their delimiters
+    (e.g. "(" and ")" or CASE and END). These must never become an
+    operand of an inner group, otherwise e.g. "( as )" would move the
+    brackets into an Identifier.
+    """
+    return (token is not None
+            and isinstance(tlist, _DELIMITED_GROUPS)
+            and (token is tlist.tokens[0] or token is tlist.tokens[-1]))
+
+
 def _group(tlist, cls, match,
            valid_prev=lambda t: True,
            valid_next=lambda t: True,
@@ -514,7 +531,9 @@ def _group(tlist, cls, match,
 
         if match(token):
             nidx, next_ = tlist.token_next(tidx)
-            if prev_ and valid_prev(prev_) and valid_next(next_):
+            if (prev_ and valid_prev(prev_) and valid_next(next_)
+                    and not _is_delimiter(tlist, prev_)
+                    and not _is_delimiter(tlist, next_)):
                 from_idx, to_idx = post(tlist, pidx, tidx, nidx)
                 grp = tlist.group_tokens(cls, from_idx, to_idx, extend=extend)
 

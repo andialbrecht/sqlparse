@@ -705,6 +705,45 @@ class TestOutputFormat:
         f = lambda sql: sqlparse.format(sql, output_format='php')
         assert f(sql) == '$sql = "select \'\\\\foo\\\\\'";'
 
+    @pytest.mark.parametrize('sql, expected', [
+        # plain variable interpolation
+        ("SELECT '$name'", r'''$sql = "SELECT '\$name'";'''),
+        # expression interpolation payloads (CVE-2026-112307)
+        ("SELECT '${expr}'", r'''$sql = "SELECT '\${expr}'";'''),
+        ("SELECT '{${expr}}'", r'''$sql = "SELECT '{\${expr}}'";'''),
+        ("SELECT '{$obj->prop}'", r'''$sql = "SELECT '{\$obj->prop}'";'''),
+        # PostgreSQL dollar-quoted strings
+        ('SELECT $body$text$body$',
+         r'''$sql = "SELECT \$body\$text\$body\$";'''),
+        # quoted identifiers and comments
+        ('SELECT "$table"', r'''$sql = "SELECT \"\$table\"";'''),
+        ('SELECT 1 /* $name */', r'''$sql = "SELECT 1 /* \$name */";'''),
+        # an existing backslash must not neutralize the dollar escape
+        ("SELECT '\\$name'", r'''$sql = "SELECT '\\\$name'";'''),
+    ])
+    def test_php_escapes_dollar_signs(self, sql, expected):
+        # CVE-2026-112307: "$" starts variable/expression interpolation in
+        # PHP double-quoted strings and must be escaped.
+        assert sqlparse.format(sql, output_format='php') == expected
+
+    def test_php_dollar_escape_multiline(self):
+        sql = 'select $a$x$a$\nfrom foo where b = \'$c\''
+        formatted = sqlparse.format(sql, output_format='php')
+        assert formatted == '\n'.join([
+            '$sql  = "select \\$a\\$x\\$a\\$ ";',
+            '$sql .= "from foo where b = \'\\$c\'";'])
+
+    def test_php_variable_name_keeps_dollar(self):
+        # only SQL content is escaped, not the generated assignment target
+        formatted = sqlparse.format('select 1; select 2', output_format='php')
+        assert formatted == '$sql = "select 1; ";\n$sql2 = "select 2";'
+
+    def test_python_dollar_signs_unchanged(self):
+        # "$" has no special meaning in single-quoted Python strings
+        sql = "select '$name' from $t$x$t$"
+        formatted = sqlparse.format(sql, output_format='python')
+        assert formatted == "sql = 'select \\'$name\\' from $t$x$t$'"
+
     def test_sql(self):
         # "sql" is an allowed option but has no effect
         sql = 'select * from foo;'

@@ -204,3 +204,34 @@ def test_cli_error_handling_continues(tmpdir, capsys):
     assert "select * from baz" in file3.read()
     _, err = capsys.readouterr()
     assert "Failed to read" in err
+
+
+# A statement that exceeds MAX_GROUPING_TOKENS, so formatting with --reindent
+# raises SQLParseError.
+TOO_MANY_TOKENS_SQL = 'select ' + 'a, ' * 6000 + 'a from t'
+
+
+def test_cli_inplace_keeps_file_on_format_error(tmpdir, capsys):
+    test_file = tmpdir.join("test.sql")
+    test_file.write(TOO_MANY_TOKENS_SQL)
+
+    result = sqlparse.cli.main([str(test_file), '--in-place', '--reindent'])
+
+    assert result == 1
+    assert test_file.read() == TOO_MANY_TOKENS_SQL
+    _, err = capsys.readouterr()
+    assert err.startswith("[ERROR] Failed to format")
+
+
+def test_cli_outfile_keeps_file_on_format_error(tmpdir, capsys):
+    in_file = tmpdir.join("in.sql")
+    in_file.write(TOO_MANY_TOKENS_SQL)
+    out_file = tmpdir.join("out.sql")
+    out_file.write("select 1")
+
+    result = sqlparse.cli.main([str(in_file), '-o', str(out_file), '--reindent'])
+
+    assert result == 1
+    assert out_file.read() == "select 1"
+    _, err = capsys.readouterr()
+    assert err.startswith("[ERROR] Failed to format")

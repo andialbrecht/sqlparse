@@ -115,9 +115,13 @@ class OutputPHPFilter(OutputFilter):
 
             # Escape backslashes before quotes so a backslash preceding a
             # quote cannot break out of the generated string literal
-            # (GHSA-3496-9g83-7v6x).
+            # (GHSA-3496-9g83-7v6x). Dollar signs are escaped last because
+            # PHP interpolates $var, ${expr} and {$expr} inside double-quoted
+            # strings (CVE-2026-112307).
             else:
-                token.value = token.value.replace('\\', '\\\\').replace('"', '\\"')
+                token.value = (token.value.replace('\\', '\\\\')
+                               .replace('"', '\\"')
+                               .replace('$', '\\$'))
 
             # Put the token
             yield sql.Token(T.Text, token.value)
