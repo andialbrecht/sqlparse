@@ -527,3 +527,12 @@ def test_max_recursion(limit_recursion):
 ])
 def test_format_malformed_input_does_not_crash(sql, options):
     assert isinstance(sqlparse.format(sql, **options), str)
+
+
+def test_reindent_aligned_malformed_case_no_valueerror_issue886():
+    # Malformed CASE where END is nested inside an assignment group used to
+    # raise ValueError from token_index(None) inside AlignedIndentFilter.
+    sql = "CASE 'a' := WHERE END SELECT GO # ->>"
+    out = sqlparse.format(sql, reindent_aligned=True)
+    assert isinstance(out, str)
+    assert 'CASE' in out

@@ -346,6 +346,12 @@ class TestFormatReindentAligned:
             '  from table'])
 
 
+
+    def test_malformed_case_does_not_raise(self):
+        # issue #886
+        sql = "CASE 'a' := WHERE END SELECT GO # ->>"
+        assert isinstance(self.formatter(sql), str)
+
 class TestSpacesAroundOperators:
     @staticmethod
     def formatter(sql):
