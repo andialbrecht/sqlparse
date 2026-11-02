@@ -500,6 +500,42 @@ class TestFormatReindent:
             'from table1, table2',
             'where 1 = 2'])
 
+    @pytest.mark.parametrize('definition', [
+        'INT NOT NULL',
+        'INT DEFAULT 0',
+        'VARCHAR(20) NOT NULL',
+        'INT NOT NULL AUTO_INCREMENT',
+    ])
+    def test_create_table_column_alignment(self, definition):
+        # Constraints and the next column name form separate IdentifierLists.
+        columns = [f'{name} {definition}' for name in ('a', 'b', 'c')]
+        prefix = 'CREATE TABLE t ('
+        statement = prefix + ', '.join(columns) + ');'
+        expected = prefix + (',\n' + ' ' * len(prefix)).join(columns) + ');'
+        formatted = sqlparse.format(statement, reindent=True)
+        assert formatted == expected
+        assert sqlparse.format(formatted, reindent=True) == expected
+
+    def test_create_table_as_preserves_select_alignment(self):
+        statement = 'CREATE TABLE t AS (SELECT a, b, c FROM x);'
+        assert sqlparse.format(statement, reindent=True) == '\n'.join([
+            'CREATE TABLE t AS',
+            '  (SELECT a,',
+            '          b,',
+            '          c',
+            '   FROM x);'])
+
+    def test_create_table_followed_by_select(self):
+        statement = ('CREATE TABLE t (a INT NOT NULL, b INT NOT NULL); '
+                     'SELECT a, b FROM x;')
+        assert sqlparse.format(statement, reindent=True) == '\n'.join([
+            'CREATE TABLE t (a INT NOT NULL,',
+            '                b INT NOT NULL);',
+            '',
+            'SELECT a,',
+            '       b',
+            'FROM x;'])
+
     def test_identifier_list_comment_first(self):
         f = lambda sql: sqlparse.format(sql, reindent=True, comma_first=True)
         # not the 3: It cleans up whitespace too!
