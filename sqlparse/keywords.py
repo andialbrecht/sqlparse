@@ -132,6 +132,7 @@ SQL_REGEX = [
     (r"`(``|[^`])*`", tokens.Name),
     (r"´(´´|[^´])*´", tokens.Name),
 
+    (r'@\?', tokens.Operator),
     (r'\?', tokens.Name.Placeholder),
     (r'%(\(\w+\))?s', tokens.Name.Placeholder),
     (r'(?<!\w)[$:?]\w+', tokens.Name.Placeholder),

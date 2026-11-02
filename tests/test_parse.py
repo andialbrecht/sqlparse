@@ -632,8 +632,8 @@ def test_configurable_regex():
 @pytest.mark.parametrize('sql', [
     '->', '->>', '#>', '#>>',
     '@>', '<@',
-    # leaving ? out for now, they're somehow ambiguous as placeholders
-    # '?', '?|', '?&',
+    # Question-mark prefixes remain ambiguous with placeholders.
+    '@?', '@@',
     '||', '-', '#-'
 ])
 def test_json_operators(sql):
