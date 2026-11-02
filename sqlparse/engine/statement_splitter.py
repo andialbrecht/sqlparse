@@ -150,15 +150,18 @@ class StatementSplitter:
 
     def process(self, stream):
         """Process the stream"""
-        EOS_TTYPE = T.Whitespace, T.Comment.Single
-
         # Run over all stream tokens
         for ttype, value in stream:
-            # Yield token if we finished a statement and there's no whitespaces
-            # It will count newline token as a non whitespace. In this context
-            # whitespace ignores newlines.
-            # why don't multi line comments also count?
-            if self.consume_ws and ttype not in EOS_TTYPE:
+            # Once a statement is finished (consume_ws), keep trailing
+            # whitespace and single-line comments with it, and only cut a
+            # new statement when real content arrives. Newlines are
+            # whitespace too, so a terminating semicolon's trailing newline
+            # stays with its statement instead of being split off into a
+            # whitespace-only remainder that gets dropped at end of stream
+            # (which broke str(parse(sql)) == sql for inputs ending in
+            # ";\n", the common end-of-file case).
+            if self.consume_ws and not (
+                    ttype in T.Whitespace or ttype in T.Comment.Single):
                 yield sql.Statement(self.tokens)
 
                 # Reset filter and prepare to process next statement

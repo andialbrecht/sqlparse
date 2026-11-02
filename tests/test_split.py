@@ -152,6 +152,25 @@ def test_split_ignores_empty_newlines():
     assert stmts[1] == 'select bar;'
 
 
+@pytest.mark.parametrize('sql', [
+    'select 1;\n',
+    'select 1;\n\n',
+    'select 1;\r\n',
+    'select 1; ',
+    'select 1;\t',
+    'select 1;\nselect 2;\n',
+    'create table t (a int);\n\n',
+])
+def test_split_preserves_trailing_whitespace(sql):
+    # The whitespace after a terminating semicolon must stay with the
+    # statement so that the parsed statements round-trip back to the input.
+    # A trailing newline (the common end-of-file "...;\n" case) used to be
+    # split off into a whitespace-only remainder and dropped, unlike a
+    # trailing space or tab.
+    stmts = sqlparse.parse(sql)
+    assert ''.join(str(q) for q in stmts) == sql
+
+
 def test_split_quotes_with_new_line():
     stmts = sqlparse.split('select "foo\nbar"')
     assert len(stmts) == 1
