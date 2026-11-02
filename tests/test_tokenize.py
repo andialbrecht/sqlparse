@@ -65,6 +65,16 @@ def test_tokenize_negative_numbers():
     assert tokens[2][1] == '-1'
 
 
+@pytest.mark.parametrize('s', ['1-1', 'a-1', 'a-1.5', 'a-.5', 'a-1e3',
+                               'a-0x1F', 'f(a)-1', 'a[1]-1', "'a'-1",
+                               '"a"-1', '`a`-1'])
+def test_tokenize_minus_after_operand(s):
+    # issue370
+    tokens = list(lexer.tokenize(s))
+    assert tokens[-2] == (T.Operator, '-')
+    assert tokens[-1][1] == s.rsplit('-', 1)[1]
+
+
 def test_token_str():
     token = sql.Token(None, 'FoO')
     assert str(token) == 'FoO'

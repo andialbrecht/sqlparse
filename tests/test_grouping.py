@@ -438,6 +438,13 @@ def test_identifier_with_operators():
     assert isinstance(p.tokens[0], sql.Operation)
 
 
+def test_operation_minus_without_whitespace():
+    # issue370
+    p = sqlparse.parse('select a-1 from foo')[0]
+    assert isinstance(p.tokens[2], sql.Operation)
+    assert p.tokens[2].value == 'a-1'
+
+
 def test_identifier_with_op_trailing_ws():
     # make sure trailing whitespace isn't grouped with identifier
     p = sqlparse.parse('foo || bar ')[0]

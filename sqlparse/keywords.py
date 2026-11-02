@@ -158,11 +158,17 @@ SQL_REGEX = [
     # because `re.match` doesn't work with look-behind regexp feature
     (r'(?<=\.)[A-ZÀ-Ü]\w*', tokens.Name),  # .'Name'
     (r'[A-ZÀ-Ü]\w*(?=\()', tokens.Name),  # side effect: change kw to func
-    (r'-?0x[\dA-F]+', tokens.Number.Hexadecimal),
-    (r'-?\d+(\.\d+)?E-?\d+', tokens.Number.Float),
-    (r'(?![_A-ZÀ-Ü])-?(\d+(\.\d*)|\.\d+)(?![_A-ZÀ-Ü])',
+    # A leading minus is only part of the number if it can't be a binary
+    # operator, i.e. if it doesn't directly follow an operand (a name, a
+    # number, a closing bracket or a quoted string or name), so that
+    # ``1-1`` is lexed as ``1``, ``-``, ``1``. See issue #370.
+    (r"(?:(?<![\w)\]'\"`])-)?0x[\dA-F]+", tokens.Number.Hexadecimal),
+    (r"(?:(?<![\w)\]'\"`])-)?\d+(\.\d+)?E-?\d+", tokens.Number.Float),
+    (r"(?![_A-ZÀ-Ü])(?:(?<![\w)\]'\"`])-)?(\d+(\.\d*)|\.\d+)"
+     r"(?![_A-ZÀ-Ü])",
      tokens.Number.Float),
-    (r'(?![_A-ZÀ-Ü])-?\d+(?![_A-ZÀ-Ü])', tokens.Number.Integer),
+    (r"(?![_A-ZÀ-Ü])(?:(?<![\w)\]'\"`])-)?\d+(?![_A-ZÀ-Ü])",
+     tokens.Number.Integer),
     (r"'(''|\\'|[^'])*'", tokens.String.Single),
     # not a real string literal in ANSI SQL:
     (r'"(""|\\"|[^"])*"', tokens.String.Symbol),
