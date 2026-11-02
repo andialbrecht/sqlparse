@@ -241,6 +241,26 @@ def test_grouping_identifier_list_with_inline_comments():
     assert isinstance(p.tokens[0].tokens[3], sql.Identifier)
 
 
+def test_grouping_identifier_list_with_role():
+    # issue798: ROLE is a non-reserved keyword usable as a column name; in an
+    # identifier list it should be an Identifier like its plain-name peers.
+    p = sqlparse.parse('SELECT a, role, b FROM t')[0]
+    assert isinstance(p.tokens[2], sql.IdentifierList)
+    identifiers = list(p.tokens[2].get_identifiers())
+    assert all(isinstance(i, sql.Identifier) for i in identifiers)
+    assert [i.value for i in identifiers] == ['a', 'role', 'b']
+
+
+def test_grouping_role_keyword_outside_identifier_list():
+    # issue798: ROLE keeps its keyword role outside an identifier list, so e.g.
+    # CREATE ROLE is not misparsed as an identifier aliased to the role name.
+    for sql_str in ('CREATE ROLE myrole', 'SET ROLE admin', 'DROP ROLE r1, r2'):
+        p = sqlparse.parse(sql_str)[0]
+        role = next(t for t in p.flatten() if t.value.upper() == 'ROLE')
+        assert role.ttype is T.Keyword
+        assert not isinstance(role.parent, sql.Identifier)
+
+
 def test_grouping_identifiers_with_operators():
     p = sqlparse.parse('a+b as c from table where (d-e)%2= 1')[0]
     assert len([x for x in p.flatten() if x.ttype == T.Name]) == 5

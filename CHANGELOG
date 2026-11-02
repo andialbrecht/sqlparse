@@ -105,6 +105,10 @@ Bug Fixes
   when it is followed by a float literal written without a leading zero, so
   that `x BETWEEN .03 AND .06` parses its bounds as numbers (issue601, pr868
   by deepakganesh78).
+* Group `ROLE` as an identifier when it is used as a column name in an
+  identifier list (e.g. `SELECT a, role, b`), so it appears alongside the
+  other columns in `get_identifiers()`, while keeping it a keyword elsewhere
+  such as `CREATE ROLE` (issue798, pr872 by adarshsm).
 * Fix a late-binding closure bug in `TokenList.token_not_matching`.
 
 Other
