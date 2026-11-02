@@ -4,8 +4,37 @@ from io import StringIO
 import pytest
 
 import sqlparse
-from sqlparse import lexer
+from sqlparse import keywords, lexer
 from sqlparse import sql, tokens as T
+
+
+@pytest.mark.parametrize('text', ['/* comment */', '/*+ hint */', '$$body$$'])
+def test_custom_lexer_can_override_delimited_tokens(text):
+    custom = lexer.Lexer()
+    custom.clear()
+    custom.set_SQL_REGEX([(r'.+', T.Name)])
+
+    assert list(custom.get_tokens(text)) == [(T.Name, text)]
+
+
+@pytest.mark.parametrize('text', ['/* comment */', '$$body$$'])
+def test_cleared_lexer_does_not_keep_delimited_tokens(text):
+    custom = lexer.Lexer()
+    custom.clear()
+
+    assert list(custom.get_tokens(text)) == [(T.Error, char) for char in text]
+
+
+def test_custom_rule_precedes_default_delimited_rule():
+    custom = lexer.Lexer()
+    custom.clear()
+    custom.set_SQL_REGEX([(r'/\*custom\*/', T.Name)] + keywords.SQL_REGEX)
+
+    assert list(custom.get_tokens('/*custom*/ /*default*/')) == [
+        (T.Name, '/*custom*/'),
+        (T.Whitespace, ' '),
+        (T.Comment.Multiline, '/*default*/'),
+    ]
 
 
 def test_tokenize_simple():

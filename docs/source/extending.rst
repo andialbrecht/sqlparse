@@ -30,6 +30,11 @@ configurations with ``.clear()``, then apply the SQL list with
 You can do so by re-using the expressions in ``sqlparse.keywords`` (see example below),
 leaving parts out, or by making up your own master list.
 
+The default list also includes a rule for dollar-quoted literals and multiline
+comments, resolved by a delimiter scanner rather than a regular expression.
+Keep this rule when extending the default grammar to retain that behavior.
+Rules inserted before it can override the corresponding tokens.
+
 See the expected types of the arguments by inspecting their structure in
 ``sqlparse.keywords``.
 

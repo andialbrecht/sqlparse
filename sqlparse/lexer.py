@@ -137,29 +137,28 @@ class Lexer:
 
         iterable = enumerate(text)
         for pos, char in iterable:
-            # Only positions the lexer actually reaches may open a
-            # dollar-quoted literal or a multiline comment; a delimiter
-            # inside a string literal or behind a "--" comment is skipped
-            # along with its surrounding token and never resolved.
-            if pos in span_openers:
-                resolved = delimited_spans.resolve(pos)
-                if resolved is not None:
-                    end, ttype = resolved
-                    yield ttype, text[pos:end]
-                    consume(iterable, end - pos - 1)
-                    continue
-
             for rexmatch, action in self._SQL_REGEX:
                 m = rexmatch(text, pos)
 
                 if not m:
                     continue
+                end = m.end()
+                if action is keywords.PROCESS_AS_DELIMITED:
+                    # Only resolve delimiters reached by this rule; earlier
+                    # custom rules and surrounding strings retain precedence.
+                    if pos not in span_openers:
+                        continue
+                    resolved = delimited_spans.resolve(pos)
+                    if resolved is None:
+                        continue
+                    end, ttype = resolved
+                    yield ttype, text[pos:end]
                 elif isinstance(action, tokens._TokenType):
                     yield action, m.group()
                 elif action is keywords.PROCESS_AS_KEYWORD:
                     yield self.is_keyword(m.group())
 
-                consume(iterable, m.end() - pos - 1)
+                consume(iterable, end - pos - 1)
                 break
             else:
                 yield tokens.Error, char
