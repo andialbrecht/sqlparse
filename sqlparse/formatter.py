@@ -182,7 +182,7 @@ def build_filter_stack(stack, options):
     if options.get('reindent_aligned', False):
         stack.enable_grouping()
         stack.stmtprocess.append(
-            filters.AlignedIndentFilter(char=options['indent_char']))
+            filters.AlignedIndentFilter(width=options['indent_width'],char=options['indent_char']))
 
     if options.get('right_margin'):
         stack.enable_grouping()

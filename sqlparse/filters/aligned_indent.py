@@ -22,8 +22,9 @@ class AlignedIndentFilter:
                    'UNION', 'VALUES',
                    'SET', 'BETWEEN', 'EXCEPT')
 
-    def __init__(self, char=' ', n='\n'):
+    def __init__(self, char=' ', n='\n', width=2):
         self.n = n
+        self.width = width
         self.offset = 0
         self.indent = 0
         self.char = char
@@ -33,7 +34,7 @@ class AlignedIndentFilter:
         # offset = 1 represent a single space after SELECT
         offset = -len(offset) if not isinstance(offset, int) else offset
         # add two for the space and parenthesis
-        indent = self.indent * (2 + self._max_kwd_len)
+        indent = self.indent * self.width
 
         return sql.Token(T.Whitespace, self.n + self.char * (
             self._max_kwd_len + offset + indent + self.offset))
