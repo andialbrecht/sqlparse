@@ -152,6 +152,21 @@ def test_split_ignores_empty_newlines():
     assert stmts[1] == 'select bar;'
 
 
+@pytest.mark.parametrize('s', ['select 1;\n',
+                               'select 1;\r\n',
+                               'select 1;\n\n',
+                               'select 1;\n ',
+                               'select 1; \n',
+                               'select 1;\nselect 2;\n',
+                               ';\n'])
+def test_split_preserves_trailing_whitespace(s):
+    # parse() must be lossless: whitespace following the final ';' was being
+    # split into a dangling all-whitespace statement and dropped, so joining
+    # the parsed statements no longer reproduced the input whenever it ended
+    # in a newline after ';' (trailing spaces alone were already preserved).
+    assert ''.join(str(stmt) for stmt in sqlparse.parse(s)) == s
+
+
 def test_split_quotes_with_new_line():
     stmts = sqlparse.split('select "foo\nbar"')
     assert len(stmts) == 1
